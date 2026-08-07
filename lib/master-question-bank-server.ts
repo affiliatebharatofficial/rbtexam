@@ -57,7 +57,7 @@ export function saveServerPersistentQuestions(): void {
 /**
  * Server-only: Create question and persist to server JSON store
  */
-export function createServerQuestion(data: Omit<MasterQuestion, 'id' | 'createdAt' | 'updatedAt' | 'version'>): MasterQuestion {
+export function createServerQuestion(data: Partial<MasterQuestion> & Omit<MasterQuestion, 'id' | 'createdAt' | 'updatedAt' | 'version'>): MasterQuestion {
   loadServerPersistentQuestions();
   const created = createQuestionInBank(data);
   saveServerPersistentQuestions();

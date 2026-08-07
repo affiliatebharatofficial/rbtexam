@@ -240,17 +240,23 @@ export function getQuestionById(id: string): MasterQuestion | undefined {
 /**
  * Create new Master Question
  */
-export function createQuestion(data: Omit<MasterQuestion, 'id' | 'createdAt' | 'updatedAt' | 'version'>): MasterQuestion {
+export function createQuestion(data: Partial<MasterQuestion> & Omit<MasterQuestion, 'id' | 'createdAt' | 'updatedAt' | 'version'>): MasterQuestion {
   loadPersistentQuestions();
+  const qId = data.id || `mq-${(data.certification || 'rbt').toLowerCase()}-${Math.random().toString(36).substring(2, 8)}`;
   const newQuestion: MasterQuestion = {
     ...data,
-    id: `mq-${data.certification.toLowerCase()}-${Math.random().toString(36).substring(2, 8)}`,
-    version: 1,
-    createdAt: new Date().toISOString(),
+    id: qId,
+    version: data.version || 1,
+    createdAt: data.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  };
+  } as MasterQuestion;
 
-  MASTER_QUESTION_BANK.unshift(newQuestion);
+  const existingIndex = MASTER_QUESTION_BANK.findIndex((q) => q.id === qId);
+  if (existingIndex >= 0) {
+    MASTER_QUESTION_BANK[existingIndex] = newQuestion;
+  } else {
+    MASTER_QUESTION_BANK.unshift(newQuestion);
+  }
   savePersistentQuestions();
   return newQuestion;
 }

@@ -97,10 +97,12 @@ export default function AdminQuestionsPage() {
 
       const data = await res.json();
       if (data.success && data.questions && Array.isArray(data.questions)) {
-        loadPersistentQuestions();
+        data.questions.forEach((q: any) => {
+          createQuestion(q);
+        });
         setIsAiModalOpen(false);
         setAiSuccessMsg(`✅ Generated & published ${data.questions.length} AI question(s) via ${data.providerUsed || 'AI Engine'}!`);
-        setFilterParams({ ...filterParams });
+        setFilterParams((prev) => ({ ...prev }));
         setTimeout(() => setAiSuccessMsg(''), 5000);
       } else {
         alert(data.error || 'Failed to generate questions');
