@@ -155,6 +155,99 @@ export default function SuperAdminCMSPage() {
           </Card>
         )}
 
+        {/* Enterprise User Registration & Security Controls Card */}
+        <Card glass className="p-6 border-blue-200/80 bg-blue-50/20 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <ShieldCheck className="w-5 h-5 text-[#2563EB]" />
+              <h3 className="text-base font-bold text-slate-900">User Registration & Security Controls</h3>
+            </div>
+            <Badge variant="blue" className="text-[10px] font-bold">RBAC Enforced</Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+            {/* 1. Allow New Registration */}
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800">Public Registration</span>
+                <button
+                  onClick={() => {
+                    const newVal = !config.allowNewRegistration;
+                    updatePlatformConfig('allowNewRegistration', newVal);
+                    setConfig({ ...config, allowNewRegistration: newVal });
+                  }}
+                  className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
+                    config.allowNewRegistration ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                  }`}
+                >
+                  {config.allowNewRegistration ? 'ENABLED (ON)' : 'DISABLED (OFF)'}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500">Allow public candidates to create new accounts</p>
+            </div>
+
+            {/* 2. Invite Only Mode */}
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800">Invite-Only Mode</span>
+                <button
+                  onClick={() => {
+                    const newVal = !config.inviteOnlyMode;
+                    updatePlatformConfig('inviteOnlyMode', newVal);
+                    setConfig({ ...config, inviteOnlyMode: newVal });
+                  }}
+                  className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
+                    config.inviteOnlyMode ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {config.inviteOnlyMode ? 'INVITE ONLY (ON)' : 'OPEN (OFF)'}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500">Require invitation code for candidate signup</p>
+            </div>
+
+            {/* 3. Require Admin Approval */}
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-800">Admin Approval</span>
+                <button
+                  onClick={() => {
+                    const newVal = !config.requireAdminApproval;
+                    updatePlatformConfig('requireAdminApproval', newVal);
+                    setConfig({ ...config, requireAdminApproval: newVal });
+                  }}
+                  className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
+                    config.requireAdminApproval ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  {config.requireAdminApproval ? 'REQUIRED (ON)' : 'AUTO (OFF)'}
+                </button>
+              </div>
+              <p className="text-[10px] text-slate-500">New accounts require admin review before activation</p>
+            </div>
+
+            {/* 4. Allowed Email Domains */}
+            <div className="p-4 rounded-xl bg-white border border-slate-200 space-y-2">
+              <span className="text-xs font-bold text-slate-800 block">Allowed Domains</span>
+              <input
+                type="text"
+                placeholder="e.g. gmail.com, company.com"
+                value={(config.allowedEmailDomains || []).join(', ')}
+                onChange={(e) => {
+                  const domains = e.target.value
+                    .split(',')
+                    .map((d) => d.trim().replace('@', ''))
+                    .filter(Boolean);
+                  updatePlatformConfig('allowedEmailDomains', domains);
+                  setConfig({ ...config, allowedEmailDomains: domains });
+                }}
+                className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+              />
+              <p className="text-[9px] text-slate-400">Leave blank to allow all email domains</p>
+            </div>
+          </div>
+        </Card>
+
         {/* TOP 4 DYNAMIC SCORECARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card glass className="p-5 space-y-2 border-white/90 shadow-xl">

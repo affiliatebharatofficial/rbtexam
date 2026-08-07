@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, AuthSession, LoginCredentials, SignUpData } from '@/types/auth';
+import { getPlatformConfig, logAuditEvent } from '@/lib/platform-config';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -73,32 +74,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials) => {
     setIsLoading(true);
     try {
-      // Simulate API network request delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 600));
 
       if (credentials.password.length < 6) {
         setIsLoading(false);
         return { success: false, error: 'Password must be at least 6 characters long.' };
       }
 
-      const loggedInUser: UserProfile = {
-        ...DEFAULT_PRODUCTION_USER,
-        email: credentials.email,
-        fullName: credentials.email.split('@')[0].replace('.', ' '),
-        lastLoginAt: new Date().toISOString(),
-      };
+      const userEmail = credentials.email.toLowerCase().trim();
+      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
+      let registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
+      
+      let existingUser = registeredUsers.find((u) => u.email.toLowerCase() === userEmail);
+
+      if (!existingUser) {
+        const config = getPlatformConfig();
+        if (!config.allowNewRegistration) {
+          setIsLoading(false);
+          return { success: false, error: 'Public account registration is currently disabled by administrator.' };
+        }
+
+        existingUser = {
+          id: `usr_${Math.random().toString(36).substring(2, 9)}`,
+          email: userEmail,
+          fullName: userEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+          role: 'student',
+          emailVerified: true,
+          accountStatus: 'active',
+          targetExamDate: '',
+          targetScore: 90,
+          readinessScore: 0,
+          estimatedPassLikelihood: 0,
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+        };
+
+        registeredUsers.push(existingUser);
+        localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
+      } else {
+        existingUser.lastLoginAt = new Date().toISOString();
+      }
 
       const newSession: AuthSession = {
         accessToken: `jwt_token_${Math.random().toString(36).substring(2)}`,
         refreshToken: `refresh_token_${Math.random().toString(36).substring(2)}`,
         expiresAt: Date.now() + 86400 * 7 * 1000,
-        user: loggedInUser,
+        user: existingUser,
       };
 
-      setUser(loggedInUser);
+      setUser(existingUser);
       setSession(newSession);
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
       setIsLoading(false);
+      logAuditEvent(existingUser.id, 'LOGIN_SUCCESS', 'Auth Module', `User ${userEmail} signed in via email/password`);
 
       return { success: true };
     } catch (err: any) {
@@ -119,35 +147,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const targetEmail = (email || 'user@gmail.com').toLowerCase().trim();
-      const targetName = name || targetEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      const targetEmail = (email || '').toLowerCase().trim();
+      if (!targetEmail) {
+        setIsLoading(false);
+        return { success: false, error: 'Google email address is required.' };
+      }
 
-      const googleUser: UserProfile = {
-        id: `usr_google_${Math.random().toString(36).substring(2, 9)}`,
-        email: targetEmail,
-        fullName: targetName,
-        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(targetEmail)}`,
-        role: 'student',
-        emailVerified: true,
-        targetExamDate: '',
-        targetScore: 90,
-        readinessScore: 0,
-        estimatedPassLikelihood: 0,
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-      };
+      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
+      const registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
+      const existingUser = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
 
+      // SECURITY RULE: Restrict Google login ONLY to existing registered users
+      if (!existingUser) {
+        setIsLoading(false);
+        logAuditEvent('SYSTEM', 'LOGIN_FAILED', 'Google Auth', `Denied Google sign-in for unregistered email: ${targetEmail}`);
+        return {
+          success: false,
+          error: `No candidate account found for ${targetEmail}. Google Sign-In is restricted to existing accounts. Please create a new account first.`,
+        };
+      }
+
+      existingUser.lastLoginAt = new Date().toISOString();
       const newSession: AuthSession = {
         accessToken: `google_oauth_token_${Math.random().toString(36).substring(2)}`,
         refreshToken: `google_refresh_token_${Math.random().toString(36).substring(2)}`,
         expiresAt: Date.now() + 86400 * 7 * 1000,
-        user: googleUser,
+        user: existingUser,
       };
 
-      setUser(googleUser);
+      setUser(existingUser);
       setSession(newSession);
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
       setIsLoading(false);
+      logAuditEvent(existingUser.id, 'GOOGLE_LOGIN_SUCCESS', 'Google Auth', `User ${targetEmail} authenticated via Google SSO`);
 
       return { success: true };
     } catch (err: any) {
@@ -159,14 +191,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (data: SignUpData) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      const config = getPlatformConfig();
+      const targetEmail = data.email.toLowerCase().trim();
+      const emailDomain = targetEmail.split('@')[1] || '';
 
+      // 1. Check Allow New Registration
+      if (!config.allowNewRegistration) {
+        setIsLoading(false);
+        logAuditEvent('SYSTEM', 'SIGNUP_BLOCKED', 'Registration', `Blocked registration attempt for ${targetEmail} (Registration Disabled)`);
+        return { success: false, error: 'Public registration is currently disabled by administrator.' };
+      }
+
+      // 2. Check Invite-Only Mode
+      if (config.inviteOnlyMode && !data.inviteCode) {
+        setIsLoading(false);
+        logAuditEvent('SYSTEM', 'SIGNUP_BLOCKED', 'Registration', `Blocked registration attempt for ${targetEmail} (Invite-Only Mode)`);
+        return { success: false, error: 'Registration is in Invite-Only mode. A valid invitation code is required.' };
+      }
+
+      // 3. Check Allowed Email Domains
+      if (config.allowedEmailDomains && config.allowedEmailDomains.length > 0) {
+        const isDomainAllowed = config.allowedEmailDomains.some(
+          (d: string) => d.toLowerCase() === emailDomain.toLowerCase()
+        );
+        if (!isDomainAllowed) {
+          setIsLoading(false);
+          logAuditEvent('SYSTEM', 'SIGNUP_BLOCKED_DOMAIN', 'Registration', `Blocked registration for domain @${emailDomain}`);
+          return { success: false, error: `Email domain @${emailDomain} is not authorized for candidate registration.` };
+        }
+      }
+
+      // 4. Prevent Duplicate Profile Creation
+      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
+      const registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
+      const duplicateUser = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
+
+      if (duplicateUser) {
+        setIsLoading(false);
+        logAuditEvent('SYSTEM', 'DUPLICATE_SIGNUP_ATTEMPT', 'Registration', `Prevented duplicate signup attempt for ${targetEmail}`);
+        return { success: false, error: 'An account with this email address already exists. Please log in instead.' };
+      }
+
+      // 5. Create Fresh Account with Verification & Status Flags
+      const initialStatus = config.requireAdminApproval ? 'pending_approval' : 'pending_verification';
       const newUser: UserProfile = {
         id: `usr_${Math.random().toString(36).substring(2, 9)}`,
-        email: data.email.toLowerCase().trim(),
+        email: targetEmail,
         fullName: data.fullName.trim(),
         role: data.role || 'student',
-        emailVerified: true,
+        emailVerified: false,
+        accountStatus: initialStatus,
         targetExamDate: data.targetExamDate || '',
         targetScore: 90,
         readinessScore: 0,
@@ -174,6 +249,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
+
+      registeredUsers.push(newUser);
+      localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
 
       const newSession: AuthSession = {
         accessToken: `signup_token_${Math.random().toString(36).substring(2)}`,
@@ -186,6 +264,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(newSession);
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
       setIsLoading(false);
+      logAuditEvent(newUser.id, 'SIGNUP_SUCCESS', 'Registration', `Created new candidate account for ${targetEmail} (${initialStatus})`);
 
       return { success: true, requiresVerification: true };
     } catch (err: any) {

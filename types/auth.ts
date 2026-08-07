@@ -2,6 +2,8 @@
 
 export type UserRole = 'student' | 'therapist' | 'clinic_admin' | 'instructor';
 
+export type AccountStatus = 'active' | 'pending_verification' | 'pending_approval' | 'suspended';
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -9,6 +11,7 @@ export interface UserProfile {
   avatarUrl?: string;
   role: UserRole;
   emailVerified: boolean;
+  accountStatus?: AccountStatus;
   targetExamDate?: string;
   targetScore: number;
   readinessScore: number;
@@ -38,6 +41,7 @@ export interface SignUpData {
   fullName: string;
   role?: UserRole;
   targetExamDate?: string;
+  inviteCode?: string;
 }
 
 export interface ResetPasswordData {
