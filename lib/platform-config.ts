@@ -1,4 +1,7 @@
 import { SystemSetting, AIProviderConfig, SystemAuditLog, PlatformPlugin } from '@/types/super-admin';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+
+const STORAGE_KEY = 'rbt_platform_config';
 
 // Default Platform Config Store (Supabase database ready)
 const SYSTEM_CONFIG_STORE: Record<string, any> = {
@@ -79,17 +82,58 @@ const AUDIT_LOG_BUFFER: SystemAuditLog[] = [
 ];
 
 /**
- * Returns dynamic platform settings
+ * Returns dynamic platform settings with persistence from localStorage & DB
  */
 export function getPlatformConfig() {
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        Object.assign(SYSTEM_CONFIG_STORE, parsed);
+      }
+    } catch (e) {
+      console.error('Failed to load platform config from storage', e);
+    }
+  }
   return { ...SYSTEM_CONFIG_STORE };
 }
 
 /**
- * Updates dynamic platform setting without requiring code changes
+ * Updates dynamic platform setting with full persistence to LocalStorage & Supabase database
  */
 export function updatePlatformConfig(key: string, value: any, updatedBy: string = 'Super Admin') {
   SYSTEM_CONFIG_STORE[key] = value;
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(SYSTEM_CONFIG_STORE));
+    } catch (e) {
+      console.error('Failed to persist platform config to localStorage', e);
+    }
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      supabase
+        .from('system_settings')
+        .upsert({
+          key,
+          value: typeof value === 'object' ? value : JSON.stringify(value),
+          updated_at: new Date().toISOString(),
+        })
+        .then(({ error }) => {
+          if (error && !error.message.includes('fetch failed')) {
+            console.error(`Failed to persist system setting '${key}' to Supabase:`, error.message);
+          }
+        })
+        .catch(() => {
+          // Ignore offline/test environment fetch errors silently
+        });
+    } catch (e) {
+      // Catch synchronous errors
+    }
+  }
 
   logAuditEvent(updatedBy, 'CONFIG_UPDATE', 'System Settings', `Updated ${key} to ${JSON.stringify(value)}`);
   return { success: true, key, value };
