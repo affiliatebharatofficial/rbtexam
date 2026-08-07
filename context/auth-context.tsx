@@ -139,16 +139,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async (email?: string, name?: string) => {
     setIsLoading(true);
     try {
-      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+      // 1. SUPABASE AUTH GOOGLE SSO (When Supabase is configured)
+      if (isSupabaseConfigured()) {
+        const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback';
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'select_account',
+            },
+          },
+        });
 
-      // 1. Direct Official Google Cloud OAuth (WITHOUT SUPABASE PROXY)
+        if (error) {
+          setIsLoading(false);
+          logAuditEvent('SYSTEM', 'LOGIN_FAILED', 'Supabase Google Auth', `Supabase Auth Error: ${error.message}`);
+          return { success: false, error: error.message };
+        }
+
+        logAuditEvent('SYSTEM', 'GOOGLE_OAUTH_INITIATED', 'Supabase Auth', `Initiated Supabase Google OAuth redirect to ${redirectUrl}`);
+        return { success: true };
+      }
+
+      // 2. Direct Official Google Cloud OAuth (Fallback if Supabase is unconfigured)
+      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
       if (googleClientId && !googleClientId.includes('mock-')) {
         const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
         window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
         return { success: true };
       }
 
-      // 2. Direct Candidate Account Authentication
+      // 3. Direct Candidate Account Authentication
       let targetEmail = (email || '').toLowerCase().trim();
 
       if (!targetEmail && typeof window !== 'undefined') {

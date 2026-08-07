@@ -2,6 +2,7 @@
 
 import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/context/auth-context';
 import { Brain, RefreshCw } from 'lucide-react';
 
@@ -13,6 +14,17 @@ function AuthCallbackContent() {
   useEffect(() => {
     async function handleAuthCallback() {
       try {
+        if (isSupabaseConfigured()) {
+          const { data, error } = await supabase.auth.getSession();
+          if (!error && data?.session?.user) {
+            const userEmail = data.session.user.email;
+            const userName = data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
+            await loginWithGoogle(userEmail || undefined, userName || undefined);
+            router.push('/dashboard');
+            return;
+          }
+        }
+
         const email = searchParams.get('email') || searchParams.get('user_email');
         const name = searchParams.get('name') || searchParams.get('full_name');
 
