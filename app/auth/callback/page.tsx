@@ -1,31 +1,39 @@
 'use client';
 
 import React, { useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuth } from '@/context/auth-context';
 import { Brain, RefreshCw } from 'lucide-react';
 
 function AuthCallbackContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { loginWithGoogle } = useAuth();
 
   useEffect(() => {
-    async function processOAuthCallback() {
+    async function handleAuthCallback() {
       try {
-        const email = searchParams.get('email') || searchParams.get('user_email');
-        const name = searchParams.get('name') || searchParams.get('full_name');
-        
-        await loginWithGoogle(email || undefined, name || undefined);
+        if (isSupabaseConfigured()) {
+          const { data, error } = await supabase.auth.getSession();
+          if (error) throw error;
+
+          if (data?.session?.user) {
+            const userEmail = data.session.user.email;
+            const userName = data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
+            await loginWithGoogle(userEmail || undefined, userName || undefined);
+            router.push('/dashboard');
+            return;
+          }
+        }
         router.push('/dashboard');
       } catch (err) {
-        console.error('OAuth Callback handling error:', err);
-        router.push('/login');
+        console.error('Failed to complete Supabase OAuth session:', err);
+        router.push('/login?error=oauth_failed');
       }
     }
 
-    processOAuthCallback();
-  }, [router, searchParams, loginWithGoogle]);
+    handleAuthCallback();
+  }, [router, loginWithGoogle]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
@@ -34,7 +42,7 @@ function AuthCallbackContent() {
       </div>
       <div className="flex items-center space-x-2 text-xs font-semibold text-slate-600">
         <RefreshCw className="w-4 h-4 animate-spin text-[#2563EB]" />
-        <span>Completing Google OAuth Authentication...</span>
+        <span>Completing Google OAuth Authentication for RBTTrainingAI...</span>
       </div>
     </div>
   );

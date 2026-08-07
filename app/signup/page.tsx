@@ -66,26 +66,11 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     setErrorMessage('');
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-    if (googleClientId && !googleClientId.includes('mock-')) {
-      setIsSubmitting(true);
-      await loginWithGoogle();
-      return;
-    }
-
-    const inputEmail = window.prompt('Enter your real Gmail address to sign up with Google:', email || 'user@gmail.com');
-    if (!inputEmail) return;
-
-    const inputName = fullName || window.prompt('Enter your Full Name for your candidate certificate:', inputEmail.split('@')[0]) || inputEmail.split('@')[0];
-
     setIsSubmitting(true);
-    const res = await loginWithGoogle(inputEmail, inputName);
+    const res = await loginWithGoogle();
     setIsSubmitting(false);
 
-    if (res.success) {
-      router.push('/dashboard');
-    } else {
+    if (!res.success) {
       setErrorMessage(res.error || 'Google sign-up failed.');
     }
   };

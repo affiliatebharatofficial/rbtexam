@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserProfile, AuthSession, LoginCredentials, SignUpData } from '@/types/auth';
 import { getPlatformConfig, logAuditEvent } from '@/lib/platform-config';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -138,26 +139,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async (email?: string, name?: string) => {
     setIsLoading(true);
     try {
-      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-      if (googleClientId && !googleClientId.includes('mock-')) {
-        const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
-        window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile`;
+      const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback';
+
+      if (isSupabaseConfigured()) {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl,
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'select_account',
+            },
+          },
+        });
+
+        if (error) {
+          setIsLoading(false);
+          logAuditEvent('SYSTEM', 'LOGIN_FAILED', 'Google Auth', `Supabase Google OAuth error: ${error.message}`);
+          return { success: false, error: error.message };
+        }
+
+        logAuditEvent('SYSTEM', 'GOOGLE_OAUTH_INITIATED', 'Google Auth', `Initiated Google OAuth redirect to ${redirectUrl}`);
         return { success: true };
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
+      // Fallback mode when Supabase environment variables are missing
       const targetEmail = (email || '').toLowerCase().trim();
       if (!targetEmail) {
         setIsLoading(false);
-        return { success: false, error: 'Google email address is required.' };
+        return {
+          success: false,
+          error: 'Supabase URL & Anon Key (NEXT_PUBLIC_SUPABASE_URL & NEXT_PUBLIC_SUPABASE_ANON_KEY) must be configured for live Google OAuth.',
+        };
       }
 
       const registeredUsersStr = localStorage.getItem('rbt_registered_users');
       const registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
       const existingUser = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
 
-      // SECURITY RULE: Restrict Google login ONLY to existing registered users
       if (!existingUser) {
         setIsLoading(false);
         logAuditEvent('SYSTEM', 'LOGIN_FAILED', 'Google Auth', `Denied Google sign-in for unregistered email: ${targetEmail}`);
@@ -184,7 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     } catch (err: any) {
       setIsLoading(false);
-      return { success: false, error: 'Google login authentication failed.' };
+      return { success: false, error: err.message || 'Google login authentication failed.' };
     }
   };
 

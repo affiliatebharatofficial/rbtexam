@@ -44,24 +44,11 @@ function LoginForm() {
 
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
-    if (googleClientId && !googleClientId.includes('mock-')) {
-      setIsSubmitting(true);
-      await loginWithGoogle();
-      return;
-    }
-
-    const inputEmail = window.prompt('Enter your real Gmail address to sign in with Google:', email || 'user@gmail.com');
-    if (!inputEmail) return;
-
     setIsSubmitting(true);
-    const res = await loginWithGoogle(inputEmail);
+    const res = await loginWithGoogle();
     setIsSubmitting(false);
 
-    if (res.success) {
-      router.push(redirectUrl);
-    } else {
+    if (!res.success) {
       setErrorMessage(res.error || 'Google sign-in failed.');
     }
   };
