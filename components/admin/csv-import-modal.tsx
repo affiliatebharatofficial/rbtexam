@@ -3,10 +3,10 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { parseAndValidateCSV } from '@/lib/question-import-engine';
+import { parseAndValidateCSV, generateSampleCSVTemplate } from '@/lib/question-import-engine';
 import { ImportValidationResult, MasterQuestion } from '@/types/master-question';
 import { createQuestion } from '@/lib/master-question-bank';
-import { X, Upload, CheckCircle2, AlertCircle, FileText, ArrowRight, RefreshCw } from 'lucide-react';
+import { X, Upload, CheckCircle2, AlertCircle, FileText, ArrowRight, RefreshCw, Download } from 'lucide-react';
 
 interface CSVImportModalProps {
   isOpen: boolean;
@@ -21,6 +21,17 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
   const [importSuccessCount, setImportSuccessCount] = useState<number | null>(null);
 
   if (!isOpen) return null;
+
+  const handleDownloadSampleCSV = () => {
+    const csv = generateSampleCSVTemplate();
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `sample_bacb_questions_template_${Date.now()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -89,12 +100,26 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
                   className="hidden"
                   id="csv-file-input"
                 />
-                <label
-                  htmlFor="csv-file-input"
-                  className="inline-block px-5 py-2.5 rounded-xl bg-[#2563EB] text-white font-bold text-xs cursor-pointer shadow-md"
-                >
-                  Browse File
-                </label>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <label
+                    htmlFor="csv-file-input"
+                    className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#2563EB] text-white font-bold text-xs cursor-pointer shadow-md hover:bg-blue-700 transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Browse CSV File</span>
+                  </label>
+
+                  <Button
+                    type="button"
+                    onClick={handleDownloadSampleCSV}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 font-bold text-xs border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 py-2.5 px-4 rounded-xl"
+                  >
+                    <Download className="w-4 h-4 text-indigo-600" />
+                    <span>Download Sample CSV Template</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Validation Summary Box */}

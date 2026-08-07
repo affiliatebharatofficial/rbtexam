@@ -166,3 +166,88 @@ function parseCSVLine(line: string): string[] {
   result.push(current);
   return result;
 }
+
+/**
+ * Generates a ready-to-use sample CSV template string
+ * with pre-formatted column headers and BACB sample rows.
+ */
+export function generateSampleCSVTemplate(): string {
+  const headers = [
+    'ID',
+    'Certification',
+    'Category',
+    'Difficulty',
+    'Type',
+    'Question',
+    'Scenario',
+    'Option A',
+    'Option B',
+    'Option C',
+    'Option D',
+    'Correct Choice',
+    'Answer Explanation',
+    'Clinical Rationale',
+    'BACB Task Reference',
+  ];
+
+  const sampleRows = [
+    [
+      'mq-sample-01',
+      'RBT',
+      'Measurement',
+      'medium',
+      'scenario_based',
+      'An RBT measures the exact time elapsed between presentation of the instruction "Sit down" and when the client initiates sitting. What continuous measurement procedure is being recorded?',
+      'During a therapy session, the RBT delivers a verbal SD and starts a stopwatch.',
+      'Duration',
+      'Latency',
+      'Inter-Response Time (IRT)',
+      'Frequency',
+      'B',
+      'Latency measures the elapsed time from SD presentation to response initiation.',
+      'Latency measurement tracks response initiation speed relative to environmental prompts.',
+      'BACB 2nd Edition Task List Item A-02',
+    ],
+    [
+      'mq-sample-02',
+      'RBT',
+      'Behavior Reduction',
+      'hard',
+      'scenario_based',
+      'A BCBA instructs an RBT to deliver a token every 5 minutes if the learner engages in ZERO instances of vocal screaming. What procedure is this?',
+      'The learner engages in high-rate vocal screaming during desk work.',
+      'Differential Reinforcement of Alternative Behavior (DRA)',
+      'Differential Reinforcement of Incompatible Behavior (DRI)',
+      'Differential Reinforcement of Other Behavior (DRO)',
+      'Non-Contingent Reinforcement (NCR)',
+      'C',
+      'DRO reinforces zero occurrences (omission) of target problem behavior during a time interval.',
+      'DRO (Omission Training) delivers reinforcement contingent on zero occurrences of the target behavior.',
+      'BACB 2nd Edition Task List Item D-04',
+    ],
+    [
+      'mq-sample-03',
+      'BCBA',
+      'Ethics',
+      'medium',
+      'case_study',
+      'A client mother offers an RBT a $100 spa gift card at the end of a therapy month. What is the ethical course of action?',
+      'The RBT is offered a high-value monetary gift card by a client parent.',
+      'Accept the gift card graciously',
+      'Politely decline, explain BACB ethical guidelines, and notify BCBA supervisor',
+      'Accept the gift card but share it with the team',
+      'Exchange the gift card for clinical toys',
+      'B',
+      'RBTs must decline high-value monetary gifts to prevent dual relationships.',
+      'BACB Ethics Code mandates declining monetary gifts to preserve objective clinical boundaries.',
+      'BACB Ethics Code Item F-02',
+    ],
+  ];
+
+  const csvLines = [
+    headers.join(','),
+    ...sampleRows.map((row) => row.map((val) => `"${val.replace(/"/g, '""')}"`).join(',')),
+  ];
+
+  return csvLines.join('\n');
+}
