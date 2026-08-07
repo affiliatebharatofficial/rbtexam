@@ -5,9 +5,11 @@ import {
   QuestionStatus,
   CertificationLevel,
 } from '@/types/master-question';
+import fs from 'fs';
+import path from 'path';
 
-// In-Memory Master Question Store (Supabase client fallback ready)
-export const MASTER_QUESTION_BANK: MasterQuestion[] = [
+// Initial default seed questions
+const SEED_QUESTIONS: MasterQuestion[] = [
   {
     id: 'mq-rbt-001',
     certification: 'RBT',
@@ -112,10 +114,80 @@ export const MASTER_QUESTION_BANK: MasterQuestion[] = [
   },
 ];
 
+// Persistent Master Question Store
+export const MASTER_QUESTION_BANK: MasterQuestion[] = [...SEED_QUESTIONS];
+
+const LOCAL_STORAGE_KEY = 'rbt_master_questions_v1';
+
+function getPersistentFilePath(): string {
+  const dataDir = path.join(process.cwd(), 'data');
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  return path.join(dataDir, 'questions-store.json');
+}
+
+/**
+ * Load questions from persistent storage (Server file or Browser localStorage)
+ */
+export function loadPersistentQuestions(): MasterQuestion[] {
+  try {
+    if (typeof window === 'undefined') {
+      const filePath = getPersistentFilePath();
+      if (fs.existsSync(filePath)) {
+        const fileData = fs.readFileSync(filePath, 'utf-8');
+        const parsed = JSON.parse(fileData);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach((q: MasterQuestion) => {
+            if (!MASTER_QUESTION_BANK.some((existing) => existing.id === q.id)) {
+              MASTER_QUESTION_BANK.unshift(q);
+            }
+          });
+        }
+      }
+    } else {
+      const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach((q: MasterQuestion) => {
+            if (!MASTER_QUESTION_BANK.some((existing) => existing.id === q.id)) {
+              MASTER_QUESTION_BANK.unshift(q);
+            }
+          });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load persistent master questions:', err);
+  }
+  return MASTER_QUESTION_BANK;
+}
+
+/**
+ * Save questions array to persistent storage
+ */
+export function savePersistentQuestions(): void {
+  try {
+    if (typeof window === 'undefined') {
+      const filePath = getPersistentFilePath();
+      fs.writeFileSync(filePath, JSON.stringify(MASTER_QUESTION_BANK, null, 2), 'utf-8');
+    } else {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(MASTER_QUESTION_BANK));
+    }
+  } catch (err) {
+    console.error('Failed to save persistent master questions:', err);
+  }
+}
+
+// Perform initial load
+loadPersistentQuestions();
+
 /**
  * Filter and paginate questions in the Master Question Bank
  */
 export function getFilteredQuestions(params: QuestionFilterParams): QuestionPaginationResult {
+  loadPersistentQuestions();
   let list = [...MASTER_QUESTION_BANK];
 
   // Search text filter
@@ -187,6 +259,7 @@ export function getFilteredQuestions(params: QuestionFilterParams): QuestionPagi
  * Get Question by ID
  */
 export function getQuestionById(id: string): MasterQuestion | undefined {
+  loadPersistentQuestions();
   return MASTER_QUESTION_BANK.find((q) => q.id === id);
 }
 
@@ -194,6 +267,7 @@ export function getQuestionById(id: string): MasterQuestion | undefined {
  * Create new Master Question
  */
 export function createQuestion(data: Omit<MasterQuestion, 'id' | 'createdAt' | 'updatedAt' | 'version'>): MasterQuestion {
+  loadPersistentQuestions();
   const newQuestion: MasterQuestion = {
     ...data,
     id: `mq-${data.certification.toLowerCase()}-${Math.random().toString(36).substring(2, 8)}`,
@@ -203,6 +277,7 @@ export function createQuestion(data: Omit<MasterQuestion, 'id' | 'createdAt' | '
   };
 
   MASTER_QUESTION_BANK.unshift(newQuestion);
+  savePersistentQuestions();
   return newQuestion;
 }
 
@@ -210,6 +285,7 @@ export function createQuestion(data: Omit<MasterQuestion, 'id' | 'createdAt' | '
  * Update existing Master Question
  */
 export function updateQuestion(id: string, updates: Partial<MasterQuestion>): MasterQuestion | undefined {
+  loadPersistentQuestions();
   const index = MASTER_QUESTION_BANK.findIndex((q) => q.id === id);
   if (index === -1) return undefined;
 
@@ -222,6 +298,7 @@ export function updateQuestion(id: string, updates: Partial<MasterQuestion>): Ma
   };
 
   MASTER_QUESTION_BANK[index] = updated;
+  savePersistentQuestions();
   return updated;
 }
 
@@ -229,9 +306,11 @@ export function updateQuestion(id: string, updates: Partial<MasterQuestion>): Ma
  * Delete Question by ID
  */
 export function deleteQuestion(id: string): boolean {
+  loadPersistentQuestions();
   const index = MASTER_QUESTION_BANK.findIndex((q) => q.id === id);
   if (index === -1) return false;
   MASTER_QUESTION_BANK.splice(index, 1);
+  savePersistentQuestions();
   return true;
 }
 
@@ -239,6 +318,7 @@ export function deleteQuestion(id: string): boolean {
  * Bulk status update (Publish, Archive, Draft)
  */
 export function bulkUpdateStatus(ids: string[], status: QuestionStatus): number {
+  loadPersistentQuestions();
   let count = 0;
   MASTER_QUESTION_BANK.forEach((q) => {
     if (ids.includes(q.id)) {
@@ -247,6 +327,7 @@ export function bulkUpdateStatus(ids: string[], status: QuestionStatus): number 
       count++;
     }
   });
+  savePersistentQuestions();
   return count;
 }
 
@@ -254,6 +335,7 @@ export function bulkUpdateStatus(ids: string[], status: QuestionStatus): number 
  * Bulk delete questions
  */
 export function bulkDeleteQuestions(ids: string[]): number {
+  loadPersistentQuestions();
   let count = 0;
   for (let i = MASTER_QUESTION_BANK.length - 1; i >= 0; i--) {
     if (ids.includes(MASTER_QUESTION_BANK[i].id)) {
@@ -261,6 +343,7 @@ export function bulkDeleteQuestions(ids: string[]): number {
       count++;
     }
   }
+  savePersistentQuestions();
   return count;
 }
 

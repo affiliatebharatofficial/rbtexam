@@ -1,29 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createQuestion } from '@/lib/master-question-bank';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topicPrompt, certification, difficulty, count, bacbTaskCode } = body;
+    const { topicPrompt, certification, difficulty, count, bacbTaskCode, provider, apiKey } = body;
 
     const targetTopic = topicPrompt?.trim() || 'Applied Behavior Analysis Core Concepts';
     const certLevel = certification || 'RBT';
     const diff = difficulty || 'medium';
-    const quantity = Math.min(15, Math.max(1, parseInt(count) || 3));
+    const quantity = Math.min(50, Math.max(1, parseInt(count) || 3));
     const taskCode = bacbTaskCode || 'A-01';
 
-    let generatedQuestions: any[] = [];
+    // Provider & Key resolution
+    const effectiveOpenAiKey = apiKey || process.env.OPENAI_API_KEY;
+    const effectiveGeminiKey = apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+    const effectiveDeepSeekKey = apiKey || process.env.DEEPSEEK_API_KEY;
+    const effectiveOpenRouterKey = apiKey || process.env.OPENROUTER_API_KEY;
+    const effectiveAnthropicKey = apiKey || process.env.ANTHROPIC_API_KEY;
 
-    // Attempt OpenAI API if OPENAI_API_KEY is configured
-    const openAiKey = process.env.OPENAI_API_KEY;
-    if (openAiKey && !openAiKey.includes('mock-')) {
+    const selectedProvider = (provider || 'auto').toLowerCase();
+
+    let generatedQuestions: any[] = [];
+    let usedProvider = 'Fallback Dynamic Generator';
+
+    const systemPrompt = `You are an expert Senior BCBA Exam Item Writer for BACB 2nd Edition Certification. Generate EXACTLY ${quantity} realistic, high-yield ${certLevel} multiple choice practice exam questions focusing on topic "${targetTopic}" (${diff} difficulty, Task Code ${taskCode}).
+Return ONLY a valid JSON object matching this schema:
+{
+  "questions": [
+    {
+      "question": "Clear stem asking a question...",
+      "scenarioText": "Clinical scenario describing client background, antecedent, and behavior...",
+      "options": [
+        { "id": "A", "text": "Option A choice", "explanation": "Detailed explanation why A is correct or distractor" },
+        { "id": "B", "text": "Option B choice", "explanation": "Detailed explanation..." },
+        { "id": "C", "text": "Option C choice", "explanation": "Detailed explanation..." },
+        { "id": "D", "text": "Option D choice", "explanation": "Detailed explanation..." }
+      ],
+      "correctOptionId": "A",
+      "clinicalExplanation": "Full clinical rationale citing BACB Task List principles...",
+      "bacbCitation": "BACB 2nd Edition Task List Item ${taskCode}",
+      "category": "Behavior Reduction"
+    }
+  ]
+}`;
+
+    // 1. OPENAI API
+    if (
+      (selectedProvider === 'openai' || selectedProvider === 'auto') &&
+      effectiveOpenAiKey &&
+      !effectiveOpenAiKey.includes('mock-') &&
+      generatedQuestions.length === 0
+    ) {
       try {
-        const systemPrompt = `You are a Senior BCBA Exam Writer for BACB 2nd Edition Certification. Generate ${quantity} high-quality ${certLevel} multiple choice practice questions for topic "${targetTopic}" (${diff} difficulty). Return ONLY valid JSON array where each object has: question (string), options (array of 4 objects with id 'A','B','C','D' and text), correctOptionId ('A','B','C','D'), clinicalExplanation (string), bacbCitation (string).`;
-        
         const apiRes = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${openAiKey}`,
+            'Authorization': `Bearer ${effectiveOpenAiKey}`,
           },
           body: JSON.stringify({
             model: 'gpt-4o-mini',
@@ -33,135 +67,241 @@ export async function POST(request: NextRequest) {
           }),
         });
 
-        const data = await apiRes.json();
-        const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}');
-        if (parsed.questions && Array.isArray(parsed.questions)) {
-          generatedQuestions = parsed.questions.map((q: any, i: number) => ({
-            id: `q_ai_${Date.now()}_${i}`,
-            certification: certLevel,
-            category: 'Behavior Reduction',
-            difficulty: diff,
-            status: 'published',
-            question: q.question,
-            options: q.options || [
-              { id: 'A', text: 'Option A choice', explanation: 'Explanation for A' },
-              { id: 'B', text: 'Option B choice', explanation: 'Explanation for B' },
-              { id: 'C', text: 'Option C choice', explanation: 'Explanation for C' },
-              { id: 'D', text: 'Option D choice', explanation: 'Explanation for D' },
-            ],
-            correctOptionId: q.correctOptionId || 'A',
-            clinicalExplanation: q.clinicalExplanation || `Clinical analysis for ${targetTopic}.`,
-            bacbTaskCode: taskCode,
-            bacbCitation: q.bacbCitation || `BACB 2nd Edition Task List Item ${taskCode}`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }));
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}');
+          if (parsed.questions && Array.isArray(parsed.questions)) {
+            generatedQuestions = parsed.questions;
+            usedProvider = 'OpenAI (gpt-4o-mini)';
+          }
         }
       } catch (err) {
-        console.error('LLM question generation failed, using internal ABA engine:', err);
+        console.error('OpenAI generation error:', err);
       }
     }
 
-    // Fallback ABA Question Generator Engine
+    // 2. GOOGLE GEMINI API
+    if (
+      (selectedProvider === 'gemini' || selectedProvider === 'auto') &&
+      effectiveGeminiKey &&
+      !effectiveGeminiKey.includes('mock-') &&
+      generatedQuestions.length === 0
+    ) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${effectiveGeminiKey}`;
+        const apiRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: systemPrompt }] }],
+            generationConfig: { response_mime_type: 'application/json', temperature: 0.7 },
+          }),
+        });
+
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            const parsed = JSON.parse(text);
+            if (parsed.questions && Array.isArray(parsed.questions)) {
+              generatedQuestions = parsed.questions;
+              usedProvider = 'Google Gemini 1.5 Flash';
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Gemini generation error:', err);
+      }
+    }
+
+    // 3. DEEPSEEK API
+    if (
+      (selectedProvider === 'deepseek' || selectedProvider === 'auto') &&
+      effectiveDeepSeekKey &&
+      !effectiveDeepSeekKey.includes('mock-') &&
+      generatedQuestions.length === 0
+    ) {
+      try {
+        const apiRes = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${effectiveDeepSeekKey}`,
+          },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [{ role: 'system', content: systemPrompt }],
+            temperature: 0.7,
+            response_format: { type: 'json_object' },
+          }),
+        });
+
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}');
+          if (parsed.questions && Array.isArray(parsed.questions)) {
+            generatedQuestions = parsed.questions;
+            usedProvider = 'DeepSeek V3';
+          }
+        }
+      } catch (err) {
+        console.error('DeepSeek generation error:', err);
+      }
+    }
+
+    // 4. OPENROUTER API
+    if (
+      (selectedProvider === 'openrouter' || selectedProvider === 'auto') &&
+      effectiveOpenRouterKey &&
+      !effectiveOpenRouterKey.includes('mock-') &&
+      generatedQuestions.length === 0
+    ) {
+      try {
+        const apiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${effectiveOpenRouterKey}`,
+          },
+          body: JSON.stringify({
+            model: 'auto',
+            messages: [{ role: 'system', content: systemPrompt }],
+            temperature: 0.7,
+            response_format: { type: 'json_object' },
+          }),
+        });
+
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}');
+          if (parsed.questions && Array.isArray(parsed.questions)) {
+            generatedQuestions = parsed.questions;
+            usedProvider = 'OpenRouter AI Engine';
+          }
+        }
+      } catch (err) {
+        console.error('OpenRouter generation error:', err);
+      }
+    }
+
+    // 5. ANTHROPIC CLAUDE API
+    if (
+      (selectedProvider === 'anthropic' || selectedProvider === 'auto') &&
+      effectiveAnthropicKey &&
+      !effectiveAnthropicKey.includes('mock-') &&
+      generatedQuestions.length === 0
+    ) {
+      try {
+        const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': effectiveAnthropicKey,
+            'anthropic-version': '2023-06-01',
+          },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 4000,
+            messages: [{ role: 'user', content: systemPrompt }],
+          }),
+        });
+
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const text = data.content?.[0]?.text;
+          if (text) {
+            const parsed = JSON.parse(text);
+            if (parsed.questions && Array.isArray(parsed.questions)) {
+              generatedQuestions = parsed.questions;
+              usedProvider = 'Anthropic Claude 3.5';
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Anthropic generation error:', err);
+      }
+    }
+
+    // 6. Dynamic High-Yield Procedural Fallback (When offline or no API keys set)
     if (generatedQuestions.length === 0) {
+      usedProvider = 'ABA Clinical Procedural Engine';
       for (let i = 0; i < quantity; i++) {
-        const qId = `q_ai_${Date.now()}_${i}`;
+        const indexNum = i + 1;
         const topicSlug = targetTopic.toLowerCase();
 
-        if (topicSlug.includes('dro') || topicSlug.includes('differential') || topicSlug.includes('reinforcement')) {
-          generatedQuestions.push({
-            id: qId,
-            certification: certLevel,
-            category: 'Behavior Reduction',
-            difficulty: diff,
-            status: 'published',
-            question: `[AI Generated Batch #${i + 1}] A RBT is working with a learner who engages in verbal screaming during task transitions. The BCBA instructs the RBT to deliver a preferred token every 3 minutes IF the learner engages in ZERO instances of screaming during the interval. What differential reinforcement procedure is being implemented?`,
-            options: [
-              { id: 'A', text: 'Differential Reinforcement of Other Behavior (DRO)', explanation: 'Correct! DRO reinforces zero occurrences of the target problem behavior during a specified time interval.' },
-              { id: 'B', text: 'Differential Reinforcement of Alternative Behavior (DRA)', explanation: 'Incorrect. DRA reinforces a specific alternative functional response rather than zero occurrence.' },
-              { id: 'C', text: 'Differential Reinforcement of Incompatible Behavior (DRI)', explanation: 'Incorrect. DRI reinforces a behavior that physically cannot co-occur with the problem behavior.' },
-              { id: 'D', text: 'Non-Contingent Reinforcement (NCR)', explanation: 'Incorrect. NCR is time-based reinforcement delivered independent of behavior.' },
-            ],
-            correctOptionId: 'A',
-            clinicalExplanation: 'DRO (Omission Training) delivers reinforcement if the target problem behavior does NOT occur throughout the specified time interval.',
-            bacbTaskCode: 'D-04',
-            bacbCitation: 'BACB 2nd Edition Task List Item D-04',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        } else if (topicSlug.includes('measurement') || topicSlug.includes('frequency') || topicSlug.includes('latency') || topicSlug.includes('irt')) {
-          generatedQuestions.push({
-            id: qId,
-            certification: certLevel,
-            category: 'Measurement',
-            difficulty: diff,
-            status: 'published',
-            question: `[AI Generated Batch #${i + 1}] An RBT records the exact elapsed time from when the BCBA delivers the verbal instruction "Touch blue" to when the learner begins making physical contact with the blue card. What continuous measurement procedure is the RBT recording?`,
-            options: [
-              { id: 'A', text: 'Latency', explanation: 'Correct! Latency measures the elapsed time from the onset of a stimulus (SD) to the initiation of the response.' },
-              { id: 'B', text: 'Inter-Response Time (IRT)', explanation: 'Incorrect. IRT measures elapsed time between TWO consecutive instances of behavior.' },
-              { id: 'C', text: 'Duration', explanation: 'Incorrect. Duration measures the total elapsed time from the start of a behavior to its termination.' },
-              { id: 'D', text: 'Rate', explanation: 'Incorrect. Rate is count divided by observation time.' },
-            ],
-            correctOptionId: 'A',
-            clinicalExplanation: 'Latency measures the time delay between the SD presentation and response initiation.',
-            bacbTaskCode: 'A-02',
-            bacbCitation: 'BACB 2nd Edition Task List Item A-02',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        } else if (topicSlug.includes('ethic') || topicSlug.includes('boundary') || topicSlug.includes('gift')) {
-          generatedQuestions.push({
-            id: qId,
-            certification: certLevel,
-            category: 'Ethics',
-            difficulty: diff,
-            status: 'published',
-            question: `[AI Generated Batch #${i + 1}] At the end of a therapy session, a learner's parents offer the RBT a $50 gift card to a local restaurant as a holiday gift. According to the BACB Ethics Code for RBTs, how should the RBT respond?`,
-            options: [
-              { id: 'A', text: 'Politely decline the gift card, explain BACB ethical guidelines regarding gifts, and notify their supervising BCBA.', explanation: 'Correct! RBTs must maintain professional boundaries and decline monetary gifts.' },
-              { id: 'B', text: 'Accept the gift card because refusing it might offend the family culture.', explanation: 'Incorrect. Accepting gifts worth monetary value violates BACB ethics.' },
-              { id: 'C', text: 'Accept the gift card but split it with the supervising BCBA.', explanation: 'Incorrect. Sharing a gift card does not resolve the ethical boundary violation.' },
-              { id: 'D', text: 'Accept the gift card only if it is under $100.', explanation: 'Incorrect. Monetary gift cards are prohibited.' },
-            ],
-            correctOptionId: 'A',
-            clinicalExplanation: 'RBTs must adhere to BACB Ethics Code guidelines on dual relationships and gift acceptance.',
-            bacbTaskCode: 'F-02',
-            bacbCitation: 'BACB Ethics Code for RBTs Item F-02',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        } else {
-          generatedQuestions.push({
-            id: qId,
-            certification: certLevel,
-            category: 'Skill Acquisition',
-            difficulty: diff,
-            status: 'published',
-            question: `[AI Generated Batch #${i + 1}] During a Discrete Trial Teaching (DTT) session on "${targetTopic}", an RBT presents the SD "Touch cup". The learner hesitates. The RBT immediately provides a full physical prompt to ensure a correct response. What prompting strategy is being used?`,
-            options: [
-              { id: 'A', text: 'Most-to-Least Prompting (Errorless Learning)', explanation: 'Correct! Most-to-least prompting provides the highest level of assistance immediately to ensure errorless response acquisition.' },
-              { id: 'B', text: 'Least-to-Most Prompting', explanation: 'Incorrect. Least-to-most gives the learner an opportunity to respond independently first before increasing prompt hierarchy.' },
-              { id: 'C', text: 'Time Delay Prompting', explanation: 'Incorrect. Constant or progressive time delay introduces a fixed delay interval before prompting.' },
-              { id: 'D', text: 'Stimulus Fading', explanation: 'Incorrect. Stimulus fading modifies physical dimension of antecedent stimuli.' },
-            ],
-            correctOptionId: 'A',
-            clinicalExplanation: 'Most-to-least prompting starts with full assistance to establish high success rates during early acquisition.',
-            bacbTaskCode: taskCode,
-            bacbCitation: `BACB 2nd Edition Task List Item ${taskCode}`,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
+        let scenario = `In a clinical setting focused on "${targetTopic}", an ${certLevel} candidate is tasked with analyzing behavior data during trial #${indexNum}.`;
+        let questionText = `[AI Generated Exam Question #${indexNum}] Which procedure best demonstrates compliance with BACB guidelines when implementing "${targetTopic}"?`;
+        let correctId = (['A', 'B', 'C', 'D'][i % 4]) as 'A' | 'B' | 'C' | 'D';
+
+        let options = [
+          { id: 'A', text: `Apply systematic differential reinforcement and objective continuous measurement for ${targetTopic}.`, explanation: 'Correct! Continuous data collection combined with differential reinforcement aligns with BACB standards.' },
+          { id: 'B', text: `Use subjective baseline estimates without supervising BCBA approval.`, explanation: 'Incorrect. Subjective estimates violate objective measurement standards.' },
+          { id: 'C', text: `Discontinue trial prompts immediately upon first error.`, explanation: 'Incorrect. Prompt hierarchies require systematic fading, not immediate discontinuation.' },
+          { id: 'D', text: `Substitute unverified non-contingent rewards for preferred backup items.`, explanation: 'Incorrect. Reinforcers must be functionally matched.' },
+        ];
+
+        if (topicSlug.includes('measurement') || topicSlug.includes('latency') || topicSlug.includes('frequency')) {
+          scenario = `An RBT records data for a learner during transition routines. The BCBA requests accurate tracking of ${targetTopic}.`;
+          questionText = `[AI Generated Batch #${indexNum}] When measuring ${targetTopic}, which observation parameter ensures scientific accuracy under BACB Task Item ${taskCode}?`;
+        } else if (topicSlug.includes('dro') || topicSlug.includes('reinforcement')) {
+          scenario = `A candidate is monitoring a learner engaging in challenging behavior. The treatment plan specifies differential reinforcement.`;
+          questionText = `[AI Generated Batch #${indexNum}] What key criterion distinguishes the differential reinforcement strategy for "${targetTopic}"?`;
         }
+
+        generatedQuestions.push({
+          question: questionText,
+          scenarioText: scenario,
+          options,
+          correctOptionId: correctId,
+          clinicalExplanation: `Clinical analysis for ${targetTopic} under BACB Task Item ${taskCode}. Ensures evidence-based behavior modification principles.`,
+          bacbCitation: `BACB 2nd Edition Task List Item ${taskCode}`,
+          category: topicSlug.includes('measurement') ? 'Measurement' : topicSlug.includes('ethic') ? 'Ethics' : 'Skill Acquisition',
+        });
       }
     }
+
+    // Persist all generated questions into the Master Question Bank immediately
+    const savedQuestions = generatedQuestions.map((q: any, i: number) => {
+      return createQuestion({
+        question: q.question || `Generated question #${i + 1} for ${targetTopic}`,
+        scenarioText: q.scenarioText || `Scenario analysis for ${targetTopic}`,
+        questionType: 'scenario_based',
+        difficulty: diff,
+        options: q.options || [
+          { id: 'A', text: 'Option A', isCorrect: true, explanation: 'Correct answer' },
+          { id: 'B', text: 'Option B', isCorrect: false, explanation: 'Incorrect choice' },
+          { id: 'C', text: 'Option C', isCorrect: false, explanation: 'Incorrect choice' },
+          { id: 'D', text: 'Option D', isCorrect: false, explanation: 'Incorrect choice' },
+        ],
+        correctAnswerId: q.correctOptionId || 'A',
+        answerExplanation: q.clinicalExplanation || `Standard BACB answer explanation for ${targetTopic}`,
+        clinicalExplanation: q.clinicalExplanation || `Clinical guidance for BACB Task List Item ${taskCode}`,
+        references: q.bacbCitation || `BACB 2nd Edition Task List Item ${taskCode}`,
+        examTips: `Focus on observable environmental variables and BACB Task List Item ${taskCode}.`,
+        commonMistakes: 'Confusing correlation with causation or selecting subjective choices.',
+        category: q.category || 'Behavior Reduction',
+        subCategory: targetTopic,
+        keywords: [targetTopic, certLevel, 'AI Generated', taskCode],
+        taskListVersion: '2nd_edition',
+        estimatedTimeSeconds: 60,
+        tags: ['AI Generated', 'BACB Exam Item', certLevel],
+        status: 'published',
+        isPremium: false,
+        isFeatured: true,
+        certification: certLevel,
+        createdBy: `AI Generator (${usedProvider})`,
+        updatedBy: 'Super Admin System',
+      });
+    });
 
     return NextResponse.json({
       success: true,
-      questions: generatedQuestions,
-      totalGenerated: generatedQuestions.length,
+      providerUsed: usedProvider,
+      totalGenerated: savedQuestions.length,
+      questions: savedQuestions,
     });
   } catch (error: any) {
+    console.error('AI Question Generation API error:', error);
     return NextResponse.json({ error: error.message || 'AI Question Generation failed' }, { status: 500 });
   }
 }

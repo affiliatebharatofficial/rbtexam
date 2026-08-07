@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Card } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import {
   bulkUpdateStatus,
   bulkDeleteQuestions,
   exportQuestionsToCSV,
+  loadPersistentQuestions,
   MASTER_QUESTION_BANK,
 } from '@/lib/master-question-bank';
 import { MasterQuestion, QuestionFilterParams, CertificationLevel, QuestionCategory, QuestionDifficulty, QuestionStatus } from '@/types/master-question';
@@ -64,10 +65,17 @@ export default function AdminQuestionsPage() {
   const [aiTopic, setAiTopic] = useState('');
   const [aiCert, setAiCert] = useState<CertificationLevel>('RBT');
   const [aiDiff, setAiDiff] = useState<QuestionDifficulty>('medium');
-  const [aiCount, setAiCount] = useState<number>(3);
+  const [aiCount, setAiCount] = useState<number>(5);
   const [aiTaskCode, setAiTaskCode] = useState('A-01');
+  const [aiProvider, setAiProvider] = useState('auto');
+  const [aiApiKey, setAiApiKey] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiSuccessMsg, setAiSuccessMsg] = useState('');
+
+  // Synchronize persistent questions on mount
+  useEffect(() => {
+    loadPersistentQuestions();
+  }, []);
 
   const handleGenerateAiQuestions = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,39 +90,18 @@ export default function AdminQuestionsPage() {
           difficulty: aiDiff,
           count: aiCount,
           bacbTaskCode: aiTaskCode,
+          provider: aiProvider,
+          apiKey: aiApiKey || undefined,
         }),
       });
 
       const data = await res.json();
-      if (data.questions && Array.isArray(data.questions)) {
-        data.questions.forEach((q: any) => {
-          createQuestion({
-            question: q.question,
-            options: q.options,
-            correctAnswerId: q.correctOptionId || 'A',
-            questionType: 'scenario_based',
-            clinicalExplanation: q.clinicalExplanation,
-            answerExplanation: q.clinicalExplanation,
-            references: q.bacbCitation || `BACB 2nd Edition Task List Item ${aiTaskCode}`,
-            certification: q.certification || aiCert,
-            difficulty: q.difficulty || aiDiff,
-            category: q.category || 'Behavior Reduction',
-            status: 'published',
-            isPremium: false,
-            isFeatured: true,
-            keywords: [aiTopic, 'BACB 2nd Edition', aiCert],
-            taskListVersion: '2nd_edition',
-            estimatedTimeSeconds: 75,
-            tags: ['AI Generated', 'BACB Exam Item'],
-            createdBy: 'AI Generator Engine',
-            updatedBy: 'Super Admin',
-          });
-        });
-
+      if (data.success && data.questions && Array.isArray(data.questions)) {
+        loadPersistentQuestions();
         setIsAiModalOpen(false);
-        setAiSuccessMsg(`✅ Successfully generated and published ${data.questions.length} AI question(s)!`);
+        setAiSuccessMsg(`✅ Generated & published ${data.questions.length} AI question(s) via ${data.providerUsed || 'AI Engine'}!`);
         setFilterParams({ ...filterParams });
-        setTimeout(() => setAiSuccessMsg(''), 4000);
+        setTimeout(() => setAiSuccessMsg(''), 5000);
       } else {
         alert(data.error || 'Failed to generate questions');
       }
@@ -664,7 +651,40 @@ export default function AdminQuestionsPage() {
                       <option value={3}>3 Questions</option>
                       <option value={5}>5 Questions</option>
                       <option value={10}>10 Questions</option>
+                      <option value={15}>15 Questions</option>
+                      <option value={20}>20 Questions</option>
+                      <option value={25}>25 Questions</option>
+                      <option value={50}>50 Questions</option>
                     </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 pt-1">
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700">AI Model Provider</label>
+                    <select
+                      value={aiProvider}
+                      onChange={(e) => setAiProvider(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold"
+                    >
+                      <option value="auto">⚡ Auto-Detect (Best Available Key)</option>
+                      <option value="openai">OpenAI (GPT-4o-mini)</option>
+                      <option value="gemini">Google Gemini (1.5 / 2.0 Flash)</option>
+                      <option value="deepseek">DeepSeek V3</option>
+                      <option value="openrouter">OpenRouter AI</option>
+                      <option value="anthropic">Anthropic Claude 3.5</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700">Custom API Key (Optional)</label>
+                    <input
+                      type="password"
+                      placeholder="sk-... or AI key override"
+                      value={aiApiKey}
+                      onChange={(e) => setAiApiKey(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    />
                   </div>
                 </div>
 
@@ -680,7 +700,7 @@ export default function AdminQuestionsPage() {
                     className="font-extrabold gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-indigo-500/25"
                   >
                     <Sparkles className="w-4 h-4 text-amber-300" />
-                    <span>{isAiGenerating ? 'Generating Questions...' : 'Generate & Publish Questions'}</span>
+                    <span>{isAiGenerating ? 'Generating Questions...' : `Generate & Publish ${aiCount} Questions`}</span>
                   </Button>
                 </div>
               </form>
