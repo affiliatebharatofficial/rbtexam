@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { EmptyState } from '@/components/ui/empty-state';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/auth-context';
 import { Users, UserPlus, X, Copy, Check, CheckCircle2, Award, Sparkles } from 'lucide-react';
 
 interface TraineeUser {
@@ -19,6 +19,7 @@ interface TraineeUser {
 }
 
 export default function ClinicPage() {
+  const { user } = useAuth();
   const [trainees, setTrainees] = useState<TraineeUser[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,45 +35,24 @@ export default function ClinicPage() {
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
-    fetchClinicTrainees();
-  }, []);
+    if (user?.email) {
+      fetchClinicTrainees();
+    } else {
+      setLoading(false);
+    }
+  }, [user?.email]);
 
   async function fetchClinicTrainees() {
     setLoading(true);
     try {
-      // 1. Fetch real student users from Supabase API / DB
-      const res = await fetch('/api/admin/users');
+      const targetInviterEmail = user?.email || '';
+      const res = await fetch(`/api/clinic/trainees?inviterEmail=${encodeURIComponent(targetInviterEmail)}`);
       const data = await res.json();
 
-      if (data.users && Array.isArray(data.users)) {
-        const studentUsers: TraineeUser[] = data.users
-          .filter((u: any) => u.role === 'student' || u.role === 'therapist')
-          .map((u: any) => ({
-            id: u.id,
-            fullName: u.fullName || u.email?.split('@')[0] || 'RBT Candidate',
-            email: u.email,
-            targetScore: 90,
-            readinessScore: Math.floor(Math.random() * 20) + 80, // High readiness score for clinic roster
-            status: 'On Track',
-          }));
-        setTrainees(studentUsers);
+      if (data.trainees && Array.isArray(data.trainees)) {
+        setTrainees(data.trainees);
       } else {
-        const { data: dbData } = await supabase
-          .from('users')
-          .select('id, full_name, email, target_score')
-          .eq('role', 'student');
-
-        if (dbData) {
-          const mapped: TraineeUser[] = dbData.map((u: any) => ({
-            id: u.id,
-            fullName: u.full_name || 'RBT Candidate',
-            email: u.email,
-            targetScore: u.target_score || 90,
-            readinessScore: 85,
-            status: 'On Track',
-          }));
-          setTrainees(mapped);
-        }
+        setTrainees([]);
       }
     } catch (err) {
       console.error('Failed to load clinic trainees', err);
@@ -95,6 +75,8 @@ export default function ClinicPage() {
           email: inviteEmail,
           targetCertification: inviteCert,
           targetExamDate: inviteExamDate,
+          inviterEmail: user?.email,
+          inviterId: user?.id,
         }),
       });
 

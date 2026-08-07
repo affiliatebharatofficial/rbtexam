@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
-    const { fullName, email, targetCertification, targetExamDate } = await request.json();
+    const { fullName, email, targetCertification, targetExamDate, inviterEmail, inviterId } = await request.json();
 
     if (!email) {
       return NextResponse.json({ error: 'Candidate email address is required' }, { status: 400 });
@@ -18,29 +18,51 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = fullName?.trim() || cleanEmail.split('@')[0];
-    const newUserId = `usr_clinic_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const cleanInviterEmail = inviterEmail?.toLowerCase().trim() || 'system';
 
-    // 1. Insert/Upsert into public.users table
+    // Resolve inviter UUID from inviterEmail or inviterId
+    let resolvedClinicId = inviterId;
+    if (!resolvedClinicId && inviterEmail) {
+      const { data: inviterUser } = await adminSupabase
+        .from('users')
+        .select('id')
+        .eq('email', cleanInviterEmail)
+        .maybeSingle();
+
+      if (inviterUser?.id) {
+        resolvedClinicId = inviterUser.id;
+      }
+    }
+
+    // Check existing user or generate random UUID
+    const { data: existingUser } = await adminSupabase
+      .from('users')
+      .select('id')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    const candidateId = existingUser?.id || crypto.randomUUID();
+
+    // 1. Insert/Upsert into public.users table with clinic_id binding
     await adminSupabase.from('users').upsert({
-      id: newUserId,
+      id: candidateId,
       email: cleanEmail,
       full_name: cleanName,
       role: 'student',
+      clinic_id: resolvedClinicId || null,
       target_exam_date: targetExamDate || null,
       target_score: 90,
-      created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
 
     // 2. Insert/Upsert into public.profiles table
     await adminSupabase.from('profiles').upsert({
-      id: newUserId,
+      id: candidateId,
       email: cleanEmail,
       full_name: cleanName,
       certification_target: targetCertification || 'RBT',
       subscription_tier: 'pro',
       account_status: 'active',
-      created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
 
@@ -51,12 +73,14 @@ export async function POST(request: NextRequest) {
       message: `Candidate ${cleanName} (${cleanEmail}) invited to clinic cohort!`,
       inviteLink,
       candidate: {
-        id: newUserId,
+        id: candidateId,
         fullName: cleanName,
         email: cleanEmail,
         targetScore: 90,
-        readinessScore: 85,
+        readinessScore: 97,
         status: 'On Track',
+        clinicId: resolvedClinicId,
+        invitedBy: cleanInviterEmail,
       },
     });
   } catch (error: any) {
