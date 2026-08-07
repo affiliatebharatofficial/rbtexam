@@ -52,6 +52,7 @@ import {
 } from 'lucide-react';
 import { getAllCoupons, createCoupon, toggleCouponStatus, deleteCoupon } from '@/lib/coupon-engine';
 import { Coupon } from '@/types/subscription';
+import { AIProviderConfig } from '@/types/super-admin';
 
 type AdminTab =
   | 'overview'
@@ -85,6 +86,53 @@ export default function SuperAdminCMSPage() {
     '/cert-badge-bacb.png',
   ]);
   const [dragOver, setDragOver] = useState(false);
+
+  // AI Provider Management State
+  const [aiProviders, setAiProviders] = useState<AIProviderConfig[]>(DEFAULT_AI_PROVIDERS);
+  const [selectedAiProvider, setSelectedAiProvider] = useState<AIProviderConfig | null>(null);
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+  const [aiMsg, setAiMsg] = useState<string>('');
+  const [editApiKey, setEditApiKey] = useState<string>('');
+  const [editTokenLimit, setEditTokenLimit] = useState<number>(50000000);
+  const [editPriority, setEditPriority] = useState<number>(1);
+  const [editIsEnabled, setEditIsEnabled] = useState<boolean>(true);
+  const [editCostUSD, setEditCostUSD] = useState<number>(100);
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
+
+  const handleOpenAiModal = (prov: AIProviderConfig) => {
+    setSelectedAiProvider(prov);
+    setEditApiKey(prov.apiKeyMasked);
+    setEditTokenLimit(prov.monthlyTokenLimit);
+    setEditPriority(prov.priority);
+    setEditIsEnabled(prov.isEnabled);
+    setEditCostUSD(prov.monthlyCostUSD || 100);
+    setShowApiKey(false);
+    setIsAiModalOpen(true);
+  };
+
+  const handleSaveAiProviderConfig = () => {
+    if (!selectedAiProvider) return;
+    const updated: AIProviderConfig = {
+      ...selectedAiProvider,
+      apiKeyMasked: editApiKey,
+      monthlyTokenLimit: editTokenLimit,
+      priority: editPriority,
+      isEnabled: editIsEnabled,
+      monthlyCostUSD: editCostUSD,
+    };
+    const newProviders = aiProviders.map((p) => (p.id === updated.id ? updated : p));
+    setAiProviders(newProviders);
+    updatePlatformConfig('aiProviders', newProviders);
+    setIsAiModalOpen(false);
+    setAiMsg(`✅ Settings & rate limits for ${updated.name} updated successfully!`);
+    setTimeout(() => setAiMsg(''), 4000);
+  };
+
+  const handleToggleAiProvider = (id: string) => {
+    const newProviders = aiProviders.map((p) => (p.id === id ? { ...p, isEnabled: !p.isEnabled } : p));
+    setAiProviders(newProviders);
+    updatePlatformConfig('aiProviders', newProviders);
+  };
 
   const auditLogs = getSystemAuditLogs();
   const summary = getPlatformAnalyticsSummary();
@@ -480,38 +528,112 @@ export default function SuperAdminCMSPage() {
         {activeTab === 'ai_cms' && (
           <div className="space-y-6 animate-fadeIn">
             <Card glass className="p-6 shadow-xl border-white/90 space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
                   <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
                     <Brain className="w-5 h-5 text-indigo-500" />
                     <span>Multi-Provider AI Routing Manager</span>
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Configure LLM priorities, fallbacks, token limits, and API keys.
+                    Configure LLM priorities, automatic fallbacks, token limits, and live API keys.
                   </p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                {DEFAULT_AI_PROVIDERS.map((prov) => (
-                  <div key={prov.id} className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
-                    <div className="space-y-1">
-                      <div className="flex items-center space-x-2 font-bold text-slate-900">
-                        <span>Priority #{prov.priority}: {prov.name}</span>
-                        <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px]">ENABLED</span>
-                      </div>
-                      <div className="text-slate-500 font-mono text-[11px]">
-                        API Key: {prov.apiKeyMasked}
-                      </div>
-                    </div>
+              {aiMsg && (
+                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900 flex items-center space-x-2 animate-fadeIn">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>{aiMsg}</span>
+                </div>
+              )}
 
-                    <div className="flex items-center space-x-3">
-                      <Button variant="outline" size="sm" className="text-xs">
-                        Configure Limits
-                      </Button>
+              <div className="space-y-4">
+                {aiProviders.map((prov) => {
+                  const usagePct = Math.min(100, Math.round((prov.tokensConsumedThisMonth / (prov.monthlyTokenLimit || 1)) * 100));
+                  return (
+                    <div key={prov.id} className="p-5 rounded-2xl border border-slate-200 bg-white flex flex-col space-y-4 text-xs shadow-sm hover:border-indigo-200 transition-all">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center space-x-2.5 font-bold text-slate-900 text-sm">
+                            <span className="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center text-xs">
+                              #{prov.priority}
+                            </span>
+                            <span>{prov.name}</span>
+                            {prov.isEnabled ? (
+                              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold uppercase">
+                                Active & Ready
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-extrabold uppercase">
+                                Disabled
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-slate-500 font-mono text-[11px] flex items-center space-x-2">
+                            <span>Key: {prov.apiKeyMasked}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleAiProvider(prov.id)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                              prov.isEnabled
+                                ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-300'
+                            }`}
+                          >
+                            {prov.isEnabled ? 'Disable Provider' : 'Enable Provider'}
+                          </button>
+                          <Button
+                            type="button"
+                            onClick={() => handleOpenAiModal(prov)}
+                            variant="outline"
+                            size="sm"
+                            className="text-xs border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-bold gap-1.5"
+                          >
+                            <Settings className="w-3.5 h-3.5" />
+                            <span>Configure Limits</span>
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Usage Progress Bar & Stats */}
+                      <div className="pt-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-[11px] text-slate-600">
+                        <div>
+                          <div className="flex justify-between mb-1">
+                            <span className="font-semibold text-slate-700">Monthly Token Usage</span>
+                            <span className="font-bold text-slate-900">{usagePct}%</span>
+                          </div>
+                          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all ${
+                                usagePct > 85 ? 'bg-rose-500' : usagePct > 60 ? 'bg-amber-500' : 'bg-indigo-600'
+                              }`}
+                              style={{ width: `${usagePct}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-slate-400 mt-1">
+                            {(prov.tokensConsumedThisMonth / 1000000).toFixed(2)}M / {(prov.monthlyTokenLimit / 1000000).toFixed(0)}M tokens
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col justify-center">
+                          <span className="font-semibold text-slate-700">Monthly Cost Estimate</span>
+                          <span className="font-bold text-slate-900 text-xs">${prov.monthlyCostUSD?.toFixed(2)} USD</span>
+                        </div>
+
+                        <div className="flex flex-col justify-center">
+                          <span className="font-semibold text-slate-700">Routing Status</span>
+                          <span className="text-slate-500 text-[10px]">
+                            {prov.priority === 1 ? 'Primary LLM Engine' : `Fallback Priority Level ${prov.priority}`}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           </div>
@@ -1014,6 +1136,117 @@ export default function SuperAdminCMSPage() {
                 </div>
               </Card>
             )}
+          </div>
+        )}
+
+        {/* AI PROVIDER CONFIGURATION MODAL */}
+        {isAiModalOpen && selectedAiProvider && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-scaleUp">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                    <Brain className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Configure {selectedAiProvider.name}</h3>
+                    <p className="text-xs text-slate-500">API Key & Token Rate Limits</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center hover:bg-slate-200 text-sm font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4 text-xs">
+                {/* API Key */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 flex items-center justify-between">
+                    <span>API Key</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                      className="text-[#2563EB] hover:underline text-[11px] font-semibold"
+                    >
+                      {showApiKey ? 'Hide Secret' : 'Show Secret'}
+                    </button>
+                  </label>
+                  <input
+                    type={showApiKey ? 'text' : 'password'}
+                    value={editApiKey}
+                    onChange={(e) => setEditApiKey(e.target.value)}
+                    placeholder="sk-..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+
+                {/* Priority Order & Cost Cap */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Priority Level</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={editPriority}
+                      onChange={(e) => setEditPriority(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <p className="text-[10px] text-slate-400">1 = Primary, 2+ = Fallback</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Monthly Cost Cap ($)</label>
+                    <input
+                      type="number"
+                      value={editCostUSD}
+                      onChange={(e) => setEditCostUSD(Number(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Monthly Token Limit */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Monthly Token Limit</label>
+                  <input
+                    type="number"
+                    step={1000000}
+                    value={editTokenLimit}
+                    onChange={(e) => setEditTokenLimit(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <p className="text-[10px] text-slate-400">Max tokens per month (e.g. 50,000,000)</p>
+                </div>
+
+                {/* Enable Status */}
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div>
+                    <span className="font-bold text-slate-900 block">Enable Provider</span>
+                    <span className="text-[10px] text-slate-500">Allow AI Workforce engine to route prompts to this model</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={editIsEnabled}
+                    onChange={(e) => setEditIsEnabled(e.target.checked)}
+                    className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end space-x-3">
+                <Button variant="outline" size="sm" onClick={() => setIsAiModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button variant="primary" size="sm" onClick={handleSaveAiProviderConfig} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+                  Save Configurations
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
