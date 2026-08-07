@@ -77,10 +77,28 @@ export default function TutorPage() {
     setIsTyping(true);
 
     try {
-      const responseMsg = await processAITutorMessage(textToSend, messages, mode, certification);
-      setMessages((prev) => [...prev, responseMsg]);
+      const apiRes = await fetch('/api/tutor/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userQuery: textToSend,
+          history: messages,
+          mode,
+          certification,
+        }),
+      });
+
+      const data = await apiRes.json();
+      if (data.message) {
+        setMessages((prev) => [...prev, data.message]);
+      } else {
+        const responseMsg = await processAITutorMessage(textToSend, messages, mode, certification);
+        setMessages((prev) => [...prev, responseMsg]);
+      }
     } catch (e) {
       console.error(e);
+      const responseMsg = await processAITutorMessage(textToSend, messages, mode, certification);
+      setMessages((prev) => [...prev, responseMsg]);
     } finally {
       setIsTyping(false);
     }
