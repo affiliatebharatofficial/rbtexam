@@ -161,6 +161,14 @@ export default function SuperAdminCMSPage() {
   const [userMsg, setUserMsg] = useState('');
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('rbt_admin_users_roster');
+        if (saved && saved.includes('@rbttraining.ai')) {
+          localStorage.removeItem('rbt_admin_users_roster');
+        }
+      } catch (e) {}
+    }
     loadAllRegisteredUsers();
   }, [activeTab]);
 

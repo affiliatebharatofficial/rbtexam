@@ -1,40 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export async function GET(request: NextRequest) {
   try {
-    let realUsers: any[] = [];
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjA1NjEzMywiZXhwIjoyMTAxNjMyMTMzfQ.OEKK73cH84lpMAr9ma2MMdzUeq5nI8IsLZVtBT2qHxQ';
 
-    // Query Supabase public.profiles table
-    if (isSupabaseConfigured()) {
-      try {
-        const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
+    const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
 
-        if (error) {
-          console.error('Error fetching profiles in /api/admin/users:', error);
-        } else if (profiles && Array.isArray(profiles)) {
-          realUsers = profiles.map((p) => ({
-            id: p.id,
-            email: p.email,
-            fullName: p.full_name || p.email?.split('@')[0] || 'Registered User',
-            role: p.email?.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (p.role || 'student'),
-            subscriptionTier: p.subscription_tier || 'pro',
-            status: p.account_status || 'active',
-            joinedAt: p.created_at || new Date().toISOString(),
-            lastLoginAt: p.updated_at || new Date().toISOString(),
-          }));
-        }
-      } catch (err) {
-        console.error('Failed to query profiles:', err);
+    let realUsersMap = new Map<string, any>();
+
+    // 1. Fetch all users directly from Supabase auth.users via Admin API
+    try {
+      const { data: authData } = await adminSupabase.auth.admin.listUsers();
+      if (authData?.users && Array.isArray(authData.users)) {
+        authData.users.forEach((u: any) => {
+          if (u.email) {
+            const emailLower = u.email.toLowerCase().trim();
+            const fullName = u.user_metadata?.full_name || u.user_metadata?.name || emailLower.split('@')[0];
+            const isAdmin = emailLower === 'jobpegyan@gmail.com' || u.app_metadata?.role === 'super_admin';
+            realUsersMap.set(emailLower, {
+              id: u.id,
+              email: emailLower,
+              fullName,
+              role: isAdmin ? 'super_admin' : 'student',
+              subscriptionTier: isAdmin ? 'enterprise' : 'free',
+              status: 'active',
+              joinedAt: u.created_at || new Date().toISOString(),
+              lastLoginAt: u.last_sign_in_at || u.updated_at || new Date().toISOString(),
+            });
+          }
+        });
       }
+    } catch (err) {
+      console.error('Error fetching Supabase auth admin users:', err);
     }
 
-    // Always guarantee primary owner jobpegyan@gmail.com is included
-    if (!realUsers.some((u) => u.email?.toLowerCase() === 'jobpegyan@gmail.com')) {
-      realUsers.unshift({
+    // 2. Fetch profiles from public.profiles table (overrides with rich profile data)
+    try {
+      const { data: profiles } = await adminSupabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (profiles && Array.isArray(profiles)) {
+        profiles.forEach((p: any) => {
+          if (p.email) {
+            const emailLower = p.email.toLowerCase().trim();
+            const existing = realUsersMap.get(emailLower) || {};
+            const isAdmin = emailLower === 'jobpegyan@gmail.com' || p.role === 'admin' || p.role === 'super_admin';
+            realUsersMap.set(emailLower, {
+              id: p.id || existing.id || `usr_${Math.random().toString(36).substring(2)}`,
+              email: emailLower,
+              fullName: p.full_name || existing.fullName || emailLower.split('@')[0],
+              role: isAdmin ? 'super_admin' : (p.role || existing.role || 'student'),
+              subscriptionTier: p.subscription_tier || existing.subscriptionTier || 'pro',
+              status: p.account_status || existing.status || 'active',
+              joinedAt: p.created_at || existing.joinedAt || new Date().toISOString(),
+              lastLoginAt: p.updated_at || existing.lastLoginAt || new Date().toISOString(),
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching profiles in /api/admin/users:', err);
+    }
+
+    // Always guarantee primary owner jobpegyan@gmail.com is present
+    if (!realUsersMap.has('jobpegyan@gmail.com')) {
+      realUsersMap.set('jobpegyan@gmail.com', {
         id: 'usr_super_jobpegyan',
         email: 'jobpegyan@gmail.com',
         fullName: 'Jobpe gyan',
@@ -45,6 +81,8 @@ export async function GET(request: NextRequest) {
         lastLoginAt: new Date().toISOString(),
       });
     }
+
+    const realUsers = Array.from(realUsersMap.values());
 
     return NextResponse.json({
       success: true,
