@@ -8,7 +8,7 @@ interface StreakCardProps {
   activeDays?: boolean[]; // [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
 }
 
-export function StreakCard({ streakDays = 7, activeDays = [true, true, true, true, true, true, true] }: StreakCardProps) {
+export function StreakCard({ streakDays = 0, activeDays = [false, false, false, false, false, false, false] }: StreakCardProps) {
   const weekDays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
   return (
@@ -22,7 +22,7 @@ export function StreakCard({ streakDays = 7, activeDays = [true, true, true, tru
             <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center space-x-1.5">
               <span>{streakDays} Days</span>
               <span className="text-xs text-amber-500 font-bold bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-                Active Streak!
+                {streakDays > 0 ? 'Active Streak!' : 'Start Streak'}
               </span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400">Daily study habit streak</p>
@@ -31,7 +31,7 @@ export function StreakCard({ streakDays = 7, activeDays = [true, true, true, tru
 
         <div className="text-right text-xs">
           <div className="font-extrabold text-slate-700 dark:text-slate-300">Personal Record</div>
-          <div className="text-amber-600 dark:text-amber-400 font-bold">14 Days</div>
+          <div className="text-amber-600 dark:text-amber-400 font-bold">{streakDays} Days</div>
         </div>
       </div>
 

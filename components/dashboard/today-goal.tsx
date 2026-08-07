@@ -6,9 +6,9 @@ import { Progress } from '@/components/ui/progress';
 
 export function TodayGoal() {
   const [tasks, setTasks] = useState([
-    { id: 1, text: 'Take 15-Minute Diagnostic Exam', icon: HelpCircle, completed: true, points: '+15 XP' },
-    { id: 2, text: 'Review 10 Leitner Flashcards (Box 4 & 5)', icon: BookOpen, completed: true, points: '+10 XP' },
-    { id: 3, text: 'Socrates AI Ethics Roleplay Scenario', icon: Brain, completed: true, points: '+20 XP' },
+    { id: 1, text: 'Take 15-Minute Diagnostic Exam', icon: HelpCircle, completed: false, points: '+15 XP' },
+    { id: 2, text: 'Review 10 Leitner Flashcards (Box 4 & 5)', icon: BookOpen, completed: false, points: '+10 XP' },
+    { id: 3, text: 'Socrates AI Ethics Roleplay Scenario', icon: Brain, completed: false, points: '+20 XP' },
     { id: 4, text: 'Complete Domain D Behavior Reduction Drill', icon: Sparkles, completed: false, points: '+25 XP' },
   ]);
 

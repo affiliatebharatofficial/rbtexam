@@ -9,7 +9,7 @@ interface ReadinessRingProps {
   passLikelihood?: number; // e.g. 94
 }
 
-export function ReadinessRing({ score, targetScore = 90, passLikelihood = 94 }: ReadinessRingProps) {
+export function ReadinessRing({ score, targetScore = 90, passLikelihood = 0 }: ReadinessRingProps) {
   const radius = 64;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (score / 100) * circumference;
@@ -58,9 +58,13 @@ export function ReadinessRing({ score, targetScore = 90, passLikelihood = 94 }: 
           <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
             Readiness
           </span>
-          <div className="flex items-center space-x-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60 mt-1">
+          <div className={`flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full border mt-1 ${
+            score >= 80
+              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800/60'
+              : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800/60'
+          }`}>
             <ShieldCheck className="w-3 h-3" />
-            <span>Pass Guaranteed</span>
+            <span>{score >= 80 ? 'Pass Guaranteed' : 'Diagnostic Needed'}</span>
           </div>
         </div>
       </div>

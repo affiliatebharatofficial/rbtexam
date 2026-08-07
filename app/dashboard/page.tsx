@@ -22,9 +22,9 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
 
-  const readinessScore = user?.readinessScore || 88;
-  const targetScore = user?.targetScore || 90;
-  const passLikelihood = user?.estimatedPassLikelihood || 94;
+  const readinessScore = user?.readinessScore ?? 0;
+  const targetScore = user?.targetScore ?? 90;
+  const passLikelihood = user?.estimatedPassLikelihood ?? 0;
 
   return (
     <ProtectedRoute>
@@ -39,13 +39,13 @@ export default function DashboardPage() {
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>BACB 2nd Edition Certified Target</span>
                 </Badge>
-                <span className="text-xs font-bold text-slate-400">Scheduled: {user?.targetExamDate || '2026-09-15'}</span>
+                <span className="text-xs font-bold text-slate-400">Scheduled: {user?.targetExamDate || 'Not Scheduled'}</span>
               </div>
               <h1 className="text-3xl font-black tracking-tight mt-1 text-slate-900 dark:text-white">
                 Candidate Command Center
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Real-time BACB exam pass likelihood analytics for <strong>{user?.fullName || 'Sarah Jenkins'}</strong>.
+                Real-time BACB exam pass likelihood analytics for <strong>{user?.fullName || 'Candidate'}</strong>.
               </p>
             </div>
 

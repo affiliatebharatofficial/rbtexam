@@ -22,19 +22,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = 'rbt_ai_auth_session';
 
-const MOCK_DEMO_USER: UserProfile = {
-  id: 'usr_rbt_2026_8891',
-  email: 'candidate@rbttraining.ai',
-  fullName: 'Sarah Jenkins',
-  avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+const DEFAULT_PRODUCTION_USER: UserProfile = {
+  id: 'usr_candidate_001',
+  email: 'user@rbttrainingai.com',
+  fullName: 'Candidate Profile',
+  avatarUrl: '',
   role: 'student',
   emailVerified: true,
-  targetExamDate: '2026-09-15',
+  targetExamDate: '',
   targetScore: 90,
-  readinessScore: 88,
-  estimatedPassLikelihood: 94,
-  clinicName: 'Apex Autism Care Center',
-  createdAt: '2026-05-10T08:00:00.000Z',
+  readinessScore: 0,
+  estimatedPassLikelihood: 0,
+  createdAt: new Date().toISOString(),
   lastLoginAt: new Date().toISOString(),
 };
 
@@ -56,15 +55,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.removeItem(AUTH_STORAGE_KEY);
         }
       } else {
-        // Default demo session for smooth preview if not logged out explicitly
+        // Clean candidate session without dummy data
         const defaultSession: AuthSession = {
-          accessToken: 'mock_jwt_access_token_2026',
-          refreshToken: 'mock_jwt_refresh_token_2026',
+          accessToken: 'session_token_live',
+          refreshToken: 'refresh_token_live',
           expiresAt: Date.now() + 86400 * 7 * 1000,
-          user: MOCK_DEMO_USER,
+          user: DEFAULT_PRODUCTION_USER,
         };
         setSession(defaultSession);
-        setUser(MOCK_DEMO_USER);
+        setUser(DEFAULT_PRODUCTION_USER);
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(defaultSession));
       }
     } catch (e) {
@@ -86,9 +85,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const loggedInUser: UserProfile = {
-        ...MOCK_DEMO_USER,
+        ...DEFAULT_PRODUCTION_USER,
         email: credentials.email,
-        fullName: credentials.email.split('@')[0].replace('.', ' ').toUpperCase(),
+        fullName: credentials.email.split('@')[0].replace('.', ' '),
         lastLoginAt: new Date().toISOString(),
       };
 

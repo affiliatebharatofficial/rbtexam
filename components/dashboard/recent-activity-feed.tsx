@@ -1,43 +1,41 @@
 'use client';
 
-import React from 'react';
-import { Sparkles, Brain, CheckCircle2, Layers, Award, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Brain, CheckCircle2, Layers, Award, Clock, Activity } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function RecentActivityFeed() {
-  const activities = [
-    {
-      id: 1,
-      title: 'Passed 85-Question Mock Exam #4',
-      subtitle: 'Scored 88% overall (Passed 5/6 Domains)',
-      time: '2 hours ago',
-      icon: Award,
-      color: 'bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400',
-    },
-    {
-      id: 2,
-      title: 'Mastered 14 Flashcards in Box 5',
-      subtitle: 'Extinction Burst, Continuous Measurement, Latency, DTT',
-      time: '4 hours ago',
-      icon: Layers,
-      color: 'bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400',
-    },
-    {
-      id: 3,
-      title: 'Socrates AI Ethics Roleplay Completed',
-      subtitle: 'Resolved dual-relationship boundary dilemma with parent',
-      time: 'Yesterday',
-      icon: Brain,
-      color: 'bg-blue-100 dark:bg-blue-950 text-[#2563EB] dark:text-blue-400',
-    },
-    {
-      id: 4,
-      title: 'Completed Domain C Skill Acquisition Drill',
-      subtitle: 'Achieved 92% accuracy across C-01 to C-08 items',
-      time: '2 days ago',
-      icon: Sparkles,
-      color: 'bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400',
-    },
-  ];
+  const [activities, setActivities] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('rbt_activity_stream');
+      if (stored) {
+        setActivities(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Failed to load activity stream', e);
+    }
+  }, []);
+
+  if (activities.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+            <Clock className="w-4 h-4 text-slate-400" />
+            <span>Recent Activity Stream</span>
+          </h3>
+        </div>
+        <EmptyState
+          icon={Activity}
+          title="No Activity Logged"
+          description="Your study sessions, flashcards reviews, and AI tutor interactions will be tracked here in real-time."
+          badgeLabel="Timeline Empty"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

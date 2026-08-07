@@ -1,17 +1,46 @@
 'use client';
 
 import React from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { CheckCircle2, XCircle, Clock, ArrowRight, FileText } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, ArrowRight, FileText, FileQuestion } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function RecentTestsTable() {
-  const attempts = [
-    { id: 'session_891', mode: 'Full 85-Q Mock Exam #4', score: 88, passed: true, duration: '68 mins', date: 'Today, 2:15 PM', domain: '85/85 Qs' },
-    { id: 'session_890', mode: 'Domain C Skill Acquisition Drill', score: 92, passed: true, duration: '14 mins', date: 'Yesterday', domain: '15/15 Qs' },
-    { id: 'session_889', mode: 'Full 85-Q Mock Exam #3', score: 81, passed: false, duration: '74 mins', date: 'Aug 4, 2026', domain: '85/85 Qs' },
-    { id: 'session_888', mode: 'Baseline 15-Q Diagnostic', score: 86, passed: true, duration: '12 mins', date: 'Aug 1, 2026', domain: '15/15 Qs' },
-  ];
+  const [attempts, setAttempts] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('rbt_exam_sessions');
+      if (stored) {
+        setAttempts(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error('Failed to load exam sessions', e);
+    }
+  }, []);
+
+  if (attempts.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Recent Exam Attempts</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Review past score breakdowns and rationales</p>
+          </div>
+        </div>
+        <EmptyState
+          icon={FileQuestion}
+          title="No Exam Attempts Yet"
+          description="Take your first diagnostic exam or 85-question mock simulation to begin building your readiness analytics."
+          badgeLabel="0 Exams Taken"
+          actionLabel="Start Mock Exam"
+          onAction={() => window.location.href = '/exam'}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

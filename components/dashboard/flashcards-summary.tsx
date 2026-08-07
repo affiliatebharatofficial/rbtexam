@@ -1,22 +1,45 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Layers, ArrowRight, RotateCw, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function FlashcardsSummary() {
-  const boxes = [
-    { box: 1, count: 8, label: 'Unfamiliar', color: 'bg-rose-500' },
-    { box: 2, count: 18, label: 'Reviewing', color: 'bg-amber-500' },
-    { box: 3, count: 32, label: 'Familiar', color: 'bg-blue-500' },
-    { box: 4, count: 64, label: 'Strong', color: 'bg-indigo-500' },
-    { box: 5, count: 128, label: 'Mastered', color: 'bg-emerald-500' },
-  ];
+  const [boxes, setBoxes] = useState([
+    { box: 1, count: 0, label: 'Unfamiliar', color: 'bg-rose-500' },
+    { box: 2, count: 0, label: 'Reviewing', color: 'bg-amber-500' },
+    { box: 3, count: 0, label: 'Familiar', color: 'bg-blue-500' },
+    { box: 4, count: 0, label: 'Strong', color: 'bg-indigo-500' },
+    { box: 5, count: 0, label: 'Mastered', color: 'bg-emerald-500' },
+  ]);
 
-  const totalCards = boxes.reduce((acc, curr) => acc + curr.count, 0);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('rbt_flashcard_progress');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+        Object.values(parsed).forEach((card: any) => {
+          const box = card.leitnerBox || 1;
+          counts[box] = (counts[box] || 0) + 1;
+        });
+        setBoxes([
+          { box: 1, count: counts[1], label: 'Unfamiliar', color: 'bg-rose-500' },
+          { box: 2, count: counts[2], label: 'Reviewing', color: 'bg-amber-500' },
+          { box: 3, count: counts[3], label: 'Familiar', color: 'bg-blue-500' },
+          { box: 4, count: counts[4], label: 'Strong', color: 'bg-indigo-500' },
+          { box: 5, count: counts[5], label: 'Mastered', color: 'bg-emerald-500' },
+        ]);
+      }
+    } catch (e) {
+      console.error('Failed to load flashcard progress', e);
+    }
+  }, []);
+
+  const totalCards = boxes.reduce((acc, curr) => acc + curr.count, 0) || 250;
   const masteredCount = boxes[3].count + boxes[4].count;
-  const dueCount = 14;
+  const dueCount = boxes[0].count + boxes[1].count;
 
   return (
     <div className="space-y-4">
