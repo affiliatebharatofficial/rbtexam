@@ -9,17 +9,17 @@ import { Brain, RefreshCw } from 'lucide-react';
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { loginWithGoogle } = useAuth();
+  const { completeGoogleAuthSession } = useAuth();
 
   useEffect(() => {
     async function handleAuthCallback() {
       try {
         if (isSupabaseConfigured()) {
           const { data, error } = await supabase.auth.getSession();
-          if (!error && data?.session?.user) {
+          if (!error && data?.session?.user?.email) {
             const userEmail = data.session.user.email;
             const userName = data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
-            await loginWithGoogle(userEmail || undefined, userName || undefined);
+            await completeGoogleAuthSession(userEmail, userName || undefined);
             router.push('/dashboard');
             return;
           }
@@ -29,7 +29,7 @@ function AuthCallbackContent() {
         const name = searchParams.get('name') || searchParams.get('full_name');
 
         if (email) {
-          await loginWithGoogle(email, name || undefined);
+          await completeGoogleAuthSession(email, name || undefined);
         }
         router.push('/dashboard');
       } catch (err) {
@@ -39,7 +39,7 @@ function AuthCallbackContent() {
     }
 
     handleAuthCallback();
-  }, [router, searchParams, loginWithGoogle]);
+  }, [router, searchParams, completeGoogleAuthSession]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">

@@ -12,6 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: (email?: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  completeGoogleAuthSession: (email: string, name?: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: SignUpData) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   confirmPasswordReset: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -136,9 +137,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const completeGoogleAuthSession = async (email: string, name?: string) => {
+    setIsLoading(true);
+    try {
+      const targetEmail = email.toLowerCase().trim();
+      if (!targetEmail) {
+        setIsLoading(false);
+        return { success: false, error: 'Valid email address is required.' };
+      }
+
+      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
+      let registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
+      let userProfile: UserProfile | undefined = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
+
+      if (!userProfile) {
+        userProfile = {
+          id: `usr_google_${Math.random().toString(36).substring(2, 9)}`,
+          email: targetEmail,
+          fullName: name || targetEmail.split('@')[0],
+          role: 'student',
+          accountStatus: 'active',
+          emailVerified: true,
+          targetScore: 85,
+          readinessScore: 0,
+          estimatedPassLikelihood: 0,
+          createdAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+        };
+        registeredUsers.push(userProfile);
+        localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
+      } else {
+        userProfile.lastLoginAt = new Date().toISOString();
+      }
+
+      const activeProfile: UserProfile = userProfile;
+
+      const newSession: AuthSession = {
+        accessToken: `google_oauth_session_${Math.random().toString(36).substring(2)}`,
+        refreshToken: `google_refresh_token_${Math.random().toString(36).substring(2)}`,
+        expiresAt: Date.now() + 86400 * 7 * 1000,
+        user: activeProfile,
+      };
+
+      setUser(activeProfile);
+      setSession(newSession);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
+      setIsLoading(false);
+      logAuditEvent(activeProfile.id, 'GOOGLE_LOGIN_SUCCESS', 'Google Auth', `User ${targetEmail} authenticated via Google OAuth callback`);
+
+      return { success: true };
+    } catch (err: any) {
+      setIsLoading(false);
+      return { success: false, error: err.message || 'Failed to establish session.' };
+    }
+  };
+
   const loginWithGoogle = async (email?: string, name?: string) => {
     setIsLoading(true);
     try {
+      // If email parameter is provided, complete session directly without re-triggering OAuth
+      if (email) {
+        return await completeGoogleAuthSession(email, name);
+      }
+
       // 1. SUPABASE AUTH GOOGLE SSO (When Supabase is configured)
       if (isSupabaseConfigured()) {
         const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback';
@@ -189,34 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
       }
 
-      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
-      const registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
-      const existingUser = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
-
-      if (!existingUser) {
-        setIsLoading(false);
-        logAuditEvent('SYSTEM', 'LOGIN_FAILED', 'Google Auth', `Denied Google sign-in for unregistered email: ${targetEmail}`);
-        return {
-          success: false,
-          error: `No candidate account found for ${targetEmail}. Google Sign-In is restricted to existing accounts. Please create a new account first.`,
-        };
-      }
-
-      existingUser.lastLoginAt = new Date().toISOString();
-      const newSession: AuthSession = {
-        accessToken: `google_oauth_token_${Math.random().toString(36).substring(2)}`,
-        refreshToken: `google_refresh_token_${Math.random().toString(36).substring(2)}`,
-        expiresAt: Date.now() + 86400 * 7 * 1000,
-        user: existingUser,
-      };
-
-      setUser(existingUser);
-      setSession(newSession);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newSession));
-      setIsLoading(false);
-      logAuditEvent(existingUser.id, 'GOOGLE_LOGIN_SUCCESS', 'Google Auth', `User ${targetEmail} authenticated via Google SSO`);
-
-      return { success: true };
+      return await completeGoogleAuthSession(targetEmail, name);
     } catch (err: any) {
       setIsLoading(false);
       return { success: false, error: err.message || 'Google login authentication failed.' };
@@ -382,6 +416,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         login,
         loginWithGoogle,
+        completeGoogleAuthSession,
         signUp,
         requestPasswordReset,
         confirmPasswordReset,
