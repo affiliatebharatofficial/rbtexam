@@ -44,9 +44,9 @@ function LoginForm() {
 
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-    if (supabaseUrl && !supabaseUrl.includes('mock-')) {
+    if (googleClientId && !googleClientId.includes('mock-')) {
       setIsSubmitting(true);
       await loginWithGoogle();
       return;
