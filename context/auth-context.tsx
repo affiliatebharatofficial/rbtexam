@@ -53,21 +53,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(parsedSession.user);
         } else {
           localStorage.removeItem(AUTH_STORAGE_KEY);
+          setSession(null);
+          setUser(null);
         }
       } else {
-        // Clean candidate session without dummy data
-        const defaultSession: AuthSession = {
-          accessToken: 'session_token_live',
-          refreshToken: 'refresh_token_live',
-          expiresAt: Date.now() + 86400 * 7 * 1000,
-          user: DEFAULT_PRODUCTION_USER,
-        };
-        setSession(defaultSession);
-        setUser(DEFAULT_PRODUCTION_USER);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(defaultSession));
+        // No active session: require user login/signup
+        setSession(null);
+        setUser(null);
       }
     } catch (e) {
       console.error('Failed to parse auth session', e);
+      setSession(null);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -117,15 +114,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const googleUser: UserProfile = {
         id: `usr_google_${Math.random().toString(36).substring(2, 9)}`,
-        email: 'alex.morgan@gmail.com',
-        fullName: 'Alex Morgan',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+        email: 'google.candidate@gmail.com',
+        fullName: 'Google Candidate',
+        avatarUrl: '',
         role: 'student',
         emailVerified: true,
-        targetExamDate: '2026-10-01',
-        targetScore: 92,
-        readinessScore: 82,
-        estimatedPassLikelihood: 89,
+        targetExamDate: '',
+        targetScore: 90,
+        readinessScore: 0,
+        estimatedPassLikelihood: 0,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
@@ -152,18 +149,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (data: SignUpData) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       const newUser: UserProfile = {
-        id: `usr_new_${Math.random().toString(36).substring(2, 9)}`,
-        email: data.email,
-        fullName: data.fullName,
+        id: `usr_${Math.random().toString(36).substring(2, 9)}`,
+        email: data.email.toLowerCase().trim(),
+        fullName: data.fullName.trim(),
         role: data.role || 'student',
-        emailVerified: false, // Requires email verification
-        targetExamDate: data.targetExamDate || '2026-09-30',
+        emailVerified: true,
+        targetExamDate: data.targetExamDate || '',
         targetScore: 90,
-        readinessScore: 45, // Baseline score
-        estimatedPassLikelihood: 50,
+        readinessScore: 0,
+        estimatedPassLikelihood: 0,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
