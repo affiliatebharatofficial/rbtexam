@@ -1,12 +1,19 @@
-# Development Seed System & Production Isolation
+# Development Seed System & Production Safeguards
 
-## 1. Overview
-The Development Seed System provides 1-click sample data seeding for local development and staging test runs.
+## Overview
+The Development Seed System (`lib/dev-seed-engine.ts`) provides controlled sample data populators for local testing without leaking mock data to production.
 
-## 2. Environment Safeguard Rules
-- **Production (`production`)**: `canSeedDemoData()` returns `false`. Calling `seedDemoData()` throws `CRITICAL SECURITY VIOLATION`.
-- **Staging (`staging`) / Development (`development`)**: Seeding demo data is permitted for offline testing.
+## Admin Toolbar Tools (Development Only)
+In Super Admin Operating CMS (`/admin`), a specialized yellow toolbar renders **ONLY** when `NEXT_PUBLIC_APP_ENV !== 'production'`:
+- **Load Demo Data**: Seeds sample records for questions, flashcards, analytics events.
+- **Remove Demo Data**: Purges all sample records to zero.
+- **Production Cleanup**: Enforces zero-data sanitization check.
+- **Seed Database**: Triggers sample data population for dev testing.
 
-## 3. Related Files
-- Engine: [dev-seed-engine.ts](file:///g:/RBT/lib/dev-seed-engine.ts)
-- Test Suite: [production-cleanup.test.ts](file:///g:/RBT/tests/unit/production-cleanup.test.ts)
+## Security Safeguards
+```ts
+if (!canSeedDemoData()) {
+  throw new Error('CRITICAL SECURITY VIOLATION: Seeding sample data is strictly prohibited in production environments.');
+}
+```
+If invoked in production, the engine throws an immediate security exception and halts execution.

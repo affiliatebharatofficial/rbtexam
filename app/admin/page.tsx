@@ -16,6 +16,13 @@ import {
 } from '@/lib/platform-config';
 import { getPlatformAnalyticsSummary } from '@/lib/analytics-engine';
 import {
+  getCurrentEnvironment,
+  canSeedDemoData,
+  getSeedStatus,
+  seedDemoData,
+  clearDemoData,
+} from '@/lib/dev-seed-engine';
+import {
   ShieldCheck,
   Users,
   Settings,
@@ -39,6 +46,8 @@ type AdminTab = 'overview' | 'users' | 'ai_cms' | 'branding' | 'media' | 'audit'
 export default function SuperAdminCMSPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [config, setConfig] = useState(getPlatformConfig());
+  const [seedStatusState, setSeedStatusState] = useState(getSeedStatus());
+  const [seedMsg, setSeedMsg] = useState('');
   const auditLogs = getSystemAuditLogs();
   const summary = getPlatformAnalyticsSummary();
 
@@ -51,6 +60,22 @@ export default function SuperAdminCMSPage() {
   const updateMaxFreeAIMessages = (count: number) => {
     updatePlatformConfig('maxDailyFreeAIMessages', count);
     setConfig({ ...config, maxDailyFreeAIMessages: count });
+  };
+
+  const handleLoadDemoData = () => {
+    try {
+      const res = seedDemoData();
+      setSeedStatusState(res.status);
+      setSeedMsg(res.message);
+    } catch (err: any) {
+      setSeedMsg(err.message || 'Failed to load demo data');
+    }
+  };
+
+  const handleRemoveDemoData = () => {
+    const res = clearDemoData();
+    setSeedStatusState(res.status);
+    setSeedMsg(res.message);
   };
 
   return (
@@ -98,6 +123,37 @@ export default function SuperAdminCMSPage() {
             </Link>
           </div>
         </div>
+
+        {/* Development Mode Only Data Controls */}
+        {canSeedDemoData() && (
+          <Card glass className="p-4 border-amber-200 bg-amber-50/50 space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center space-x-2">
+                <Badge variant="amber" className="text-[10px] font-bold uppercase tracking-wider">
+                  Development Tools Only
+                </Badge>
+                <span className="text-xs text-amber-900 font-semibold">
+                  Env: {getCurrentEnvironment()} • Demo Loaded: {seedStatusState.isDemoDataLoaded ? 'YES' : 'NO'}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button onClick={handleLoadDemoData} variant="outline" size="sm" className="text-xs border-amber-300 text-amber-900 hover:bg-amber-100 font-bold">
+                  Load Demo Data
+                </Button>
+                <Button onClick={handleRemoveDemoData} variant="outline" size="sm" className="text-xs border-amber-300 text-amber-900 hover:bg-amber-100 font-bold">
+                  Remove Demo Data
+                </Button>
+                <Button onClick={handleRemoveDemoData} variant="outline" size="sm" className="text-xs border-amber-300 text-amber-900 hover:bg-amber-100 font-bold">
+                  Production Cleanup
+                </Button>
+                <Button onClick={handleLoadDemoData} variant="outline" size="sm" className="text-xs border-amber-300 text-amber-900 hover:bg-amber-100 font-bold">
+                  Seed Database
+                </Button>
+              </div>
+            </div>
+            {seedMsg && <p className="text-xs font-semibold text-amber-800">{seedMsg}</p>}
+          </Card>
+        )}
 
         {/* TOP 4 DYNAMIC SCORECARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

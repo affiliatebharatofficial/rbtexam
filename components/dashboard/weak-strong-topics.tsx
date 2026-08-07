@@ -1,11 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, Star, Brain, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Star, Brain, ArrowRight, CheckCircle2, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function WeakStrongTopics() {
+  const [hasData, setHasData] = useState(false);
   const weakTopics = [
     { code: 'D-04', name: 'Differential Reinforcement (DRO/DRA)', domain: 'Domain D', score: 74, reason: 'Confusing DRO interval rules' },
     { code: 'C-04', name: 'Discrete Trial Teaching Prompt Fading', domain: 'Domain C', score: 78, reason: 'Time delay prompt errors' },
@@ -15,6 +17,33 @@ export function WeakStrongTopics() {
     { code: 'E-01', name: 'Objective Clinical Session Notes', domain: 'Domain E', score: 96, status: 'Mastered' },
     { code: 'F-02', name: 'BACB RBT Ethics Code & Scope', domain: 'Domain F', score: 98, status: 'Mastered' },
   ];
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('rbt_exam_sessions');
+      if (stored) {
+        const sessions = JSON.parse(stored);
+        if (sessions.length > 0) {
+          setHasData(true);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load topic breakdown', e);
+    }
+  }, []);
+
+  if (!hasData) {
+    return (
+      <EmptyState
+        icon={Target}
+        title="No Domain Topic Breakdown Available"
+        description="Your weak and strong BACB task list topic areas will be calculated automatically after your first completed exam drill."
+        badgeLabel="Topic Breakdown Pending"
+        actionLabel="Take 15-Min Diagnostic"
+        onAction={() => window.location.href = '/exam'}
+      />
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

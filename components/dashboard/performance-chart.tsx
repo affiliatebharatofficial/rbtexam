@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Calendar } from 'lucide-react';
+import { BarChart3, TrendingUp, Calendar, LineChart } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
 
 export function PerformanceChart() {
   const [activeTab, setActiveTab] = useState<'trend' | 'domains'>('trend');
+  const [hasActivity, setHasActivity] = useState(false);
   const [trendData, setTrendData] = useState([
     { label: 'Week 1', score: 0 },
     { label: 'Week 2', score: 0 },
@@ -26,6 +28,7 @@ export function PerformanceChart() {
       if (stored) {
         const sessions = JSON.parse(stored);
         if (sessions.length > 0) {
+          setHasActivity(true);
           const latestScore = sessions[0].score || 0;
           setTrendData([
             { label: 'Baseline', score: Math.max(0, latestScore - 20) },
@@ -39,6 +42,30 @@ export function PerformanceChart() {
       console.error('Failed to load performance analytics', e);
     }
   }, []);
+
+  if (!hasActivity) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4 text-[#2563EB]" />
+              <span>Candidate Performance Analytics</span>
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Score progress over time & BACB domain comparison</p>
+          </div>
+        </div>
+        <EmptyState
+          icon={LineChart}
+          title="No Analytics Available Yet"
+          description="Performance charts and domain trends will automatically render after your first completed practice drill."
+          badgeLabel="0 Data Points"
+          actionLabel="Start Mock Exam"
+          onAction={() => window.location.href = '/exam'}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

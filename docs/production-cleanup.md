@@ -1,17 +1,18 @@
-# Production Cleanup & Zero Fake Data Standard
+# Production Cleanup & Data Isolation Architecture
 
-## 1. Executive Summary
-RBTTrainingAI enforces a strict production data integrity policy. All demo, mock, placeholder, and fake data (dummy users, fake revenue, sample exam results, placeholder charts, and fake study progress) are completely isolated and prohibited from appearing in production environments.
+## Overview
+RBTTrainingAI enforces strict zero-fake-data architecture in production environments. All mock users, sample analytics, fake revenues, hardcoded trends, and pre-populated test attempts are removed from production runtime.
 
-## 2. Removed Demo Modules & Isolated Systems
-- **Dummy Users & Accounts**: Removed static user roster in production mode. Users are fetched directly from PostgreSQL Supabase `profiles` table.
-- **Fake Revenue & Subscriptions**: $42.8k hardcoded MRR metrics replaced with live subscription aggregations.
-- **Mock Charts & Analytics**: Charts render **only** when database record count > 0.
-- **Sample Questions & Flashcards**: Production question queries fetch from PostgreSQL `master_questions` and `master_flashcards`.
-- **Demo Seed System Isolation**: `seedDemoData()` in [dev-seed-engine.ts](file:///g:/RBT/lib/dev-seed-engine.ts) throws `CRITICAL SECURITY VIOLATION` when invoked under `NEXT_PUBLIC_APP_ENV === 'production'`.
+## Core Directives
+1. **Allowed Starter Content**: The ONLY starter content permitted in production is the **Master Question Bank**.
+2. **Dynamic PostgreSQL Queries**: Every dashboard widget, candidate analytics summary, and admin scorecard fetches real database records.
+3. **Zero Fake Accounts**: Users must authenticate via Supabase Auth or email signup. Sample profiles (`Alex Morgan`, `Sarah Jenkins`) are completely removed.
+4. **Environment Check**: `process.env.NEXT_PUBLIC_APP_ENV === 'production'` enforces strict isolation.
 
-## 3. Related Files
-- Engine: [dev-seed-engine.ts](file:///g:/RBT/lib/dev-seed-engine.ts)
-- Analytics: [analytics-engine.ts](file:///g:/RBT/lib/analytics-engine.ts)
-- Empty State Component: [empty-state.tsx](file:///g:/RBT/components/ui/empty-state.tsx)
-- Admin CMS: [page.tsx](file:///g:/RBT/app/admin/page.tsx)
+## Security Safeguard Matrix
+| Component | Development Mode | Production Mode |
+| :--- | :--- | :--- |
+| **Demo Seeding** | Allowed via Admin Toolbar | **STRICTLY BLOCKED (Throws Error)** |
+| **Empty Widgets** | Show sample preview if seeded | **Render Apple-Level Empty States** |
+| **User Profiles** | Real or Auth Session | **Authenticated Supabase Users Only** |
+| **Starter Data** | Questions & Decks | **Master Question Bank Only** |
