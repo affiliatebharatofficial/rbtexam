@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { MasterQuestion, CertificationLevel, QuestionType, QuestionDifficulty, QuestionStatus, QuestionCategory } from '@/types/master-question';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Save, Eye, Check, AlertCircle, HelpCircle, Code, Table, Image, Film, Plus, Trash2 } from 'lucide-react';
+import { X, Save, Eye, Check, AlertCircle, HelpCircle, Code, Table, Image, Film, Plus, Trash2, Sparkles } from 'lucide-react';
 
 interface QuestionEditorModalProps {
   isOpen: boolean;
@@ -19,6 +19,38 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
   const [difficulty, setDifficulty] = useState<QuestionDifficulty>('medium');
   const [questionType, setQuestionType] = useState<QuestionType>('scenario_based');
   const [status, setStatus] = useState<QuestionStatus>('published');
+  const [isAiAutofilling, setIsAiAutofilling] = useState(false);
+
+  const handleAiAutofill = async () => {
+    setIsAiAutofilling(true);
+    try {
+      const res = await fetch('/api/questions/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topicPrompt: `${category} ${certification} practice question`,
+          certification: certification,
+          difficulty: difficulty,
+          count: 1,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.questions && data.questions[0]) {
+        const q = data.questions[0];
+        setQuestionText(q.question);
+        setOptions(q.options.map((o: any) => ({ id: o.id, text: o.text, isCorrect: o.id === q.correctOptionId, explanation: o.explanation || '' })));
+        setCorrectAnswerId(q.correctOptionId);
+        setClinicalExplanation(q.clinicalExplanation);
+        setAnswerExplanation(q.clinicalExplanation);
+        setReferences(q.bacbCitation || `BACB 2nd Edition Task List Item ${category}`);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsAiAutofilling(false);
+    }
+  };
 
   const [questionText, setQuestionText] = useState('');
   const [scenarioText, setScenarioText] = useState('');
@@ -252,10 +284,23 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
               </div>
 
               {/* Question Prompt */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Main Question Prompt *
-                </label>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Main Question Prompt *
+                  </label>
+                  <Button
+                    type="button"
+                    onClick={handleAiAutofill}
+                    disabled={isAiAutofilling}
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5 text-[11px] font-black text-indigo-700 border-indigo-200 bg-indigo-50 hover:bg-indigo-100"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{isAiAutofilling ? 'AI Generating...' : '⚡ Auto-Fill Question with AI'}</span>
+                  </Button>
+                </div>
                 <input
                   type="text"
                   required

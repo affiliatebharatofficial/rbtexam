@@ -59,6 +59,73 @@ export default function AdminQuestionsPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [previewQuestion, setPreviewQuestion] = useState<MasterQuestion | null>(null);
 
+  // AI Question Generator Modal State
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [aiTopic, setAiTopic] = useState('');
+  const [aiCert, setAiCert] = useState<CertificationLevel>('RBT');
+  const [aiDiff, setAiDiff] = useState<QuestionDifficulty>('medium');
+  const [aiCount, setAiCount] = useState<number>(3);
+  const [aiTaskCode, setAiTaskCode] = useState('A-01');
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiSuccessMsg, setAiSuccessMsg] = useState('');
+
+  const handleGenerateAiQuestions = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAiGenerating(true);
+    try {
+      const res = await fetch('/api/questions/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topicPrompt: aiTopic,
+          certification: aiCert,
+          difficulty: aiDiff,
+          count: aiCount,
+          bacbTaskCode: aiTaskCode,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.questions && Array.isArray(data.questions)) {
+        data.questions.forEach((q: any) => {
+          createQuestion({
+            question: q.question,
+            options: q.options,
+            correctAnswerId: q.correctOptionId || 'A',
+            questionType: 'scenario_based',
+            clinicalExplanation: q.clinicalExplanation,
+            answerExplanation: q.clinicalExplanation,
+            references: q.bacbCitation || `BACB 2nd Edition Task List Item ${aiTaskCode}`,
+            certification: q.certification || aiCert,
+            difficulty: q.difficulty || aiDiff,
+            category: q.category || 'Behavior Reduction',
+            status: 'published',
+            isPremium: false,
+            isFeatured: true,
+            keywords: [aiTopic, 'BACB 2nd Edition', aiCert],
+            taskListVersion: '2nd_edition',
+            estimatedTimeSeconds: 75,
+            tags: ['AI Generated', 'BACB Exam Item'],
+            createdBy: 'AI Generator Engine',
+            updatedBy: 'Super Admin',
+          });
+        });
+
+        setIsAiModalOpen(false);
+        setAiSuccessMsg(`✅ Successfully generated and published ${data.questions.length} AI question(s)!`);
+        setFilterParams({ ...filterParams });
+        setTimeout(() => setAiSuccessMsg(''), 4000);
+      } else {
+        alert(data.error || 'Failed to generate questions');
+      }
+    } catch (err) {
+      console.error('AI generation error:', err);
+      alert('Failed to generate AI questions.');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
   const queryResult = getFilteredQuestions(filterParams);
 
   // Bulk Handlers
@@ -155,12 +222,59 @@ export default function AdminQuestionsPage() {
               <Upload className="w-4 h-4" />
               <span>Import CSV</span>
             </Button>
+            <Button
+              onClick={() => setIsAiModalOpen(true)}
+              variant="primary"
+              size="sm"
+              className="gap-1.5 text-xs font-black bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 shadow-md shadow-indigo-500/25"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>AI Question Generator</span>
+            </Button>
             <Button onClick={() => setEditingQuestion(null)} variant="primary" size="sm" className="gap-1.5 text-xs shadow-md">
               <Plus className="w-4 h-4" />
               <span>Add New Question</span>
             </Button>
           </div>
         </div>
+
+        {aiSuccessMsg && (
+          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-extrabold text-emerald-900 flex items-center space-x-2 animate-fadeIn shadow-sm">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <span>{aiSuccessMsg}</span>
+          </div>
+        )}
+
+        {/* AI QUESTION GENERATOR HERO CARD */}
+        <Card glass className="p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-purple-950 text-white shadow-2xl border-indigo-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Badge className="bg-amber-400 text-slate-950 font-black px-3 py-1 flex items-center space-x-1.5 shadow-md shadow-amber-400/20">
+                <Sparkles className="w-4 h-4 text-slate-950" />
+                <span>AI QUESTION GENERATOR ENGINE</span>
+              </Badge>
+              <span className="text-xs font-semibold text-indigo-200">BACB 2nd Edition Multi-Model LLM</span>
+            </div>
+            <h2 className="text-xl font-black text-white">
+              Create & Publish Practice Questions with AI
+            </h2>
+            <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+              Instantly generate realistic RBT, BCaBA, and BCBA practice questions with 4 distractor options, correct answers, and clinical BCBA explanations using custom topic prompts.
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-3 flex-shrink-0">
+            <Button
+              onClick={() => setIsAiModalOpen(true)}
+              variant="primary"
+              size="md"
+              className="gap-2 bg-gradient-to-r from-purple-500 via-indigo-600 to-blue-600 font-extrabold shadow-xl shadow-indigo-500/40 text-xs px-5 py-3"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>⚡ Generate Questions with AI Now</span>
+            </Button>
+          </div>
+        </Card>
 
         {/* Dashboard Statistics Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -456,6 +570,121 @@ export default function AdminQuestionsPage() {
                 <p>{previewQuestion.clinicalExplanation || previewQuestion.answerExplanation}</p>
               </div>
             </Card>
+          </div>
+        )}
+
+        {/* AI BULK QUESTION GENERATOR MODAL */}
+        {isAiModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-black text-[#0F172A] flex items-center space-x-2">
+                    <Sparkles className="w-5 h-5 text-indigo-600" />
+                    <span>AI Bulk Question Generator (Super Admin)</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">Multi-Model LLM Exam Generation for BACB 2nd Edition Task List</p>
+                </div>
+                <button
+                  onClick={() => setIsAiModalOpen(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleGenerateAiQuestions} className="space-y-4 text-xs">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700">Topic Prompt / Concept Description *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Differential Reinforcement (DRO vs DRA), Latency Data, BACB Ethics Dual Relationships"
+                    value={aiTopic}
+                    onChange={(e) => setAiTopic(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700">Target Certification</label>
+                    <select
+                      value={aiCert}
+                      onChange={(e) => setAiCert(e.target.value as CertificationLevel)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold"
+                    >
+                      <option value="RBT">RBT (Registered Behavior Tech)</option>
+                      <option value="BCaBA">BCaBA Assistant</option>
+                      <option value="BCBA">BCBA Analyst</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700">BACB Task List Code</label>
+                    <select
+                      value={aiTaskCode}
+                      onChange={(e) => setAiTaskCode(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold"
+                    >
+                      <option value="A-01">A-01 Data Collection Prep</option>
+                      <option value="A-02">A-02 Continuous Measurement</option>
+                      <option value="A-03">A-03 Discontinuous Measurement</option>
+                      <option value="B-04">B-04 Verbal Operants</option>
+                      <option value="C-01">C-01 Discrete Trial Teaching (DTT)</option>
+                      <option value="D-04">D-04 Differential Reinforcement</option>
+                      <option value="E-01">E-01 Functional Assessment</option>
+                      <option value="F-02">F-02 BACB Ethics Code</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700">Question Difficulty</label>
+                    <select
+                      value={aiDiff}
+                      onChange={(e) => setAiDiff(e.target.value as QuestionDifficulty)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold"
+                    >
+                      <option value="easy">Easy (Fundamentals)</option>
+                      <option value="medium">Medium (Standard Exam)</option>
+                      <option value="hard">Hard (Tricky Scenario)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-700">Questions Batch Count</label>
+                    <select
+                      value={aiCount}
+                      onChange={(e) => setAiCount(parseInt(e.target.value))}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold"
+                    >
+                      <option value={1}>1 Question</option>
+                      <option value={3}>3 Questions</option>
+                      <option value={5}>5 Questions</option>
+                      <option value={10}>10 Questions</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+                  <Button variant="outline" size="sm" type="button" onClick={() => setIsAiModalOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    type="submit"
+                    disabled={isAiGenerating || !aiTopic.trim()}
+                    className="font-extrabold gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-indigo-500/25"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    <span>{isAiGenerating ? 'Generating Questions...' : 'Generate & Publish Questions'}</span>
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 
