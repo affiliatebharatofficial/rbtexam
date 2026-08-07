@@ -137,21 +137,19 @@ export default function SuperAdminCMSPage() {
     updatePlatformConfig('aiProviders', newProviders);
   };
 
-  // User Accounts Roster State & Management
-  const [userAccounts, setUserAccounts] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('rbt_admin_users_roster');
-        if (saved) return JSON.parse(saved);
-      } catch (e) {}
-    }
-    return [
-      { id: 'usr_super_001', email: 'jobpegyan@gmail.com', fullName: 'Job Pegyan (Super Admin)', role: 'super_admin', subscriptionTier: 'enterprise', status: 'active', joinedAt: '2026-08-01T08:00:00.000Z', lastLoginAt: new Date().toISOString() },
-      { id: 'usr_admin_002', email: 'admin@rbttraining.ai', fullName: 'System Administrator', role: 'admin', subscriptionTier: 'enterprise', status: 'active', joinedAt: '2026-08-01T09:00:00.000Z', lastLoginAt: new Date(Date.now() - 3600000).toISOString() },
-      { id: 'usr_editor_003', email: 'editor.bcba@rbttraining.ai', fullName: 'Dr. Sarah Jenkins, BCBA', role: 'bcba_editor', subscriptionTier: 'team', status: 'active', joinedAt: '2026-08-02T10:00:00.000Z', lastLoginAt: new Date(Date.now() - 7200000).toISOString() },
-      { id: 'usr_student_004', email: 'candidate.demo@rbttraining.ai', fullName: 'Alex Morgan (RBT Candidate)', role: 'student', subscriptionTier: 'pro', status: 'active', joinedAt: '2026-08-03T11:00:00.000Z', lastLoginAt: new Date(Date.now() - 14400000).toISOString() },
-    ];
-  });
+  // User Accounts Roster State & Management (Pure Real Users)
+  const [userAccounts, setUserAccounts] = useState<any[]>([
+    {
+      id: 'usr_super_001',
+      email: 'jobpegyan@gmail.com',
+      fullName: 'Jobpe gyan',
+      role: 'super_admin',
+      subscriptionTier: 'enterprise',
+      status: 'active',
+      joinedAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    },
+  ]);
 
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
@@ -167,85 +165,98 @@ export default function SuperAdminCMSPage() {
   }, [activeTab]);
 
   const loadAllRegisteredUsers = async () => {
-    let combinedUsers: any[] = [...userAccounts];
+    let realUsersMap = new Map<string, any>();
 
-    // 1. Fetch from Supabase Database if configured
+    // Always include Primary Owner
+    realUsersMap.set('jobpegyan@gmail.com', {
+      id: 'usr_super_jobpegyan',
+      email: 'jobpegyan@gmail.com',
+      fullName: 'Jobpe gyan',
+      role: 'super_admin',
+      subscriptionTier: 'enterprise',
+      status: 'active',
+      joinedAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    });
+
+    // 1. Fetch real users from Server API Route /api/admin/users
+    try {
+      const apiRes = await fetch('/api/admin/users');
+      const apiData = await apiRes.json();
+      if (apiData.users && Array.isArray(apiData.users)) {
+        apiData.users.forEach((u: any) => {
+          if (u.email && !u.email.includes('@rbttraining.ai')) {
+            realUsersMap.set(u.email.toLowerCase().trim(), u);
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching /api/admin/users:', err);
+    }
+
+    // 2. Fetch real users from Supabase Direct DB Query
     if (isSupabaseConfigured()) {
       try {
         const { data: dbProfiles } = await supabase.from('profiles').select('*');
-        if (dbProfiles && dbProfiles.length > 0) {
+        if (dbProfiles && Array.isArray(dbProfiles)) {
           dbProfiles.forEach((p: any) => {
-            const index = combinedUsers.findIndex((u) => u.email?.toLowerCase() === p.email?.toLowerCase());
-            const userObj = {
-              id: p.id,
-              email: p.email,
-              fullName: p.full_name || p.email?.split('@')[0] || 'Registered Candidate',
-              role: p.email === 'jobpegyan@gmail.com' ? 'super_admin' : (p.role || 'student'),
-              subscriptionTier: p.subscription_tier || 'pro',
-              status: p.account_status || 'active',
-              joinedAt: p.created_at || new Date().toISOString(),
-              lastLoginAt: p.updated_at || new Date().toISOString(),
-            };
-            if (index >= 0) {
-              combinedUsers[index] = { ...combinedUsers[index], ...userObj };
-            } else {
-              combinedUsers.push(userObj);
+            if (p.email && !p.email.includes('@rbttraining.ai')) {
+              realUsersMap.set(p.email.toLowerCase().trim(), {
+                id: p.id,
+                email: p.email,
+                fullName: p.full_name || p.email.split('@')[0],
+                role: p.email.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (p.role || 'student'),
+                subscriptionTier: p.subscription_tier || 'pro',
+                status: p.account_status || 'active',
+                joinedAt: p.created_at || new Date().toISOString(),
+                lastLoginAt: p.updated_at || new Date().toISOString(),
+              });
             }
           });
         }
       } catch (err) {
-        console.error('Error fetching Supabase profiles for admin roster:', err);
+        console.error('Error fetching Supabase profiles:', err);
       }
     }
 
-    // 2. Fetch from LocalStorage registered users ('rbt_registered_users')
+    // 3. Fetch real signed up users from LocalStorage ('rbt_registered_users')
     if (typeof window !== 'undefined') {
       try {
         const regStr = localStorage.getItem('rbt_registered_users');
         if (regStr) {
           const regUsers: any[] = JSON.parse(regStr);
           regUsers.forEach((u: any) => {
-            const index = combinedUsers.findIndex((existing) => existing.email?.toLowerCase() === u.email?.toLowerCase());
-            const userObj = {
-              id: u.id,
-              email: u.email,
-              fullName: u.fullName || u.email?.split('@')[0],
-              role: u.email === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
-              subscriptionTier: u.subscriptionTier || 'pro',
-              status: u.accountStatus || 'active',
-              joinedAt: u.createdAt || new Date().toISOString(),
-              lastLoginAt: u.lastLoginAt || new Date().toISOString(),
-            };
-            if (index >= 0) {
-              combinedUsers[index] = { ...combinedUsers[index], ...userObj };
-            } else {
-              combinedUsers.push(userObj);
+            if (u.email && !u.email.includes('@rbttraining.ai')) {
+              realUsersMap.set(u.email.toLowerCase().trim(), {
+                id: u.id,
+                email: u.email,
+                fullName: u.fullName || u.email.split('@')[0],
+                role: u.email.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
+                subscriptionTier: u.subscriptionTier || 'pro',
+                status: u.accountStatus || 'active',
+                joinedAt: u.createdAt || new Date().toISOString(),
+                lastLoginAt: u.lastLoginAt || new Date().toISOString(),
+              });
             }
           });
         }
 
-        // 3. Fetch from Active Auth Session ('rbt_ai_auth_session')
+        // 4. Fetch active logged in session user ('rbt_ai_auth_session')
         const activeSessStr = localStorage.getItem('rbt_ai_auth_session');
         if (activeSessStr) {
           const activeSess = JSON.parse(activeSessStr);
-          if (activeSess?.user?.email) {
+          if (activeSess?.user?.email && !activeSess.user.email.includes('@rbttraining.ai')) {
             const u = activeSess.user;
-            const index = combinedUsers.findIndex((existing) => existing.email?.toLowerCase() === u.email?.toLowerCase());
-            const userObj = {
+            realUsersMap.set(u.email.toLowerCase().trim(), {
               id: u.id,
               email: u.email,
-              fullName: u.fullName || u.email?.split('@')[0],
-              role: u.email === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
-              subscriptionTier: 'enterprise',
+              fullName: u.fullName || u.email.split('@')[0],
+              role: u.email.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
+              subscriptionTier: u.subscriptionTier || 'enterprise',
               status: 'active',
               joinedAt: u.createdAt || new Date().toISOString(),
               lastLoginAt: u.lastLoginAt || new Date().toISOString(),
-            };
-            if (index >= 0) {
-              combinedUsers[index] = { ...combinedUsers[index], ...userObj };
-            } else {
-              combinedUsers.push(userObj);
-            }
+            });
           }
         }
       } catch (e) {
@@ -253,7 +264,8 @@ export default function SuperAdminCMSPage() {
       }
     }
 
-    setUserAccounts(combinedUsers);
+    const finalRealUsers = Array.from(realUsersMap.values());
+    setUserAccounts(finalRealUsers);
   };
 
   const saveUserAccounts = (updated: any[]) => {
