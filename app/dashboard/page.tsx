@@ -40,6 +40,11 @@ export default function DashboardPage() {
                   <span>BACB 2nd Edition Certified Target</span>
                 </Badge>
                 <span className="text-xs font-bold text-slate-400">Scheduled: {user?.targetExamDate || 'Not Scheduled'}</span>
+                {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'clinic_admin') && (
+                  <Badge variant="purple" className="bg-purple-100 text-purple-800 font-extrabold border-purple-200">
+                    Enterprise VIP Active
+                  </Badge>
+                )}
               </div>
               <h1 className="text-3xl font-black tracking-tight mt-1 text-slate-900 dark:text-white">
                 Candidate Command Center
