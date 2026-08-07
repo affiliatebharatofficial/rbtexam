@@ -286,17 +286,41 @@ export default function SuperAdminCMSPage() {
     }
   };
 
-  const handleUpdateUserRole = (userId: string, newRole: string) => {
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    const targetUser = userAccounts.find((u) => u.id === userId);
     const updated = userAccounts.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
     saveUserAccounts(updated);
-    setUserMsg(`Updated user role to ${newRole.toUpperCase()}`);
+    if (targetUser?.email) {
+      try {
+        await fetch('/api/admin/users/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: targetUser.email, role: newRole }),
+        });
+      } catch (err) {
+        console.error('Failed to sync role update to DB:', err);
+      }
+    }
+    setUserMsg(`Updated user role to ${newRole.toUpperCase()} in Supabase DB!`);
     setTimeout(() => setUserMsg(''), 3000);
   };
 
-  const handleUpdateUserTier = (userId: string, newTier: string) => {
+  const handleUpdateUserTier = async (userId: string, newTier: string) => {
+    const targetUser = userAccounts.find((u) => u.id === userId);
     const updated = userAccounts.map((u) => (u.id === userId ? { ...u, subscriptionTier: newTier } : u));
     saveUserAccounts(updated);
-    setUserMsg(`Updated user tier to ${newTier.toUpperCase()}`);
+    if (targetUser?.email) {
+      try {
+        await fetch('/api/admin/users/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: targetUser.email, subscriptionTier: newTier }),
+        });
+      } catch (err) {
+        console.error('Failed to sync tier update to DB:', err);
+      }
+    }
+    setUserMsg(`Updated user tier to ${newTier.toUpperCase()} in Supabase DB!`);
     setTimeout(() => setUserMsg(''), 3000);
   };
 

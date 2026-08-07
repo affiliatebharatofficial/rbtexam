@@ -16,7 +16,7 @@ import { RecentTestsTable } from '@/components/dashboard/recent-tests-table';
 import { RecentActivityFeed } from '@/components/dashboard/recent-activity-feed';
 import { PerformanceChart } from '@/components/dashboard/performance-chart';
 import { QuickActions } from '@/components/dashboard/quick-actions';
-import { Sparkles, Brain, Flame, Sun, Moon, Calendar, ShieldCheck, ArrowRight, Award } from 'lucide-react';
+import { Sparkles, Brain, Flame, Sun, Moon, Calendar, ShieldCheck, ArrowRight, Award, Users } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -81,6 +81,36 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
+
+          {/* ENTERPRISE VIP HERO BANNER */}
+          {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'clinic_admin') && (
+            <Card glass className="p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 text-white shadow-2xl border-indigo-500/30 flex flex-col md:flex-row md:items-center justify-between gap-6 animate-fadeIn">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Badge className="bg-amber-400 text-slate-950 font-black px-3 py-1 flex items-center space-x-1.5 shadow-md shadow-amber-400/20">
+                    <Award className="w-4 h-4 text-slate-950" />
+                    <span>ENTERPRISE VIP ACCESS UNLOCKED</span>
+                  </Badge>
+                  <span className="text-xs font-semibold text-indigo-200">Unlimited Multi-Model AI & Oversight</span>
+                </div>
+                <h2 className="text-xl font-black text-white">
+                  Welcome to Enterprise VIP Status, {user?.fullName || 'Valued Partner'}!
+                </h2>
+                <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                  Your account is upgraded to Enterprise VIP. You have unlimited access to Socrates Socratic AI Tutor, Leitner Smart Flashcards Engine, BACB 2nd Edition Exam Simulator, and B2B Clinic Cohort Supervision Oversight Hub.
+                </p>
+              </div>
+
+              <div className="flex items-center space-x-3 flex-shrink-0">
+                <Link href="/clinic">
+                  <Button variant="primary" size="md" className="gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 font-extrabold shadow-lg shadow-blue-500/30">
+                    <Users className="w-4 h-4" />
+                    <span>Open B2B Clinic Hub</span>
+                  </Button>
+                </Link>
+              </div>
+            </Card>
+          )}
 
           {/* Quick Action Launchers Grid */}
           <QuickActions />
