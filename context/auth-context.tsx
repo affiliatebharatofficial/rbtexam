@@ -9,7 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: (email?: string, name?: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: SignUpData) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   confirmPasswordReset: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -107,16 +107,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (email?: string, name?: string) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 900));
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      if (supabaseUrl && !supabaseUrl.includes('mock-')) {
+        window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(window.location.origin + '/auth/callback')}`;
+        return { success: true };
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const targetEmail = (email || 'user@gmail.com').toLowerCase().trim();
+      const targetName = name || targetEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
       const googleUser: UserProfile = {
         id: `usr_google_${Math.random().toString(36).substring(2, 9)}`,
-        email: 'google.candidate@gmail.com',
-        fullName: 'Google Candidate',
-        avatarUrl: '',
+        email: targetEmail,
+        fullName: targetName,
+        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(targetEmail)}`,
         role: 'student',
         emailVerified: true,
         targetExamDate: '',

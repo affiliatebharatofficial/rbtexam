@@ -66,8 +66,21 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     setErrorMessage('');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('mock-')) {
+      setIsSubmitting(true);
+      await loginWithGoogle();
+      return;
+    }
+
+    const inputEmail = window.prompt('Enter your real Gmail address to sign up with Google:', email || 'user@gmail.com');
+    if (!inputEmail) return;
+
+    const inputName = fullName || window.prompt('Enter your Full Name for your candidate certificate:', inputEmail.split('@')[0]) || inputEmail.split('@')[0];
+
     setIsSubmitting(true);
-    const res = await loginWithGoogle();
+    const res = await loginWithGoogle(inputEmail, inputName);
     setIsSubmitting(false);
 
     if (res.success) {

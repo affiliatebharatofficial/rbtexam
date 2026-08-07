@@ -44,8 +44,19 @@ function LoginForm() {
 
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl && !supabaseUrl.includes('mock-')) {
+      setIsSubmitting(true);
+      await loginWithGoogle();
+      return;
+    }
+
+    const inputEmail = window.prompt('Enter your real Gmail address to sign in with Google:', email || 'user@gmail.com');
+    if (!inputEmail) return;
+
     setIsSubmitting(true);
-    const res = await loginWithGoogle();
+    const res = await loginWithGoogle(inputEmail);
     setIsSubmitting(false);
 
     if (res.success) {
