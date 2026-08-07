@@ -74,7 +74,7 @@ export const DEFAULT_AI_PROVIDERS: AIProviderConfig[] = [
 
 export const REGISTERED_PLUGINS: PlatformPlugin[] = [
   { id: 'plug-questions', name: 'Master Question Bank Engine', version: 'v1.4.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'BACB 2nd Edition Task List question generator & CSV manager.', menuLabel: 'Question Bank', route: '/admin/questions' },
-  { id: 'plug-flashcards', name: 'Smart Flashcard Engine', version: 'v1.5.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'Leitner 5-box spaced repetition algorithm & progress persistence.', menuLabel: 'Flashcards', route: '/flashcards' },
+  { id: 'plug-flashcards', name: 'Smart Flashcard Engine', version: 'v1.5.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'Leitner 5-box spaced repetition algorithm, AI bulk generator & progress persistence.', menuLabel: 'Flashcards CMS', route: '/admin/flashcards' },
   { id: 'plug-tutor', name: 'Socrates AI Tutor Engine', version: 'v1.6.0', status: 'active', isEnabled: true, category: 'AI Workforce', description: 'Clinical dialogue roleplay, RAG retrieval & prompt safety gates.', menuLabel: 'AI Tutor', route: '/tutor' },
   { id: 'plug-adaptive', name: 'AI Adaptive Learning Engine', version: 'v1.7.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'Dynamic study planner, target date readiness & domain heatmaps.', menuLabel: 'Study Planner', route: '/study-planner' },
   { id: 'plug-analytics', name: 'Analytics & BI Engine', version: 'v1.8.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Pass likelihood calculator, DAU/MAU metrics & cohort analytics.', menuLabel: 'Analytics', route: '/analytics' },
