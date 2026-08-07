@@ -30,6 +30,13 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
   aiFallbackProvider: 'Google Gemini 1.5 Pro',
   requireEmailVerification: true,
   maxDailyFreeAIMessages: 5,
+  lemonSqueezy: {
+    storeId: 'ls_store_84920',
+    apiKeyMasked: 'ls_api_live_51M0...9102',
+    webhookSecretMasked: 'ls_whsec_...7492',
+    environment: 'live' as 'test' | 'live',
+    currency: 'USD',
+  },
   stripe: {
     publishableKey: 'pk_live_51M0...9102',
     secretKeyMasked: 'sk_live_51M0...8491',

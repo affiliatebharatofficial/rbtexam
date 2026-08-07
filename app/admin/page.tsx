@@ -53,6 +53,7 @@ import {
 import { getAllCoupons, createCoupon, toggleCouponStatus, deleteCoupon } from '@/lib/coupon-engine';
 import { Coupon } from '@/types/subscription';
 import { AIProviderConfig } from '@/types/super-admin';
+import { testLemonSqueezyConnection } from '@/lib/lemon-squeezy';
 
 type AdminTab =
   | 'overview'
@@ -141,7 +142,7 @@ export default function SuperAdminCMSPage() {
     { id: 'overview', label: 'Overview', icon: Activity },
     { id: 'users', label: 'User Roles', icon: Users },
     { id: 'ai_cms', label: 'AI Models', icon: Brain },
-    { id: 'stripe', label: 'Stripe', icon: CreditCard },
+    { id: 'stripe', label: 'Lemon Squeezy', icon: CreditCard },
     { id: 'smtp', label: 'SMTP/Email', icon: Mail },
     { id: 'branding', label: 'Branding', icon: Layers },
     { id: 'landing', label: 'Landing Page', icon: Globe },
@@ -155,6 +156,13 @@ export default function SuperAdminCMSPage() {
     const newVal = !config.maintenanceMode;
     updatePlatformConfig('maintenanceMode', newVal);
     setConfig({ ...config, maintenanceMode: newVal });
+  };
+
+  const [lemonMsg, setLemonMsg] = useState('');
+  const handleTestLemonSqueezyConnection = async () => {
+    setLemonMsg('Connecting to Lemon Squeezy API Gateway...');
+    const res = await testLemonSqueezyConnection();
+    setLemonMsg(res.message);
   };
 
   const handleTestStripeConnection = async () => {
@@ -639,70 +647,73 @@ export default function SuperAdminCMSPage() {
           </div>
         )}
 
-        {/* TAB: STRIPE SETTINGS */}
+        {/* TAB: LEMON SQUEEZY PAYMENT GATEWAY */}
         {activeTab === 'stripe' && (
           <Card glass className="p-6 shadow-xl border-white/90 space-y-6 animate-fadeIn">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
-                  <CreditCard className="w-5 h-5 text-emerald-600" />
-                  <span>Stripe Billing & Payment Gateway Settings</span>
+                  <CreditCard className="w-5 h-5 text-amber-500" />
+                  <span>Lemon Squeezy Billing & Payment Gateway Settings</span>
                 </h3>
-                <p className="text-xs text-slate-500">Configure production & sandbox API keys, webhooks, and default billing currency.</p>
+                <p className="text-xs text-slate-500">Configure Lemon Squeezy Store ID, API keys, Webhook secrets, and merchant currency.</p>
               </div>
-              <Button onClick={handleTestStripeConnection} variant="outline" size="sm" className="gap-2 text-xs border-emerald-300 text-emerald-800 font-bold hover:bg-emerald-50">
-                <Zap className="w-3.5 h-3.5" />
+              <Button onClick={handleTestLemonSqueezyConnection} variant="outline" size="sm" className="gap-2 text-xs border-amber-300 text-amber-900 font-bold hover:bg-amber-50">
+                <Zap className="w-3.5 h-3.5 text-amber-600" />
                 <span>Test API Connection</span>
               </Button>
             </div>
 
-            {stripeMsg && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900 flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{stripeMsg}</span>
+            {lemonMsg && (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-900 flex items-center space-x-2 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <span>{lemonMsg}</span>
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Publishable Key</label>
+                <label className="font-bold text-slate-700">Lemon Squeezy Store ID</label>
                 <input
                   type="text"
-                  value={config.stripe?.publishableKey || ''}
+                  value={config.lemonSqueezy?.storeId || ''}
                   onChange={(e) => {
-                    const updated = { ...config.stripe, publishableKey: e.target.value };
-                    updatePlatformConfig('stripe', updated);
-                    setConfig({ ...config, stripe: updated });
+                    const updated = { ...config.lemonSqueezy, storeId: e.target.value };
+                    updatePlatformConfig('lemonSqueezy', updated);
+                    setConfig({ ...config, lemonSqueezy: updated });
                   }}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white font-mono"
+                  placeholder="e.g. 12345 or ls_store_84920"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Secret Key</label>
+                <label className="font-bold text-slate-700">API Key</label>
                 <input
                   type="password"
-                  value={config.stripe?.secretKeyMasked || ''}
+                  value={config.lemonSqueezy?.apiKeyMasked || ''}
                   onChange={(e) => {
-                    const updated = { ...config.stripe, secretKeyMasked: e.target.value };
-                    updatePlatformConfig('stripe', updated);
-                    setConfig({ ...config, stripe: updated });
+                    const updated = { ...config.lemonSqueezy, apiKeyMasked: e.target.value };
+                    updatePlatformConfig('lemonSqueezy', updated);
+                    setConfig({ ...config, lemonSqueezy: updated });
                   }}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white font-mono"
+                  placeholder="ls_api_live_..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">Webhook Secret</label>
+                <label className="font-bold text-slate-700">Webhook Signing Secret</label>
                 <input
                   type="password"
-                  value={config.stripe?.webhookSecretMasked || ''}
+                  value={config.lemonSqueezy?.webhookSecretMasked || ''}
                   onChange={(e) => {
-                    const updated = { ...config.stripe, webhookSecretMasked: e.target.value };
-                    updatePlatformConfig('stripe', updated);
-                    setConfig({ ...config, stripe: updated });
+                    const updated = { ...config.lemonSqueezy, webhookSecretMasked: e.target.value };
+                    updatePlatformConfig('lemonSqueezy', updated);
+                    setConfig({ ...config, lemonSqueezy: updated });
                   }}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white font-mono"
+                  placeholder="ls_whsec_..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-mono focus:ring-2 focus:ring-amber-500 focus:outline-none"
                 />
               </div>
 
@@ -711,16 +722,17 @@ export default function SuperAdminCMSPage() {
                 <div className="flex items-center space-x-3 pt-1">
                   {['test', 'live'].map((mode) => (
                     <button
+                      type="button"
                       key={mode}
                       onClick={() => {
-                        const updated = { ...config.stripe, environment: mode };
-                        updatePlatformConfig('stripe', updated);
-                        setConfig({ ...config, stripe: updated });
+                        const updated = { ...config.lemonSqueezy, environment: mode };
+                        updatePlatformConfig('lemonSqueezy', updated);
+                        setConfig({ ...config, lemonSqueezy: updated });
                       }}
-                      className={`px-4 py-1.5 rounded-lg font-bold uppercase text-[10px] transition-all ${
-                        config.stripe?.environment === mode
-                          ? mode === 'live' ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'
-                          : 'bg-slate-100 text-slate-600'
+                      className={`px-4 py-2 rounded-xl font-bold uppercase text-[10px] transition-all ${
+                        config.lemonSqueezy?.environment === mode
+                          ? mode === 'live' ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-700 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
                       {mode} MODE

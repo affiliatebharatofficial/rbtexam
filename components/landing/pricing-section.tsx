@@ -9,6 +9,34 @@ import { Badge } from '@/components/ui/badge';
 
 export function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+  const [loadingVariant, setLoadingVariant] = useState<string | null>(null);
+
+  const handleCheckout = async (variantId: string, tier: string) => {
+    setLoadingVariant(variantId);
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variantId,
+          tier,
+          billingInterval: billingCycle,
+          userEmail: 'candidate@rbttrainingai.com',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        window.location.href = '/profile/billing';
+      }
+    } catch (err) {
+      window.location.href = '/profile/billing';
+    } finally {
+      setLoadingVariant(null);
+    }
+  };
 
   return (
     <section id="pricing" className="py-24 bg-white border-b border-slate-100">
@@ -26,6 +54,7 @@ export function PricingSection() {
           <div className="pt-4 flex items-center justify-center">
             <div className="bg-slate-100 p-1 rounded-2xl inline-flex items-center space-x-1 border border-slate-200">
               <button
+                type="button"
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                   billingCycle === 'monthly'
@@ -36,6 +65,7 @@ export function PricingSection() {
                 Monthly Plan
               </button>
               <button
+                type="button"
                 onClick={() => setBillingCycle('annual')}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
                   billingCycle === 'annual'
@@ -90,11 +120,15 @@ export function PricingSection() {
             </div>
 
             <div className="pt-8">
-              <Link href="/exam">
-                <Button variant="outline" size="lg" className="w-full">
-                  Start 7-Day Free Trial
-                </Button>
-              </Link>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full"
+                onClick={() => handleCheckout('v_monthly_pro_290', 'pro')}
+                disabled={loadingVariant === 'v_monthly_pro_290'}
+              >
+                {loadingVariant === 'v_monthly_pro_290' ? 'Processing Checkout...' : 'Start 7-Day Free Trial'}
+              </Button>
             </div>
           </Card>
 
@@ -138,12 +172,16 @@ export function PricingSection() {
             </div>
 
             <div className="pt-8">
-              <Link href="/exam">
-                <Button variant="primary" size="lg" className="w-full gap-2 shadow-lg shadow-blue-500/30">
-                  <span>Get Lifetime Access</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full gap-2 shadow-lg shadow-blue-500/30"
+                onClick={() => handleCheckout('v_lifetime_vip_990', 'lifetime')}
+                disabled={loadingVariant === 'v_lifetime_vip_990'}
+              >
+                <span>{loadingVariant === 'v_lifetime_vip_990' ? 'Redirecting...' : 'Get Lifetime Access'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
             </div>
           </Card>
 
@@ -184,11 +222,15 @@ export function PricingSection() {
             </div>
 
             <div className="pt-8">
-              <Link href="/clinic">
-                <Button variant="secondary" size="lg" className="w-full">
-                  Request Clinic Demo
-                </Button>
-              </Link>
+              <Button
+                variant="secondary"
+                size="lg"
+                className="w-full"
+                onClick={() => handleCheckout('v_clinic_enterprise_2490', 'team')}
+                disabled={loadingVariant === 'v_clinic_enterprise_2490'}
+              >
+                {loadingVariant === 'v_clinic_enterprise_2490' ? 'Processing...' : 'Request Clinic Demo'}
+              </Button>
             </div>
           </Card>
         </div>

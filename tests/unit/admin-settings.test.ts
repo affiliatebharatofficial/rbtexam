@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { getPlatformConfig, updatePlatformConfig } from '@/lib/platform-config';
 
 describe('Super Admin Platform Configuration Settings', () => {
-  it('should initialize with complete Stripe, SMTP, Branding, and Landing CMS defaults', () => {
+  it('should initialize with complete Lemon Squeezy, SMTP, Branding, and Landing CMS defaults', () => {
     const config = getPlatformConfig();
-    expect(config.stripe).toBeDefined();
-    expect(config.stripe.environment).toBe('live');
+    expect(config.lemonSqueezy).toBeDefined();
+    expect(config.lemonSqueezy.environment).toBe('live');
     expect(config.smtp).toBeDefined();
     expect(config.smtp.host).toBe('smtp.sendgrid.net');
     expect(config.companyName).toBe('RBTTrainingAI Inc.');
@@ -14,18 +14,18 @@ describe('Super Admin Platform Configuration Settings', () => {
     expect(config.language.defaultLocale).toBe('en-US');
   });
 
-  it('should update Stripe configuration dynamically', () => {
-    updatePlatformConfig('stripe', {
-      publishableKey: 'pk_test_updated_123',
-      secretKeyMasked: 'sk_test_updated_456',
-      webhookSecretMasked: 'whsec_test_789',
+  it('should update Lemon Squeezy configuration dynamically', () => {
+    updatePlatformConfig('lemonSqueezy', {
+      storeId: '123456',
+      apiKeyMasked: 'ls_api_test_updated_123',
+      webhookSecretMasked: 'ls_whsec_test_789',
       environment: 'test',
       currency: 'USD',
     });
 
     const updated = getPlatformConfig();
-    expect(updated.stripe.publishableKey).toBe('pk_test_updated_123');
-    expect(updated.stripe.environment).toBe('test');
+    expect(updated.lemonSqueezy.storeId).toBe('123456');
+    expect(updated.lemonSqueezy.environment).toBe('test');
   });
 
   it('should update Landing CMS headline dynamically', () => {

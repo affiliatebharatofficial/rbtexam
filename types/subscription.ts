@@ -34,6 +34,8 @@ export interface SubscriptionPlan {
   priceLifetimeUSD?: number;
   stripeMonthlyPriceId?: string;
   stripeYearlyPriceId?: string;
+  lemonSqueezyVariantIdMonthly?: string;
+  lemonSqueezyVariantIdYearly?: string;
   limits: PlanLimits;
   features: string[];
   isPopular?: boolean;
@@ -53,6 +55,8 @@ export interface UserSubscription {
   cancelAtPeriodEnd: boolean;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  lemonSqueezyCustomerId?: string;
+  lemonSqueezySubscriptionId?: string;
   createdAt: string;
   updatedAt: string;
 }
