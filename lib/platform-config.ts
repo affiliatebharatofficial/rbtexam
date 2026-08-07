@@ -3,6 +3,19 @@ import { SystemSetting, AIProviderConfig, SystemAuditLog, PlatformPlugin } from 
 // Default Platform Config Store (Supabase database ready)
 const SYSTEM_CONFIG_STORE: Record<string, any> = {
   brandName: 'RBTTrainingAI',
+  logoUrl: '/logo.svg',
+  faviconUrl: '/favicon.ico',
+  primaryColor: '#2563EB',
+  secondaryColor: '#0F172A',
+  companyName: 'RBTTrainingAI Inc.',
+  supportEmail: 'support@rbttraining.ai',
+  supportPhone: '+1 (800) 555-0199',
+  footerCopyright: '© 2026 RBTTrainingAI Inc. All rights reserved.',
+  socialLinks: {
+    twitter: 'https://twitter.com/rbttrainingai',
+    linkedin: 'https://linkedin.com/company/rbttrainingai',
+    facebook: 'https://facebook.com/rbttrainingai',
+  },
   maintenanceMode: false,
   primaryCurrency: 'USD',
   allowPublicRegistration: true,
@@ -14,6 +27,33 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
   aiFallbackProvider: 'Google Gemini 1.5 Pro',
   requireEmailVerification: true,
   maxDailyFreeAIMessages: 5,
+  stripe: {
+    publishableKey: 'pk_live_51M0...9102',
+    secretKeyMasked: 'sk_live_51M0...8491',
+    webhookSecretMasked: 'whsec_...7492',
+    environment: 'live' as 'test' | 'live',
+    currency: 'USD',
+  },
+  smtp: {
+    host: 'smtp.sendgrid.net',
+    port: 587,
+    username: 'apikey',
+    passwordMasked: 'SG.9a8f...1029',
+    encryption: 'TLS' as 'TLS' | 'SSL' | 'NONE',
+    senderName: 'RBTTrainingAI Candidate Portal',
+    senderEmail: 'noreply@rbttraining.ai',
+  },
+  landing: {
+    heroTitle: 'Pass Your BACB RBT® Exam on the First Attempt',
+    heroSubtitle: 'The ultimate AI-powered preparation platform for Applied Behavior Analysis candidates.',
+    ctaButtonText: 'Start Free Candidate Practice',
+    featuresTitle: 'Everything You Need for BACB Certification Success',
+    faqTitle: 'Frequently Asked Questions',
+  },
+  language: {
+    defaultLocale: 'en-US',
+    supportedLocales: ['en-US', 'es-ES'],
+  },
 };
 
 export const DEFAULT_AI_PROVIDERS: AIProviderConfig[] = [

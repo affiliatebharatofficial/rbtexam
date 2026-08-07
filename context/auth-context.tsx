@@ -12,7 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: (email?: string, name?: string) => Promise<{ success: boolean; error?: string }>;
-  completeGoogleAuthSession: (email: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  completeGoogleAuthSession: (email: string, name?: string, userId?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: SignUpData) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   confirmPasswordReset: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -45,32 +45,223 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Initialize session from LocalStorage
-  useEffect(() => {
+  // Helper to ensure user profile exists in database (public.users and public.profiles)
+  const ensureDatabaseProfile = async (
+    userId: string,
+    email: string,
+    fullName?: string,
+    avatarUrl?: string
+  ): Promise<UserProfile> => {
+    const cleanEmail = email.toLowerCase().trim();
+    const cleanName = fullName || cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+    let dbUser: any = null;
+    let dbProfile: any = null;
+
+    if (isSupabaseConfigured()) {
+      try {
+        // Query public.users table
+        const { data: uData } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+        dbUser = uData;
+
+        // Query public.profiles table
+        const { data: pData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+        dbProfile = pData;
+
+        // If public.users record is missing, automatically insert it into application database
+        if (!dbUser) {
+          const { data: insertedUser, error: insertUserErr } = await supabase
+            .from('users')
+            .upsert({
+              id: userId,
+              email: cleanEmail,
+              full_name: cleanName,
+              role: 'student',
+              target_score: 90,
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .maybeSingle();
+
+          if (!insertUserErr && insertedUser) {
+            dbUser = insertedUser;
+          }
+        }
+
+        // If public.profiles record is missing, automatically insert it into application database
+        if (!dbProfile) {
+          const { data: insertedProfile, error: insertProfileErr } = await supabase
+            .from('profiles')
+            .upsert({
+              id: userId,
+              email: cleanEmail,
+              full_name: cleanName,
+              avatar_url: avatarUrl || '',
+              certification_target: 'RBT',
+              subscription_tier: 'free',
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .maybeSingle();
+
+          if (!insertProfileErr && insertedProfile) {
+            dbProfile = insertedProfile;
+          }
+        }
+      } catch (err) {
+        console.error('Database profile check/upsert error:', err);
+      }
+    }
+
+    const profile: UserProfile = {
+      id: userId,
+      email: dbUser?.email || dbProfile?.email || cleanEmail,
+      fullName: dbUser?.full_name || dbProfile?.full_name || cleanName,
+      avatarUrl: dbProfile?.avatar_url || avatarUrl || '',
+      role: (dbUser?.role as any) || 'student',
+      emailVerified: true,
+      accountStatus: 'active',
+      targetExamDate: dbUser?.target_exam_date || dbProfile?.exam_date || '',
+      targetScore: dbUser?.target_score || 90,
+      readinessScore: 0,
+      estimatedPassLikelihood: 0,
+      createdAt: dbUser?.created_at || dbProfile?.created_at || new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
+
+    // Ensure profile is synced to local registered users array as cache
     try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-      if (stored) {
-        const parsedSession: AuthSession = JSON.parse(stored);
-        if (parsedSession.expiresAt > Date.now()) {
-          setSession(parsedSession);
-          setUser(parsedSession.user);
+      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
+      let registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
+      const idx = registeredUsers.findIndex((u) => u.id === userId || u.email.toLowerCase() === cleanEmail);
+      if (idx >= 0) {
+        registeredUsers[idx] = profile;
+      } else {
+        registeredUsers.push(profile);
+      }
+      localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
+    } catch (e) {
+      console.error('Failed to sync user to local registry:', e);
+    }
+
+    return profile;
+  };
+
+  // Initialize session and listen for auth state changes
+  useEffect(() => {
+    let isMounted = true;
+    let subscription: { unsubscribe: () => void } | null = null;
+
+    async function initAuthSession() {
+      try {
+        if (isSupabaseConfigured()) {
+          const { data: { session: sbSession } } = await supabase.auth.getSession();
+          if (sbSession?.user) {
+            const sbUser = sbSession.user;
+            const profile = await ensureDatabaseProfile(
+              sbUser.id,
+              sbUser.email || '',
+              sbUser.user_metadata?.full_name || sbUser.user_metadata?.name,
+              sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture
+            );
+            if (isMounted) {
+              const activeSession: AuthSession = {
+                accessToken: sbSession.access_token,
+                refreshToken: sbSession.refresh_token,
+                expiresAt: (sbSession.expires_at || 0) * 1000,
+                user: profile,
+              };
+              setUser(profile);
+              setSession(activeSession);
+              localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(activeSession));
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+
+        const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (stored) {
+          const parsedSession: AuthSession = JSON.parse(stored);
+          if (parsedSession.expiresAt > Date.now()) {
+            if (isMounted) {
+              setSession(parsedSession);
+              setUser(parsedSession.user);
+            }
+          } else {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            if (isMounted) {
+              setSession(null);
+              setUser(null);
+            }
+          }
         } else {
-          localStorage.removeItem(AUTH_STORAGE_KEY);
+          if (isMounted) {
+            setSession(null);
+            setUser(null);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse auth session', e);
+        if (isMounted) {
           setSession(null);
           setUser(null);
         }
-      } else {
-        // No active session: require user login/signup
-        setSession(null);
-        setUser(null);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-    } catch (e) {
-      console.error('Failed to parse auth session', e);
-      setSession(null);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
     }
+
+    initAuthSession();
+
+    if (isSupabaseConfigured()) {
+      const { data: authListener } = supabase.auth.onAuthStateChange(async (event, sbSession) => {
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') && sbSession?.user) {
+          const sbUser = sbSession.user;
+          const profile = await ensureDatabaseProfile(
+            sbUser.id,
+            sbUser.email || '',
+            sbUser.user_metadata?.full_name || sbUser.user_metadata?.name,
+            sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture
+          );
+          if (isMounted) {
+            const activeSession: AuthSession = {
+              accessToken: sbSession.access_token,
+              refreshToken: sbSession.refresh_token,
+              expiresAt: (sbSession.expires_at || 0) * 1000,
+              user: profile,
+            };
+            setUser(profile);
+            setSession(activeSession);
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(activeSession));
+          }
+        } else if (event === 'SIGNED_OUT') {
+          if (isMounted) {
+            setUser(null);
+            setSession(null);
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+          }
+        }
+      });
+      subscription = authListener?.subscription || null;
+    }
+
+    return () => {
+      isMounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   const login = async (credentials: LoginCredentials) => {
@@ -137,7 +328,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const completeGoogleAuthSession = async (email: string, name?: string) => {
+  const completeGoogleAuthSession = async (
+    email: string,
+    name?: string,
+    userId?: string,
+    avatarUrl?: string
+  ) => {
     setIsLoading(true);
     try {
       const targetEmail = email.toLowerCase().trim();
@@ -146,31 +342,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: 'Valid email address is required.' };
       }
 
-      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
-      let registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
-      let userProfile: UserProfile | undefined = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
+      let activeUserId = userId;
 
-      if (!userProfile) {
-        userProfile = {
-          id: `usr_google_${Math.random().toString(36).substring(2, 9)}`,
-          email: targetEmail,
-          fullName: name || targetEmail.split('@')[0],
-          role: 'student',
-          accountStatus: 'active',
-          emailVerified: true,
-          targetScore: 85,
-          readinessScore: 0,
-          estimatedPassLikelihood: 0,
-          createdAt: new Date().toISOString(),
-          lastLoginAt: new Date().toISOString(),
-        };
-        registeredUsers.push(userProfile);
-        localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
-      } else {
-        userProfile.lastLoginAt = new Date().toISOString();
+      // Extract Supabase session user id if available and not explicitly passed
+      if (!activeUserId && isSupabaseConfigured()) {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session?.user?.id) {
+          activeUserId = data.session.user.id;
+        }
       }
 
-      const activeProfile: UserProfile = userProfile;
+      if (!activeUserId) {
+        activeUserId = `usr_google_${Math.random().toString(36).substring(2, 9)}`;
+      }
+
+      // Automatically create or fetch the profile from public.users and public.profiles
+      const activeProfile = await ensureDatabaseProfile(
+        activeUserId,
+        targetEmail,
+        name,
+        avatarUrl
+      );
 
       const newSession: AuthSession = {
         accessToken: `google_oauth_session_${Math.random().toString(36).substring(2)}`,

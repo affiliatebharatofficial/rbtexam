@@ -432,4 +432,71 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public read release notes') THEN
     CREATE POLICY "Public read release notes" ON public.release_notes FOR SELECT USING (is_published = true);
   END IF;
+
+  -- RLS Policies for public.users & public.profiles
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Users read own record') THEN
+    CREATE POLICY "Users read own record" ON public.users FOR SELECT USING (auth.uid() = id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Users insert own record') THEN
+    CREATE POLICY "Users insert own record" ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Users update own record') THEN
+    CREATE POLICY "Users update own record" ON public.users FOR UPDATE USING (auth.uid() = id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'profiles' AND policyname = 'Users read own profile') THEN
+    CREATE POLICY "Users read own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'profiles' AND policyname = 'Users insert own profile') THEN
+    CREATE POLICY "Users insert own profile" ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'profiles' AND policyname = 'Users update own profile') THEN
+    CREATE POLICY "Users update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+  END IF;
 END $$;
+
+-- Automatic User & Profile Creation Function on Supabase Auth
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  extracted_name TEXT;
+  extracted_avatar TEXT;
+BEGIN
+  extracted_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    split_part(NEW.email, '@', 1)
+  );
+
+  extracted_avatar := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture',
+    ''
+  );
+
+  -- Upsert public.users
+  INSERT INTO public.users (id, email, full_name, role, target_score, created_at, updated_at)
+  VALUES (NEW.id, NEW.email, extracted_name, 'student', 90, NOW(), NOW())
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = COALESCE(EXCLUDED.full_name, public.users.full_name),
+    updated_at = NOW();
+
+  -- Upsert public.profiles
+  INSERT INTO public.profiles (id, email, full_name, avatar_url, certification_target, subscription_tier, created_at, updated_at)
+  VALUES (NEW.id, NEW.email, extracted_name, extracted_avatar, 'RBT', 'free', NOW(), NOW())
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
+    avatar_url = COALESCE(EXCLUDED.avatar_url, public.profiles.avatar_url),
+    updated_at = NOW();
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger on auth.users AFTER INSERT
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+

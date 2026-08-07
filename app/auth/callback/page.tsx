@@ -18,8 +18,10 @@ function AuthCallbackContent() {
           const { data, error } = await supabase.auth.getSession();
           if (!error && data?.session?.user?.email) {
             const userEmail = data.session.user.email;
+            const userId = data.session.user.id;
             const userName = data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
-            await completeGoogleAuthSession(userEmail, userName || undefined);
+            const userAvatar = data.session.user.user_metadata?.avatar_url || data.session.user.user_metadata?.picture;
+            await completeGoogleAuthSession(userEmail, userName || undefined, userId, userAvatar || undefined);
             router.push('/dashboard');
             return;
           }

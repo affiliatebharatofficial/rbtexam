@@ -36,6 +36,40 @@ export const PROMO_COUPONS: Coupon[] = [
   },
 ];
 
+export function getAllCoupons(): Coupon[] {
+  return [...PROMO_COUPONS];
+}
+
+export function createCoupon(data: Omit<Coupon, 'id' | 'currentUses' | 'isActive'>): Coupon {
+  const newCoupon: Coupon = {
+    ...data,
+    id: `c-${Date.now()}`,
+    code: data.code.trim().toUpperCase(),
+    currentUses: 0,
+    isActive: true,
+  };
+  PROMO_COUPONS.unshift(newCoupon);
+  return newCoupon;
+}
+
+export function toggleCouponStatus(id: string): boolean {
+  const coupon = PROMO_COUPONS.find((c) => c.id === id);
+  if (coupon) {
+    coupon.isActive = !coupon.isActive;
+    return true;
+  }
+  return false;
+}
+
+export function deleteCoupon(id: string): boolean {
+  const idx = PROMO_COUPONS.findIndex((c) => c.id === id);
+  if (idx !== -1) {
+    PROMO_COUPONS.splice(idx, 1);
+    return true;
+  }
+  return false;
+}
+
 /**
  * Validates promo coupon code and calculates discounted final price
  */
