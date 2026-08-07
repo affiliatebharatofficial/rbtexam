@@ -90,6 +90,63 @@ export const MASTER_FLASHCARDS: Flashcard[] = [
   },
 ];
 
+// In-memory & LocalStorage Custom Flashcard Store
+let CUSTOM_FLASHCARDS: Flashcard[] = [];
+
+if (typeof window !== 'undefined') {
+  try {
+    const saved = localStorage.getItem('rbt_custom_flashcards');
+    if (saved) {
+      CUSTOM_FLASHCARDS = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.error('Failed to load custom flashcards from storage', e);
+  }
+}
+
+/**
+ * Add a custom or AI-generated flashcard to the user deck with persistence
+ */
+export function addCustomFlashcard(card: Partial<Flashcard>): Flashcard {
+  const newCard: Flashcard = {
+    id: card.id || `fc-custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    title: card.title || 'Custom BACB Flashcard',
+    front: card.front || 'Front Prompt',
+    back: card.back || 'Back Answer',
+    cardType: card.cardType || 'ai_generated',
+    explanation: card.explanation || 'Detailed clinical rationale for this BACB task list item.',
+    clinicalExplanation: card.clinicalExplanation || 'Applied Behavior Analysis clinical implementation note.',
+    memoryTip: card.memoryTip || 'Remember key antecedent-behavior-consequence relationships.',
+    realLifeExample: card.realLifeExample || 'Example ABA clinical scenario.',
+    commonMistakes: card.commonMistakes || 'Confusing related behavioral terms.',
+    reference: card.reference || 'BACB Task List Standard',
+    certification: card.certification || 'RBT',
+    category: (card.category as any) || 'Measurement',
+    difficulty: card.difficulty || 'medium',
+    keywords: card.keywords || ['ABA', 'RBT'],
+    tags: card.tags || ['Custom', 'AI Generated'],
+    status: 'published',
+    isPremium: false,
+    isFeatured: true,
+    createdBy: card.createdBy || 'user_ai',
+    updatedBy: 'user_ai',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  CUSTOM_FLASHCARDS.unshift(newCard);
+
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('rbt_custom_flashcards', JSON.stringify(CUSTOM_FLASHCARDS));
+    } catch (e) {
+      console.error('Failed to save custom flashcards', e);
+    }
+  }
+
+  return newCard;
+}
+
 // In-memory User Spaced Repetition Progress Store
 const USER_PROGRESS_STORE: Record<string, SpacedRepetitionState> = {};
 
@@ -152,8 +209,8 @@ export function generateFlashcardsFromQuestions(): Flashcard[] {
  * Query and filter flashcards with Spaced Repetition queue management
  */
 export function getFilteredFlashcards(params: FlashcardFilterParams, userId: string = 'default_user'): FlashcardPaginationResult {
-  // Combine seed cards with AI generated cards
-  const allCards = [...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
+  // Combine custom cards, seed cards, and AI generated question cards
+  const allCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
   let filtered = [...allCards];
 
   // Certification filter
