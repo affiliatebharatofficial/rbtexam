@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -161,11 +162,106 @@ export default function SuperAdminCMSPage() {
   const [inviteTier, setInviteTier] = useState('pro');
   const [userMsg, setUserMsg] = useState('');
 
+  useEffect(() => {
+    loadAllRegisteredUsers();
+  }, [activeTab]);
+
+  const loadAllRegisteredUsers = async () => {
+    let combinedUsers: any[] = [...userAccounts];
+
+    // 1. Fetch from Supabase Database if configured
+    if (isSupabaseConfigured()) {
+      try {
+        const { data: dbProfiles } = await supabase.from('profiles').select('*');
+        if (dbProfiles && dbProfiles.length > 0) {
+          dbProfiles.forEach((p: any) => {
+            const index = combinedUsers.findIndex((u) => u.email?.toLowerCase() === p.email?.toLowerCase());
+            const userObj = {
+              id: p.id,
+              email: p.email,
+              fullName: p.full_name || p.email?.split('@')[0] || 'Registered Candidate',
+              role: p.email === 'jobpegyan@gmail.com' ? 'super_admin' : (p.role || 'student'),
+              subscriptionTier: p.subscription_tier || 'pro',
+              status: p.account_status || 'active',
+              joinedAt: p.created_at || new Date().toISOString(),
+              lastLoginAt: p.updated_at || new Date().toISOString(),
+            };
+            if (index >= 0) {
+              combinedUsers[index] = { ...combinedUsers[index], ...userObj };
+            } else {
+              combinedUsers.push(userObj);
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching Supabase profiles for admin roster:', err);
+      }
+    }
+
+    // 2. Fetch from LocalStorage registered users ('rbt_registered_users')
+    if (typeof window !== 'undefined') {
+      try {
+        const regStr = localStorage.getItem('rbt_registered_users');
+        if (regStr) {
+          const regUsers: any[] = JSON.parse(regStr);
+          regUsers.forEach((u: any) => {
+            const index = combinedUsers.findIndex((existing) => existing.email?.toLowerCase() === u.email?.toLowerCase());
+            const userObj = {
+              id: u.id,
+              email: u.email,
+              fullName: u.fullName || u.email?.split('@')[0],
+              role: u.email === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
+              subscriptionTier: u.subscriptionTier || 'pro',
+              status: u.accountStatus || 'active',
+              joinedAt: u.createdAt || new Date().toISOString(),
+              lastLoginAt: u.lastLoginAt || new Date().toISOString(),
+            };
+            if (index >= 0) {
+              combinedUsers[index] = { ...combinedUsers[index], ...userObj };
+            } else {
+              combinedUsers.push(userObj);
+            }
+          });
+        }
+
+        // 3. Fetch from Active Auth Session ('rbt_ai_auth_session')
+        const activeSessStr = localStorage.getItem('rbt_ai_auth_session');
+        if (activeSessStr) {
+          const activeSess = JSON.parse(activeSessStr);
+          if (activeSess?.user?.email) {
+            const u = activeSess.user;
+            const index = combinedUsers.findIndex((existing) => existing.email?.toLowerCase() === u.email?.toLowerCase());
+            const userObj = {
+              id: u.id,
+              email: u.email,
+              fullName: u.fullName || u.email?.split('@')[0],
+              role: u.email === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
+              subscriptionTier: 'enterprise',
+              status: 'active',
+              joinedAt: u.createdAt || new Date().toISOString(),
+              lastLoginAt: u.lastLoginAt || new Date().toISOString(),
+            };
+            if (index >= 0) {
+              combinedUsers[index] = { ...combinedUsers[index], ...userObj };
+            } else {
+              combinedUsers.push(userObj);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error loading local registered users:', e);
+      }
+    }
+
+    setUserAccounts(combinedUsers);
+  };
+
   const saveUserAccounts = (updated: any[]) => {
     setUserAccounts(updated);
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('rbt_admin_users_roster', JSON.stringify(updated));
+        localStorage.setItem('rbt_registered_users', JSON.stringify(updated));
       } catch (e) {}
     }
   };
