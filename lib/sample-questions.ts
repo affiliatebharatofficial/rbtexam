@@ -173,14 +173,70 @@ export const SAMPLE_BACB_QUESTIONS: Question[] = [
   },
 ];
 
+import { MASTER_QUESTION_BANK } from './master-question-bank';
+import { BACBDomainId } from '@/types/bacb';
+
+/**
+ * Dynamically converts MasterQuestion objects into Exam Question format
+ */
+export function getMasterBankExamQuestions(): Question[] {
+  return MASTER_QUESTION_BANK
+    .filter((mq) => mq.status === 'published' || mq.status === 'featured')
+    .map((mq) => {
+      const categoryMap: Record<string, BACBDomainId> = {
+        'Measurement': 'A',
+        'Data Collection': 'A',
+        'Assessment': 'B',
+        'Preference Assessment': 'B',
+        'ABC Data': 'B',
+        'Skill Acquisition': 'C',
+        'Prompting': 'C',
+        'Chaining': 'C',
+        'Token Economy': 'C',
+        'Behavior Reduction': 'D',
+        'Reinforcement': 'D',
+        'Punishment': 'D',
+        'Replacement Behaviors': 'D',
+        'Behavior Intervention Plans': 'D',
+        'Documentation': 'E',
+        'Reporting': 'E',
+        'Professional Conduct': 'F',
+        'Ethics': 'F',
+      };
+
+      const domainId: BACBDomainId = categoryMap[mq.category] || 'A';
+      const validCorrectId: 'A' | 'B' | 'C' | 'D' = (['A', 'B', 'C', 'D'].includes(mq.correctAnswerId) ? mq.correctAnswerId : 'A') as any;
+
+      return {
+        id: mq.id,
+        taskItemId: mq.references || 'A-01',
+        domainId,
+        scenarioText: mq.scenarioText || '',
+        questionText: mq.question,
+        options: mq.options.map((o) => ({
+          id: (['A', 'B', 'C', 'D'].includes(o.id) ? o.id : 'A') as 'A' | 'B' | 'C' | 'D',
+          text: o.text,
+          explanation: o.explanation || mq.clinicalExplanation || 'Correct rationale according to BACB task list.',
+        })),
+        correctOptionId: validCorrectId,
+        difficulty: mq.difficulty === 'easy' ? 'Easy' : mq.difficulty === 'hard' ? 'Hard' : 'Medium',
+        bacbCitation: mq.references || `BACB 2nd Edition Task List Item ${domainId}-01`,
+        aiExplanationDetail: mq.clinicalExplanation || mq.answerExplanation,
+      };
+    });
+}
+
 /**
  * Dynamically generates a randomized set of N questions (20, 50, 85, 100)
  * ensuring proportional BACB domain weighting and unique IDs.
  */
 export function generateExamQuestions(count: number, targetDomain?: string): Question[] {
+  const masterQuestions = getMasterBankExamQuestions();
+  const fullBank = [...masterQuestions, ...SAMPLE_BACB_QUESTIONS];
+
   const sourceBank = targetDomain && targetDomain !== 'ALL'
-    ? SAMPLE_BACB_QUESTIONS.filter((q) => q.domainId === targetDomain)
-    : SAMPLE_BACB_QUESTIONS;
+    ? fullBank.filter((q) => q.domainId === targetDomain)
+    : fullBank;
 
   const result: Question[] = [];
 
