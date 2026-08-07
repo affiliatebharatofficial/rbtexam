@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS public.master_questions (
   correct_answer_id VARCHAR(16) NOT NULL,
   answer_explanation TEXT NOT NULL,
   clinical_explanation TEXT,
-  references TEXT,
+  "references" TEXT,
   exam_tips TEXT,
   common_mistakes TEXT,
   category VARCHAR(128) NOT NULL,
