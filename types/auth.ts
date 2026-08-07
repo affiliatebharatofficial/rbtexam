@@ -1,6 +1,6 @@
 // Types definition for Auth Module in RBTTrainingAI
 
-export type UserRole = 'student' | 'therapist' | 'clinic_admin' | 'instructor';
+export type UserRole = 'student' | 'therapist' | 'clinic_admin' | 'instructor' | 'admin' | 'super_admin';
 
 export type AccountStatus = 'active' | 'pending_verification' | 'pending_approval' | 'suspended';
 

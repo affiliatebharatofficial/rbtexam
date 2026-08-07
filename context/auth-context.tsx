@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { UserProfile, AuthSession, LoginCredentials, SignUpData } from '@/types/auth';
+import { UserProfile, AuthSession, LoginCredentials, SignUpData, UserRole } from '@/types/auth';
 import { getPlatformConfig, logAuditEvent } from '@/lib/platform-config';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
@@ -25,12 +25,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = 'rbt_ai_auth_session';
 
+export const ADMIN_EMAILS: string[] = [
+  'jobpegyan@gmail.com',
+  'admin@rbttraining.ai',
+  'superadmin@rbttraining.ai',
+];
+
+export function isEmailAdmin(email?: string | null): boolean {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
+}
+
 const DEFAULT_PRODUCTION_USER: UserProfile = {
   id: 'usr_candidate_001',
-  email: 'user@rbttrainingai.com',
-  fullName: 'Candidate Profile',
+  email: 'jobpegyan@gmail.com',
+  fullName: 'Job Pegyan (Admin)',
   avatarUrl: '',
-  role: 'student',
+  role: 'super_admin',
   emailVerified: true,
   targetExamDate: '',
   targetScore: 90,
@@ -54,6 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ): Promise<UserProfile> => {
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = fullName || cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const isAdmin = isEmailAdmin(cleanEmail);
+    const assignedRole: UserRole = isAdmin ? 'admin' : 'student';
 
     let dbUser: any = null;
     let dbProfile: any = null;
@@ -76,15 +89,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .maybeSingle();
         dbProfile = pData;
 
-        // If public.users record is missing, automatically insert it into application database
-        if (!dbUser) {
+        // If public.users record is missing or role needs upgrade
+        if (!dbUser || (isAdmin && dbUser.role !== 'admin' && dbUser.role !== 'super_admin')) {
           const { data: insertedUser, error: insertUserErr } = await supabase
             .from('users')
             .upsert({
               id: userId,
               email: cleanEmail,
               full_name: cleanName,
-              role: 'student',
+              role: assignedRole,
               target_score: 90,
               updated_at: new Date().toISOString(),
             })
@@ -96,8 +109,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // If public.profiles record is missing, automatically insert it into application database
-        if (!dbProfile) {
+        // If public.profiles record is missing or subscription tier needs enterprise
+        if (!dbProfile || (isAdmin && dbProfile.subscription_tier !== 'enterprise')) {
           const { data: insertedProfile, error: insertProfileErr } = await supabase
             .from('profiles')
             .upsert({
@@ -106,7 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               full_name: cleanName,
               avatar_url: avatarUrl || '',
               certification_target: 'RBT',
-              subscription_tier: 'free',
+              subscription_tier: isAdmin ? 'enterprise' : 'free',
               updated_at: new Date().toISOString(),
             })
             .select()
@@ -126,7 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: dbUser?.email || dbProfile?.email || cleanEmail,
       fullName: dbUser?.full_name || dbProfile?.full_name || cleanName,
       avatarUrl: dbProfile?.avatar_url || avatarUrl || '',
-      role: (dbUser?.role as any) || 'student',
+      role: isAdmin ? 'super_admin' : ((dbUser?.role as any) || 'student'),
       emailVerified: true,
       accountStatus: 'active',
       targetExamDate: dbUser?.target_exam_date || dbProfile?.exam_date || '',
@@ -287,11 +300,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { success: false, error: 'Public account registration is currently disabled by administrator.' };
         }
 
+        const isAdm = isEmailAdmin(userEmail);
         existingUser = {
           id: `usr_${Math.random().toString(36).substring(2, 9)}`,
           email: userEmail,
           fullName: userEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-          role: 'student',
+          role: isAdm ? 'super_admin' : 'student',
           emailVerified: true,
           accountStatus: 'active',
           targetExamDate: '',
@@ -305,6 +319,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         registeredUsers.push(existingUser);
         localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
       } else {
+        if (isEmailAdmin(userEmail)) {
+          existingUser.role = 'super_admin';
+        }
         existingUser.lastLoginAt = new Date().toISOString();
       }
 
@@ -500,7 +517,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: `usr_${Math.random().toString(36).substring(2, 9)}`,
         email: targetEmail,
         fullName: data.fullName.trim(),
-        role: data.role || 'student',
+        role: isEmailAdmin(targetEmail) ? 'super_admin' : (data.role || 'student'),
         emailVerified: false,
         accountStatus: initialStatus,
         targetExamDate: data.targetExamDate || '',
