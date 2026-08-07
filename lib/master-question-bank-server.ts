@@ -1,18 +1,26 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { MasterQuestion } from '@/types/master-question';
 import { MASTER_QUESTION_BANK, createQuestion as createQuestionInBank } from './master-question-bank';
 
 function getPersistentFilePath(): string {
-  const dataDir = path.join(process.cwd(), 'data');
+  // Use os.tmpdir() for serverless platforms (Vercel/AWS Lambda) to prevent read-only directory errors
+  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NEXT_RUNTIME === 'edge');
+  const dataDir = isServerless ? os.tmpdir() : path.join(process.cwd(), 'data');
+  
   if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+    try {
+      fs.mkdirSync(dataDir, { recursive: true });
+    } catch (err) {
+      // Ignore directory creation error in read-only environments
+    }
   }
   return path.join(dataDir, 'questions-store.json');
 }
 
 /**
- * Server-only: Load questions from server disk JSON store
+ * Server-only: Load questions from server JSON store
  */
 export function loadServerPersistentQuestions(): MasterQuestion[] {
   try {
@@ -29,25 +37,25 @@ export function loadServerPersistentQuestions(): MasterQuestion[] {
       }
     }
   } catch (err) {
-    console.error('Failed to load server persistent questions:', err);
+    // Graceful fallback for serverless environments
   }
   return MASTER_QUESTION_BANK;
 }
 
 /**
- * Server-only: Save questions array to server disk JSON store
+ * Server-only: Save questions array to server JSON store
  */
 export function saveServerPersistentQuestions(): void {
   try {
     const filePath = getPersistentFilePath();
     fs.writeFileSync(filePath, JSON.stringify(MASTER_QUESTION_BANK, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Failed to save server persistent questions:', err);
+    // Graceful fallback for serverless environments
   }
 }
 
 /**
- * Server-only: Create question and persist to server disk JSON store
+ * Server-only: Create question and persist to server JSON store
  */
 export function createServerQuestion(data: Omit<MasterQuestion, 'id' | 'createdAt' | 'updatedAt' | 'version'>): MasterQuestion {
   loadServerPersistentQuestions();
