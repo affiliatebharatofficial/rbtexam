@@ -115,13 +115,15 @@ export function updatePlatformConfig(key: string, value: any, updatedBy: string 
 
   if (isSupabaseConfigured()) {
     try {
-      supabase
-        .from('system_settings')
-        .upsert({
-          key,
-          value: typeof value === 'object' ? value : JSON.stringify(value),
-          updated_at: new Date().toISOString(),
-        })
+      Promise.resolve(
+        supabase
+          .from('system_settings')
+          .upsert({
+            key,
+            value: typeof value === 'object' ? value : JSON.stringify(value),
+            updated_at: new Date().toISOString(),
+          })
+      )
         .then(({ error }) => {
           if (error && !error.message.includes('fetch failed')) {
             console.error(`Failed to persist system setting '${key}' to Supabase:`, error.message);
