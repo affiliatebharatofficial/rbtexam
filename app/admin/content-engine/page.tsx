@@ -48,7 +48,7 @@ export default function AIContentEngineAdminPage() {
   const approvedItems = drafts.filter((d) => d.status === 'approved' || d.status === 'published');
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireAdmin>
       <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 min-h-[calc(100vh-4rem)]">
         
         {/* Header */}

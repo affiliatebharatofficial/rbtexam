@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { MaintenanceBanner } from '@/components/release/maintenance-banner';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 import {
   Release,
   FeatureFlag,
@@ -216,6 +217,7 @@ export default function AdminLaunchControlPage() {
   };
 
   return (
+    <ProtectedRoute requireAdmin>
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans pb-16">
       {/* Emergency Banner Header if Active */}
       {maintenanceState.isEmergencyBannerActive && (
@@ -791,5 +793,6 @@ Integrated enterprise-grade deployment controls, 20-point pre-launch validation 
         )}
       </main>
     </div>
+    </ProtectedRoute>
   );
 }

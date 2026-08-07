@@ -5,16 +5,41 @@ import { useAuth } from '@/context/auth-context';
 import { useRouter, usePathname } from 'next/navigation';
 import { Brain, RefreshCw } from 'lucide-react';
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+  allowedRoles?: string[];
+}
+
+export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }: ProtectedRouteProps) {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+        return;
+      }
+
+      if (requireAdmin) {
+        const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+        if (!isAdmin) {
+          router.push('/dashboard');
+          return;
+        }
+      }
+
+      if (allowedRoles && allowedRoles.length > 0) {
+        const userRole = user?.role || 'student';
+        if (!allowedRoles.includes(userRole)) {
+          router.push('/dashboard');
+          return;
+        }
+      }
     }
-  }, [isAuthenticated, isLoading, router, pathname]);
+  }, [isAuthenticated, isLoading, user, requireAdmin, allowedRoles, router, pathname]);
 
   if (isLoading) {
     return (
@@ -32,6 +57,20 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (requireAdmin) {
+    const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+    if (!isAdmin) {
+      return null;
+    }
+  }
+
+  if (allowedRoles && allowedRoles.length > 0) {
+    const userRole = user?.role || 'student';
+    if (!allowedRoles.includes(userRole)) {
+      return null;
+    }
   }
 
   return <>{children}</>;
