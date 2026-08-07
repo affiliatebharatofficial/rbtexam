@@ -1,0 +1,375 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { ProtectedRoute } from '@/components/auth/protected-route';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { EmptyState } from '@/components/ui/empty-state';
+import {
+  getPlatformConfig,
+  updatePlatformConfig,
+  DEFAULT_AI_PROVIDERS,
+  REGISTERED_PLUGINS,
+  getSystemAuditLogs,
+} from '@/lib/platform-config';
+import { getPlatformAnalyticsSummary } from '@/lib/analytics-engine';
+import {
+  ShieldCheck,
+  Users,
+  Settings,
+  Brain,
+  Folder,
+  Activity,
+  Layers,
+  Server,
+  DollarSign,
+  AlertTriangle,
+  Lock,
+  Eye,
+  CheckCircle2,
+  Cpu,
+  ArrowRight,
+  UserPlus,
+} from 'lucide-react';
+
+type AdminTab = 'overview' | 'users' | 'ai_cms' | 'branding' | 'media' | 'audit';
+
+export default function SuperAdminCMSPage() {
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [config, setConfig] = useState(getPlatformConfig());
+  const auditLogs = getSystemAuditLogs();
+  const summary = getPlatformAnalyticsSummary();
+
+  const toggleMaintenanceMode = () => {
+    const newVal = !config.maintenanceMode;
+    updatePlatformConfig('maintenanceMode', newVal);
+    setConfig({ ...config, maintenanceMode: newVal });
+  };
+
+  const updateMaxFreeAIMessages = (count: number) => {
+    updatePlatformConfig('maxDailyFreeAIMessages', count);
+    setConfig({ ...config, maxDailyFreeAIMessages: count });
+  };
+
+  return (
+    <ProtectedRoute>
+      <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 min-h-[calc(100vh-4rem)]">
+        
+        {/* Top Command Center Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <Badge variant="blue" className="gap-1 mb-1">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Super Admin OS v3.0</span>
+            </Badge>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] tracking-tight">
+              Super Admin Operating CMS
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Centralized platform configuration, AI model routing, user roles, media assets, and security audit logs.
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <Link href="/dashboard">
+              <Button variant="outline" size="md" className="gap-2 text-xs font-bold border-slate-300 text-slate-700 hover:bg-slate-100">
+                <ArrowRight className="w-4 h-4 rotate-180" />
+                <span>Go to User Dashboard</span>
+              </Button>
+            </Link>
+
+            <Button
+              onClick={toggleMaintenanceMode}
+              variant={config.maintenanceMode ? 'secondary' : 'outline'}
+              size="md"
+              className={`gap-2 text-xs font-bold ${config.maintenanceMode ? 'bg-amber-500 text-white hover:bg-amber-600' : ''}`}
+            >
+              <AlertTriangle className="w-4 h-4" />
+              <span>{config.maintenanceMode ? 'MAINTENANCE MODE ON' : 'System Live'}</span>
+            </Button>
+
+            <Link href="/admin/launch-control">
+              <Button variant="primary" size="md" className="gap-2 shadow-lg shadow-blue-500/25">
+                <Activity className="w-4 h-4" />
+                <span>Go-Live Control Panel</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* TOP 4 DYNAMIC SCORECARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card glass className="p-5 space-y-2 border-white/90 shadow-xl">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span>Monthly Recurring Revenue</span>
+              <DollarSign className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="text-3xl font-black text-slate-900">${summary.business.mrrUSD.toLocaleString()}</div>
+            <div className="text-[10px] text-slate-400 font-mono">
+              {summary.business.activeSubscribers > 0
+                ? `${summary.business.activeSubscribers} Active Subscribers`
+                : 'No revenue yet'}
+            </div>
+          </Card>
+
+          <Card glass className="p-5 space-y-2 border-white/90 shadow-xl">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span>Total Registered Candidates</span>
+              <Users className="w-4 h-4 text-[#2563EB]" />
+            </div>
+            <div className="text-3xl font-black text-slate-900">{summary.students.totalStudents.toLocaleString()}</div>
+            <div className="text-[10px] text-slate-400 font-mono">
+              {summary.students.totalStudents > 0
+                ? `${summary.students.activeStudentsDAU} DAU • ${summary.students.activeStudentsMAU} MAU`
+                : 'No registered candidates yet'}
+            </div>
+          </Card>
+
+          <Card glass className="p-5 space-y-2 border-white/90 shadow-xl">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span>Active AI Model Provider</span>
+              <Brain className="w-4 h-4 text-indigo-500" />
+            </div>
+            <div className="text-xl font-black text-indigo-600 truncate">{config.aiPrimaryProvider}</div>
+            <div className="text-[10px] text-slate-400 font-mono">
+              {summary.aiTutor.totalTokensConsumed > 0
+                ? `${(summary.aiTutor.totalTokensConsumed / 1000000).toFixed(1)}M Tokens ($${summary.aiTutor.totalAICostUSD.toFixed(2)})`
+                : 'Zero AI token consumption'}
+            </div>
+          </Card>
+
+          <Card glass className="p-5 space-y-2 border-white/90 shadow-xl">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+              <span>System Health & Uptime</span>
+              <Server className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="text-3xl font-black text-emerald-600">{summary.system.uptimePercentage}%</div>
+            <div className="text-[10px] text-slate-400 font-mono">
+              API Latency: {summary.system.apiAverageLatencyMs}ms • DB: Healthy
+            </div>
+          </Card>
+        </div>
+
+        {/* TABBED NAVIGATION BAR */}
+        <div className="flex items-center space-x-2 border-b border-slate-200 text-xs font-bold pb-2 overflow-x-auto">
+          {[
+            { id: 'overview', label: 'Global Overview', icon: Cpu },
+            { id: 'users', label: 'Users & Roles', icon: Users },
+            { id: 'ai_cms', label: 'AI & Prompt CMS', icon: Brain },
+            { id: 'branding', label: 'Site Settings', icon: Settings },
+            { id: 'media', label: 'Media Library', icon: Folder },
+            { id: 'audit', label: 'Security Audit Logs', icon: Lock },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as AdminTab)}
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all ${
+                activeTab === tab.id
+                  ? 'bg-[#0F172A] text-white shadow-md'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* TAB 1: GLOBAL OVERVIEW */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6 animate-fadeIn">
+            <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
+                    <Layers className="w-5 h-5 text-[#2563EB]" />
+                    <span>Registered Engine Plugin Registry</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Modular platform engines automatically registered inside Super Admin CMS.
+                  </p>
+                </div>
+                <Badge variant="emerald">{REGISTERED_PLUGINS.length} Engines Active</Badge>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {REGISTERED_PLUGINS.map((plug) => (
+                  <div key={plug.id} className="p-4 rounded-2xl border border-slate-200 bg-white space-y-2 shadow-sm">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-extrabold text-slate-900">{plug.name}</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] font-bold">
+                        {plug.version}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 text-xs border-t border-slate-100">
+                      <span className="flex items-center space-x-1 text-emerald-600 font-bold text-[11px]">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Active</span>
+                      </span>
+
+                      <Link href={plug.route} className="font-bold text-[#2563EB] hover:underline flex items-center space-x-1 text-[11px]">
+                        <span>Open {plug.menuLabel}</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* TAB 2: USER & ROLE MANAGEMENT */}
+        {activeTab === 'users' && (
+          <div className="space-y-6 animate-fadeIn">
+            {summary.students.totalStudents === 0 ? (
+              <EmptyState
+                title="No Users Registered Yet"
+                description="Your platform currently has zero registered candidates or staff members. Invite your first student or create administrator accounts."
+                icon={Users}
+                badgeLabel="Users Roster Empty"
+                actionLabel="Invite First Candidate"
+                onAction={() => alert('Invite candidate modal')}
+                secondaryActionLabel="Configure User Roles"
+                onSecondaryAction={() => alert('Configure roles')}
+              />
+            ) : (
+              <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
+                <h3 className="text-base font-bold text-[#0F172A]">Registered User Accounts ({summary.students.totalStudents})</h3>
+                <p className="text-xs text-slate-500">Live PostgreSQL database accounts.</p>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: AI & PROMPT CMS */}
+        {activeTab === 'ai_cms' && (
+          <div className="space-y-6 animate-fadeIn">
+            <Card glass className="p-6 shadow-xl border-white/90 space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
+                    <Brain className="w-5 h-5 text-indigo-500" />
+                    <span>Multi-Provider AI Routing Manager</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Configure LLM priorities, fallbacks, token limits, and API keys.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {DEFAULT_AI_PROVIDERS.map((prov) => (
+                  <div key={prov.id} className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+                    <div className="space-y-1">
+                      <div className="flex items-center space-x-2 font-bold text-slate-900">
+                        <span>Priority #{prov.priority}: {prov.name}</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px]">ENABLED</span>
+                      </div>
+                      <div className="text-slate-500 font-mono text-[11px]">
+                        API Key: {prov.apiKeyMasked}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <Button variant="outline" size="sm" className="text-xs">
+                        Configure Limits
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* TAB 4: SITE SETTINGS & BRANDING */}
+        {activeTab === 'branding' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
+            <div className="lg:col-span-7">
+              <Card glass className="p-6 shadow-xl border-white/90 space-y-6">
+                <h3 className="text-base font-bold text-[#0F172A]">Dynamic Site Settings</h3>
+
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Platform Brand Name</label>
+                    <input
+                      type="text"
+                      value={config.brandName}
+                      onChange={(e) => {
+                        updatePlatformConfig('brandName', e.target.value);
+                        setConfig({ ...config, brandName: e.target.value });
+                      }}
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white font-semibold text-slate-900"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-700">Max Free Daily AI Tutor Messages</label>
+                    <div className="flex items-center space-x-2">
+                      {[3, 5, 10, 20].map((num) => (
+                        <button
+                          key={num}
+                          onClick={() => updateMaxFreeAIMessages(num)}
+                          className={`px-3 py-1.5 rounded-lg transition-all font-bold ${
+                            config.maxDailyFreeAIMessages === num
+                              ? 'bg-[#2563EB] text-white shadow'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {num} Messages
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: SECURITY AUDIT LOGS */}
+        {activeTab === 'audit' && (
+          <div className="space-y-6 animate-fadeIn">
+            {auditLogs.length === 0 ? (
+              <EmptyState
+                title="No Security Audit Logs Yet"
+                description="No administrative actions or security threat events have been recorded in the platform audit log."
+                icon={Lock}
+                badgeLabel="Audit Log Clear"
+              />
+            ) : (
+              <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
+                <h3 className="text-base font-bold text-[#0F172A]">Security Audit Log Stream</h3>
+                <div className="space-y-3">
+                  {auditLogs.map((log) => (
+                    <div key={log.id} className="p-4 rounded-2xl border border-slate-200 bg-white flex items-center justify-between text-xs">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-extrabold text-slate-900">{log.action}</span>
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] font-mono text-[10px]">
+                            {log.module}
+                          </span>
+                        </div>
+                        <p className="text-slate-600">{log.details}</p>
+                      </div>
+
+                      <div className="text-right text-[11px] text-slate-400 font-mono">
+                        <div>{log.userName}</div>
+                        <div>{new Date(log.timestamp).toLocaleTimeString()}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
+
+      </div>
+    </ProtectedRoute>
+  );
+}
