@@ -45,11 +45,13 @@ function LoginForm() {
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
     setIsSubmitting(true);
-    const res = await loginWithGoogle();
+    const res = await loginWithGoogle(email || undefined);
     setIsSubmitting(false);
 
-    if (!res.success) {
-      setErrorMessage(res.error || 'Google sign-in failed.');
+    if (res.success) {
+      router.push(redirectUrl);
+    } else if (res.error) {
+      setErrorMessage(res.error);
     }
   };
 

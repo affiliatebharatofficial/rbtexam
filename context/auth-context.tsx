@@ -149,12 +149,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // 2. Direct Candidate Account Authentication
-      const targetEmail = (email || '').toLowerCase().trim();
+      let targetEmail = (email || '').toLowerCase().trim();
+
+      if (!targetEmail && typeof window !== 'undefined') {
+        const prompted = window.prompt('Please enter your Google/Gmail email address to sign in:', '');
+        if (prompted) {
+          targetEmail = prompted.toLowerCase().trim();
+        }
+      }
+
       if (!targetEmail) {
         setIsLoading(false);
         return {
           success: false,
-          error: 'Please sign in or register with your email address below.',
+          error: 'Please enter your email address to continue with Google sign-in.',
         };
       }
 

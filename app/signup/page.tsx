@@ -67,11 +67,13 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     setErrorMessage('');
     setIsSubmitting(true);
-    const res = await loginWithGoogle();
+    const res = await loginWithGoogle(email || undefined, fullName || undefined);
     setIsSubmitting(false);
 
-    if (!res.success) {
-      setErrorMessage(res.error || 'Google sign-up failed.');
+    if (res.success) {
+      router.push('/dashboard');
+    } else if (res.error) {
+      setErrorMessage(res.error);
     }
   };
 
