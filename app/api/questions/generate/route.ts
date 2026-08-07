@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createQuestion } from '@/lib/master-question-bank';
+import { createServerQuestion } from '@/lib/master-question-bank-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -262,7 +262,7 @@ Return ONLY a valid JSON object matching this schema:
 
     // Persist all generated questions into the Master Question Bank immediately
     const savedQuestions = generatedQuestions.map((q: any, i: number) => {
-      return createQuestion({
+      return createServerQuestion({
         question: q.question || `Generated question #${i + 1} for ${targetTopic}`,
         scenarioText: q.scenarioText || `Scenario analysis for ${targetTopic}`,
         questionType: 'scenario_based',

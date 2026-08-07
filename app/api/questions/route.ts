@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getFilteredQuestions, createQuestion } from '@/lib/master-question-bank';
+import { getFilteredQuestions } from '@/lib/master-question-bank';
+import { loadServerPersistentQuestions, createServerQuestion } from '@/lib/master-question-bank-server';
 import { QuestionFilterParams } from '@/types/master-question';
 
 export async function GET(request: NextRequest) {
   try {
+    loadServerPersistentQuestions();
     const { searchParams } = new URL(request.url);
 
     const filterParams: QuestionFilterParams = {
@@ -33,7 +35,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing mandatory fields: question, certification, options' }, { status: 400 });
     }
 
-    const created = createQuestion(body);
+    const created = createServerQuestion(body);
     return NextResponse.json({ success: true, question: created }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to create question', message: error.message }, { status: 500 });

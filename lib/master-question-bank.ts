@@ -5,8 +5,6 @@ import {
   QuestionStatus,
   CertificationLevel,
 } from '@/types/master-question';
-import fs from 'fs';
-import path from 'path';
 
 // Initial default seed questions
 const SEED_QUESTIONS: MasterQuestion[] = [
@@ -119,33 +117,12 @@ export const MASTER_QUESTION_BANK: MasterQuestion[] = [...SEED_QUESTIONS];
 
 const LOCAL_STORAGE_KEY = 'rbt_master_questions_v1';
 
-function getPersistentFilePath(): string {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  return path.join(dataDir, 'questions-store.json');
-}
-
 /**
- * Load questions from persistent storage (Server file or Browser localStorage)
+ * Load questions from persistent storage (Browser localStorage)
  */
 export function loadPersistentQuestions(): MasterQuestion[] {
   try {
-    if (typeof window === 'undefined') {
-      const filePath = getPersistentFilePath();
-      if (fs.existsSync(filePath)) {
-        const fileData = fs.readFileSync(filePath, 'utf-8');
-        const parsed = JSON.parse(fileData);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          parsed.forEach((q: MasterQuestion) => {
-            if (!MASTER_QUESTION_BANK.some((existing) => existing.id === q.id)) {
-              MASTER_QUESTION_BANK.unshift(q);
-            }
-          });
-        }
-      }
-    } else {
+    if (typeof window !== 'undefined') {
       const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -165,14 +142,11 @@ export function loadPersistentQuestions(): MasterQuestion[] {
 }
 
 /**
- * Save questions array to persistent storage
+ * Save questions array to persistent storage (Browser localStorage)
  */
 export function savePersistentQuestions(): void {
   try {
-    if (typeof window === 'undefined') {
-      const filePath = getPersistentFilePath();
-      fs.writeFileSync(filePath, JSON.stringify(MASTER_QUESTION_BANK, null, 2), 'utf-8');
-    } else {
+    if (typeof window !== 'undefined') {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(MASTER_QUESTION_BANK));
     }
   } catch (err) {
