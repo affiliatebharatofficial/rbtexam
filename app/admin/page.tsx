@@ -467,39 +467,60 @@ export default function SuperAdminCMSPage() {
         {/* TAB 1: GLOBAL OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-6 animate-fadeIn">
-            <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <Card glass className="p-6 shadow-xl border-white/90 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
                   <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
                     <Layers className="w-5 h-5 text-[#2563EB]" />
                     <span>Registered Engine Plugin Registry</span>
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Modular platform engines automatically registered inside Super Admin CMS.
+                    Modular platform engines automatically registered inside Super Admin CMS. Click any engine card to launch or configure.
                   </p>
                 </div>
-                <Badge variant="emerald">{REGISTERED_PLUGINS.length} Engines Active</Badge>
+                <div className="flex items-center space-x-2">
+                  <Badge variant="emerald">{REGISTERED_PLUGINS.filter(p => p.status === 'active').length} / {REGISTERED_PLUGINS.length} Engines Active</Badge>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {REGISTERED_PLUGINS.map((plug) => (
-                  <div key={plug.id} className="p-4 rounded-2xl border border-slate-200 bg-white space-y-2 shadow-sm">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-extrabold text-slate-900">{plug.name}</span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] font-bold">
-                        {plug.version}
-                      </span>
+                  <div
+                    key={plug.id}
+                    className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between group"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <span className="font-extrabold text-slate-900 text-sm block group-hover:text-[#2563EB] transition-colors">
+                            {plug.name}
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block">
+                            {plug.category || 'Platform Engine'}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] font-extrabold flex-shrink-0">
+                          {plug.version}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {plug.description}
+                      </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 text-xs border-t border-slate-100">
-                      <span className="flex items-center space-x-1 text-emerald-600 font-bold text-[11px]">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                      <span className="flex items-center space-x-1.5 text-emerald-600 font-bold text-xs">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                         <span>Active</span>
                       </span>
 
-                      <Link href={plug.route} className="font-bold text-[#2563EB] hover:underline flex items-center space-x-1 text-[11px]">
+                      <Link
+                        href={plug.route}
+                        className="px-3.5 py-2 rounded-xl bg-[#2563EB] text-white text-xs font-bold hover:bg-blue-700 transition-all flex items-center space-x-1.5 shadow-sm shadow-blue-500/20"
+                      >
                         <span>Open {plug.menuLabel}</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </div>

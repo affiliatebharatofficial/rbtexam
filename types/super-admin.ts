@@ -53,6 +53,10 @@ export interface PlatformPlugin {
   name: string;
   version: string;
   status: 'active' | 'inactive';
+  description?: string;
   menuLabel: string;
   route: string;
+  adminRoute?: string;
+  category?: 'Core Learning' | 'AI Workforce' | 'Operations' | 'Security & Infrastructure';
+  isEnabled?: boolean;
 }

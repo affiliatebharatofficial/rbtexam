@@ -73,13 +73,20 @@ export const DEFAULT_AI_PROVIDERS: AIProviderConfig[] = [
 ];
 
 export const REGISTERED_PLUGINS: PlatformPlugin[] = [
-  { id: 'plug-questions', name: 'Master Question Bank Engine', version: 'v1.4.0', status: 'active', menuLabel: 'Question Bank', route: '/admin/questions' },
-  { id: 'plug-flashcards', name: 'Smart Flashcard Engine', version: 'v1.5.0', status: 'active', menuLabel: 'Flashcards', route: '/flashcards' },
-  { id: 'plug-tutor', name: 'Socrates AI Tutor Engine', version: 'v1.6.0', status: 'active', menuLabel: 'AI Tutor', route: '/tutor' },
-  { id: 'plug-adaptive', name: 'AI Adaptive Learning Engine', version: 'v1.7.0', status: 'active', menuLabel: 'Study Planner', route: '/study-planner' },
-  { id: 'plug-analytics', name: 'Analytics & BI Engine', version: 'v1.8.0', status: 'active', menuLabel: 'Analytics', route: '/analytics' },
-  { id: 'plug-billing', name: 'Subscription & Billing Engine', version: 'v1.9.0', status: 'active', menuLabel: 'Billing', route: '/profile/billing' },
-  { id: 'plug-seo', name: 'Enterprise SEO & pSEO Engine', version: 'v2.0.0', status: 'active', menuLabel: 'SEO Hub', route: '/rbt' },
+  { id: 'plug-questions', name: 'Master Question Bank Engine', version: 'v1.4.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'BACB 2nd Edition Task List question generator & CSV manager.', menuLabel: 'Question Bank', route: '/admin/questions' },
+  { id: 'plug-flashcards', name: 'Smart Flashcard Engine', version: 'v1.5.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'Leitner 5-box spaced repetition algorithm & progress persistence.', menuLabel: 'Flashcards', route: '/flashcards' },
+  { id: 'plug-tutor', name: 'Socrates AI Tutor Engine', version: 'v1.6.0', status: 'active', isEnabled: true, category: 'AI Workforce', description: 'Clinical dialogue roleplay, RAG retrieval & prompt safety gates.', menuLabel: 'AI Tutor', route: '/tutor' },
+  { id: 'plug-adaptive', name: 'AI Adaptive Learning Engine', version: 'v1.7.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'Dynamic study planner, target date readiness & domain heatmaps.', menuLabel: 'Study Planner', route: '/study-planner' },
+  { id: 'plug-analytics', name: 'Analytics & BI Engine', version: 'v1.8.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Pass likelihood calculator, DAU/MAU metrics & cohort analytics.', menuLabel: 'Analytics', route: '/analytics' },
+  { id: 'plug-billing', name: 'Lemon Squeezy Billing Engine', version: 'v1.9.0', status: 'active', isEnabled: true, category: 'Operations', description: 'SaaS merchant checkout, recurring webhooks & subscription quotas.', menuLabel: 'Billing', route: '/profile/billing' },
+  { id: 'plug-seo', name: 'Enterprise SEO & pSEO Engine', version: 'v2.0.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Programmatic landing pages, dynamic XML sitemaps & OpenGraph metadata.', menuLabel: 'SEO Hub', route: '/rbt' },
+  { id: 'plug-workforce', name: 'AI Workforce Manager', version: 'v2.1.0', status: 'active', isEnabled: true, category: 'AI Workforce', description: '29 autonomous AI agents across 7 specialized departments.', menuLabel: 'AI Workforce', route: '/admin/ai-workforce' },
+  { id: 'plug-knowledge', name: 'Knowledge Graph Engine', version: 'v2.2.0', status: 'active', isEnabled: true, category: 'Core Learning', description: 'Interactive BACB task list nodes & clinical dependency visualizer.', menuLabel: 'Knowledge Graph', route: '/admin/knowledge' },
+  { id: 'plug-launch', name: 'Launch & Release Engine', version: 'v2.3.0', status: 'active', isEnabled: true, category: 'Operations', description: '20-point pre-launch validation matrix & SemVer changelog generator.', menuLabel: 'Launch Control', route: '/admin/launch-control' },
+  { id: 'plug-security', name: 'Security & RLS Engine', version: 'v2.4.0', status: 'active', isEnabled: true, category: 'Security & Infrastructure', description: 'PostgreSQL Row-Level Security, prompt injection filters & audit trail.', menuLabel: 'Security Center', route: '/admin/security' },
+  { id: 'plug-brain', name: 'Project Brain Inventory', version: 'v2.5.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Real-time codebase component, database table & API route registry.', menuLabel: 'Project Brain', route: '/admin/project-brain' },
+  { id: 'plug-qa', name: 'QA & Automated Testing', version: 'v2.6.0', status: 'active', isEnabled: true, category: 'Operations', description: '145-test suite execution, Playwright E2E smoke tests & health checks.', menuLabel: 'QA Hub', route: '/admin/qa' },
+  { id: 'plug-notifications', name: 'Notification & Email Engine', version: 'v2.7.0', status: 'active', isEnabled: true, category: 'Operations', description: 'In-app notification inbox, SMTP gateway & email campaign manager.', menuLabel: 'Notifications', route: '/admin/notifications' },
 ];
 
 const AUDIT_LOG_BUFFER: SystemAuditLog[] = [
