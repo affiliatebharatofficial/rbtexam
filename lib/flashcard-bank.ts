@@ -354,6 +354,20 @@ export async function deleteDatabaseFlashcard(id: string): Promise<boolean> {
 }
 
 /**
+ * Bulk delete multiple flashcards from Supabase database
+ */
+export async function deleteDatabaseFlashcardBulk(ids: string[]): Promise<boolean> {
+  if (!ids || ids.length === 0) return true;
+  const adminDb = getSupabaseAdminClient();
+  const { error } = await adminDb.from('master_flashcards').delete().in('id', ids);
+  if (error) {
+    console.error('[Flashcard Bank] Bulk Delete error:', error.message);
+    throw new Error(`Failed to bulk delete flashcards: ${error.message}`);
+  }
+  return true;
+}
+
+/**
  * Parse CSV string content into Partial<Flashcard>[] array
  */
 export function parseCSVFlashcards(csvText: string): Partial<Flashcard>[] {

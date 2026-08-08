@@ -118,6 +118,57 @@ export default function AdminFlashcardsPage() {
     }
   };
 
+  // Multi-Select & Bulk Delete State
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const handleToggleSelectCard = (id: string) => {
+    setSelectedCardIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllFilteredCards = () => {
+    if (selectedCardIds.length === filteredCards.length && filteredCards.length > 0) {
+      setSelectedCardIds([]);
+    } else {
+      setSelectedCardIds(filteredCards.map((c) => c.id));
+    }
+  };
+
+  const handleBulkDeleteSelected = async () => {
+    if (selectedCardIds.length === 0) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete all ${selectedCardIds.length} selected flashcards from the master database?`
+      )
+    )
+      return;
+
+    setIsBulkDeleting(true);
+    setStatusMsg('');
+    setGenerationError('');
+    try {
+      const res = await fetch('/api/flashcards', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedCardIds }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatusMsg(`✅ Successfully deleted ${selectedCardIds.length} flashcards!`);
+        setFlashcards((prev) => prev.filter((c) => !selectedCardIds.includes(c.id)));
+        setSelectedCardIds([]);
+      } else {
+        setGenerationError(data.error || 'Failed to bulk delete flashcards');
+      }
+    } catch (err: any) {
+      setGenerationError(`Network error bulk deleting flashcards: ${err.message}`);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
   const fetchAllFlashcards = async () => {
     try {
       const res = await fetch('/api/flashcards?limit=200');
@@ -398,6 +449,51 @@ export default function AdminFlashcardsPage() {
           </div>
         </div>
 
+        {/* Floating / Sticky Bulk Action Banner */}
+        {selectedCardIds.length > 0 && (
+          <div className="sticky top-4 z-40 p-4 rounded-2xl bg-slate-900 text-white shadow-2xl flex items-center justify-between animate-fadeIn border border-slate-700">
+            <div className="flex items-center space-x-3">
+              <span className="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30 text-xs">
+                {selectedCardIds.length} Selected
+              </span>
+              <p className="text-xs text-slate-300">
+                You have selected <strong className="text-white">{selectedCardIds.length}</strong> flashcard(s).
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedCardIds([])}
+                className="text-xs text-slate-300 border-slate-700 hover:bg-slate-800"
+              >
+                Clear Selection
+              </Button>
+
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleBulkDeleteSelected}
+                disabled={isBulkDeleting}
+                className="gap-2 bg-rose-600 hover:bg-rose-700 font-extrabold text-xs shadow-lg shadow-rose-600/30"
+              >
+                {isBulkDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting Cards...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Selected ({selectedCardIds.length})</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Flashcards Roster Table Card */}
         <Card className="border-slate-200 overflow-hidden">
           <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -414,6 +510,14 @@ export default function AdminFlashcardsPage() {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-100/60 font-bold text-slate-600">
+                  <th className="p-3 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedCardIds.length === filteredCards.length && filteredCards.length > 0}
+                      onChange={handleSelectAllFilteredCards}
+                      className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                  </th>
                   <th className="p-3">Card Title & Front Prompt</th>
                   <th className="p-3">Back Answer Rationale</th>
                   <th className="p-3">Category</th>
@@ -424,12 +528,27 @@ export default function AdminFlashcardsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {filteredCards.map((card) => (
-                  <tr key={card.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-3 max-w-xs">
-                      <p className="font-bold text-slate-900 truncate">{card.title}</p>
-                      <p className="text-slate-500 text-[11px] line-clamp-2 mt-0.5">{card.front}</p>
-                    </td>
+                {filteredCards.map((card) => {
+                  const isSelected = selectedCardIds.includes(card.id);
+                  return (
+                    <tr
+                      key={card.id}
+                      className={`transition-colors ${
+                        isSelected ? 'bg-blue-50/70 hover:bg-blue-100/50' : 'hover:bg-slate-50/80'
+                      }`}
+                    >
+                      <td className="p-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleToggleSelectCard(card.id)}
+                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        />
+                      </td>
+                      <td className="p-3 max-w-xs">
+                        <p className="font-bold text-slate-900 truncate">{card.title}</p>
+                        <p className="text-slate-500 text-[11px] line-clamp-2 mt-0.5">{card.front}</p>
+                      </td>
                     <td className="p-3 max-w-sm">
                       <p className="text-slate-700 line-clamp-2">{card.back}</p>
                       <p className="text-slate-400 text-[10px] mt-0.5">{card.reference}</p>
@@ -485,7 +604,8 @@ export default function AdminFlashcardsPage() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
