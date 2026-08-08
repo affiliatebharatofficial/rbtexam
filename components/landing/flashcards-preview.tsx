@@ -152,73 +152,93 @@ export function FlashcardsPreview() {
             </button>
           </div>
 
-          {/* Card Box Wrapper */}
-          <div className="relative cursor-pointer perspective-1000 group" onClick={handleFlip}>
+          {/* Card Box Outer Perspective Wrapper */}
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              isFlipped
+                ? `Flashcard back definition: ${card.definition}. Click or press Enter or Space to flip to front.`
+                : `Flashcard front term: ${card.term}. Click or press Enter or Space to flip to back.`
+            }
+            aria-pressed={isFlipped}
+            onClick={handleFlip}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleFlip();
+              }
+            }}
+            className="relative min-h-[360px] sm:min-h-[380px] w-full cursor-pointer touch-manipulation select-none [perspective:1000px] group focus:outline-none focus:ring-4 focus:ring-blue-500/30 rounded-3xl"
+          >
+            {/* 3D Rotating Inner Card Body */}
             <div
-              className={`w-full min-h-[320px] p-8 rounded-3xl bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 text-white shadow-2xl border border-slate-700/80 flex flex-col justify-between transition-transform duration-500 transform ${
-                isFlipped ? 'rotate-y-180' : ''
+              className={`relative w-full min-h-[360px] sm:min-h-[380px] rounded-3xl transition-transform duration-700 [transform-style:preserve-3d] shadow-2xl ${
+                isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
               }`}
             >
-              {!isFlipped ? (
-                /* Front Side */
-                <div className="flex flex-col justify-between h-full space-y-8">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">
-                      {card.code} • {card.domain}
-                    </span>
-                    <span className="flex items-center space-x-1 text-slate-400">
-                      <RotateCw className="w-3.5 h-3.5" />
-                      <span>Click to flip</span>
-                    </span>
-                  </div>
+              {/* FRONT FACE OF CARD */}
+              <div className="absolute inset-0 w-full h-full rounded-3xl p-8 bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 text-white border border-slate-700/80 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] flex flex-col justify-between overflow-y-auto shadow-xl">
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">
+                    {card.code} • {card.domain}
+                  </span>
+                  <span className="flex items-center space-x-1 text-slate-400 font-bold">
+                    <RotateCw className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Click to flip</span>
+                  </span>
+                </div>
 
-                  <div className="text-center space-y-3 py-6">
-                    <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                      {card.term}
-                    </h3>
-                    <div className="inline-flex items-center space-x-1.5 text-xs text-slate-400">
-                      <Volume2 className="w-4 h-4 text-[#2563EB]" />
-                      <span>BACB Core ABA Term</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs text-slate-400">
-                    <span>Leitner Box Level {card.leitnerBox} of 5</span>
-                    <span className="text-emerald-400 font-bold">Mastery Rate: 94%</span>
+                <div className="text-center space-y-3 py-6 my-auto">
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    {card.term}
+                  </h3>
+                  <div className="inline-flex items-center space-x-1.5 text-xs text-slate-400">
+                    <Volume2 className="w-4 h-4 text-[#2563EB]" />
+                    <span>BACB Core ABA Term</span>
                   </div>
                 </div>
-              ) : (
-                /* Back Side */
-                <div className="flex flex-col justify-between h-full space-y-6 animate-fadeIn">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="text-emerald-400 font-bold uppercase tracking-wider">Clinical Definition & Mnemonic</span>
-                    <span className="text-slate-400 text-[11px]">Card {currentIndex + 1} of {flashcards.length}</span>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs text-slate-400 font-medium">
+                  <span>Leitner Box Level {card.leitnerBox} of 5</span>
+                  <span className="text-emerald-400 font-bold">Mastery Rate: 94%</span>
+                </div>
+              </div>
+
+              {/* BACK FACE OF CARD */}
+              <div className="absolute inset-0 w-full h-full rounded-3xl p-8 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-700/80 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between overflow-y-auto shadow-2xl">
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span className="text-emerald-400 font-bold uppercase tracking-wider">Clinical Definition & Mnemonic</span>
+                  <span className="text-slate-400 text-[11px]">Card {currentIndex + 1} of {flashcards.length}</span>
+                </div>
+
+                <div className="space-y-3 my-auto text-xs">
+                  <p className="text-sm sm:text-base font-medium text-slate-100 leading-relaxed">
+                    "{card.definition}"
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-200 text-xs space-y-0.5">
+                    <span className="font-bold flex items-center space-x-1">
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Mnemonic Trick:</span>
+                    </span>
+                    <p>{card.mnemonic}</p>
                   </div>
 
-                  <div className="space-y-3">
-                    <p className="text-sm sm:text-base font-medium text-slate-100 leading-relaxed">
-                      "{card.definition}"
-                    </p>
-
-                    <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-200 text-xs space-y-0.5">
-                      <span className="font-bold flex items-center space-x-1">
-                        <Zap className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Mnemonic Trick:</span>
-                      </span>
-                      <p>{card.mnemonic}</p>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs space-y-1">
-                      <span className="font-bold text-blue-300">Clinical Scenario Example:</span>
-                      <p className="text-slate-300 italic">{card.clinicalExample}</p>
-                    </div>
-                  </div>
-
-                  <div className="text-center text-xs text-slate-400 pt-2">
-                    Click to flip back
+                  <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs space-y-1">
+                    <span className="font-bold text-blue-300">Clinical Scenario Example:</span>
+                    <p className="text-slate-300 italic">{card.clinicalExample}</p>
                   </div>
                 </div>
-              )}
+
+                <div className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800 flex items-center justify-between">
+                  <span>Leitner SRS Active</span>
+                  <span className="text-slate-300 font-bold flex items-center space-x-1">
+                    <RotateCw className="w-3 h-3 text-emerald-400" />
+                    <span>Click to flip back</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
