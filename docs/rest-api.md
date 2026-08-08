@@ -1,4 +1,4 @@
-# REST API Standards & Pagination Schemas - RBTTrainingAI SaaS
+# REST API Standards & Pagination Schemas - RBT Practice Questions SaaS
 
 ## Purpose
 Defines standard JSON response wrappers, pagination cursors (`limit`, `offset`), and HTTP status codes (200, 201, 400, 401, 403, 429, 500).

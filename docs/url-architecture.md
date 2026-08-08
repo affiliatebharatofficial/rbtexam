@@ -1,4 +1,4 @@
-# URL Architecture & Clean Taxonomy - RBTTrainingAI SaaS
+# URL Architecture & Clean Taxonomy - RBT Practice Questions SaaS
 
 ## Purpose
 Defines the clean, hierarchical URL taxonomy for search engine crawling and user navigation.

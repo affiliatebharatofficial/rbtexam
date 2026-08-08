@@ -13,7 +13,7 @@ interface EnvVar {
 
 const ENV_SCHEMA: EnvVar[] = [
   // App
-  { key: 'NEXT_PUBLIC_APP_URL',             required: true,  description: 'Public app URL', example: 'https://rbttrainingai.com' },
+  { key: 'NEXT_PUBLIC_APP_URL',             required: true,  description: 'Public app URL', example: 'https://rbtpracticequestions.com' },
   { key: 'NEXT_PUBLIC_APP_NAME',            required: false, description: 'App display name' },
   { key: 'NEXT_PUBLIC_APP_ENV',             required: true,  description: 'Environment: development|staging|production' },
 
@@ -95,7 +95,7 @@ export function validateEnvironment(): EnvValidationResult {
 // CLI runner
 if (require.main === module) {
   const result = validateEnvironment();
-  console.log('\n🔍 RBTTrainingAI — Environment Validation\n');
+  console.log('\n🔍 RBT Practice Questions — Environment Validation\n');
   console.log(`Total vars: ${result.summary.total}  |  Present: ${result.summary.present}  |  Missing: ${result.summary.missing}`);
 
   if (result.missingRequired.length > 0) {

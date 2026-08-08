@@ -1,4 +1,4 @@
-# Granular Role & Permission System - RBTTrainingAI SaaS
+# Granular Role & Permission System - RBT Practice Questions SaaS
 
 ## Purpose
 This document specifies the Role-Based Access Control (RBAC) architecture governing Super Admins, Admins, BCBA Clinical Editors, Support Staff, and Students.

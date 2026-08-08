@@ -1,7 +1,7 @@
-# 03. Database Schema - RBTTrainingAI SaaS
+# 03. Database Schema - RBT Practice Questions SaaS
 
 ## Purpose
-This document defines the complete relational database schema for RBTTrainingAI, hosted on Supabase (PostgreSQL). It covers tables, relationships, indices, Row Level Security (RLS) policies, and data types supporting candidate tracking, clinic management, and diagnostic algorithms.
+This document defines the complete relational database schema for RBT Practice Questions, hosted on Supabase (PostgreSQL). It covers tables, relationships, indices, Row Level Security (RLS) policies, and data types supporting candidate tracking, clinic management, and diagnostic algorithms.
 
 ## Architecture
 - **DBMS**: PostgreSQL 15+ (Supabase Managed)

@@ -1,4 +1,4 @@
-# FEATURE MAP — RBTTrainingAI SaaS
+# FEATURE MAP — RBT Practice Questions SaaS
 
 ## Core Product Feature Matrix
 

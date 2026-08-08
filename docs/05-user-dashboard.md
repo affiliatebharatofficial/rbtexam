@@ -1,4 +1,4 @@
-# 05. User Dashboard - RBTTrainingAI SaaS
+# 05. User Dashboard - RBT Practice Questions SaaS
 
 ## Purpose
 The User Dashboard (Candidate Command Center) serves as the primary intelligence hub for RBT candidates. Designed with Apple-level visual aesthetics, glassmorphic blur panels, dark mode toggling, and interactive data visualization widgets, it tracks BACB exam readiness, study streaks, daily target goals, weak/strong task list items, Leitner 5-box flashcards distribution, recent mock attempts, timeline activity feed, and performance trends.

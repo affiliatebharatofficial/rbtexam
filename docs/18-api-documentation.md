@@ -1,4 +1,4 @@
-# 18. Enterprise API Platform & Documentation - RBTTrainingAI SaaS
+# 18. Enterprise API Platform & Documentation - RBT Practice Questions SaaS
 
 ## Purpose
 The Enterprise API Platform provides centralized REST APIs, outbound webhooks, API key security, and client SDK code generators for web, mobile, clinic enterprise partners, and white-label SaaS clients.

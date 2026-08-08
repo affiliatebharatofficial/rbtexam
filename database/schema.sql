@@ -1,4 +1,4 @@
--- RBTTrainingAI Database Schema (PostgreSQL / Supabase Ready)
+-- RBT Practice Questions Database Schema (PostgreSQL / Supabase Ready)
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

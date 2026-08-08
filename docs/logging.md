@@ -1,4 +1,4 @@
-# Logging & Audit Architecture — RBTTrainingAI SaaS
+# Logging & Audit Architecture — RBT Practice Questions SaaS
 
 ## Purpose
 Unified logging, structured audit logs, security threat monitoring, and retrieval telemetry.

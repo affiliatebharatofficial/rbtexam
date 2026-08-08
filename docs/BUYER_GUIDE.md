@@ -1,7 +1,7 @@
-# BUYER HANDOVER GUIDE — RBTTrainingAI SaaS
+# BUYER HANDOVER GUIDE — RBT Practice Questions SaaS
 
 ## Executive Summary for M&A / Acquisition Buyers
-RBTTrainingAI is built as a complete, self-contained commercial SaaS platform ready for immediate takeover, deployment, and scaling without requiring original developer assistance.
+RBT Practice Questions is built as a complete, self-contained commercial SaaS platform ready for immediate takeover, deployment, and scaling without requiring original developer assistance.
 
 ---
 

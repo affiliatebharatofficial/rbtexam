@@ -1,4 +1,4 @@
-# Backup & Restore Strategy — RBTTrainingAI SaaS
+# Backup & Restore Strategy — RBT Practice Questions SaaS
 
 ## Purpose
 Establishes automated daily backup schedules, point-in-time recovery (PITR), and data restoration procedures for enterprise data safety.

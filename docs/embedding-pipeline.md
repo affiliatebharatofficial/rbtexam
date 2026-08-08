@@ -1,4 +1,4 @@
-# Embedding Pipeline — RBTTrainingAI SaaS
+# Embedding Pipeline — RBT Practice Questions SaaS
 
 ## Purpose
 Specifies the semantic chunking strategy, embedding generation workflow, versioned embedding metadata, and background embedding queue processing.

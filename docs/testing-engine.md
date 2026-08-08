@@ -1,4 +1,4 @@
-# Testing Engine — RBTTrainingAI SaaS
+# Testing Engine — RBT Practice Questions SaaS
 
 ## Purpose
 The Enterprise Testing & QA Engine ensures platform stability, prevents regressions, and enforces quality gates across all platform modules. Every new feature must include tests before being considered production-ready.

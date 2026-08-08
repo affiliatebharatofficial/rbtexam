@@ -1,4 +1,4 @@
-# Work Queue Architecture — RBTTrainingAI SaaS
+# Work Queue Architecture — RBT Practice Questions SaaS
 
 ## Purpose
 Specifies asynchronous workforce job queues: Content Queue, Review Queue, SEO Queue, Publishing Queue, Notification Queue, AI Tutor Queue, Translation Queue, Knowledge Queue.

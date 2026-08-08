@@ -1,5 +1,5 @@
 /**
- * RBTTrainingAI - Production Launch, Beta Release & Go-Live Engine
+ * RBT Practice Questions - Production Launch, Beta Release & Go-Live Engine
  * Enterprise Release Orchestrator, Feature Flags, Health Diagnostics, Beta Manager & Rollback Guard
  */
 
@@ -469,7 +469,7 @@ export function redeemBetaInvite(code: string, email: string): { success: boolea
     joinedAt: new Date().toISOString(),
     feedbackCount: 0,
   };
-  return { success: true, user: newUser, message: 'Welcome to RBTTrainingAI Beta Program!' };
+  return { success: true, user: newUser, message: 'Welcome to RBT Practice Questions Beta Program!' };
 }
 
 export function submitBetaFeedback(feedback: Omit<BetaFeedback, 'id' | 'createdAt' | 'status'>): BetaFeedback {
@@ -580,7 +580,7 @@ export function createRelease(releaseData: Omit<Release, 'id' | 'createdAt' | 'u
 
 export function generateChangelogMarkdown(entry: ChangelogEntry): string {
   return `
-# RBTTrainingAI Release Notes - v${entry.version}
+# RBT Practice Questions Release Notes - v${entry.version}
 *Released on ${new Date(entry.releaseDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}*
 
 ## 🚀 ${entry.title}
@@ -611,6 +611,6 @@ ${
 }
 
 ---
-*RBTTrainingAI Enterprise Release Management System*
+*RBT Practice Questions Enterprise Release Management System*
   `.trim();
 }

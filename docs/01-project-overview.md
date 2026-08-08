@@ -1,7 +1,7 @@
-# 01. Project Overview - RBTTrainingAI SaaS
+# 01. Project Overview - RBT Practice Questions SaaS
 
 ## Purpose
-RBTTrainingAI is an enterprise-grade, AI-powered commercial SaaS application designed to help Registered Behavior Technician (RBT) candidates in the United States pass their official Behavior Analyst Certification Board (BACB®) 2nd Edition Task List certification exam on their first attempt. The platform incorporates adaptive diagnostic test engines, Socratic AI tutoring, Leitner 5-box spaced-repetition flashcards, clinic B2B supervision dashboards, and real-time pass readiness heatmaps.
+RBT Practice Questions is an enterprise-grade, AI-powered commercial SaaS application designed to help Registered Behavior Technician (RBT) candidates in the United States pass their official Behavior Analyst Certification Board (BACB®) 2nd Edition Task List certification exam on their first attempt. The platform incorporates adaptive diagnostic test engines, Socratic AI tutoring, Leitner 5-box spaced-repetition flashcards, clinic B2B supervision dashboards, and real-time pass readiness heatmaps.
 
 ## Architecture
 The application is built on a modern full-stack web architecture leveraging:

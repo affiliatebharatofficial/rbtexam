@@ -773,7 +773,7 @@ export default function AdminLaunchControlPage() {
               <span>📝</span> Automated Release Notes & Changelog Markdown
             </h2>
             <div className="p-4 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-slate-300 whitespace-pre-wrap">
-              {`# RBTTrainingAI Release Notes - v2.8.0
+              {`# RBT Practice Questions Release Notes - v2.8.0
 Released on August 7, 2026
 
 ## 🚀 Production Launch, Beta Release & Go-Live Engine

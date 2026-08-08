@@ -1,7 +1,7 @@
-# Client SDK Roadmap - RBTTrainingAI SaaS
+# Client SDK Roadmap - RBT Practice Questions SaaS
 
 ## Purpose
-Roadmap for official SDK libraries (`@rbttrainingai/sdk` for TypeScript/JavaScript, Python `pip install rbttrainingai`, Go, and Flutter).
+Roadmap for official SDK libraries (`@rbtpracticequestions/sdk` for TypeScript/JavaScript, Python `pip install rbtpracticequestions`, Go, and Flutter).
 
 ## Related Files
 - [app/developer/page.tsx](file:///g:/RBT/app/developer/page.tsx)

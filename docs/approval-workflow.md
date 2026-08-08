@@ -1,4 +1,4 @@
-# Approval Workflow & Reviewer Sign-Offs - RBTTrainingAI SaaS
+# Approval Workflow & Reviewer Sign-Offs - RBT Practice Questions SaaS
 
 ## Purpose
 Defines permission controls for BCBA Clinical Editors, reviewers, and publishers approving content drafts.

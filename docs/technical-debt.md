@@ -1,4 +1,4 @@
-# Technical Debt Audit — RBTTrainingAI SaaS
+# Technical Debt Audit — RBT Practice Questions SaaS
 
 ## Overview
 This document logs technical debt, refactoring candidates, and code hygiene improvements identified during the enterprise audit.

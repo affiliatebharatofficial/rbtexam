@@ -1,4 +1,4 @@
-# Immutable Audit Logging Engine - RBTTrainingAI SaaS
+# Immutable Audit Logging Engine - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies immutable audit records for configuration edits, role changes, question modifications, and payment events.

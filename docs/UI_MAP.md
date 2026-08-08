@@ -1,4 +1,4 @@
-# UI & VIEW MAP — RBTTrainingAI SaaS
+# UI & VIEW MAP — RBT Practice Questions SaaS
 
 ## Application Page Route Registry
 

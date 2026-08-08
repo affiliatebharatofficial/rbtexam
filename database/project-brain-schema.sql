@@ -3,7 +3,7 @@
 -- 1. Master Project Brain Registry Table
 CREATE TABLE IF NOT EXISTS public.project_brain_registry (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  system_name TEXT NOT NULL DEFAULT 'RBTTrainingAI',
+  system_name TEXT NOT NULL DEFAULT 'RBT Practice Questions',
   version TEXT NOT NULL DEFAULT 'v2.8.0',
   health_score NUMERIC(5,2) DEFAULT 98.50,
   total_features INTEGER DEFAULT 12,

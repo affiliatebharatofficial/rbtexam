@@ -1,7 +1,7 @@
-# 20. Deployment - RBTTrainingAI SaaS
+# 20. Deployment - RBT Practice Questions SaaS
 
 ## Purpose
-This document provides instructions for deploying, building, and operating the RBTTrainingAI platform on Vercel, AWS CloudFront, and Supabase Cloud.
+This document provides instructions for deploying, building, and operating the RBT Practice Questions platform on Vercel, AWS CloudFront, and Supabase Cloud.
 
 ## Architecture
 - Hosting Platform: Vercel Global Edge Network
@@ -17,7 +17,7 @@ This document provides instructions for deploying, building, and operating the R
 Production PostgreSQL Database hosted on Supabase Cloud.
 
 ## API Endpoints
-All production routes served via `https://rbttraining.ai`.
+All production routes served via `https://rbtpracticequestions.com`.
 
 ## Workflow
 1. Developer pushes code to `main` branch on GitHub repository.

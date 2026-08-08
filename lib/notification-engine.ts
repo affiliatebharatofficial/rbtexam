@@ -45,7 +45,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
     id: 'tpl-welcome',
     templateCode: 'WELCOME_SERIES_01',
-    subject: 'Welcome to RBTTrainingAI - Your Path to BACB Exam Success!',
+    subject: 'Welcome to RBT Practice Questions - Your Path to BACB Exam Success!',
     bodyHTML: '<h1>Welcome {{name}}!</h1><p>Start your first 85-question diagnostic mock exam today.</p>',
     category: 'onboarding',
     isEditable: true,

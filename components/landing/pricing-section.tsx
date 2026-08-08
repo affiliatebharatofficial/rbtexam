@@ -21,7 +21,7 @@ export function PricingSection() {
           variantId,
           tier,
           billingInterval: billingCycle,
-          userEmail: 'candidate@rbttrainingai.com',
+          userEmail: 'candidate@rbtpracticequestions.com',
         }),
       });
 

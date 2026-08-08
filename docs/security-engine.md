@@ -1,7 +1,7 @@
-# Enterprise Security, Privacy & Compliance Engine - RBTTrainingAI SaaS
+# Enterprise Security, Privacy & Compliance Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The Enterprise Security, Privacy & Compliance Engine establishes a Zero Trust Architecture and Defense-in-Depth security framework for RBTTrainingAI. Built to protect student learning records, clinic enterprise accounts, and AI services, it enforces prompt injection mitigation, session revocation, API key scope checks, immutable audit logging, and GDPR/CCPA privacy data governance.
+The Enterprise Security, Privacy & Compliance Engine establishes a Zero Trust Architecture and Defense-in-Depth security framework for RBT Practice Questions. Built to protect student learning records, clinic enterprise accounts, and AI services, it enforces prompt injection mitigation, session revocation, API key scope checks, immutable audit logging, and GDPR/CCPA privacy data governance.
 
 ## Architecture
 - **Zero Trust Security Core**: `g:\RBT\lib\security-engine.ts` (`sanitizeAIPromptInput`, `logThreatEvent`, `revokeUserSession`, `submitDataSubjectRequest`, `getSecurityHealthSummary`).

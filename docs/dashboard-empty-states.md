@@ -1,7 +1,7 @@
 # Dashboard Empty States Architecture
 
 ## Purpose
-In production mode, when a candidate or clinic user has 0 activity, RBTTrainingAI hides mock charts and displays Apple-level glassmorphic `EmptyState` components with clear onboarding CTAs.
+In production mode, when a candidate or clinic user has 0 activity, RBT Practice Questions hides mock charts and displays Apple-level glassmorphic `EmptyState` components with clear onboarding CTAs.
 
 ## Component Specification
 - **`components/ui/empty-state.tsx`**: Universal glassmorphism container accepting `title`, `description`, `icon`, `badgeLabel`, `actionLabel`, `onAction`.

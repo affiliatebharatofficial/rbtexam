@@ -1,4 +1,4 @@
-# Accessibility Testing — RBTTrainingAI SaaS
+# Accessibility Testing — RBT Practice Questions SaaS
 Playwright E2E includes basic accessibility checks (landmark presence, label count, keyboard navigation).
 
 ## Standards Targeted

@@ -1,4 +1,4 @@
-# DATABASE MAP — RBTTrainingAI SaaS
+# DATABASE MAP — RBT Practice Questions SaaS
 
 ## Master PostgreSQL Table Registry (35 Tables)
 

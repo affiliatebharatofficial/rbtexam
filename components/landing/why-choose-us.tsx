@@ -59,7 +59,7 @@ export function WhyChooseUs() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <Badge variant="blue">The Smart Choice for RBT Candidates</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Why Students & ABA Clinics Choose RBTTrainingAI
+            Why Students & ABA Clinics Choose RBT Practice Questions
           </h2>
           <p className="text-base text-slate-600">
             Compare our next-generation adaptive AI preparation platform against legacy static video courses and PDF question banks.
@@ -78,7 +78,7 @@ export function WhyChooseUs() {
                   <th className="py-4 px-4 text-sm font-extrabold text-[#2563EB] w-3/10 bg-blue-50/60 rounded-t-xl text-center">
                     <div className="flex items-center justify-center space-x-1">
                       <Sparkles className="w-4 h-4 text-[#2563EB]" />
-                      <span>RBTTrainingAI</span>
+                      <span>RBT Practice Questions</span>
                     </div>
                   </th>
                   <th className="py-4 px-4 text-xs font-bold text-slate-500 w-3/10 text-center">

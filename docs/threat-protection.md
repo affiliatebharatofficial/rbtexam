@@ -1,4 +1,4 @@
-# Threat Protection & Prompt Injection Mitigation - RBTTrainingAI SaaS
+# Threat Protection & Prompt Injection Mitigation - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies prompt injection filtering (`sanitizeAIPromptInput`), rate-limit enforcement, and brute-force protection.

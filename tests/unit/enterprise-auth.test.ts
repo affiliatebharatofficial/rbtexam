@@ -25,9 +25,9 @@ describe('Enterprise Authentication & Security Safeguards', () => {
   });
 
   it('should allow setting allowedEmailDomains whitelist', () => {
-    updatePlatformConfig('allowedEmailDomains', ['gmail.com', 'rbttraining.ai']);
+    updatePlatformConfig('allowedEmailDomains', ['gmail.com', 'rbtpracticequestions.com']);
     const config = getPlatformConfig();
-    expect(config.allowedEmailDomains).toEqual(['gmail.com', 'rbttraining.ai']);
+    expect(config.allowedEmailDomains).toEqual(['gmail.com', 'rbtpracticequestions.com']);
   });
 
   it('should allow enabling inviteOnlyMode', () => {

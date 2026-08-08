@@ -1,7 +1,7 @@
-# AI Adaptive Learning Engine - RBTTrainingAI SaaS
+# AI Adaptive Learning Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The AI Adaptive Learning Engine serves as the central intelligence layer of the RBTTrainingAI SaaS platform. Designed for candidates preparing for **RBT**, **BCaBA**, and **BCBA** certification exams, it continuously monitors learning behavior across practice tests, Socratic AI tutor chats, spaced flashcards, and diagnostic drills to automatically generate weak topic priority queues, personalized study plans, pass likelihood predictions, and daily task recommendations.
+The AI Adaptive Learning Engine serves as the central intelligence layer of the RBT Practice Questions SaaS platform. Designed for candidates preparing for **RBT**, **BCaBA**, and **BCBA** certification exams, it continuously monitors learning behavior across practice tests, Socratic AI tutor chats, spaced flashcards, and diagnostic drills to automatically generate weak topic priority queues, personalized study plans, pass likelihood predictions, and daily task recommendations.
 
 ## Architecture
 - **Certifications Supported**: RBT, BCaBA, BCBA

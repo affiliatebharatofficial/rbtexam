@@ -41,7 +41,7 @@ export default function AnalyticsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `rbttrainingai_bi_report_${timeframe}.csv`;
+    a.download = `rbtpracticequestions_bi_report_${timeframe}.csv`;
     a.click();
   };
 

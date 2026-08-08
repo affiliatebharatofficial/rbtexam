@@ -1,4 +1,4 @@
-# Active Session Management & Revocation - RBTTrainingAI SaaS
+# Active Session Management & Revocation - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies concurrent session tracking (`ActiveSession`), device revocation (`revokeUserSession`), and MFA verification.

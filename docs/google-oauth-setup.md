@@ -1,7 +1,7 @@
 # Google OAuth Branding & Supabase Authentication Production Configuration
 
 ## Overview
-RBTTrainingAI uses official Supabase Google OAuth (`@supabase/supabase-js`) for candidate authentication. When candidates click **"Continue with Google"**, they are redirected directly to Google's official sign-in screen, where the application branding displays **RBTTrainingAI**.
+RBT Practice Questions uses official Supabase Google OAuth (`@supabase/supabase-js`) for candidate authentication. When candidates click **"Continue with Google"**, they are redirected directly to Google's official sign-in screen, where the application branding displays **RBT Practice Questions**.
 
 ---
 
@@ -13,33 +13,33 @@ const redirectUrl = `${window.location.origin}/auth/callback`;
 This dynamically supports:
 - **Local Development**: `http://localhost:3000/auth/callback`
 - **Vercel Preview Deployments**: `https://rbtexam-olive.vercel.app/auth/callback` (or any branch preview URL)
-- **Custom Production Domain**: `https://rbttraining.ai/auth/callback`
+- **Custom Production Domain**: `https://rbtpracticequestions.com/auth/callback`
 
 ---
 
 ## Step-by-Step Google Cloud Console & Supabase Configuration
 
 ### Step 1: Configure Google Cloud OAuth Consent Screen (Branding)
-To ensure Google displays **RBTTrainingAI** during candidate sign-in:
+To ensure Google displays **RBT Practice Questions** during candidate sign-in:
 1. Open [Google Cloud Console](https://console.cloud.google.com/).
 2. Navigate to **APIs & Services** > **OAuth consent screen**.
-3. Set **App Name**: `RBTTrainingAI`
-4. Set **User support email**: `support@rbttraining.ai`
-5. Upload **App Logo**: RBTTrainingAI Brain Logo SVG/PNG.
+3. Set **App Name**: `RBT Practice Questions`
+4. Set **User support email**: `support@rbtpracticequestions.com`
+5. Upload **App Logo**: RBT Practice Questions Brain Logo SVG/PNG.
 6. Set **Authorized Domains**:
    - `supabase.co`
    - `vercel.app`
-   - `rbttraining.ai`
+   - `rbtpracticequestions.com`
 7. Save and publish the consent screen.
 
 ### Step 2: Create OAuth 2.0 Client Credentials
 1. In Google Cloud Console, navigate to **Credentials** > **Create Credentials** > **OAuth client ID**.
 2. Select **Application type**: `Web application`.
-3. Set **Name**: `RBTTrainingAI Web Client`.
+3. Set **Name**: `RBT Practice Questions Web Client`.
 4. Add **Authorized JavaScript Origins**:
    - `http://localhost:3000`
    - `https://rbtexam-olive.vercel.app`
-   - `https://rbttraining.ai`
+   - `https://rbtpracticequestions.com`
 5. Add **Authorized Redirect URIs**:
    - `https://<YOUR_SUPABASE_PROJECT_ID>.supabase.co/auth/v1/callback`
 6. Copy the generated **Client ID** and **Client Secret**.
@@ -65,4 +65,4 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
 | :--- | :--- | :--- | :--- |
 | **Localhost** | `http://localhost:3000` | `https://<proj>.supabase.co/auth/v1/callback` | `http://localhost:3000/auth/callback` |
 | **Vercel Preview** | `https://rbtexam-olive.vercel.app` | `https://<proj>.supabase.co/auth/v1/callback` | `https://rbtexam-olive.vercel.app/auth/callback` |
-| **Production** | `https://rbttraining.ai` | `https://<proj>.supabase.co/auth/v1/callback` | `https://rbttraining.ai/auth/callback` |
+| **Production** | `https://rbtpracticequestions.com` | `https://<proj>.supabase.co/auth/v1/callback` | `https://rbtpracticequestions.com/auth/callback` |

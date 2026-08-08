@@ -1,4 +1,4 @@
-# Security & Compliance Review — RBTTrainingAI SaaS
+# Security & Compliance Review — RBT Practice Questions SaaS
 
 ## Audit Summary
 Enterprise security audit evaluating authentication, AI prompt injection protection, session management, Supabase RLS policies, encryption, and GDPR/CCPA data governance.

@@ -1,4 +1,4 @@
-# RBTTrainingAI Global Project Rules & Architecture Standards
+# RBT Practice Questions Global Project Rules & Architecture Standards
 
 > These global rules override all previous implementation patterns and MUST be enforced for every future feature, engine, page, API, database table, workflow, AI module, service, component, admin module, and integration.
 

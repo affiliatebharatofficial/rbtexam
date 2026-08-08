@@ -1,4 +1,4 @@
-# Internal Linking Engine - RBTTrainingAI SaaS
+# Internal Linking Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Internal Linking Engine constructs a contextual link graph connecting pillar pages, question detail pages, Leitner flashcard decks, and glossary terms to maximize Google crawl efficiency and eliminate orphan pages.

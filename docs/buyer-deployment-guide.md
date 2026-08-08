@@ -1,7 +1,7 @@
-# Buyer Deployment & Handover Guide — RBTTrainingAI SaaS
+# Buyer Deployment & Handover Guide — RBT Practice Questions SaaS
 
 ## Purpose
-Complete end-to-end guide for new owners, acquisition teams, and engineering leads taking over RBTTrainingAI. No prior knowledge of the codebase is required.
+Complete end-to-end guide for new owners, acquisition teams, and engineering leads taking over RBT Practice Questions. No prior knowledge of the codebase is required.
 
 ---
 

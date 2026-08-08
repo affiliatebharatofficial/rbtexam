@@ -1,4 +1,4 @@
-# 12. Enterprise SEO Engine - RBTTrainingAI SaaS
+# 12. Enterprise SEO Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Enterprise SEO Engine automates organic search authority, programmatic page generation, JSON-LD rich snippets, XML sitemaps, internal link graphs, and metadata management across **RBT**, **BCaBA**, and **BCBA** certification paths.
@@ -40,7 +40,7 @@ The Enterprise SEO Engine automates organic search authority, programmatic page 
 - `GET /api/seo/audit`: Returns SEO health score report (98% Health).
 
 ## Workflow
-1. Googlebot visits `https://rbttrainingai.com/sitemap.xml`.
+1. Googlebot visits `https://rbtpracticequestions.com/sitemap.xml`.
 2. Crawls programmatic routes `/rbt/question/[slug]` and `/rbt/glossary`.
 3. Parses QAPage JSON-LD schema for rich result carousels.
 4. Follows internal link graph to prevent orphan pages.

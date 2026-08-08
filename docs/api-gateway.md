@@ -1,4 +1,4 @@
-# API Gateway Routing & Rate Limiting - RBTTrainingAI SaaS
+# API Gateway Routing & Rate Limiting - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies API key authentication, rate limiting (600 reqs/min standard, 1,200 reqs/min enterprise), and global edge routing.

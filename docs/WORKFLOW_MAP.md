@@ -1,4 +1,4 @@
-# WORKFLOW MAP — RBTTrainingAI SaaS
+# WORKFLOW MAP — RBT Practice Questions SaaS
 
 ## Platform Core Business Workflows
 

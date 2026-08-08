@@ -1,4 +1,4 @@
-# System Prompt Governance & Versioning — RBTTrainingAI SaaS
+# System Prompt Governance & Versioning — RBT Practice Questions SaaS
 
 ## Purpose
 Establishes prompt versioning, changelogs, rollback capabilities, and A/B testing infrastructure for agent system prompts.

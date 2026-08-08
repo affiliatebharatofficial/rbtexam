@@ -1,4 +1,4 @@
-# CODING & ARCHITECTURE STANDARDS — RBTTrainingAI SaaS
+# CODING & ARCHITECTURE STANDARDS — RBT Practice Questions SaaS
 
 ## Core Architectural Rules
 1. **Engine Separation**: Business logic MUST reside in `/lib/` files. Components MUST only render views and forward events.

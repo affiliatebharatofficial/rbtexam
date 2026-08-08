@@ -1,4 +1,4 @@
-# Integration Testing Guide — RBTTrainingAI SaaS
+# Integration Testing Guide — RBT Practice Questions SaaS
 Integration tests validate Next.js API route handlers end-to-end using real in-memory engine state.
 
 ## Covered API Routes

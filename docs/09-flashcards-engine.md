@@ -1,4 +1,4 @@
-# 09. Smart Flashcard Engine - RBTTrainingAI SaaS
+# 09. Smart Flashcard Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Flashcard Engine provides an adaptive spaced repetition study system (SM-2 algorithm) for RBT, BCaBA, and BCBA terminology. It tracks confidence ratings, memory decay intervals, and mastery scores across Leitner 5-box memory distribution.

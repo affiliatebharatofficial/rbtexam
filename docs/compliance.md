@@ -1,4 +1,4 @@
-# Compliance Readiness Guide (SOC 2 & FERPA) - RBTTrainingAI SaaS
+# Compliance Readiness Guide (SOC 2 & FERPA) - RBT Practice Questions SaaS
 
 ## Purpose
 Roadmap and architecture readiness guide for future SOC 2 Type II audits and educational record FERPA compliance.

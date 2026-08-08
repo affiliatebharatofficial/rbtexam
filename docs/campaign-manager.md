@@ -1,4 +1,4 @@
-# Campaign Manager & Audience Segmentation - RBTTrainingAI SaaS
+# Campaign Manager & Audience Segmentation - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies mass candidate broadcast campaigns targeted by certification level, activity status, or subscription tier.

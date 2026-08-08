@@ -1,7 +1,7 @@
-# 04. Authentication - RBTTrainingAI SaaS
+# 04. Authentication - RBT Practice Questions SaaS
 
 ## Purpose
-The Authentication & Session Management Module provides secure end-to-end user identity verification, account registration, Google OAuth single sign-on, email verification workflows, password recovery, persistent session state management, role-based access control (RBAC), and route guarding across the RBTTrainingAI commercial SaaS platform.
+The Authentication & Session Management Module provides secure end-to-end user identity verification, account registration, Google OAuth single sign-on, email verification workflows, password recovery, persistent session state management, role-based access control (RBAC), and route guarding across the RBT Practice Questions commercial SaaS platform.
 
 ## Architecture
 - **Auth Provider Context**: `context/auth-context.tsx` (`AuthProvider`, `useAuth`)

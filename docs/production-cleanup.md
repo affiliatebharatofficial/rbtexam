@@ -1,7 +1,7 @@
 # Production Cleanup & Data Isolation Architecture
 
 ## Overview
-RBTTrainingAI enforces strict zero-fake-data architecture in production environments. All mock users, sample analytics, fake revenues, hardcoded trends, and pre-populated test attempts are removed from production runtime.
+RBT Practice Questions enforces strict zero-fake-data architecture in production environments. All mock users, sample analytics, fake revenues, hardcoded trends, and pre-populated test attempts are removed from production runtime.
 
 ## Core Directives
 1. **Allowed Starter Content**: The ONLY starter content permitted in production is the **Master Question Bank**.

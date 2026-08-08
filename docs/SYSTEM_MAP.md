@@ -1,4 +1,4 @@
-# SYSTEM MAP — RBTTrainingAI SaaS
+# SYSTEM MAP — RBT Practice Questions SaaS
 
 ## High-Level System Subsystems
 

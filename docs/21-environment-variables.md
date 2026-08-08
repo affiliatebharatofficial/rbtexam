@@ -1,7 +1,7 @@
-# 21. Environment Variables - RBTTrainingAI SaaS
+# 21. Environment Variables - RBT Practice Questions SaaS
 
 ## Purpose
-This document catalogs all environment configuration variables required to run RBTTrainingAI across development, staging, and production environments.
+This document catalogs all environment configuration variables required to run RBT Practice Questions across development, staging, and production environments.
 
 ## Architecture
 Configuration files:
@@ -16,7 +16,7 @@ Configuration files:
 
 | Variable Name | Required | Description | Example / Location |
 | :--- | :--- | :--- | :--- |
-| `NEXT_PUBLIC_SITE_URL` | Yes | Canonical domain URL | `https://rbttraining.ai` |
+| `NEXT_PUBLIC_SITE_URL` | Yes | Canonical domain URL | `https://rbtpracticequestions.com` |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL | `https://xyz.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase public API key | `eyJhbGciOi...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-side database admin key | `eyJhbGciOi...` |

@@ -1,7 +1,7 @@
 # Apple-Level Empty States System
 
 ## 1. Design Standard
-Whenever a database query returns zero records, RBTTrainingAI hides empty charts and displays a unified, Apple-level `EmptyState` component featuring:
+Whenever a database query returns zero records, RBT Practice Questions hides empty charts and displays a unified, Apple-level `EmptyState` component featuring:
 - **Icon / Badge**: Visual category indicator (e.g. `Users`, `FolderOpen`, `Lock`).
 - **Heading**: Clear, bold headline (e.g., "No Users Registered Yet", "No Questions Available").
 - **Description**: Helpful context explaining how to populate data.

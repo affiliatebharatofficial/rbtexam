@@ -1,7 +1,7 @@
-# Analytics & Business Intelligence Engine - RBTTrainingAI SaaS
+# Analytics & Business Intelligence Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The Analytics & Business Intelligence (BI) Engine serves as the central data observation and financial intelligence layer of the RBTTrainingAI SaaS platform. It ingests telemetry events from all core modules (*Practice Test Engine, Question Bank, Flashcards, AI Tutor, Adaptive Learning, Subscriptions, Payments, SEO Engine*) to calculate real-time student learning velocity, exam pass predictions, LLM token costs, MRR/ARR growth, churn rates, and infrastructure health metrics.
+The Analytics & Business Intelligence (BI) Engine serves as the central data observation and financial intelligence layer of the RBT Practice Questions SaaS platform. It ingests telemetry events from all core modules (*Practice Test Engine, Question Bank, Flashcards, AI Tutor, Adaptive Learning, Subscriptions, Payments, SEO Engine*) to calculate real-time student learning velocity, exam pass predictions, LLM token costs, MRR/ARR growth, churn rates, and infrastructure health metrics.
 
 ## Architecture
 - **Central Event Tracker Pipeline**: `g:\RBT\lib\analytics-engine.ts` (`trackAnalyticsEvent`, `getPlatformAnalyticsSummary`, `exportAnalyticsToCSV`).

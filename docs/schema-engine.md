@@ -1,4 +1,4 @@
-# JSON-LD Schema Engine - RBTTrainingAI SaaS
+# JSON-LD Schema Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The JSON-LD Schema Engine generates structured data markup to secure Google Rich Snippets (QAPage carousels, Course cards, BreadcrumbList, EducationalOrganization).

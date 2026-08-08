@@ -1,4 +1,4 @@
-// Types definition for Auth Module in RBTTrainingAI
+// Types definition for Auth Module in RBT Practice Questions
 
 export type UserRole = 'student' | 'therapist' | 'clinic_admin' | 'instructor' | 'admin' | 'super_admin';
 

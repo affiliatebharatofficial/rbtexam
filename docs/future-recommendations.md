@@ -1,7 +1,7 @@
-# Future Recommendations & M&A Growth Roadmap — RBTTrainingAI SaaS
+# Future Recommendations & M&A Growth Roadmap — RBT Practice Questions SaaS
 
 ## Overview
-Strategic product, technology, and business recommendations for acquisition buyers and product managers taking over RBTTrainingAI.
+Strategic product, technology, and business recommendations for acquisition buyers and product managers taking over RBT Practice Questions.
 
 ---
 

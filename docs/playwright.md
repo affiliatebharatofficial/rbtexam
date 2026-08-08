@@ -1,4 +1,4 @@
-# Playwright E2E Testing — RBTTrainingAI SaaS
+# Playwright E2E Testing — RBT Practice Questions SaaS
 Run: `npm run test:e2e` (full) or `npm run test:e2e:smoke` (critical path only).
 
 ## Test Files

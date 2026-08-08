@@ -1,4 +1,4 @@
-# Unit Testing Guide — RBTTrainingAI SaaS
+# Unit Testing Guide — RBT Practice Questions SaaS
 Run: `npm run test` or `npm run test:coverage`.
 
 ## Covered Modules

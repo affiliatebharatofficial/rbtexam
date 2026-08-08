@@ -1,4 +1,4 @@
-# 06. Super Admin Operating CMS - RBTTrainingAI SaaS
+# 06. Super Admin Operating CMS - RBT Practice Questions SaaS
 
 ## Purpose
 The Super Admin Operating CMS controls platform configurations, dynamic site branding, multi-provider AI model routing (OpenAI, Gemini, OpenRouter), user roles, media assets, engine plugin registries, and security audit streams.

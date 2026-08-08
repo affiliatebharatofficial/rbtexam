@@ -1,7 +1,7 @@
-# Master Project Brain Architecture — RBTTrainingAI SaaS
+# Master Project Brain Architecture — RBT Practice Questions SaaS
 
 ## Purpose
-The Master Project Brain is the permanent intelligence layer and single source of truth for RBTTrainingAI. It continuously maintains the project index, feature registry, API mapping, database schema, component graph, implementation status, and acquisition documentation.
+The Master Project Brain is the permanent intelligence layer and single source of truth for RBT Practice Questions. It continuously maintains the project index, feature registry, API mapping, database schema, component graph, implementation status, and acquisition documentation.
 
 ## Architecture
 

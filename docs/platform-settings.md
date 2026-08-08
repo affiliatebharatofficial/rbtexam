@@ -1,4 +1,4 @@
-# Dynamic Platform Settings Engine - RBTTrainingAI SaaS
+# Dynamic Platform Settings Engine - RBT Practice Questions SaaS
 
 ## Purpose
 Defines the zero-code configuration manager allowing administrators to dynamically alter platform branding, maintenance status, daily AI tutor message limits, and currency settings.

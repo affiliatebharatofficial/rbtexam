@@ -77,7 +77,7 @@ export default function SuperAdminCMSPage() {
   const [seedMsg, setSeedMsg] = useState('');
   const [stripeMsg, setStripeMsg] = useState('');
   const [smtpMsg, setSmtpMsg] = useState('');
-  const [testEmailAddr, setTestEmailAddr] = useState('admin@rbttraining.ai');
+  const [testEmailAddr, setTestEmailAddr] = useState('support@rbtpracticequestions.com');
   const [coupons, setCoupons] = useState<Coupon[]>(getAllCoupons());
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newDiscountVal, setNewDiscountVal] = useState(20);
@@ -164,7 +164,7 @@ export default function SuperAdminCMSPage() {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('rbt_admin_users_roster');
-        if (saved && saved.includes('@rbttraining.ai')) {
+        if (saved && saved.includes('@rbtpracticequestions.com')) {
           localStorage.removeItem('rbt_admin_users_roster');
         }
       } catch (e) {}
@@ -193,7 +193,7 @@ export default function SuperAdminCMSPage() {
       const apiData = await apiRes.json();
       if (apiData.users && Array.isArray(apiData.users)) {
         apiData.users.forEach((u: any) => {
-          if (u.email && !u.email.includes('@rbttraining.ai')) {
+          if (u.email && !u.email.includes('@rbtpracticequestions.com')) {
             realUsersMap.set(u.email.toLowerCase().trim(), u);
           }
         });
@@ -208,7 +208,7 @@ export default function SuperAdminCMSPage() {
         const { data: dbProfiles } = await supabase.from('profiles').select('*');
         if (dbProfiles && Array.isArray(dbProfiles)) {
           dbProfiles.forEach((p: any) => {
-            if (p.email && !p.email.includes('@rbttraining.ai')) {
+            if (p.email && !p.email.includes('@rbtpracticequestions.com')) {
               realUsersMap.set(p.email.toLowerCase().trim(), {
                 id: p.id,
                 email: p.email,
@@ -234,7 +234,7 @@ export default function SuperAdminCMSPage() {
         if (regStr) {
           const regUsers: any[] = JSON.parse(regStr);
           regUsers.forEach((u: any) => {
-            if (u.email && !u.email.includes('@rbttraining.ai')) {
+            if (u.email && !u.email.includes('@rbtpracticequestions.com')) {
               realUsersMap.set(u.email.toLowerCase().trim(), {
                 id: u.id,
                 email: u.email,
@@ -253,7 +253,7 @@ export default function SuperAdminCMSPage() {
         const activeSessStr = localStorage.getItem('rbt_ai_auth_session');
         if (activeSessStr) {
           const activeSess = JSON.parse(activeSessStr);
-          if (activeSess?.user?.email && !activeSess.user.email.includes('@rbttraining.ai')) {
+          if (activeSess?.user?.email && !activeSess.user.email.includes('@rbtpracticequestions.com')) {
             const u = activeSess.user;
             realUsersMap.set(u.email.toLowerCase().trim(), {
               id: u.id,

@@ -1,4 +1,4 @@
-# RAG Architecture Overview — RBTTrainingAI SaaS
+# RAG Architecture Overview — RBT Practice Questions SaaS
 
 ## Purpose
 End-to-end RAG system architecture diagram and decision record for the centralized knowledge intelligence platform.

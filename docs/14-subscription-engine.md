@@ -1,4 +1,4 @@
-# 14. Subscription Engine - RBTTrainingAI SaaS
+# 14. Subscription Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Subscription Engine handles plan tiers (Free, Pro Pass Guarantee, Team Clinic, Lifetime), entitlement permission guards, daily usage quotas, and billing cycle state management.

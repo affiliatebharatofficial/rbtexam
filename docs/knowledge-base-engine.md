@@ -1,4 +1,4 @@
-# Central Knowledge Base Engine - RBTTrainingAI SaaS
+# Central Knowledge Base Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Central Knowledge Base Engine houses canonical definitions, clinical examples, BACB Task List citations, and mnemonic memory tricks reused across questions, flashcards, and AI tutor prompts.

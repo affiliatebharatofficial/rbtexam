@@ -1,4 +1,4 @@
-# Security Audit Logging & Session Control - RBTTrainingAI SaaS
+# Security Audit Logging & Session Control - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies security audit logging (`logAuditEvent`), user impersonation protocols, and IP address tracking for administrative operations.

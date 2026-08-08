@@ -1,7 +1,7 @@
-# DEVELOPER ONBOARDING GUIDE — RBTTrainingAI SaaS
+# DEVELOPER ONBOARDING GUIDE — RBT Practice Questions SaaS
 
 ## Overview
-Guidelines, architecture principles, and setup instructions for software engineers joining the RBTTrainingAI engineering team.
+Guidelines, architecture principles, and setup instructions for software engineers joining the RBT Practice Questions engineering team.
 
 ---
 

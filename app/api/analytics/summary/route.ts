@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(csv, {
         headers: {
           'Content-Type': 'text/csv',
-          'Content-Disposition': 'attachment; filename="rbttrainingai_bi_summary.csv"',
+          'Content-Disposition': 'attachment; filename="rbtpracticequestions_bi_summary.csv"',
         },
       });
     }

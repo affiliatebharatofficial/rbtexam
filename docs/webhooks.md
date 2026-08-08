@@ -1,4 +1,4 @@
-# Webhook Event Delivery & HMAC Signatures - RBTTrainingAI SaaS
+# Webhook Event Delivery & HMAC Signatures - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies outbound webhook event delivery (`practice_test.completed`, `weak_topic.alert`, `payment.success`) with HMAC SHA-256 signatures (`whsec_...`).

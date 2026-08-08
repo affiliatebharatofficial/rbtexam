@@ -1,4 +1,4 @@
-# 16. Notification Engine - RBTTrainingAI SaaS
+# 16. Notification Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Notification Engine drives candidate engagement via in-app bell notifications, push notifications, webhooks, and trigger-condition-action automation rules.

@@ -1,4 +1,4 @@
--- Database Migration System for RBTTrainingAI
+-- Database Migration System for RBT Practice Questions
 -- Run migrations in order using: scripts/migrate.sh
 -- Each migration is numbered and idempotent.
 

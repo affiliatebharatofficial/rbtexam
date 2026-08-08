@@ -26,12 +26,12 @@ export function Hero() {
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-[1.15]">
-              Pass Your <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] via-blue-600 to-indigo-600">RBT Exam</span> On Your First Try. Guaranteed.
+              Pass Your <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] via-blue-600 to-indigo-600">RBT Certification</span> with Confidence
             </h1>
 
             {/* Sub-headline */}
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed mx-auto lg:mx-0">
-              Powered by <strong className="text-slate-900 font-semibold">Socrates AI</strong>. Experience adaptive BACB scenario simulations, domain-by-domain weakness heatmaps, and spaced-repetition flashcards tailored for US RBT candidates.
+              Practice thousands of realistic RBT questions, take full-length mock exams, learn with AI Tutor, master flashcards and track your progress.
             </p>
 
             {/* Feature Bullets */}
@@ -42,31 +42,31 @@ export function Hero() {
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>Socrates AI Ethics & Roleplay Tutor</span>
+                <span>AI Ethics & Practice Question Tutor</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>Domains A-F Task List Mastery</span>
+                <span>Domains A-F Task List Coverage</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>B2B Clinic Supervisor Dashboard</span>
+                <span>Weak Area Analysis & Analytics</span>
               </div>
             </div>
 
             {/* Primary Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <Link href="/exam" className="w-full sm:w-auto">
+              <Link href="/signup" className="w-full sm:w-auto">
                 <Button size="lg" variant="primary" className="w-full sm:w-auto gap-2 text-base px-8 py-4 shadow-xl shadow-blue-500/25">
-                  <span>Start Free Diagnostic Exam</span>
+                  <span>Start Free Practice</span>
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
 
-              <Link href="/tutor" className="w-full sm:w-auto">
+              <Link href="/rbt/mock-exam" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base px-6 py-4">
                   <Brain className="w-5 h-5 text-[#2563EB]" />
-                  <span>Try Socrates AI Tutor</span>
+                  <span>Take a Mock Exam</span>
                 </Button>
               </Link>
             </div>

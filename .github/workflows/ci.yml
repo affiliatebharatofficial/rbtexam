@@ -1,4 +1,4 @@
-name: CI/CD — RBTTrainingAI Enterprise Pipeline
+name: CI/CD — RBT Practice Questions Enterprise Pipeline
 
 on:
   push:
@@ -77,7 +77,7 @@ jobs:
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_APP_URL: https://rbttrainingai.com
+      NEXT_PUBLIC_APP_URL: https://rbtpracticequestions.com
       NEXT_PUBLIC_APP_ENV: production
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +127,7 @@ jobs:
           build-args: |
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.PROD_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.PROD_SUPABASE_ANON_KEY }}
-            NEXT_PUBLIC_APP_URL=https://rbttrainingai.com
+            NEXT_PUBLIC_APP_URL=https://rbtpracticequestions.com
             NEXT_PUBLIC_APP_ENV=production
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -151,7 +151,7 @@ jobs:
       - name: Health Check post-deployment
         run: |
           sleep 30
-          curl -f https://rbttrainingai.com/api/health || exit 1
+          curl -f https://rbtpracticequestions.com/api/health || exit 1
         continue-on-error: true
 
   # ─── 7. E2E Smoke Tests (post-deploy) ───────────────────────────────────
@@ -169,7 +169,7 @@ jobs:
       - name: Run smoke tests against production
         run: npm run test:e2e:smoke
         env:
-          PLAYWRIGHT_BASE_URL: https://rbttrainingai.com
+          PLAYWRIGHT_BASE_URL: https://rbtpracticequestions.com
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@v4

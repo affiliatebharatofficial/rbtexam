@@ -1,7 +1,7 @@
-# Master Project Audit — RBTTrainingAI SaaS
+# Master Project Audit — RBT Practice Questions SaaS
 
 ## Audit Overview
-A 360-degree technical, business, UX, and operational audit of the RBTTrainingAI SaaS application conducted for M&A / acquisition evaluation.
+A 360-degree technical, business, UX, and operational audit of the RBT Practice Questions SaaS application conducted for M&A / acquisition evaluation.
 
 ---
 

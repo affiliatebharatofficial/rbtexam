@@ -1,7 +1,7 @@
-# 22. Future Roadmap - RBTTrainingAI SaaS
+# 22. Future Roadmap - RBT Practice Questions SaaS
 
 ## Purpose
-This document outlines the product strategy, upcoming features, architectural scalability milestones, and feature expansion roadmap for RBTTrainingAI.
+This document outlines the product strategy, upcoming features, architectural scalability milestones, and feature expansion roadmap for RBT Practice Questions.
 
 ## Architecture
 Planned system extensions:

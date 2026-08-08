@@ -1,7 +1,7 @@
-# AI Content Generation & Knowledge Engine - RBTTrainingAI SaaS
+# AI Content Generation & Knowledge Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The AI Content Generation & Knowledge Engine is the central content intelligence platform for RBTTrainingAI. Designed to generate high-quality educational drafts (*practice questions, flashcard decks, clinical ABA scenarios, study guides, blog articles, and glossary terms*) for **RBT**, **BCaBA**, and **BCBA** candidates, it enforces a strict human-in-the-loop editorial review workflow (*Draft -> Needs Review -> Fact & SEO Check -> BCBA Approval -> Published*) preventing unverified auto-publishing.
+The AI Content Generation & Knowledge Engine is the central content intelligence platform for RBT Practice Questions. Designed to generate high-quality educational drafts (*practice questions, flashcard decks, clinical ABA scenarios, study guides, blog articles, and glossary terms*) for **RBT**, **BCaBA**, and **BCBA** candidates, it enforces a strict human-in-the-loop editorial review workflow (*Draft -> Needs Review -> Fact & SEO Check -> BCBA Approval -> Published*) preventing unverified auto-publishing.
 
 ## Architecture
 - **Central Core Engine**: `g:\RBT\lib\ai-content-engine.ts` (`generateAIDraft`, `inspectContentQuality`, `updateDraftReviewStatus`, `getAllContentDrafts`).

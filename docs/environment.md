@@ -1,4 +1,4 @@
-# Environment Variables Management — RBTTrainingAI SaaS
+# Environment Variables Management — RBT Practice Questions SaaS
 
 ## Purpose
 Specifies environment configuration, validation schema, security rules, and variable isolation across environments.

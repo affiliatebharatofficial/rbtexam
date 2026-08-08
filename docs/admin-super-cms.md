@@ -1,7 +1,7 @@
-# Enterprise Super Admin CMS - RBTTrainingAI SaaS Operating System
+# Enterprise Super Admin CMS - RBT Practice Questions SaaS Operating System
 
 ## Purpose
-The Enterprise Super Admin CMS is the central operating system and administration console for the RBTTrainingAI SaaS platform. It governs every platform engine (*Master Question Bank, Smart Flashcards, Socrates AI Tutor, AI Adaptive Learning, Analytics BI, Subscription Billing, Enterprise SEO*), dynamic site configurations, multi-provider AI model routing (OpenAI, Gemini, OpenRouter), user roles, media assets, and security audit trails without requiring code changes.
+The Enterprise Super Admin CMS is the central operating system and administration console for the RBT Practice Questions SaaS platform. It governs every platform engine (*Master Question Bank, Smart Flashcards, Socrates AI Tutor, AI Adaptive Learning, Analytics BI, Subscription Billing, Enterprise SEO*), dynamic site configurations, multi-provider AI model routing (OpenAI, Gemini, OpenRouter), user roles, media assets, and security audit trails without requiring code changes.
 
 ## Architecture
 - **Super Admin CMS Interface**: `g:\RBT\app\admin\page.tsx` (Global Overview, User & Roles, AI & Prompt CMS, Site Settings, Media Library, Audit Logs).

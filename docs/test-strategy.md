@@ -1,4 +1,4 @@
-# Test Strategy — RBTTrainingAI SaaS
+# Test Strategy — RBT Practice Questions SaaS
 Defines the comprehensive test strategy for all platform layers including Unit, Integration, AI Regression, E2E, Performance, Accessibility, and Visual Regression.
 
 ## Layer Strategy

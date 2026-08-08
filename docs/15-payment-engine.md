@@ -1,4 +1,4 @@
-# 15. Payment Engine - RBTTrainingAI SaaS
+# 15. Payment Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Payment Engine integrates payment gateways (Stripe primary, extensible for PayPal/Paddle), manages subscription checkouts, invoice receipts, tax reporting, and webhook event processing.

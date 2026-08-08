@@ -1,4 +1,4 @@
-# 23. Changelog - RBTTrainingAI SaaS
+# 23. Changelog - RBT Practice Questions SaaS
 
 ## Version History
 

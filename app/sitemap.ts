@@ -3,7 +3,7 @@ import { SAMPLE_BACB_QUESTIONS } from '@/lib/sample-questions';
 import { ABA_GLOSSARY_TERMS } from '@/lib/seo-engine';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://rbttrainingai.com';
+  const baseUrl = 'https://rbtpracticequestions.com';
 
   // Core Static & Pillar Routes
   const staticRoutes: MetadataRoute.Sitemap = [

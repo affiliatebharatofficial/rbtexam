@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
           Set New Password
         </h1>
         <p className="text-xs sm:text-sm text-slate-600">
-          Create a new secure password for your RBTTrainingAI candidate account.
+          Create a new secure password for your RBT Practice Questions candidate account.
         </p>
       </div>
 

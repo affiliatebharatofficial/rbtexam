@@ -1,4 +1,4 @@
-# GitHub Actions CI/CD Pipeline — RBTTrainingAI SaaS
+# GitHub Actions CI/CD Pipeline — RBT Practice Questions SaaS
 
 ## Purpose
 Automates code quality verification, type checks, unit/integration testing, Docker builds, and cloud deployments on push, pull request, merge, and nightly schedules.

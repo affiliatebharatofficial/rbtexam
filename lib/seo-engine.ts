@@ -1,7 +1,7 @@
 import { SEOMetadata, InternalLink, GlossaryTerm, SEOHealthReport } from '@/types/seo';
 import { SAMPLE_BACB_QUESTIONS } from './sample-questions';
 
-const BASE_URL = 'https://rbttrainingai.com';
+const BASE_URL = 'https://rbtpracticequestions.com';
 
 /**
  * Builds standard Next.js Metadata Payload
@@ -10,12 +10,12 @@ export function buildSEOMetadata(
   title: string,
   description: string,
   slugPath: string,
-  keywords: string[] = ['RBT exam prep', 'BACB 2nd edition task list', 'RBT practice test']
+  keywords: string[] = ['RBT Practice Questions', 'RBT Practice Exam', 'RBT Practice Test']
 ): SEOMetadata {
   const canonicalUrl = `${BASE_URL}${slugPath.startsWith('/') ? slugPath : `/${slugPath}`}`;
 
   return {
-    title: `${title} | RBTTrainingAI`,
+    title: `${title} | RBT Practice Questions`,
     description,
     slug: slugPath,
     canonicalUrl,
@@ -26,7 +26,7 @@ export function buildSEOMetadata(
     certification: 'RBT',
     lastUpdated: new Date().toISOString(),
     readingTimeMinutes: 5,
-    author: 'RBTTrainingAI BCBA Editorial Team',
+    author: 'RBT Practice Questions BCBA Editorial Team',
   };
 }
 
@@ -65,7 +65,7 @@ export function generateCourseJSONLD(certification: string = 'RBT') {
     description: `Complete ${certification} certification preparation platform with 85-question mock exams, Leitner flashcards, and Socrates AI Tutor mentorship.`,
     provider: {
       '@type': 'EducationalOrganization',
-      name: 'RBTTrainingAI',
+      name: 'RBT Practice Questions',
       sameAs: BASE_URL,
     },
     educationalCredentialAwarded: `${certification} Exam Pass Readiness Certification`,

@@ -1,4 +1,4 @@
-# Media Library Asset Manager - RBTTrainingAI SaaS
+# Media Library Asset Manager - RBT Practice Questions SaaS
 
 ## Purpose
 Defines file storage management for clinical PDF study guides, question images, video clips, and CDN compression.

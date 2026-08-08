@@ -1,4 +1,4 @@
-# Performance Review & Core Web Vitals Audit — RBTTrainingAI SaaS
+# Performance Review & Core Web Vitals Audit — RBT Practice Questions SaaS
 
 ## Audit Summary
 Evaluates frontend rendering, API latency, vector search speed, image optimization, and bundle optimization across mobile and desktop viewports.

@@ -1,7 +1,7 @@
-# 02. Folder Structure - RBTTrainingAI SaaS
+# 02. Folder Structure - RBT Practice Questions SaaS
 
 ## Purpose
-This document provides a comprehensive mapping of the RBTTrainingAI codebase folder structure, detailing module organization, component grouping, service boundaries, and utility distribution for senior software engineers and system architects.
+This document provides a comprehensive mapping of the RBT Practice Questions codebase folder structure, detailing module organization, component grouping, service boundaries, and utility distribution for senior software engineers and system architects.
 
 ## Architecture
 The application adheres to Next.js App Router architectural guidelines:

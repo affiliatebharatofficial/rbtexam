@@ -1,7 +1,7 @@
-# RAG Engine — RBTTrainingAI SaaS
+# RAG Engine — RBT Practice Questions SaaS
 
 ## Purpose
-The RAG (Retrieval-Augmented Generation) Engine is the centralized knowledge intelligence platform for RBTTrainingAI. It prevents AI hallucination by grounding every AI Tutor response, adaptive recommendation, and study plan in authoritative internal knowledge — never relying solely on LLM memory.
+The RAG (Retrieval-Augmented Generation) Engine is the centralized knowledge intelligence platform for RBT Practice Questions. It prevents AI hallucination by grounding every AI Tutor response, adaptive recommendation, and study plan in authoritative internal knowledge — never relying solely on LLM memory.
 
 ## Architecture
 

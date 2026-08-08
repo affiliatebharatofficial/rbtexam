@@ -1,7 +1,7 @@
-# Master Question Bank Engine - RBTTrainingAI SaaS
+# Master Question Bank Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The Master Question Bank Engine is the centralized core data and item management engine of the RBTTrainingAI SaaS platform. It serves as the single source of truth for all practice questions, diagnostic simulations, Socrates AI tutor drills, and flashcard associations across all supported BACB certification levels (**RBT**, **BCaBA**, and **BCBA**).
+The Master Question Bank Engine is the centralized core data and item management engine of the RBT Practice Questions SaaS platform. It serves as the single source of truth for all practice questions, diagnostic simulations, Socrates AI tutor drills, and flashcard associations across all supported BACB certification levels (**RBT**, **BCaBA**, and **BCBA**).
 
 ## Architecture
 - **Certifications Supported**: RBT (Registered Behavior Technician), BCaBA (Board Certified Assistant Behavior Analyst), BCBA (Board Certified Behavior Analyst).

@@ -1,6 +1,14 @@
-# CHANGELOG — RBTTrainingAI SaaS
+# CHANGELOG — RBT Practice Questions SaaS
 
 ## Master Version History
+
+### [v3.1.0] - 2026-08-08 (Official Brand Launch: RBT Practice Questions)
+#### Added / Modified
+- Complete project-wide rebrand to **RBT Practice Questions** (Domain: `https://rbtpracticequestions.com`).
+- Updated all SEO metadata, primary/secondary keywords, OpenGraph, JSON-LD schema, title tags (`RBT Practice Questions | Free Mock Exams, Flashcards & AI Tutor`), and meta descriptions.
+- Updated Navbar logo, Footer navigation, Hero headline/subheadline, CTAs, Admin CMS, and AI Tutor system prompts.
+- Updated support and no-reply email addresses (`support@rbtpracticequestions.com`, `no-reply@rbtpracticequestions.com`).
+- Updated all 100+ documentation files and database schemas.
 
 ### [v3.0.0] - 2026-08-07 (Production Launch, Beta Release & Production Cleanup Release)
 #### Added

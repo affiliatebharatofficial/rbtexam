@@ -1,4 +1,4 @@
-# Programmatic SEO Architecture - RBTTrainingAI SaaS
+# Programmatic SEO Architecture - RBT Practice Questions SaaS
 
 ## Purpose
 This document specifies the Programmatic SEO (pSEO) engine architecture designed to generate and scale thousands of search-indexed landing pages across RBT, BCaBA, and BCBA certification domains.

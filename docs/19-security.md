@@ -1,4 +1,4 @@
-# 19. Enterprise Security, Privacy & Compliance Engine - RBTTrainingAI SaaS
+# 19. Enterprise Security, Privacy & Compliance Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Security, Privacy & Compliance Engine implements Zero Trust Architecture, Defense-in-Depth, prompt injection mitigation, session revocation, API key scope checks, immutable audit logging, and GDPR/CCPA privacy data subject governance.

@@ -1,7 +1,7 @@
-# Enterprise AI Workforce System — RBTTrainingAI SaaS
+# Enterprise AI Workforce System — RBT Practice Questions SaaS
 
 ## Purpose
-The Enterprise AI Workforce System transforms RBTTrainingAI into an autonomous AI-powered educational company where 29 specialized AI Employees collaborate across content generation, quality review, programmatic SEO, learning coaching, analytics, and operational workflows.
+The Enterprise AI Workforce System transforms RBT Practice Questions into an autonomous AI-powered educational company where 29 specialized AI Employees collaborate across content generation, quality review, programmatic SEO, learning coaching, analytics, and operational workflows.
 
 ## Architecture
 

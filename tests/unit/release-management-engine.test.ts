@@ -121,7 +121,7 @@ describe('Production Launch & Go-Live Engine', () => {
       knownIssues: [],
     });
 
-    expect(changelog).toContain('# RBTTrainingAI Release Notes - v3.0.0');
+    expect(changelog).toContain('# RBT Practice Questions Release Notes - v3.0.0');
     expect(changelog).toContain('20-point validation matrix');
   });
 });

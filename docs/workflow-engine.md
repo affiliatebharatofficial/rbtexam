@@ -1,4 +1,4 @@
-# Trigger-Condition-Action Automation Workflow Engine - RBTTrainingAI SaaS
+# Trigger-Condition-Action Automation Workflow Engine - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies trigger-condition-action automation rules (*e.g., If user misses 3 study days -> Send email -> Recommend flashcards*).

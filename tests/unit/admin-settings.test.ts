@@ -8,9 +8,9 @@ describe('Super Admin Platform Configuration Settings', () => {
     expect(config.lemonSqueezy.environment).toBe('live');
     expect(config.smtp).toBeDefined();
     expect(config.smtp.host).toBe('smtp.sendgrid.net');
-    expect(config.companyName).toBe('RBTTrainingAI Inc.');
+    expect(config.companyName).toBe('RBT Practice Questions Inc.');
     expect(config.landing).toBeDefined();
-    expect(config.landing.heroTitle).toContain('BACB RBT');
+    expect(config.landing.heroTitle).toContain('RBT Certification');
     expect(config.language.defaultLocale).toBe('en-US');
   });
 

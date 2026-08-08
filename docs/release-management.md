@@ -1,7 +1,7 @@
 # Release Management Framework
 
 ## 1. Environment Promotion Pipeline
-RBTTrainingAI enforces a strict 5-stage deployment progression:
+RBT Practice Questions enforces a strict 5-stage deployment progression:
 1. **Development (`dev`)**: Local integration and unit testing.
 2. **Staging (`staging`)**: Pre-release verification and automated E2E testing.
 3. **Private Beta (`private_beta`)**: Internal testers and select power users.

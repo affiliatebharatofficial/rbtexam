@@ -1,4 +1,4 @@
-# Dynamic Metadata Engine - RBTTrainingAI SaaS
+# Dynamic Metadata Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Metadata Engine constructs OpenGraph social cards, canonical URLs, robots directives, and title/description meta tags across all pages.

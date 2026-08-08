@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/api/', '/admin/', '/profile/'],
     },
-    sitemap: 'https://rbttrainingai.com/sitemap.xml',
+    sitemap: 'https://rbtpracticequestions.com/sitemap.xml',
   };
 }

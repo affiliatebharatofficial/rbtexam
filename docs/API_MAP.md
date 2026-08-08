@@ -1,4 +1,4 @@
-# API MAP — RBTTrainingAI SaaS
+# API MAP — RBT Practice Questions SaaS
 
 ## Complete REST Endpoint Registry
 

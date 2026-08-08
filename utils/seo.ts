@@ -1,24 +1,24 @@
 import { Metadata } from 'next';
 
 export const SITE_CONFIG = {
-  name: 'RBTTrainingAI',
-  title: 'RBTTrainingAI - #1 AI Exam Prep for RBT Certification (BACB 2nd Edition)',
-  description: 'Master the Registered Behavior Technician (RBT) Exam with the world’s most advanced AI-powered practice simulator, Socrates AI tutor, spaced-repetition flashcards, and BACB task list study guides.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://rbttraining.ai',
-  ogImage: 'https://rbttraining.ai/og-image.png',
+  name: 'RBT Practice Questions',
+  title: 'RBT Practice Questions | Free Mock Exams, Flashcards & AI Tutor',
+  description: 'Practice with thousands of RBT practice questions, mock exams, flashcards, AI tutor, study guides and detailed explanations to prepare for the BACB Registered Behavior Technician certification exam.',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://rbtpracticequestions.com',
+  ogImage: 'https://rbtpracticequestions.com/og-image.png',
   keywords: [
-    'RBT exam prep',
-    'Registered Behavior Technician exam',
-    'BACB 2nd Edition task list',
-    'RBT practice test',
-    'RBT flashcards',
-    'ABA student study guide',
-    'AI RBT tutor',
-    'RBT mock exam',
-    'Applied Behavior Analysis exam',
-    'RBT training center software',
+    'RBT Practice Questions',
+    'RBT Practice Exam',
+    'RBT Practice Test',
+    'RBT Mock Exam',
+    'RBT Exam Questions',
+    'Free RBT Practice Questions',
+    'BACB RBT Practice Test',
+    'RBT Flashcards',
+    'RBT Study Guide',
+    'RBT Mock Test',
   ],
-  author: 'RBTTrainingAI Inc.',
+  author: 'RBT Practice Questions Inc.',
 };
 
 export function constructMetadata({
@@ -65,7 +65,7 @@ export function constructMetadata({
           url: image,
           width: 1200,
           height: 630,
-          alt: 'RBTTrainingAI Exam Prep Platform',
+          alt: 'RBT Practice Questions Platform',
         },
       ],
       locale: 'en_US',
@@ -76,7 +76,7 @@ export function constructMetadata({
       title,
       description,
       images: [image],
-      creator: '@rbttrainingai',
+      creator: '@rbtpracticequestions',
     },
   };
 }

@@ -1,4 +1,4 @@
-# Privacy Engine & Data Subject Rights (GDPR / CCPA) - RBTTrainingAI SaaS
+# Privacy Engine & Data Subject Rights (GDPR / CCPA) - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies data privacy controls, consent management (`PrivacyConsentRecord`), right to erasure (account deletion), and right to data export (`DataSubjectRequest`).

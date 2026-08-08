@@ -1,7 +1,7 @@
 # Production Launch Engine & Go-Live Strategy
 
 ## 1. Overview
-The **Production Launch Engine** serves as the final production readiness layer for RBTTrainingAI. It guarantees safe, controlled, measurable, and reversible deployments across all environments.
+The **Production Launch Engine** serves as the final production readiness layer for RBT Practice Questions. It guarantees safe, controlled, measurable, and reversible deployments across all environments.
 
 ## 2. Architecture & Subsystems
 - **Release Management Engine**: Controls SemVer releases across Development, Staging, Private Beta, Public Beta, Production, Hotfix, and Emergency states.

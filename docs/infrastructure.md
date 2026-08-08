@@ -1,4 +1,4 @@
-# Infrastructure Architecture — RBTTrainingAI SaaS
+# Infrastructure Architecture — RBT Practice Questions SaaS
 
 ## Purpose
 Enterprise cloud and self-host infrastructure specification designed to scale to millions of active candidates across RBT, BCaBA, and BCBA certifications.

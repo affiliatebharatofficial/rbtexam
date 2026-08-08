@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# RBTTrainingAI — Production Dockerfile
+# RBT Practice Questions — Production Dockerfile
 # Multi-stage build: Builder → Runner
 # Target: Node.js 20 Alpine (minimal, secure)
 # ─────────────────────────────────────────────────────────────────────────────

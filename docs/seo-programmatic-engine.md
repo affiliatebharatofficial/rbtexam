@@ -1,7 +1,7 @@
-# Enterprise SEO & Programmatic Content Engine - RBTTrainingAI SaaS
+# Enterprise SEO & Programmatic Content Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The Enterprise SEO & Programmatic Content Engine is the automated organic growth and search engine indexing platform for RBTTrainingAI. Designed to generate, optimize, and scale thousands of search landing pages (*question detail pages, flashcard decks, clinical glossary terms, mock exam landings, and certification hubs*), it enforces clean URL taxonomy, JSON-LD rich snippet schema validation, zero orphan page internal linking, dynamic XML sitemaps, and automated SEO health auditing.
+The Enterprise SEO & Programmatic Content Engine is the automated organic growth and search engine indexing platform for RBT Practice Questions. Designed to generate, optimize, and scale thousands of search landing pages (*question detail pages, flashcard decks, clinical glossary terms, mock exam landings, and certification hubs*), it enforces clean URL taxonomy, JSON-LD rich snippet schema validation, zero orphan page internal linking, dynamic XML sitemaps, and automated SEO health auditing.
 
 ## Architecture
 - **Certifications Covered**: RBT, BCaBA, BCBA, ABA Therapy, Behavior Analysis.

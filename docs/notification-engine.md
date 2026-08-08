@@ -1,7 +1,7 @@
-# Notification, Email Automation & Workflow Engine - RBTTrainingAI SaaS
+# Notification, Email Automation & Workflow Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The Notification, Email Automation & Workflow Engine serves as the event-driven communication and candidate retention platform for RBTTrainingAI. Designed to deliver multi-channel messages (*in-app notification center bell, automated emails, push notifications, webhooks*), it executes intelligent triggers (*3-day study inactivity, weak topic alerts, 7-day streak milestones, trial expirations, payment receipts*) to maximize study consistency and subscriber retention across **RBT**, **BCaBA**, and **BCBA** candidates.
+The Notification, Email Automation & Workflow Engine serves as the event-driven communication and candidate retention platform for RBT Practice Questions. Designed to deliver multi-channel messages (*in-app notification center bell, automated emails, push notifications, webhooks*), it executes intelligent triggers (*3-day study inactivity, weak topic alerts, 7-day streak milestones, trial expirations, payment receipts*) to maximize study consistency and subscriber retention across **RBT**, **BCaBA**, and **BCBA** candidates.
 
 ## Architecture
 - **Central Event Publisher**: `g:\RBT\lib\notification-engine.ts` (`publishNotificationEvent`, `getUserInAppNotifications`, `markNotificationAsRead`, `broadcastNotificationCampaign`).

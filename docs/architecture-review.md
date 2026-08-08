@@ -1,7 +1,7 @@
-# Enterprise Architecture Review & Audit — RBTTrainingAI SaaS
+# Enterprise Architecture Review & Audit — RBT Practice Questions SaaS
 
 ## Executive Summary
-This document provides a Principal Architect audit of the RBTTrainingAI platform. The application is built as a commercial multi-certification SaaS (RBT, BCaBA, BCBA) powered by Next.js 16, TypeScript, Supabase PostgreSQL, and an internal pgvector RAG intelligence engine.
+This document provides a Principal Architect audit of the RBT Practice Questions platform. The application is built as a commercial multi-certification SaaS (RBT, BCaBA, BCBA) powered by Next.js 16, TypeScript, Supabase PostgreSQL, and an internal pgvector RAG intelligence engine.
 
 ---
 

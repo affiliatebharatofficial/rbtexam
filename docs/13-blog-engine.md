@@ -1,4 +1,4 @@
-# 13. Blog & AI Content Intelligence Engine - RBTTrainingAI SaaS
+# 13. Blog & AI Content Intelligence Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Blog & AI Content Intelligence Engine powers educational blog articles, study guides, clinical ABA scenarios, and question drafts through an AI-assisted human-in-the-loop review pipeline.

@@ -1,4 +1,4 @@
-# Socrates AI Tutor Engine - RBTTrainingAI SaaS
+# Socrates AI Tutor Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Socrates AI Tutor Engine is an intelligent, BCBA-grade Socratic learning assistant designed specifically for candidates preparing for **RBT**, **BCaBA**, and **BCBA** certification exams. It goes far beyond a generic chatbot by injecting candidate-specific memory context (*readiness rating, priority weak topics, target exam date, recent mock scores*) directly into system prompts, generating clinical ABC scenario deconstructions, mnemonic memory tricks, and BACB exam strategy tips.

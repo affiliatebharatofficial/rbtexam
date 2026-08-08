@@ -1,4 +1,4 @@
-# Docker Infrastructure — RBTTrainingAI SaaS
+# Docker Infrastructure — RBT Practice Questions SaaS
 
 ## Purpose
 Containerization specs for local development, testing, staging, and self-hosted production setups.

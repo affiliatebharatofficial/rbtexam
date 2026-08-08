@@ -1,7 +1,7 @@
-# DevOps Overview — RBTTrainingAI SaaS
+# DevOps Overview — RBT Practice Questions SaaS
 
 ## Purpose
-The DevOps & Infrastructure Engine provides high-availability, zero-downtime deployments, environment safety, containerization, automated testing, and comprehensive observability for RBTTrainingAI.
+The DevOps & Infrastructure Engine provides high-availability, zero-downtime deployments, environment safety, containerization, automated testing, and comprehensive observability for RBT Practice Questions.
 
 ## Architecture
 

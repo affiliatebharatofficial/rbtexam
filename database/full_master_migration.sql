@@ -1,5 +1,5 @@
 -- ====================================================================
--- RBTTrainingAI FULL MASTER DATABASE MIGRATION SCRIPT
+-- RBT Practice Questions FULL MASTER DATABASE MIGRATION SCRIPT
 -- Database Engine: PostgreSQL 15+ (Supabase Compatible)
 -- Security: Supabase Row Level Security (RLS) Enabled Across All Tables
 -- Primary Keys: UUID v4 (gen_random_uuid() / uuid_generate_v4())

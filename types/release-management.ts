@@ -1,5 +1,5 @@
 /**
- * RBTTrainingAI - Release Management & Go-Live Engine Types
+ * RBT Practice Questions - Release Management & Go-Live Engine Types
  * Strict Enterprise Type Definitions
  */
 

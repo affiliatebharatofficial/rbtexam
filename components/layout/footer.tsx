@@ -14,11 +14,11 @@ export function Footer() {
                 <Brain className="w-5 h-5" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                RBT<span className="text-[#2563EB]">Training</span>AI
+                RBT <span className="text-[#2563EB]">Practice Questions</span>
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
-              The premier AI-powered RBT exam preparation SaaS designed specifically for autism therapists, ABA students, and clinical training centers across the United States.
+              The premier RBT exam preparation platform with thousands of practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.
             </p>
             <div className="flex items-center space-x-2 text-xs text-emerald-400 font-medium pt-2">
               <ShieldCheck className="w-4 h-4" />
@@ -26,38 +26,37 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Platform Navigation */}
+          {/* Core Tools */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Exam Prep Tools</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Exam Prep</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link href="/exam" className="hover:text-white transition-colors">Adaptive AI Exam Simulator</Link></li>
-              <li><Link href="/tutor" className="hover:text-white transition-colors">Socrates AI RBT Tutor</Link></li>
-              <li><Link href="/task-list" className="hover:text-white transition-colors">2nd Edition Task List Guide</Link></li>
-              <li><Link href="/flashcards" className="hover:text-white transition-colors">Spaced Repetition Flashcards</Link></li>
-              <li><Link href="/analytics" className="hover:text-white transition-colors">Readiness Score Analytics</Link></li>
+              <li><Link href="/exam" className="hover:text-white transition-colors">Practice Questions</Link></li>
+              <li><Link href="/rbt/mock-exam" className="hover:text-white transition-colors">Mock Exams</Link></li>
+              <li><Link href="/flashcards" className="hover:text-white transition-colors">Flashcards</Link></li>
+              <li><Link href="/task-list" className="hover:text-white transition-colors">Study Guides</Link></li>
+              <li><Link href="/tutor" className="hover:text-white transition-colors">AI Tutor</Link></li>
             </ul>
           </div>
 
-          {/* Target Audience Solutions */}
+          {/* Resources & Info */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Solutions For</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Company & Blog</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link href="/clinic" className="hover:text-white transition-colors">ABA Clinics & Agencies</Link></li>
-              <li><Link href="/clinic" className="hover:text-white transition-colors">RBT Training Centers</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">Autism Behavior Technicians</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">BCBA Supervisors</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">Enterprise Cohort Licensing</Link></li>
+              <li><Link href="/rbt" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/rbt/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+              <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
             </ul>
           </div>
 
           {/* Legal & Compliance */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Target Market & Legal</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Legal & Policies</h4>
             <ul className="space-y-2.5 text-xs">
-              <li className="text-slate-400">United States (US National Exam)</li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">100% Pass Guarantee Policy</Link></li>
-              <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+              <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
             </ul>
           </div>
         </div>
@@ -65,7 +64,7 @@ export function Footer() {
         {/* Disclaimer & Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-500 space-y-4 md:space-y-0">
           <p className="max-w-3xl leading-relaxed">
-            <strong>BACB Disclaimer:</strong> RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). RBTTrainingAI is an independent prep provider and is not affiliated with or endorsed by the BACB®.
+            <strong>BACB Disclaimer:</strong> RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). RBT Practice Questions is an independent prep provider and is not affiliated with or endorsed by the BACB®.
           </p>
           <div className="flex items-center space-x-1">
             <span>Built with precision for US RBT Candidates</span>

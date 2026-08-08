@@ -1,4 +1,4 @@
-# Template System & Personalization - RBTTrainingAI SaaS
+# Template System & Personalization - RBT Practice Questions SaaS
 
 ## Purpose
 Defines HTML email template variables (`{{name}}`, `{{streakDays}}`, `{{weakTopic}}`) for dynamic candidate engagement.

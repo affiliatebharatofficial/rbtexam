@@ -1,4 +1,4 @@
-# Vector Search & pgvector — RBTTrainingAI SaaS
+# Vector Search & pgvector — RBT Practice Questions SaaS
 
 ## Purpose
 Specifies pgvector IVFFlat cosine similarity search, approximate nearest-neighbour (ANN) queries, and multi-provider embedding adapter strategy.

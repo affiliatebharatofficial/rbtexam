@@ -1,4 +1,4 @@
-# RELEASE & DEPLOYMENT PROCESS — RBTTrainingAI SaaS
+# RELEASE & DEPLOYMENT PROCESS — RBT Practice Questions SaaS
 
 ## Release Pipeline Overview
 Every production release follows a strict 5-stage automated CI/CD pipeline managed by GitHub Actions (`.github/workflows/ci.yml`).

@@ -1,4 +1,4 @@
-# Smart Flashcard Engine - RBTTrainingAI SaaS
+# Smart Flashcard Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The Smart Flashcard Engine delivers an AI-powered, adaptive spaced repetition learning system inspired by Anki and SuperMemo (SM-2). Supporting **RBT**, **BCaBA**, and **BCBA** certification levels, it calculates memory decay intervals, automates learning stage progressions (*learning, review, mastered, forgotten*), and integrates with the Master Question Bank to dynamically generate clinical scenario flashcards with Socratic AI mnemonics.

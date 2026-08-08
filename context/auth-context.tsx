@@ -27,8 +27,8 @@ const AUTH_STORAGE_KEY = 'rbt_ai_auth_session';
 
 export const ADMIN_EMAILS: string[] = [
   'jobpegyan@gmail.com',
-  'admin@rbttraining.ai',
-  'superadmin@rbttraining.ai',
+  'support@rbtpracticequestions.com',
+  'admin@rbtpracticequestions.com',
 ];
 
 export function isEmailAdmin(email?: string | null): boolean {

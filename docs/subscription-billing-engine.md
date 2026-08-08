@@ -1,7 +1,7 @@
-# Subscription & Billing Engine - RBTTrainingAI SaaS
+# Subscription & Billing Engine - RBT Practice Questions SaaS
 
 ## Purpose
-The Subscription & Billing Engine provides an enterprise-grade SaaS monetization and entitlement system for RBTTrainingAI. Built to handle individual candidates, clinic organizations, and lifetime memberships, it governs feature permissions (*practice test limits, flashcard daily quotas, AI Tutor messages*), Stripe webhook integrations, invoice generation, tax reporting, and promo coupon validation.
+The Subscription & Billing Engine provides an enterprise-grade SaaS monetization and entitlement system for RBT Practice Questions. Built to handle individual candidates, clinic organizations, and lifetime memberships, it governs feature permissions (*practice test limits, flashcard daily quotas, AI Tutor messages*), Stripe webhook integrations, invoice generation, tax reporting, and promo coupon validation.
 
 ## Architecture
 - **Plans Supported**: `free`, `basic`, `pro` (Pass Guarantee), `team` (Clinic Organization), `enterprise`, `lifetime`.

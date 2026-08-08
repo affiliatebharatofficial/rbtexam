@@ -1,4 +1,4 @@
-# PRODUCT & TECHNOLOGY ROADMAP — RBTTrainingAI SaaS
+# PRODUCT & TECHNOLOGY ROADMAP — RBT Practice Questions SaaS
 
 ## Version Release History
 

@@ -1,4 +1,4 @@
-# QA Process — RBTTrainingAI SaaS
+# QA Process — RBT Practice Questions SaaS
 
 ## Definition of Done
 A feature is only complete when:

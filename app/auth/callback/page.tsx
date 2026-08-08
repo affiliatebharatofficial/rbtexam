@@ -50,7 +50,7 @@ function AuthCallbackContent() {
       </div>
       <div className="flex items-center space-x-2 text-xs font-semibold text-slate-600">
         <RefreshCw className="w-4 h-4 animate-spin text-[#2563EB]" />
-        <span>Completing Google OAuth Authentication for RBTTrainingAI...</span>
+        <span>Completing Google OAuth Authentication for RBT Practice Questions...</span>
       </div>
     </div>
   );

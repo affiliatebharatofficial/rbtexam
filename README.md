@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RBT Practice Questions — #1 BACB Certification Exam Prep SaaS
+
+Official Domain: [https://rbtpracticequestions.com](https://rbtpracticequestions.com)
+
+This is the Next.js 16 App Router codebase for **RBT Practice Questions**.
 
 ## Getting Started
 

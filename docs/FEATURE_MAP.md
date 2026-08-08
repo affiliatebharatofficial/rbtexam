@@ -1,4 +1,4 @@
-# FEATURE MAP — RBTTrainingAI SaaS
+# FEATURE MAP — RBT Practice Questions SaaS
 
 ## Master Feature Matrix (12 Production Modules)
 

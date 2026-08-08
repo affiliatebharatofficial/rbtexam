@@ -14,13 +14,14 @@ export function Navbar() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const navLinks = [
-    { href: '/dashboard', label: 'Dashboard', icon: Brain },
-    { href: '/exam', label: 'Exam Simulator', icon: Sparkles },
-    { href: '/tutor', label: 'Socrates AI Tutor', icon: BookOpen },
-    { href: '/task-list', label: '2nd Ed Task List', icon: Layers },
+    { href: '/', label: 'Home', icon: Brain },
+    { href: '/exam', label: 'Practice Questions', icon: Sparkles },
+    { href: '/rbt/mock-exam', label: 'Mock Exams', icon: Sparkles },
     { href: '/flashcards', label: 'Flashcards', icon: Layers },
-    { href: '/analytics', label: 'Analytics', icon: BarChart2 },
-    { href: '/clinic', label: 'Clinic B2B', icon: Users },
+    { href: '/task-list', label: 'Study Guides', icon: BookOpen },
+    { href: '/tutor', label: 'AI Tutor', icon: BookOpen },
+    { href: '/pricing', label: 'Pricing', icon: BarChart2 },
+    { href: '/dashboard', label: 'Dashboard', icon: Brain },
   ];
 
   return (
@@ -34,7 +35,7 @@ export function Navbar() {
             </div>
             <div>
               <span className="text-xl font-bold text-[#0F172A] tracking-tight">
-                RBT<span className="text-[#2563EB]">Training</span>AI
+                RBT <span className="text-[#2563EB]">Practice Questions</span>
               </span>
               <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200/60">
                 2nd Ed BACB

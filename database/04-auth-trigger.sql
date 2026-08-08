@@ -1,5 +1,5 @@
 -- ====================================================================
--- RBTTrainingAI Database Migration 004: Supabase Auth Trigger & Profiles Sync
+-- RBT Practice Questions Database Migration 004: Supabase Auth Trigger & Profiles Sync
 -- Description: Automatically creates records in public.users and public.profiles 
 --              when a user authenticates or registers via Supabase Auth (Google OAuth/Email).
 -- ====================================================================

@@ -1,4 +1,4 @@
-# 11. AI Adaptive Study Planner Engine - RBTTrainingAI SaaS
+# 11. AI Adaptive Study Planner Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The AI Adaptive Study Planner Engine automates candidate exam preparation by generating personalized daily study checklists, priority weakness queues, and pass probability predictions based on real-time performance analytics.

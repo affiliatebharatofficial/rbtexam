@@ -1,4 +1,4 @@
-# 17. Email System - RBTTrainingAI SaaS
+# 17. Email System - RBT Practice Questions SaaS
 
 ## Purpose
 The Email System manages transactional and marketing email delivery via Resend, SendGrid, and SMTP providers.

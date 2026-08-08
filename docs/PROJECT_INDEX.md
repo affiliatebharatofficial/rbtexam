@@ -1,7 +1,7 @@
-# PROJECT INDEX — RBTTrainingAI SaaS
+# PROJECT INDEX — RBT Practice Questions SaaS
 
 ## Executive Overview
-RBTTrainingAI is an enterprise-grade AI-powered educational SaaS platform designed to help candidates prepare for and pass BACB certification exams (RBT, BCaBA, BCBA) in the shortest possible time.
+RBT Practice Questions is an enterprise-grade AI-powered educational SaaS platform designed to help candidates prepare for and pass BACB certification exams (RBT, BCaBA, BCBA) in the shortest possible time.
 
 ---
 

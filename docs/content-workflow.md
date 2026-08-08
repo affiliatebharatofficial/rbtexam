@@ -1,4 +1,4 @@
-# Editorial Content & Review Workflow - RBTTrainingAI SaaS
+# Editorial Content & Review Workflow - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies the multi-stage human-in-the-loop review pipeline ensuring zero hallucinations or incorrect answer keys reach candidates.

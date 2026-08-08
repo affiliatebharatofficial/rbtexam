@@ -1,4 +1,4 @@
-# Multi-Agent System — RBTTrainingAI SaaS
+# Multi-Agent System — RBT Practice Questions SaaS
 
 ## Purpose
 Specifies the 29 specialized AI Employees, their roles, departments, system prompts, and collaborative workflows.

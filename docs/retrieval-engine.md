@@ -1,4 +1,4 @@
-# Retrieval Engine — RBTTrainingAI SaaS
+# Retrieval Engine — RBT Practice Questions SaaS
 
 ## Purpose
 Specifies the hybrid retrieval strategy: semantic vector search combined with keyword BM25 matching, followed by metadata filtering and confidence re-ranking.

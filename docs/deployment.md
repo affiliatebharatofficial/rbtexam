@@ -1,4 +1,4 @@
-# Deployment Strategy — RBTTrainingAI SaaS
+# Deployment Strategy — RBT Practice Questions SaaS
 
 ## Purpose
 Detailed deployment instructions and workflows for Vercel, Supabase, Docker, and self-hosted environments.

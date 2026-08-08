@@ -1,4 +1,4 @@
-# AI Prompt CMS & Model Routing - RBTTrainingAI SaaS
+# AI Prompt CMS & Model Routing - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies multi-provider LLM priority routing (OpenAI GPT-4o, Google Gemini 1.5 Pro, OpenRouter) and version-controlled system prompt templates.

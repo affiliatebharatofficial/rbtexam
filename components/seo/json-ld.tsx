@@ -4,12 +4,12 @@ export function JsonLdSchema() {
   const courseSchema = {
     '@context': 'https://schema.org',
     '@type': 'Course',
-    name: 'RBT Exam Preparation Mastery & Socrates AI Tutor',
+    name: 'RBT Practice Questions & AI Tutor',
     description: 'Complete AI-powered prep platform for the Registered Behavior Technician (RBT) certification exam based on the BACB 2nd Edition Task List.',
     provider: {
       '@type': 'Organization',
-      name: 'RBTTrainingAI',
-      sameAs: 'https://rbttraining.ai',
+      name: 'RBT Practice Questions',
+      sameAs: 'https://rbtpracticequestions.com',
     },
     educationalCredentialAwarded: 'Registered Behavior Technician (RBT) Exam Readiness',
     hasCourseInstance: {
@@ -33,10 +33,10 @@ export function JsonLdSchema() {
       },
       {
         '@type': 'Question',
-        name: 'How does RBTTrainingAI calculate my pass readiness score?',
+        name: 'How does RBT Practice Questions calculate my pass readiness score?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'RBTTrainingAI uses real-time adaptive diagnostic algorithms evaluating your score accuracy across all 6 BACB task list domains, time spent per question, and spaced-repetition memory retention.',
+          text: 'RBT Practice Questions uses real-time adaptive diagnostic algorithms evaluating your score accuracy across all 6 BACB task list domains, time spent per question, and spaced-repetition memory retention.',
         },
       },
       {
@@ -44,7 +44,7 @@ export function JsonLdSchema() {
         name: 'Can ABA Clinics track student progress?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes! RBTTrainingAI includes a dedicated Clinic & Training Center portal for BCBA supervisors to manage cohorts, monitor pass probability, and assign mock exams.',
+          text: 'Yes! RBT Practice Questions includes a dedicated Clinic & Training Center portal for BCBA supervisors to manage cohorts, monitor pass probability, and assign mock exams.',
         },
       },
     ],

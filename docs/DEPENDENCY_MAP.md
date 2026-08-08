@@ -1,4 +1,4 @@
-# DEPENDENCY MAP — RBTTrainingAI SaaS
+# DEPENDENCY MAP — RBT Practice Questions SaaS
 
 ## Production Dependencies (`package.json`)
 

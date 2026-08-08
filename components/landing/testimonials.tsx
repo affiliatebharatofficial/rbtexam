@@ -15,7 +15,7 @@ export function Testimonials() {
       rating: 5,
       scoreBefore: '64%',
       scoreAfter: '94%',
-      quote: 'I failed my first attempt using a basic PDF test bank. RBTTrainingAI’s Socrates tutor pinpointed my exact weak spot in Domain C (DTT vs NET) within 15 minutes. Passed my BACB retake with flying colors!',
+      quote: 'I failed my first attempt using a basic PDF test bank. RBT Practice Questions’ Socrates tutor pinpointed my exact weak spot in Domain C (DTT vs NET) within 15 minutes. Passed my BACB retake with flying colors!',
       verified: true,
     },
     {
@@ -26,7 +26,7 @@ export function Testimonials() {
       rating: 5,
       scoreBefore: 'Clinic Avg 72%',
       scoreAfter: 'Clinic Avg 98%',
-      quote: 'We onboarded 24 new behavior technicians using the RBTTrainingAI B2B Clinic Portal. Every single candidate passed on their first try within 3 weeks. It saves our BCBA supervisors dozens of hours.',
+      quote: 'We onboarded 24 new behavior technicians using the RBT Practice Questions B2B Clinic Portal. Every single candidate passed on their first try within 3 weeks. It saves our BCBA supervisors dozens of hours.',
       verified: true,
     },
     {
@@ -54,7 +54,7 @@ export function Testimonials() {
             Trusted by 14,200+ RBT Candidates & Top ABA Clinics
           </h2>
           <p className="text-base text-slate-600">
-            See how therapists and clinical supervisors passed their BACB RBT exam on the first attempt with RBTTrainingAI.
+            See how therapists and clinical supervisors passed their BACB RBT exam on the first attempt with RBT Practice Questions.
           </p>
         </div>
 

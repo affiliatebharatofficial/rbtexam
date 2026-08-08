@@ -9,7 +9,7 @@ export function FAQSection() {
 
   const faqs = [
     {
-      q: 'How similar are RBTTrainingAI practice questions to the actual BACB RBT Exam?',
+      q: 'How similar are RBT Practice Questions to the actual BACB RBT Exam?',
       a: 'Our question engine is modeled directly after the BACB 2nd Edition Task List. Every scenario reflects real-world clinical behavior analysis cases with 4 distractors designed to test discrimination skills, latency, IRT, DTT, and ethics.',
     },
     {
@@ -18,7 +18,7 @@ export function FAQSection() {
     },
     {
       q: 'What is the 100% Money-Back Pass Guarantee?',
-      a: 'We are so confident in our platform that if you achieve an 85%+ Readiness Score on RBTTrainingAI and do not pass your official BACB RBT exam on the first attempt, we will issue a 100% full refund.',
+      a: 'We are so confident in our platform that if you achieve an 85%+ Readiness Score on RBT Practice Questions and do not pass your official BACB RBT exam on the first attempt, we will issue a 100% full refund.',
     },
     {
       q: 'Can ABA Clinics and BCBAs track student progress?',
@@ -42,7 +42,7 @@ export function FAQSection() {
             Frequently Asked Questions
           </h2>
           <p className="text-base text-slate-600">
-            Everything you need to know about the RBT certification exam and RBTTrainingAI.
+            Everything you need to know about the RBT certification exam and RBT Practice Questions.
           </p>
         </div>
 

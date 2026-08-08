@@ -1,4 +1,4 @@
-# Enterprise API Platform & Developer Ecosystem - RBTTrainingAI SaaS
+# Enterprise API Platform & Developer Ecosystem - RBT Practice Questions SaaS
 
 ## Purpose
 The Enterprise API Platform & Developer Ecosystem provides secure REST APIs, outbound webhook delivery, API Key management, and client SDKs for mobile applications, web apps, desktop clients, Chrome extensions, clinic enterprise integrations, and white-label SaaS partners.

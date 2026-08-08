@@ -1,4 +1,4 @@
-# API Key Authentication & Scopes - RBTTrainingAI SaaS
+# API Key Authentication & Scopes - RBT Practice Questions SaaS
 
 ## Purpose
 Defines Bearer Token headers (`Authorization: Bearer rbt_live_...`) and scope-based permissions (`questions:read`, `analytics:read`, `billing:manage`).

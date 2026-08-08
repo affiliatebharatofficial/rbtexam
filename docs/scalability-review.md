@@ -1,4 +1,4 @@
-# Scalability & Capacity Review — RBTTrainingAI SaaS
+# Scalability & Capacity Review — RBT Practice Questions SaaS
 
 ## Capacity Benchmark Matrix
 

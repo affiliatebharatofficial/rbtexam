@@ -1,5 +1,5 @@
 /**
- * RBTTrainingAI - Database Migration Script
+ * RBT Practice Questions - Database Migration Script
  * Reads database/full_master_migration.sql and provides a CLI runner
  * Usage: npx ts-node scripts/migrate-database.ts
  */
@@ -27,7 +27,7 @@ export function validateMasterMigrationSQL(): { valid: boolean; tableCount: numb
 if (require.main === module) {
   const validation = validateMasterMigrationSQL();
   console.log('====================================================');
-  console.log('RBTTrainingAI Master Database Migration Summary');
+  console.log('RBT Practice Questions Master Database Migration Summary');
   console.log('====================================================');
   console.log(`Status: ${validation.valid ? 'READY' : 'INVALID'}`);
   console.log(`Master Tables Defined: ${validation.tableCount}`);

@@ -128,7 +128,7 @@ const AI_AGENTS_REGISTRY: AIAgent[] = [
     temperature: 0.6,
     maxTokens: 1000,
     promptVersion: 'v3.0',
-    systemPrompt: 'You are Socrates, the lead AI Tutor for RBTTrainingAI. Use Socratic questioning to guide candidates to correct behavior-analytic reasoning.',
+    systemPrompt: 'You are Socrates, the lead AI Tutor for RBT Practice Questions. Use Socratic questioning to guide candidates to correct behavior-analytic reasoning.',
     isActive: true,
     requiresHumanApproval: false,
     totalJobsProcessed: 480,

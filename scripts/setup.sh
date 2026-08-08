@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────────────────────
-# RBTTrainingAI — One-Command Setup Script
+# RBT Practice Questions — One-Command Setup Script
 # Usage: bash scripts/setup.sh
 # ─────────────────────────────────────────────────────────────────────────────
 set -e
@@ -11,7 +11,7 @@ YELLOW="\033[33m"
 RED="\033[31m"
 RESET="\033[0m"
 
-echo -e "${BOLD}🚀 RBTTrainingAI — Enterprise Setup${RESET}\n"
+echo -e "${BOLD}🚀 RBT Practice Questions — Enterprise Setup${RESET}\n"
 
 # ── Step 1: Check Node.js ─────────────────────────────────────────────────────
 echo -e "1️⃣  Checking Node.js version..."

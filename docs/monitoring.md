@@ -1,4 +1,4 @@
-# Monitoring & Observability — RBTTrainingAI SaaS
+# Monitoring & Observability — RBT Practice Questions SaaS
 
 ## Purpose
 Monitors service health, API latency, background jobs, DB connection pools, and external service statuses (OpenAI, Stripe, Resend).
@@ -25,7 +25,7 @@ Monitors service health, API latency, background jobs, DB connection pools, and 
 - **Metrics**: Real-time service status, deployment logs, environment variable integrity checks, and system version tracking.
 
 ## External Uptime Monitoring
-Configure UptimeRobot or Checkly to poll `https://rbttrainingai.com/api/health` every 60 seconds with an HTTP alert trigger if status is not `200 OK`.
+Configure UptimeRobot or Checkly to poll `https://rbtpracticequestions.com/api/health` every 60 seconds with an HTTP alert trigger if status is not `200 OK`.
 
 ## Related Files
 - [lib/health-engine.ts](file:///g:/RBT/lib/health-engine.ts)

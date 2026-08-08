@@ -1,4 +1,4 @@
-# Email Automation System - RBTTrainingAI SaaS
+# Email Automation System - RBT Practice Questions SaaS
 
 ## Purpose
 Specifies transactional and marketing email delivery via Resend, SendGrid, and SMTP providers.

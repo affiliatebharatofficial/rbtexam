@@ -1,4 +1,4 @@
-# 08. Practice Test Engine - RBTTrainingAI SaaS
+# 08. Practice Test Engine - RBT Practice Questions SaaS
 
 ## Purpose
 The RBT Practice Test Engine delivers a realistic, high-concurrency exam simulation environment matching Pearson VUE test center conditions for the BACB® 2nd Edition Task List certification exam. It features randomized question pooling, selectable modes (*Timed Simulation vs Untimed Socratic Study Mode*), configurable question lengths (*20, 50, 85, 100 questions*), instant option explanations, question bookmarking, a pre-submit review grid drawer, immediate scoring, BACB domain sub-score analytics, detailed post-exam rationales walkthrough, and automatic progress saving.

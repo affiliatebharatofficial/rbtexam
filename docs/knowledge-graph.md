@@ -1,4 +1,4 @@
-# Knowledge Graph — RBTTrainingAI SaaS
+# Knowledge Graph — RBT Practice Questions SaaS
 
 ## Purpose
 The Knowledge Graph connects ABA/BACB concepts into a typed, weighted directed graph, enabling prerequisite-aware retrieval, learning-path planning, and concept comparison capabilities for the AI Tutor.

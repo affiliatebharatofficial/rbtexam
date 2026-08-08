@@ -1,4 +1,4 @@
-# Prompt Engineering Library - RBTTrainingAI SaaS
+# Prompt Engineering Library - RBT Practice Questions SaaS
 
 ## Purpose
 Catalog of system prompts used for generating RBT, BCaBA, and BCBA practice items, flashcards, scenarios, and study guides.
