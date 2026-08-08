@@ -71,6 +71,9 @@ export default function AdminQuestionsPage() {
   const [aiApiKey, setAiApiKey] = useState('');
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiSuccessMsg, setAiSuccessMsg] = useState('');
+  const [aiProgressStep, setAiProgressStep] = useState<string>('');
+  const [aiErrorMsg, setAiErrorMsg] = useState<string>('');
+  const [aiErrorDetails, setAiErrorDetails] = useState<{ provider?: string; reason?: string } | null>(null);
 
   // Synchronize persistent questions on mount
   useEffect(() => {
@@ -80,7 +83,14 @@ export default function AdminQuestionsPage() {
   const handleGenerateAiQuestions = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAiGenerating(true);
+    setAiErrorMsg('');
+    setAiErrorDetails(null);
+    setAiSuccessMsg('');
+    setAiProgressStep('Connecting to AI Provider Router...');
+
     try {
+      setAiProgressStep(`Sending generation request for ${aiCount} question(s) via ${aiProvider === 'auto' ? 'Auto-Detect' : aiProvider.toUpperCase()}...`);
+      
       const res = await fetch('/api/questions/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,23 +105,28 @@ export default function AdminQuestionsPage() {
         }),
       });
 
+      setAiProgressStep('Validating 10-point JSON schema & verifying database persistence...');
       const data = await res.json();
+
       if (data.success && data.questions && Array.isArray(data.questions)) {
-        data.questions.forEach((q: any) => {
-          createQuestion(q);
-        });
+        loadPersistentQuestions();
         setIsAiModalOpen(false);
-        setAiSuccessMsg(`✅ Generated & published ${data.questions.length} AI question(s) via ${data.providerUsed || 'AI Engine'}!`);
+        setAiSuccessMsg(`✅ ${data.insertedCount || data.questions.length} questions generated & inserted into Database via ${data.providerUsed} (${data.modelUsed})! Latency: ${data.latencyMs}ms | Tokens: ${data.totalTokens || 0}`);
         setFilterParams((prev) => ({ ...prev }));
-        setTimeout(() => setAiSuccessMsg(''), 5000);
+        setTimeout(() => setAiSuccessMsg(''), 10000);
       } else {
-        alert(data.error || 'Failed to generate questions');
+        setAiErrorMsg(data.error || 'AI Question Generation failed.');
+        setAiErrorDetails({
+          provider: data.providerUsed || aiProvider,
+          reason: data.error || 'Provider returned error response.',
+        });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI generation error:', err);
-      alert('Failed to generate AI questions.');
+      setAiErrorMsg(err.message || 'Failed to connect to AI Generation API.');
     } finally {
       setIsAiGenerating(false);
+      setAiProgressStep('');
     }
   };
 
@@ -581,6 +596,33 @@ export default function AdminQuestionsPage() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
+              {aiErrorMsg && (
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1.5 animate-fadeIn">
+                  <div className="font-extrabold text-rose-800 flex items-center space-x-1.5">
+                    <XCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                    <span>AI Question Generation Failed</span>
+                  </div>
+                  <p className="text-[11px] text-rose-700 leading-relaxed">{aiErrorMsg}</p>
+                  {aiErrorDetails && (
+                    <div className="text-[10px] bg-white/70 p-2 rounded-lg border border-rose-200 text-slate-700 font-mono">
+                      Provider: {aiErrorDetails.provider || 'Auto'} | Reason: {aiErrorDetails.reason || 'Failed'}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {isAiGenerating && (
+                <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs space-y-2 animate-pulse">
+                  <div className="flex items-center space-x-2 font-bold text-indigo-700">
+                    <Sparkles className="w-4 h-4 text-indigo-600 animate-spin" />
+                    <span>{aiProgressStep || 'Processing AI Question Generation...'}</span>
+                  </div>
+                  <div className="w-full bg-indigo-200 h-1.5 rounded-full overflow-hidden">
+                    <div className="bg-indigo-600 h-full w-2/3 animate-pulse rounded-full" />
+                  </div>
+                </div>
+              )}
 
               <form onSubmit={handleGenerateAiQuestions} className="space-y-4 text-xs">
                 <div className="space-y-1.5">
