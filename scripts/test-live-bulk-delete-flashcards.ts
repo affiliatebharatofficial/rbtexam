@@ -1,3 +1,4 @@
+import { FlashcardCategory } from '../types/flashcard';
 import { importBulkFlashcards, deleteDatabaseFlashcardBulk, fetchDatabaseFlashcards } from '../lib/flashcard-bank';
 
 async function testBulkDelete() {
@@ -7,9 +8,9 @@ async function testBulkDelete() {
 
   console.log('1. Inserting 3 sample test flashcards...');
   const sampleCards = [
-    { title: 'Bulk Test Card #1', front: 'Front #1', back: 'Back #1', category: 'Measurement' },
-    { title: 'Bulk Test Card #2', front: 'Front #2', back: 'Back #2', category: 'Assessment' },
-    { title: 'Bulk Test Card #3', front: 'Front #3', back: 'Back #3', category: 'Skill Acquisition' },
+    { title: 'Bulk Test Card #1', front: 'Front #1', back: 'Back #1', category: 'Measurement' as FlashcardCategory },
+    { title: 'Bulk Test Card #2', front: 'Front #2', back: 'Back #2', category: 'Assessment' as FlashcardCategory },
+    { title: 'Bulk Test Card #3', front: 'Front #3', back: 'Back #3', category: 'Skill Acquisition' as FlashcardCategory },
   ];
 
   const insertRes = await importBulkFlashcards(sampleCards);
