@@ -93,6 +93,7 @@ export const MASTER_FLASHCARDS: Flashcard[] = [
 
 // In-memory & LocalStorage Custom Flashcard Store
 let CUSTOM_FLASHCARDS: Flashcard[] = [];
+export const DELETED_CARD_IDS = new Set<string>();
 
 if (typeof window !== 'undefined') {
   try {
@@ -100,8 +101,26 @@ if (typeof window !== 'undefined') {
     if (saved) {
       CUSTOM_FLASHCARDS = JSON.parse(saved);
     }
+    const deletedSaved = localStorage.getItem('rbt_deleted_flashcard_ids');
+    if (deletedSaved) {
+      const parsedDeleted = JSON.parse(deletedSaved);
+      if (Array.isArray(parsedDeleted)) {
+        parsedDeleted.forEach((id: string) => DELETED_CARD_IDS.add(id));
+      }
+    }
   } catch (e) {
     console.error('Failed to load custom flashcards from storage', e);
+  }
+}
+
+export function markCardAsDeleted(id: string): void {
+  DELETED_CARD_IDS.add(id);
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('rbt_deleted_flashcard_ids', JSON.stringify(Array.from(DELETED_CARD_IDS)));
+    } catch (e) {
+      console.error('Failed to persist deleted flashcard ID to storage', e);
+    }
   }
 }
 
@@ -346,9 +365,11 @@ const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
  * Delete a flashcard from Supabase database or in-memory store
  */
 export async function deleteDatabaseFlashcard(id: string): Promise<boolean> {
+  markCardAsDeleted(id);
   if (isSupabaseConfigured() && uuidRegex.test(id)) {
     try {
       const adminDb = getSupabaseAdminClient();
+      await adminDb.from('master_flashcards').update({ deleted_at: new Date().toISOString(), status: 'deleted' }).eq('id', id);
       const { error } = await adminDb.from('master_flashcards').delete().eq('id', id);
       if (error) {
         console.error('[Flashcard Bank] Delete error:', error.message);
@@ -370,11 +391,17 @@ export async function deleteDatabaseFlashcard(id: string): Promise<boolean> {
 export async function deleteDatabaseFlashcardBulk(ids: string[]): Promise<boolean> {
   if (!ids || ids.length === 0) return true;
 
+  ids.forEach((id) => markCardAsDeleted(id));
+
   const uuidIds = ids.filter((id) => uuidRegex.test(id));
 
   if (isSupabaseConfigured() && uuidIds.length > 0) {
     try {
       const adminDb = getSupabaseAdminClient();
+      await adminDb
+        .from('master_flashcards')
+        .update({ deleted_at: new Date().toISOString(), status: 'deleted' })
+        .in('id', uuidIds);
       const { error } = await adminDb.from('master_flashcards').delete().in('id', uuidIds);
       if (error) {
         console.error('[Flashcard Bank] Bulk Delete error:', error.message);
@@ -700,7 +727,7 @@ function processFilteredFlashcardsList(
   params: FlashcardFilterParams,
   userId: string = 'default_user'
 ): FlashcardPaginationResult {
-  let filtered = [...allCards];
+  let filtered = allCards.filter((c) => !DELETED_CARD_IDS.has(c.id));
 
   // Certification filter
   if (params.certification && params.certification !== 'ALL') {
