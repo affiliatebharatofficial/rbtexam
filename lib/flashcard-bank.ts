@@ -501,7 +501,75 @@ export async function importBulkFlashcards(cards: Partial<Flashcard>[]): Promise
 }
 
 /**
+ * Backward-compatible Question-to-Flashcard transformation layer
+ * Transforms a Question Bank item into a concise, recall-focused flashcard
+ */
+export function transformQuestionToFlashcard(mq: any): Partial<Flashcard> {
+  const correctOpt = Array.isArray(mq.options)
+    ? mq.options.find((o: any) => o.id === mq.correctAnswerId)?.text || mq.correctAnswerId
+    : 'Option A';
+
+  // 1. Build concise recall-focused Front Prompt
+  let cleanFront = mq.question || 'Question concept';
+
+  // Strip scenario headers or options filler if present
+  cleanFront = cleanFront
+    .replace(/^\[Scenario\]\s*/i, '')
+    .replace(/Which of the following best describes/i, 'What is')
+    .replace(/Which of the following options/i, 'Which')
+    .replace(/Which of the following is/i, 'What is')
+    .trim();
+
+  // If question stem has multiple sentences (e.g. scenario description + question sentence), extract the question sentence
+  if (cleanFront.length > 120 && cleanFront.includes('?')) {
+    const parts = cleanFront.split(/(?<=\?)/);
+    const lastQuestion = parts.find((p: string) => p.trim().endsWith('?'));
+    if (lastQuestion && lastQuestion.trim().length >= 15) {
+      cleanFront = lastQuestion.trim();
+    }
+  }
+
+  // 2. Build Back Definition (Correct Answer + Short Rationale, NO Question Repetition)
+  const cleanBack = `${correctOpt}\n\n${mq.answerExplanation || ''}`.trim();
+
+  // 3. Build Clinical Rationale
+  const clinicalRationale = mq.clinicalExplanation
+    ? mq.clinicalExplanation.replace(/^BACB Item [^:]+:\s*/i, '').trim()
+    : mq.answerExplanation || 'Clinical rationale not provided';
+
+  // 4. Memory Tip
+  const memoryTip = mq.examTips
+    ? mq.examTips
+    : `Memory Tip: ${correctOpt} — ${Array.isArray(mq.keywords) && mq.keywords.length > 0 ? mq.keywords.slice(0, 2).join(', ') : mq.category}`;
+
+  // 5. Build full explanation block for card detail view
+  const fullExplanation = [
+    `Clinical Rationale:\n${clinicalRationale}`,
+    memoryTip ? `Memory Tip:\n${memoryTip}` : '',
+  ].filter(Boolean).join('\n\n');
+
+  // 6. Source Question ID mapping & Metadata
+  const sourceQuestionId = String(mq.id);
+  const taskListCode = `SQID:${sourceQuestionId}`;
+
+  return {
+    title: `${mq.category}: ${correctOpt}`.slice(0, 50),
+    front: cleanFront.slice(0, 250),
+    back: cleanBack,
+    explanation: fullExplanation,
+    clinicalExplanation: clinicalRationale,
+    category: mq.category || 'Measurement',
+    certification: (mq.certification?.toUpperCase() as any) || 'RBT',
+    difficulty: (mq.difficulty?.toLowerCase() as any) || 'medium',
+    reference: taskListCode.slice(0, 30),
+    tags: ['Converted Question', `source_question_id:${sourceQuestionId}`, mq.certification || 'RBT'],
+    cardType: 'basic',
+  };
+}
+
+/**
  * Convert all existing Master Questions into Database Flashcards in Supabase
+ * Includes duplicate protection checking source_question_id
  */
 export async function convertQuestionsToDatabaseFlashcards(): Promise<{ convertedCount: number; insertedIds: string[] }> {
   const adminDb = getSupabaseAdminClient();
@@ -536,35 +604,39 @@ export async function convertQuestionsToDatabaseFlashcards(): Promise<{ converte
     }
   }
 
-  const convertedCards: Partial<Flashcard>[] = sourceQuestions.map((mq) => {
-    const correctOpt = Array.isArray(mq.options)
-      ? mq.options.find((o: any) => o.id === mq.correctAnswerId)?.text || mq.correctAnswerId
-      : 'Option A';
+  // Deduplication check: fetch existing database cards to skip already converted source questions
+  const existingSourceIds = new Set<string>();
+  if (isSupabaseConfigured()) {
+    try {
+      const { data: existingCards } = await adminDb.from('master_flashcards').select('task_list_code, tags');
+      if (existingCards) {
+        existingCards.forEach((c: any) => {
+          if (c.task_list_code && c.task_list_code.includes('SQID:')) {
+            const match = c.task_list_code.match(/SQID:([^\s)]+)/);
+            if (match) existingSourceIds.add(match[1]);
+          }
+          if (Array.isArray(c.tags)) {
+            c.tags.forEach((t: string) => {
+              if (t.startsWith('source_question_id:')) {
+                existingSourceIds.add(t.replace('source_question_id:', ''));
+              }
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.error('[Flashcard Bank] Error fetching existing cards for deduplication check:', e);
+    }
+  }
 
-    const frontPrompt = mq.scenarioText
-      ? `[Clinical Scenario] ${mq.scenarioText}\n\nQuestion: ${mq.question}`
-      : mq.question;
+  // Filter out already converted source questions
+  const unConvertedQuestions = sourceQuestions.filter((sq) => !existingSourceIds.has(String(sq.id)));
 
-    const backAnswer = `Correct Answer: ${correctOpt}\n\nRationale: ${mq.answerExplanation}`;
-    const clinicalExampleText = [
-      mq.answerExplanation,
-      mq.clinicalExplanation ? `Clinical Rationale: ${mq.clinicalExplanation}` : '',
-      mq.examTips ? `Exam Tip: ${mq.examTips}` : '',
-    ].filter(Boolean).join('\n\n');
+  if (unConvertedQuestions.length === 0) {
+    return { convertedCount: 0, insertedIds: [] };
+  }
 
-    return {
-      title: `${mq.category}: ${mq.certification} Question Card`,
-      front: frontPrompt,
-      back: backAnswer,
-      explanation: clinicalExampleText,
-      clinicalExplanation: mq.clinicalExplanation || mq.answerExplanation,
-      category: mq.category || 'Measurement',
-      certification: mq.certification || 'RBT',
-      difficulty: mq.difficulty || 'medium',
-      reference: `Converted Question #${mq.id}`,
-      tags: ['Converted Question', mq.certification || 'RBT'],
-    };
-  });
+  const convertedCards: Partial<Flashcard>[] = unConvertedQuestions.map(transformQuestionToFlashcard);
 
   if (isSupabaseConfigured()) {
     const res = await importBulkFlashcards(convertedCards);
