@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { SAMPLE_BACB_QUESTIONS } from '@/lib/sample-questions';
+import { getMasterBankExamQuestions } from '@/lib/sample-questions';
 import { generateQuestionJSONLD, generateBreadcrumbJSONLD, getRelatedInternalLinks } from '@/lib/seo-engine';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,14 +8,16 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, CheckCircle2, ArrowRight, Brain, BookOpen, ShieldCheck, ArrowLeft } from 'lucide-react';
 
 export async function generateStaticParams() {
-  return SAMPLE_BACB_QUESTIONS.map((q) => ({
+  const questions = getMasterBankExamQuestions();
+  return questions.map((q) => ({
     slug: q.id,
   }));
 }
 
 export default async function ProgrammaticQuestionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const question = SAMPLE_BACB_QUESTIONS.find((q) => q.id === slug) || SAMPLE_BACB_QUESTIONS[0];
+  const questions = getMasterBankExamQuestions();
+  const question = questions.find((q) => q.id === slug) || questions[0];
 
   const jsonLd = generateQuestionJSONLD(question);
   const breadcrumbsJsonLd = generateBreadcrumbJSONLD([

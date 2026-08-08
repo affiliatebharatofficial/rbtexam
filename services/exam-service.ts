@@ -1,14 +1,14 @@
 import { Question, ExamSession, ExamResult, DomainScore, UserAnswer } from '@/types/exam';
 import { BACBDomainId } from '@/types/bacb';
 import { BACB_TASK_LIST_2ND_EDITION } from '@/lib/bacb-task-list';
-import { SAMPLE_BACB_QUESTIONS } from '@/lib/sample-questions';
+import { getMasterBankExamQuestions } from '@/lib/sample-questions';
 
 export class ExamService {
   /**
    * Generates a new exam session based on mode and domain filter
    */
   static createExamSession(mode: 'diagnostic' | 'full_mock' | 'domain_focus', targetDomainId?: BACBDomainId): ExamSession {
-    let questions = [...SAMPLE_BACB_QUESTIONS];
+    let questions = getMasterBankExamQuestions();
 
     if (mode === 'domain_focus' && targetDomainId) {
       questions = questions.filter(q => q.domainId === targetDomainId);

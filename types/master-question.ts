@@ -81,6 +81,7 @@ export interface QuestionFilterParams {
   isFeatured?: boolean;
   page?: number;
   limit?: number;
+  pageSize?: number;
   sortBy?: 'createdAt' | 'updatedAt' | 'difficulty' | 'category' | 'question';
   sortOrder?: 'asc' | 'desc';
 }
@@ -91,6 +92,7 @@ export interface QuestionPaginationResult {
   page: number;
   totalPages: number;
   limit: number;
+  pageSize?: number;
 }
 
 export interface ImportValidationError {
