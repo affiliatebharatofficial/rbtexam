@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,9 @@ import { Brain, Lock, CheckCircle2, AlertCircle, RefreshCw, ArrowRight } from 'l
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const { confirmPasswordReset } = useAuth();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token') || '';
+  const { confirmPasswordReset, homeRoute } = useAuth();
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,7 +35,7 @@ export default function ResetPasswordPage() {
     }
 
     setIsSubmitting(true);
-    const res = await confirmPasswordReset('mock_token_123', newPassword);
+    const res = await confirmPasswordReset(token, newPassword);
     setIsSubmitting(false);
 
     if (res.success) {
@@ -46,7 +48,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-50/50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-4 text-center relative z-10">
-        <Link href="/" className="inline-flex items-center space-x-3">
+        <Link href={homeRoute} className="inline-flex items-center space-x-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-500/25">
             <Brain className="w-7 h-7" />
           </div>

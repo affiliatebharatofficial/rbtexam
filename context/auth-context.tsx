@@ -19,6 +19,7 @@ interface AuthContextType {
   verifyEmail: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  homeRoute: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,6 +35,14 @@ export const ADMIN_EMAILS: string[] = [
 export function isEmailAdmin(email?: string | null): boolean {
   if (!email) return false;
   return ADMIN_EMAILS.includes(email.toLowerCase().trim());
+}
+
+export function getHomeRoute(user: Partial<UserProfile> | null, isAuthenticated: boolean): string {
+  if (!isAuthenticated || !user) return '/';
+  if (user.role === 'admin' || user.role === 'super_admin') {
+    return '/admin';
+  }
+  return '/dashboard';
 }
 
 const DEFAULT_PRODUCTION_USER: UserProfile = {
@@ -632,6 +641,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         verifyEmail,
         updateProfile,
         logout,
+        homeRoute: getHomeRoute(user, Boolean(user)),
       }}
     >
       {children}

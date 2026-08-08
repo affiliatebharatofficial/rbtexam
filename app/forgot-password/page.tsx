@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Brain, Mail, ArrowLeft, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
-  const { requestPasswordReset } = useAuth();
+  const { requestPasswordReset, homeRoute } = useAuth();
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-50/50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-4 text-center relative z-10">
-        <Link href="/" className="inline-flex items-center space-x-3">
+        <Link href={homeRoute} className="inline-flex items-center space-x-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-500/25">
             <Brain className="w-7 h-7" />
           </div>

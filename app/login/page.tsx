@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/auth-context';
+import { useAuth, isEmailAdmin } from '@/context/auth-context';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Brain, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, RefreshCw, Eye, EyeOff } from 'lucide-react';
@@ -11,9 +11,7 @@ import { Brain, Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, RefreshCw, Eye
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
-
-  const { login, loginWithGoogle, isLoading: authLoading } = useAuth();
+  const { login, loginWithGoogle, user, isLoading: authLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +19,17 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const performRedirect = () => {
+    const customRedirect = searchParams.get('redirect');
+    if (customRedirect) {
+      router.push(customRedirect);
+    } else if (isEmailAdmin(email) || (user && (user.role === 'admin' || user.role === 'super_admin'))) {
+      router.push('/admin');
+    } else {
+      router.push('/dashboard');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +45,7 @@ function LoginForm() {
     setIsSubmitting(false);
 
     if (res.success) {
-      router.push(redirectUrl);
+      performRedirect();
     } else {
       setErrorMessage(res.error || 'Authentication failed. Please check your credentials.');
     }
@@ -49,7 +58,7 @@ function LoginForm() {
     setIsSubmitting(false);
 
     if (res.success) {
-      router.push(redirectUrl);
+      performRedirect();
     } else if (res.error) {
       setErrorMessage(res.error);
     }
@@ -204,13 +213,15 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const { homeRoute } = useAuth();
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-slate-50/50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Dynamic Ambient Background Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-gradient-to-b from-blue-500/10 via-indigo-500/5 to-transparent blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-4 text-center relative z-10">
-        <Link href="/" className="inline-flex items-center space-x-3 group">
+        <Link href={homeRoute} className="inline-flex items-center space-x-3 group">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200">
             <Brain className="w-7 h-7" />
           </div>

@@ -11,7 +11,7 @@ import { UserRole } from '@/types/auth';
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { signUp, loginWithGoogle, isLoading: authLoading } = useAuth();
+  const { signUp, loginWithGoogle, homeRoute, isLoading: authLoading } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -83,7 +83,7 @@ export default function SignUpPage() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-to-b from-blue-500/10 via-indigo-500/5 to-transparent blur-3xl pointer-events-none" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md space-y-4 text-center relative z-10">
-        <Link href="/" className="inline-flex items-center space-x-3 group">
+        <Link href={homeRoute} className="inline-flex items-center space-x-3 group">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-500/25">
             <Brain className="w-7 h-7" />
           </div>

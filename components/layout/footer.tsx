@@ -1,15 +1,21 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/auth-context';
 import { Brain, ShieldCheck, Heart } from 'lucide-react';
 
 export function Footer() {
+  const { homeRoute, user, isAuthenticated } = useAuth();
+  const isAdmin = Boolean(user && (user.role === 'admin' || user.role === 'super_admin'));
+
   return (
     <footer className="bg-[#0F172A] text-slate-400 border-t border-slate-800 pt-16 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-slate-800">
           {/* Brand Info */}
           <div className="space-y-4 md:col-span-1">
-            <Link href="/" className="flex items-center space-x-3">
+            <Link href={homeRoute} className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#2563EB] to-blue-500 flex items-center justify-center text-white shadow-lg">
                 <Brain className="w-5 h-5" />
               </div>
@@ -46,7 +52,7 @@ export function Footer() {
               <li><Link href="/rbt/about" className="hover:text-white transition-colors">About</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
               <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
+              <li><Link href={homeRoute} className="hover:text-white transition-colors">{isAdmin ? 'Admin Panel' : 'Dashboard'}</Link></li>
             </ul>
           </div>
 

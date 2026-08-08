@@ -8,20 +8,25 @@ import { Sparkles, Brain, BookOpen, Layers, BarChart2, Users, Menu, X, ArrowRigh
 import { Button } from '@/components/ui/button';
 
 export function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, homeRoute } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
+  const isAdmin = Boolean(user && (user.role === 'admin' || user.role === 'super_admin'));
+  const homeLabel = isAuthenticated ? (isAdmin ? 'Admin Panel' : 'Home') : 'Home';
+  const homeIcon = isAdmin ? ShieldCheck : Brain;
+
   const navLinks = [
-    { href: '/', label: 'Home', icon: Brain },
+    { href: homeRoute, label: homeLabel, icon: homeIcon },
     { href: '/exam', label: 'Practice Questions', icon: Sparkles },
     { href: '/rbt/mock-exam', label: 'Mock Exams', icon: Sparkles },
     { href: '/flashcards', label: 'Flashcards', icon: Layers },
     { href: '/task-list', label: 'Study Guides', icon: BookOpen },
     { href: '/tutor', label: 'AI Tutor', icon: BookOpen },
     { href: '/pricing', label: 'Pricing', icon: BarChart2 },
-    { href: '/dashboard', label: 'Dashboard', icon: Brain },
+    ...(isAuthenticated && !isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: Brain }] : []),
+    ...(isAuthenticated && isAdmin ? [{ href: '/admin', label: 'Admin CMS', icon: ShieldCheck }] : []),
   ];
 
   return (
@@ -29,7 +34,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
+          <Link href={homeRoute} className="flex items-center space-x-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
               <Brain className="w-6 h-6" />
             </div>
