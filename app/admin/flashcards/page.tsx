@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Flashcard, CertificationLevel } from '@/types/flashcard';
+import { Flashcard, CertificationLevel, FlashcardCategory } from '@/types/flashcard';
 import { MASTER_FLASHCARDS, addCustomFlashcard } from '@/lib/flashcard-bank';
 import {
   Layers,
@@ -24,6 +24,11 @@ import {
   Loader2,
   ArrowLeft,
   X,
+  AlertCircle,
+  Cpu,
+  Coins,
+  Clock,
+  ShieldCheck,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -38,8 +43,14 @@ export default function AdminFlashcardsPage() {
   const [aiTopic, setAiTopic] = useState('');
   const [aiCount, setAiCount] = useState(5);
   const [aiCert, setAiCert] = useState<CertificationLevel>('RBT');
+  const [aiCategory, setAiCategory] = useState<FlashcardCategory>('Skill Acquisition');
+  const [aiDifficulty, setAiDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [aiProvider, setAiProvider] = useState<string>('auto');
+  const [aiApiKey, setAiApiKey] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
+  const [generationError, setGenerationError] = useState('');
+  const [telemetry, setTelemetry] = useState<any>(null);
 
   // Manual Add Modal State
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
@@ -68,6 +79,8 @@ export default function AdminFlashcardsPage() {
     if (!aiTopic.trim()) return;
     setIsGenerating(true);
     setStatusMsg('');
+    setGenerationError('');
+    setTelemetry(null);
 
     try {
       const res = await fetch('/api/flashcards/generate', {
@@ -77,24 +90,40 @@ export default function AdminFlashcardsPage() {
           topic: aiTopic,
           count: aiCount,
           certification: aiCert,
+          category: aiCategory,
+          difficulty: aiDifficulty,
+          provider: aiProvider,
+          apiKey: aiApiKey.trim() || undefined,
         }),
       });
 
       const data = await res.json();
-      if (data.cards && Array.isArray(data.cards)) {
-        const newCards: Flashcard[] = data.cards.map((c: any) => addCustomFlashcard({ ...c, createdBy: 'super_admin_ai' }));
-        setFlashcards((prev) => [...newCards, ...prev]);
-        setStatusMsg(`✅ Successfully generated & published ${data.cards.length} AI Flashcards to Global Master Bank!`);
-        setTimeout(() => {
-          setIsAiModalOpen(false);
-          setAiTopic('');
-          setStatusMsg('');
-        }, 1200);
+
+      if (res.ok && data.success && Array.isArray(data.cards)) {
+        setFlashcards((prev) => [...data.cards, ...prev]);
+        setTelemetry({
+          providerUsed: data.providerUsed,
+          modelUsed: data.modelUsed,
+          insertedCount: data.insertedCount,
+          generatedCount: data.generatedCount,
+          validatedCount: data.validatedCount,
+          duplicateCount: data.duplicateCount,
+          totalTokens: data.totalTokens,
+          estimatedCostUSD: data.estimatedCostUSD,
+          latencyMs: data.latencyMs,
+          batchCount: data.batchCount,
+          batches: data.batches,
+        });
+
+        setStatusMsg(
+          `✅ Successfully generated, validated & persisted ${data.insertedCount} Flashcards to Database & Global Bank!`
+        );
       } else {
-        alert(data.error || 'Failed to generate AI flashcards');
+        const errorDetail = data.error || 'AI Flashcard generation failed.';
+        setGenerationError(errorDetail);
       }
     } catch (err: any) {
-      alert('Error generating flashcards: ' + err.message);
+      setGenerationError(`Network error generating flashcards: ${err.message}`);
     } finally {
       setIsGenerating(false);
     }
@@ -140,137 +169,206 @@ export default function AdminFlashcardsPage() {
               <Link href="/admin" className="text-slate-400 hover:text-slate-600 transition-colors">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <Badge variant="emerald" className="gap-1">
-                <Brain className="w-3.5 h-3.5" />
-                <span>Super Admin CMS</span>
-              </Badge>
+              <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">
+                Smart Flashcard Bank & AI Generator
+              </h1>
             </div>
-            <h1 className="text-3xl font-black text-[#0F172A] tracking-tight mt-1">
-              Smart Flashcard Bank & AI Generator
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600">
+            <p className="text-xs text-slate-500 mt-1">
               Generate high-yield BACB Anki flashcards with multi-model AI or manage global published decks.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center space-x-3">
             <Button
-              onClick={() => setIsAiModalOpen(true)}
+              variant="outline"
+              size="sm"
+              onClick={() => setIsManualModalOpen(true)}
+              className="gap-2 font-bold"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Manual Card</span>
+            </Button>
+
+            <Button
               variant="primary"
               size="sm"
-              className="gap-2 shadow-lg shadow-blue-500/20 font-extrabold"
+              onClick={() => {
+                setIsAiModalOpen(true);
+                setStatusMsg('');
+                setGenerationError('');
+                setTelemetry(null);
+              }}
+              className="gap-2 shadow-lg shadow-blue-500/20 font-bold"
             >
               <Zap className="w-4 h-4 text-amber-300" />
               <span>AI Bulk Flashcard Generator</span>
             </Button>
-
-            <Button
-              onClick={() => setIsManualModalOpen(true)}
-              variant="outline"
-              size="sm"
-              className="gap-1.5 border-slate-300 text-slate-700 font-bold hover:bg-slate-50"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create Manual Card</span>
-            </Button>
           </div>
         </div>
 
-        {/* Filter Controls Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2 flex items-center space-x-2 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-sm">
-            <Search className="w-4 h-4 text-slate-400 ml-2" />
+        {/* Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="p-4 border-slate-200">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                <Layers className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500">Total Cards in Master Bank</p>
+                <p className="text-xl font-bold text-slate-900">{flashcards.length}</p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 border-slate-200">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500">AI Generated Cards</p>
+                <p className="text-xl font-bold text-slate-900">
+                  {flashcards.filter((c) => c.cardType === 'ai_generated').length}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 border-slate-200">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+                <Brain className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500">Active RBT Task List Items</p>
+                <p className="text-xl font-bold text-slate-900">42 / 42 Covered</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by title, prompt, answer, or task list item..."
+              placeholder="Search flashcards by term, definition..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs bg-transparent focus:outline-none text-slate-800 font-medium"
+              className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
             />
           </div>
 
-          <select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full text-xs font-bold px-3 py-2.5 bg-white rounded-2xl border border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-          >
-            <option value="ALL">All Categories</option>
-            <option value="Measurement">Measurement</option>
-            <option value="Assessment">Assessment</option>
-            <option value="Skill Acquisition">Skill Acquisition</option>
-            <option value="Behavior Reduction">Behavior Reduction</option>
-            <option value="Documentation">Documentation & Reporting</option>
-            <option value="Professional Conduct">Ethics & Conduct</option>
-          </select>
+          <div className="flex items-center space-x-3 w-full sm:w-auto overflow-x-auto">
+            <select
+              value={selectedCertification}
+              onChange={(e) => setSelectedCertification(e.target.value)}
+              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white font-medium"
+            >
+              <option value="ALL">All Certifications</option>
+              <option value="RBT">RBT</option>
+              <option value="BCaBA">BCaBA</option>
+              <option value="BCBA">BCBA</option>
+            </select>
 
-          <select
-            value={selectedCertification}
-            onChange={(e) => setSelectedCertification(e.target.value)}
-            className="w-full text-xs font-bold px-3 py-2.5 bg-white rounded-2xl border border-slate-200 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-          >
-            <option value="ALL">All Certification Levels</option>
-            <option value="RBT">RBT (Registered Behavior Technician)</option>
-            <option value="BCaBA">BCaBA (Assistant Behavior Analyst)</option>
-            <option value="BCBA">BCBA (Board Certified Behavior Analyst)</option>
-          </select>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white font-medium"
+            >
+              <option value="ALL">All Categories</option>
+              <option value="Measurement">Measurement</option>
+              <option value="Assessment">Assessment</option>
+              <option value="Skill Acquisition">Skill Acquisition</option>
+              <option value="Behavior Reduction">Behavior Reduction</option>
+              <option value="Documentation">Documentation</option>
+              <option value="Reinforcement">Reinforcement</option>
+            </select>
+          </div>
         </div>
 
         {/* Flashcards Roster Table Card */}
-        <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-            <div>
-              <h3 className="text-base font-bold text-[#0F172A] flex items-center space-x-2">
-                <Layers className="w-4 h-4 text-[#2563EB]" />
-                <span>Global Published Flashcards ({filteredCards.length})</span>
-              </h3>
-              <p className="text-xs text-slate-500">Live BACB Flashcard Bank active across candidate accounts.</p>
+        <Card className="border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div className="flex items-center space-x-2">
+              <Layers className="w-4 h-4 text-blue-600" />
+              <span className="font-bold text-sm text-[#0F172A]">
+                Global Published Flashcards ({filteredCards.length})
+              </span>
             </div>
+            <p className="text-xs text-slate-500">Live BACB Flashcard Bank active across candidate accounts.</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 uppercase font-extrabold text-[10px] tracking-wider bg-slate-50/50">
-                  <th className="p-3">Card Title & Task Reference</th>
-                  <th className="p-3">Front Prompt</th>
-                  <th className="p-3">Back Answer</th>
+                <tr className="border-b border-slate-200 bg-slate-100/60 font-bold text-slate-600">
+                  <th className="p-3">Card Title & Front Prompt</th>
+                  <th className="p-3">Back Answer Rationale</th>
                   <th className="p-3">Category</th>
                   <th className="p-3">Cert</th>
+                  <th className="p-3">Difficulty</th>
+                  <th className="p-3">Type</th>
                   <th className="p-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 font-medium">
                 {filteredCards.map((card) => (
                   <tr key={card.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-3 space-y-1">
-                      <div className="font-extrabold text-slate-900">{card.title}</div>
-                      <div className="text-[10px] font-mono text-slate-400">{card.reference}</div>
+                    <td className="p-3 max-w-xs">
+                      <p className="font-bold text-slate-900 truncate">{card.title}</p>
+                      <p className="text-slate-500 text-[11px] line-clamp-2 mt-0.5">{card.front}</p>
                     </td>
-
-                    <td className="p-3 font-medium text-slate-800 max-w-xs truncate">
-                      {card.front}
+                    <td className="p-3 max-w-sm">
+                      <p className="text-slate-700 line-clamp-2">{card.back}</p>
+                      <p className="text-slate-400 text-[10px] mt-0.5">{card.reference}</p>
                     </td>
-
-                    <td className="p-3 text-slate-600 max-w-xs truncate">
-                      {card.back}
-                    </td>
-
                     <td className="p-3">
-                      <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#2563EB] text-[10px] font-extrabold">
+                      <Badge variant="slate" className="text-[10px] font-semibold bg-slate-50">
                         {card.category}
-                      </span>
+                      </Badge>
                     </td>
-
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">
+                      <Badge
+                        className={`text-[10px] font-bold ${
+                          card.certification === 'RBT'
+                            ? 'bg-blue-100 text-blue-800'
+                            : card.certification === 'BCaBA'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-indigo-100 text-indigo-800'
+                        }`}
+                      >
                         {card.certification}
+                      </Badge>
+                    </td>
+                    <td className="p-3">
+                      <span
+                        className={`font-semibold capitalize ${
+                          card.difficulty === 'easy'
+                            ? 'text-emerald-600'
+                            : card.difficulty === 'medium'
+                            ? 'text-amber-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        {card.difficulty}
                       </span>
                     </td>
-
-                    <td className="p-3 text-right space-x-2">
+                    <td className="p-3">
+                      {card.cardType === 'ai_generated' ? (
+                        <span className="inline-flex items-center space-x-1 text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full font-bold text-[10px]">
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span>AI</span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 text-[11px]">Manual</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-right">
                       <button
                         onClick={() => handleDeleteCard(card.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                         title="Delete Card"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -288,11 +386,11 @@ export default function AdminFlashcardsPage() {
       {/* AI FLASHCARD GENERATOR MODAL FOR ADMIN */}
       {isAiModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-100 space-y-6">
+          <div className="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl border border-slate-100 space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center space-x-2">
                 <Zap className="w-5 h-5 text-amber-500" />
-                <h3 className="text-lg font-bold text-[#0F172A]">AI Flashcard Generator (Super Admin)</h3>
+                <h3 className="text-lg font-bold text-[#0F172A]">AI Flashcard Generator (Multi-Model Engine)</h3>
               </div>
               <button
                 onClick={() => setIsAiModalOpen(false)}
@@ -302,10 +400,44 @@ export default function AdminFlashcardsPage() {
               </button>
             </div>
 
+            {/* Status & Telemetry Header */}
             {statusMsg && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900 flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{statusMsg}</span>
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>{statusMsg}</span>
+                </div>
+
+                {telemetry && (
+                  <div className="pt-2 border-t border-emerald-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono text-emerald-800">
+                    <div>
+                      <span className="text-slate-500 font-sans block">Provider/Model</span>
+                      <span className="font-bold">{telemetry.providerUsed} ({telemetry.modelUsed})</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-sans block">Batches</span>
+                      <span className="font-bold">{telemetry.batchCount}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-sans block">Total Tokens</span>
+                      <span className="font-bold">{telemetry.totalTokens}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 font-sans block">Est. Cost</span>
+                      <span className="font-bold">${telemetry.estimatedCostUSD.toFixed(5)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {generationError && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-900 flex items-start space-x-2">
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-red-950">Generation Failed</p>
+                  <p className="font-medium text-red-800 mt-0.5">{generationError}</p>
+                </div>
               </div>
             )}
 
@@ -314,7 +446,7 @@ export default function AdminFlashcardsPage() {
                 <label className="font-bold text-slate-700">ABA Target Topic or Clinical Prompt</label>
                 <input
                   type="text"
-                  placeholder="e.g. Discrete Trial Training (DTT), Preference Assessments, BACB Ethics Code"
+                  placeholder="e.g. Positive Reinforcement, Discrete Trial Training, DRO vs DRA"
                   value={aiTopic}
                   onChange={(e) => setAiTopic(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#2563EB] focus:outline-none font-medium"
@@ -325,7 +457,7 @@ export default function AdminFlashcardsPage() {
               <div className="space-y-1">
                 <span className="text-[11px] font-semibold text-slate-500">Quick AI Topic Presets:</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {['Continuous Measurement', 'Extinction Burst', 'Preference Assessment', 'DRO vs DRA', 'BACB Ethics Item C-01'].map((preset) => (
+                  {['Positive Reinforcement', 'Continuous Measurement', 'Extinction Burst', 'Preference Assessment', 'DRO vs DRA', 'BACB Ethics Item C-01'].map((preset) => (
                     <button
                       type="button"
                       key={preset}
@@ -338,13 +470,13 @@ export default function AdminFlashcardsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="font-bold text-slate-700">Certification Target Level</label>
+                  <label className="font-bold text-slate-700">Certification Target</label>
                   <select
                     value={aiCert}
                     onChange={(e) => setAiCert(e.target.value as CertificationLevel)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white font-bold"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold"
                   >
                     <option value="RBT">RBT (Technician)</option>
                     <option value="BCaBA">BCaBA (Assistant)</option>
@@ -353,22 +485,86 @@ export default function AdminFlashcardsPage() {
                 </div>
 
                 <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700">Category</label>
+                  <select
+                    value={aiCategory}
+                    onChange={(e) => setAiCategory(e.target.value as FlashcardCategory)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold"
+                  >
+                    <option value="Measurement">Measurement</option>
+                    <option value="Assessment">Assessment</option>
+                    <option value="Skill Acquisition">Skill Acquisition</option>
+                    <option value="Behavior Reduction">Behavior Reduction</option>
+                    <option value="Documentation">Documentation</option>
+                    <option value="Ethics">Ethics</option>
+                    <option value="Reinforcement">Reinforcement</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700">Difficulty Level</label>
+                  <select
+                    value={aiDifficulty}
+                    onChange={(e) => setAiDifficulty(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold"
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
                   <label className="font-bold text-slate-700">Cards Count</label>
                   <select
                     value={aiCount}
                     onChange={(e) => setAiCount(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white font-bold"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold"
                   >
                     <option value={3}>3 Cards</option>
-                    <option value={5}>5 Cards</option>
-                    <option value={10}>10 Cards</option>
-                    <option value={15}>15 Cards</option>
+                    <option value={5}>5 Cards (1 Batch)</option>
+                    <option value={10}>10 Cards (2 Batches)</option>
+                    <option value={15}>15 Cards (3 Batches)</option>
+                    <option value={20}>20 Cards (4 Batches)</option>
+                    <option value={30}>30 Cards (6 Batches)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700">AI LLM Provider</label>
+                  <select
+                    value={aiProvider}
+                    onChange={(e) => setAiProvider(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-bold"
+                  >
+                    <option value="auto">Auto / Dynamic Fallback</option>
+                    <option value="openai">OpenAI (GPT-4o-mini)</option>
+                    <option value="gemini">Google Gemini 1.5 Flash</option>
+                    <option value="deepseek">DeepSeek V3</option>
+                    <option value="anthropic">Anthropic (Claude 3.5 Haiku)</option>
+                    <option value="openrouter">OpenRouter Auto</option>
                   </select>
                 </div>
               </div>
+
+              <div className="space-y-1.5 pt-1">
+                <label className="font-bold text-slate-700 flex items-center justify-between">
+                  <span>Custom API Key Override (Optional)</span>
+                  <span className="text-[10px] font-normal text-slate-400">Leaves blank to use server environment key</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="sk-... or AIzaSy..."
+                  value={aiApiKey}
+                  onChange={(e) => setAiApiKey(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 font-mono text-xs focus:ring-2 focus:ring-[#2563EB] focus:outline-none"
+                />
+              </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 pt-2">
+            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-slate-100">
               <Button variant="outline" size="sm" onClick={() => setIsAiModalOpen(false)}>
                 Cancel
               </Button>
@@ -382,7 +578,7 @@ export default function AdminFlashcardsPage() {
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Generating & Publishing...</span>
+                    <span>Executing AI Call & Persisting...</span>
                   </>
                 ) : (
                   <>
@@ -457,7 +653,7 @@ export default function AdminFlashcardsPage() {
                     <option value="Skill Acquisition">Skill Acquisition</option>
                     <option value="Behavior Reduction">Behavior Reduction</option>
                     <option value="Documentation">Documentation</option>
-                    <option value="Professional Conduct">Ethics</option>
+                    <option value="Ethics">Ethics</option>
                   </select>
                 </div>
 
