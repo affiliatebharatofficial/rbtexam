@@ -32,6 +32,106 @@ export const SYSTEM_PROMPT_TEMPLATES: PromptTemplate[] = [
 ];
 
 /**
+ * Multi-Provider LLM Executor for AI Tutor Chat
+ */
+async function callLLMProviderForTutor(
+  systemDirective: string,
+  historyMessages: { role: string; content: string }[],
+  userQuery: string
+): Promise<string | null> {
+  const keys: Record<string, string | undefined> = {
+    openai: process.env.OPENAI_API_KEY,
+    deepseek: process.env.DEEPSEEK_API_KEY,
+    gemini: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    anthropic: process.env.ANTHROPIC_API_KEY,
+    openrouter: process.env.OPENROUTER_API_KEY,
+  };
+
+  const providers = ['openai', 'deepseek', 'gemini', 'anthropic', 'openrouter'];
+
+  for (const p of providers) {
+    const key = keys[p];
+    if (!key || key.includes('mock-')) continue;
+
+    try {
+      if (p === 'openai') {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'system', content: systemDirective }, ...historyMessages, { role: 'user', content: userQuery }],
+            temperature: 0.7,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.choices?.[0]?.message?.content || null;
+        }
+      } else if (p === 'deepseek') {
+        const res = await fetch('https://api.deepseek.com/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [{ role: 'system', content: systemDirective }, ...historyMessages, { role: 'user', content: userQuery }],
+            temperature: 0.7,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.choices?.[0]?.message?.content || null;
+        }
+      } else if (p === 'gemini') {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `${systemDirective}\n\nCandidate Question: ${userQuery}` }] }],
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        }
+      } else if (p === 'openrouter') {
+        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: 'auto',
+            messages: [{ role: 'system', content: systemDirective }, ...historyMessages, { role: 'user', content: userQuery }],
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.choices?.[0]?.message?.content || null;
+        }
+      } else if (p === 'anthropic') {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({
+            model: 'claude-3-5-haiku-20241022',
+            max_tokens: 2000,
+            messages: [{ role: 'user', content: `${systemDirective}\n\nCandidate Question: ${userQuery}` }],
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.content?.[0]?.text || null;
+        }
+      }
+    } catch (err) {
+      console.error(`AI Tutor provider '${p}' failed:`, err);
+    }
+  }
+
+  return null;
+}
+
+/**
  * Intelligent Dynamic BCBA AI Tutor Response Processing
  * Generates topic-specific Socratic mentorship, ABC scenario deconstructions, and exam tips.
  */
@@ -45,52 +145,69 @@ export async function processAITutorMessage(
   const cleanQuery = userQuery.trim();
   const queryLower = cleanQuery.toLowerCase();
 
-  // 1. Attempt LLM Provider Execution (OpenAI / OpenRouter / Gemini)
-  const openAiKey = process.env.OPENAI_API_KEY;
-  if (openAiKey && !openAiKey.includes('mock-')) {
-    try {
-      const systemDirective = `${formatSystemDirective(candidateContext, mode)}\nYou are Socrates AI, an elite BCBA Clinical Mentor for ${certification} candidates. Respond thoughtfully and provide structured JSON with keys: content, concept, simpleExplanation, clinicalExample, examTip, mnemonicTip, commonMistakes.`;
-      
-      const apiRes = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${openAiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemDirective },
-            ...history.slice(-4).map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.content })),
-            { role: 'user', content: cleanQuery },
-          ],
-          temperature: 0.7,
-        }),
-      });
+  // 1. Attempt LLM Provider Execution (Multi-Model AI Engine)
+  const systemDirective = `${formatSystemDirective(candidateContext, mode)}
+You are Socrates AI, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB 2nd Edition Task List exam.
+Provide a clear, encouraging, structured response. Respond in valid JSON if possible with keys: "content" (markdown string response), "concept", "simpleExplanation", "clinicalExample", "examTip", "mnemonicTip", "commonMistakes".`;
 
-      const data = await apiRes.json();
-      const rawText = data.choices?.[0]?.message?.content;
-      if (rawText) {
+  const historyMessages = history.slice(-4).map((m) => ({
+    role: m.sender === 'user' ? 'user' : 'assistant',
+    content: m.content,
+  }));
+
+  const rawLLMResponse = await callLLMProviderForTutor(systemDirective, historyMessages, cleanQuery);
+
+  if (rawLLMResponse) {
+    try {
+      const cleaned = rawLLMResponse.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+      let parsedJSON: any = null;
+      if (cleaned.startsWith('{')) {
+        parsedJSON = JSON.parse(cleaned);
+      }
+
+      if (parsedJSON && (parsedJSON.content || parsedJSON.simpleExplanation)) {
         return {
           id: `msg-${Date.now()}`,
           sender: 'assistant',
-          content: rawText,
+          content: parsedJSON.content || parsedJSON.explanation || `### 💡 Socrates AI Analysis: "${cleanQuery}"\n\n${parsedJSON.simpleExplanation}`,
           timestamp: new Date().toISOString(),
           clinicalInsight: {
-            concept: cleanQuery.slice(0, 40),
-            simpleExplanation: `Clinical analysis of "${cleanQuery}" for ${certification} candidates.`,
-            clinicalExample: `Example: In ABA session, when evaluating "${cleanQuery}", monitor environmental variables and BCBA protocol guidelines.`,
-            examTip: 'Always verify behavior function and task list standards before selecting intervention procedures.',
-            mnemonicTip: 'Remember: Baseline Data -> Task Analysis -> Prompt Hierarchy -> Generalization.',
+            concept: parsedJSON.concept || cleanQuery.slice(0, 40),
+            simpleExplanation: parsedJSON.simpleExplanation || `Clinical analysis of ${cleanQuery} for ${certification} candidates.`,
+            clinicalExample: parsedJSON.clinicalExample || `Example: In ABA session, apply operational criteria when implementing ${cleanQuery}.`,
+            examTip: parsedJSON.examTip || 'BACB Exam Tip: Prioritize objective data collection and client dignity.',
+            mnemonicTip: parsedJSON.mnemonicTip || undefined,
+            commonMistakes: parsedJSON.commonMistakes || undefined,
           },
         };
       }
-    } catch (llmErr) {
-      console.error('LLM API call error, falling back to Socratic Knowledge Engine:', llmErr);
+
+      // Plain Markdown response from LLM
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'assistant',
+        content: rawLLMResponse,
+        timestamp: new Date().toISOString(),
+        clinicalInsight: {
+          concept: cleanQuery.slice(0, 40),
+          simpleExplanation: `Clinical ABA analysis of "${cleanQuery}" for ${certification} candidates.`,
+          clinicalExample: `In a clinical setting, evaluate environmental variables, antecedents, and consequences.`,
+          examTip: 'Focus on observable behavior definitions and BACB Task List competencies.',
+          mnemonicTip: 'Remember: Baseline Data -> Task Analysis -> Prompt Hierarchy -> Generalization.',
+        },
+      };
+    } catch (e) {
+      // Return raw LLM response as markdown if JSON parsing fails
+      return {
+        id: `msg-${Date.now()}`,
+        sender: 'assistant',
+        content: rawLLMResponse,
+        timestamp: new Date().toISOString(),
+      };
     }
   }
 
-  // 2. Dynamic Socratic ABA Knowledge & ABC Scenario Deconstruction Engine
+  // 2. Dynamic Socratic ABA Knowledge & ABC Scenario Deconstruction Engine (Fallback)
 
   // Scenario / ABC Analysis Mode
   if (
@@ -131,14 +248,25 @@ export async function processAITutorMessage(
     };
   }
 
-  // Match query against BACB Task List items
-  let matchedTask = BACB_TASK_LIST_2ND_EDITION.flatMap((d) => d.items).find((item) =>
-    item.keyConcepts.some((kc) => queryLower.includes(kc.toLowerCase())) ||
-    item.title.toLowerCase().includes(queryLower) ||
-    queryLower.includes(item.id.toLowerCase())
-  );
+  // Measurement Procedures
+  if (queryLower.includes('latency') || queryLower.includes('duration') || queryLower.includes('frequency') || queryLower.includes('irt') || queryLower.includes('measurement') || queryLower.includes('rate')) {
+    return {
+      id: `msg-${Date.now()}`,
+      sender: 'assistant',
+      content: `### ⏱️ Socratic Mentorship: Continuous Measurement Procedures (A-01 - A-04)\n\nIn ABA continuous measurement, we track every occurrence of behavior:\n\n1. **Latency**: Time elapsed between SD delivery and response initiation (SD -> Start).\n2. **Duration**: Total time elapsed from response start to response finish (Start -> Stop).\n3. **Frequency / Rate**: Count of behavior occurrences per unit of time (e.g. 5 occurrences / hour).\n4. **Inter-Response Time (IRT)**: Time elapsed between two consecutive behavior instances (Stop 1 -> Start 2).`,
+      timestamp: new Date().toISOString(),
+      clinicalInsight: {
+        concept: 'Continuous Measurement (Latency, Duration, Frequency, IRT)',
+        simpleExplanation: 'Continuous measurement records every instance of behavior without sampling intervals.',
+        clinicalExample: 'Latency: RBT says "Sit down", timer starts, client sits 4 seconds later -> Latency = 4s.\nDuration: Client cries for 12 minutes -> Duration = 12 min.',
+        examTip: 'Exam Trigger Words: "Instruction to start" = Latency. "Start to finish" = Duration. "Between two behaviors" = IRT.',
+        mnemonicTip: 'SD -> Start = Latency. Start -> Stop = Duration. Stop 1 -> Start 2 = IRT.',
+        commonMistakes: 'Candidates often confuse Latency with Duration. Look for "instruction delivered" as the trigger for Latency.',
+      },
+    };
+  }
 
-  // Concept-specific dynamic generators
+  // Differential Reinforcement
   if (queryLower.includes('dro') || queryLower.includes('dra') || queryLower.includes('dri') || queryLower.includes('drh') || queryLower.includes('drl') || queryLower.includes('differential reinforcement')) {
     return {
       id: `msg-${Date.now()}`,
@@ -152,12 +280,11 @@ export async function processAITutorMessage(
         examTip: 'Exam Golden Rule: DRO = ZERO occurrences (Omission). DRA = Alternative functional behavior. DRI = Physically incompatible.',
         mnemonicTip: 'DRO = ZERO occurrences. DRA = Alternative card. DRI = Incompatible hands.',
         commonMistakes: 'Confusing DRO with DRA. Remember DRO requires ZERO occurrences during the entire time interval.',
-        relatedTopics: ['D-04 Differential Reinforcement', 'Extinction Bursts', 'Functional Communication Training (FCT)'],
-        suggestedFlashcards: ['fc-rbt-003', 'fc-rbt-001'],
       },
     };
   }
 
+  // Verbal Operants
   if (queryLower.includes('mand') || queryLower.includes('tact') || queryLower.includes('echoic') || queryLower.includes('intraverbal') || queryLower.includes('verbal operant')) {
     return {
       id: `msg-${Date.now()}`,
@@ -171,11 +298,11 @@ export async function processAITutorMessage(
         examTip: 'Exam Key: MAND is the ONLY verbal operant directly controlled by a Motivating Operation (MO) and produces a specific reinforcer.',
         mnemonicTip: 'MAND = Demand/Must have. TACT = Contact with senses. ECHOIC = Echo. INTRAVERBAL = Interview/Conversation.',
         commonMistakes: 'Thinking Mands are only vocal. Mands can be PECS, sign language, or AAC device selections!',
-        relatedTopics: ['B-04 Verbal Operants', 'Functional Communication Training', 'PECS'],
       },
     };
   }
 
+  // Extinction
   if (queryLower.includes('extinction') || queryLower.includes('extinction burst')) {
     return {
       id: `msg-${Date.now()}`,
@@ -189,11 +316,11 @@ export async function processAITutorMessage(
         examTip: 'Never stop extinction during an extinction burst, or you will inadvertently reinforce a higher intensity behavior!',
         mnemonicTip: 'Burst = Temporary Spike before Drop.',
         commonMistakes: 'Mistaking an extinction burst for a failed intervention. Bursts are normal indicators that extinction is working!',
-        relatedTopics: ['D-05 Extinction', 'Extinction Bursts', 'Spontaneous Recovery'],
       },
     };
   }
 
+  // DTT vs NET
   if (queryLower.includes('dtt') || queryLower.includes('discrete trial') || queryLower.includes('net') || queryLower.includes('naturalistic')) {
     return {
       id: `msg-${Date.now()}`,
@@ -207,12 +334,18 @@ export async function processAITutorMessage(
         examTip: 'DTT has 5 distinct components: 1. SD, 2. Prompt, 3. Response, 4. Reinforcer/Correction, 5. Inter-Trial Interval.',
         mnemonicTip: 'DTT = Desk & Trials. NET = Natural & Play.',
         commonMistakes: 'Thinking NET lacks structure. NET is highly structured but follows learner interest.',
-        relatedTopics: ['C-01 Discrete Trial Teaching', 'C-02 Naturalistic Teaching', 'Prompt Hierarchies'],
       },
     };
   }
 
-  // Fallback for any general query
+  // Match query against BACB Task List items
+  let matchedTask = BACB_TASK_LIST_2ND_EDITION.flatMap((d) => d.items).find((item) =>
+    item.keyConcepts.some((kc) => queryLower.includes(kc.toLowerCase())) ||
+    item.title.toLowerCase().includes(queryLower) ||
+    queryLower.includes(item.id.toLowerCase())
+  );
+
+  // General Fallback for any other query
   const titleTopic = matchedTask ? `${matchedTask.id}: ${matchedTask.title}` : cleanQuery;
   const descriptionText = matchedTask ? matchedTask.description : `Clinical behavior analytic analysis of ${cleanQuery}.`;
 
@@ -228,7 +361,6 @@ export async function processAITutorMessage(
       examTip: `BACB Exam Strategy: On questions about ${cleanQuery}, eliminate answer choices that use subjective language or unapproved punishment techniques.`,
       mnemonicTip: 'Identify Function -> Define Operationally -> Collect Objective Data -> Apply Reinforcement.',
       commonMistakes: 'Selecting interventions based on hypothetical internal states rather than observable environmental variables.',
-      relatedTopics: matchedTask?.keyConcepts || ['Functions of Behavior', 'BACB Ethics Code', 'Objective Data Measurement'],
     },
   };
 }
