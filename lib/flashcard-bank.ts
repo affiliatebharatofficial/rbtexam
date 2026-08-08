@@ -527,10 +527,7 @@ export async function importBulkFlashcards(cards: Partial<Flashcard>[]): Promise
     certification: String(c.certification || 'RBT').slice(0, 30),
     term: String(c.front || c.title || 'Untitled Flashcard').slice(0, 250),
     definition: c.back || c.explanation || 'No definition',
-    clinical_example: [
-      c.front && c.front.length > 250 ? `Full Question Prompt:\n${c.front}` : '',
-      c.explanation || c.clinicalExplanation || '',
-    ].filter(Boolean).join('\n\n') || null,
+    clinical_example: c.clinicalExplanation || c.explanation || null,
     category: String(c.category || 'Measurement').slice(0, 120),
     task_list_code: String(c.reference || c.subcategory || 'CSV Import').slice(0, 30),
     tags: c.tags || ['CSV Import'],
@@ -578,7 +575,7 @@ export function transformQuestionToFlashcard(mq: any): Partial<Flashcard> {
     : 'Option A';
 
   // 1. Build concise recall-focused Front Prompt
-  let cleanFront = mq.question || 'Question concept';
+  let cleanFront = (mq.question || 'Question concept').trim();
 
   // Strip scenario headers or options filler if present
   cleanFront = cleanFront
@@ -597,23 +594,59 @@ export function transformQuestionToFlashcard(mq: any): Partial<Flashcard> {
     }
   }
 
-  // 2. Build Back Definition (Correct Answer + Short Rationale, NO Question Repetition)
-  const cleanBack = `${correctOpt}\n\n${mq.answerExplanation || ''}`.trim();
+  // 2. Build Rationale & Answer Explanation without redundant answer title repetition
+  let rawRationale = (mq.answerExplanation || mq.explanation || '').trim();
 
-  // 3. Build Clinical Rationale
-  const clinicalRationale = mq.clinicalExplanation
-    ? mq.clinicalExplanation.replace(/^BACB Item [^:]+:\s*/i, '').trim()
-    : mq.answerExplanation || 'Clinical rationale not provided';
+  // Strip duplicate leading answer term if present at start of explanation
+  if (correctOpt && rawRationale) {
+    const escapedOpt = correctOpt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const leadingOptRegex = new RegExp(`^(${escapedOpt}[:\\s—-]*)`, 'i');
+    if (leadingOptRegex.test(rawRationale)) {
+      rawRationale = rawRationale.replace(leadingOptRegex, '').trim();
+      if (rawRationale.length > 0) {
+        rawRationale = rawRationale.charAt(0).toUpperCase() + rawRationale.slice(1);
+      }
+    }
+  }
 
-  // 4. Memory Tip
-  const memoryTip = mq.examTips
-    ? mq.examTips
-    : `Memory Tip: ${correctOpt} — ${Array.isArray(mq.keywords) && mq.keywords.length > 0 ? mq.keywords.slice(0, 2).join(', ') : mq.category}`;
+  // Strip any trailing Memory Tip / Exam Tip block from rationale
+  rawRationale = rawRationale.replace(/(?:Memory Tip|Exam Tip|Tip|Mnemonic):[\s\S]*$/i, '').trim();
 
-  // 5. Build full explanation block for card detail view
+  // Build Back Definition (Correct Answer + Short Rationale, NO Question Repetition)
+  const cleanBack = rawRationale ? `${correctOpt}\n\n${rawRationale}` : correctOpt;
+
+  // 3. Build Pure Clinical Rationale (ONLY clinical/practical explanation, NO memory tip, NO question prompt)
+  let cleanClinical = (mq.clinicalExplanation || rawRationale || 'Clinical rationale not provided').trim();
+  cleanClinical = cleanClinical
+    .replace(/^BACB Item [^:]+:\s*/i, '')
+    .replace(/(?:Memory Tip|Exam Tip|Tip|Mnemonic):[\s\S]*$/i, '')
+    .replace(/^Full Question Prompt:[\s\S]*?\n\n/i, '')
+    .trim();
+
+  if (correctOpt && cleanClinical) {
+    const escapedOpt = correctOpt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const leadingOptRegex = new RegExp(`^(${escapedOpt}[:\\s—-]*)`, 'i');
+    if (leadingOptRegex.test(cleanClinical)) {
+      cleanClinical = cleanClinical.replace(leadingOptRegex, '').trim();
+      if (cleanClinical.length > 0) {
+        cleanClinical = cleanClinical.charAt(0).toUpperCase() + cleanClinical.slice(1);
+      }
+    }
+  }
+
+  // 4. Pure Memory Tip (Strip duplicate labels)
+  let rawMemoryTip = (mq.examTips || mq.memoryTip || '').trim();
+  rawMemoryTip = rawMemoryTip.replace(/^(?:Memory Tip|Exam Tip|Tip|Mnemonic):\s*/i, '').trim();
+
+  if (!rawMemoryTip) {
+    const keywords = Array.isArray(mq.keywords) && mq.keywords.length > 0 ? mq.keywords.slice(0, 2).join(', ') : mq.category;
+    rawMemoryTip = `${correctOpt} → ${keywords}`;
+  }
+
+  // 5. Build full explanation block for card detail view (Clean sections without double labels)
   const fullExplanation = [
-    `Clinical Rationale:\n${clinicalRationale}`,
-    memoryTip ? `Memory Tip:\n${memoryTip}` : '',
+    `Clinical Rationale:\n${cleanClinical}`,
+    `Memory Tip:\n${rawMemoryTip}`,
   ].filter(Boolean).join('\n\n');
 
   // 6. Source Question ID mapping & Metadata
@@ -625,7 +658,8 @@ export function transformQuestionToFlashcard(mq: any): Partial<Flashcard> {
     front: cleanFront.slice(0, 250),
     back: cleanBack,
     explanation: fullExplanation,
-    clinicalExplanation: clinicalRationale,
+    clinicalExplanation: cleanClinical,
+    memoryTip: rawMemoryTip,
     category: mq.category || 'Measurement',
     certification: (mq.certification?.toUpperCase() as any) || 'RBT',
     difficulty: (mq.difficulty?.toLowerCase() as any) || 'medium',
