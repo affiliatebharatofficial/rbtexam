@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Layers, RotateCw, Check, X, Sparkles, Volume2, ArrowRight } from 'lucide-react';
+import { Layers, RotateCw, Check, X, Sparkles, Volume2, ArrowRight, Play, Pause, Brain, Zap, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 
 export function FlashcardsPreview() {
@@ -16,6 +16,7 @@ export function FlashcardsPreview() {
       code: 'C-02',
       definition: 'A stimulus in the presence of which a particular response will be reinforced and in the absence of which that response will not be reinforced.',
       clinicalExample: 'RBT says "Touch red circle" while pointing to the red card.',
+      mnemonic: 'SD = Signal for Delivery of Reinforcement',
       leitnerBox: 4,
     },
     {
@@ -25,6 +26,7 @@ export function FlashcardsPreview() {
       code: 'D-02',
       definition: 'Reinforcing a specific desirable alternative behavior while placing the problem behavior on extinction.',
       clinicalExample: 'Reinforcing a child when they hand a break card instead of screaming.',
+      mnemonic: 'DRA = Alternative Appropriate Behavior',
       leitnerBox: 3,
     },
     {
@@ -34,15 +36,37 @@ export function FlashcardsPreview() {
       code: 'A-02',
       definition: 'The elapsed time between the end of one response and the beginning of the next adjacent response.',
       clinicalExample: 'Recording 45 seconds between two consecutive hand-mouthing instances.',
+      mnemonic: 'IRT = In Between Responses Time',
       leitnerBox: 5,
     },
   ];
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
+  const [isPlayingDemo, setIsPlayingDemo] = useState<boolean>(false);
   const [knownCount, setKnownCount] = useState<number>(0);
 
   const card = flashcards[currentIndex];
+
+  // Auto-play demo animation loop
+  useEffect(() => {
+    if (!isPlayingDemo) return;
+
+    const flipTimer = setTimeout(() => {
+      setIsFlipped(true);
+    }, 2000);
+
+    const nextCardTimer = setTimeout(() => {
+      setIsFlipped(false);
+      setKnownCount((prev) => prev + 1);
+      setCurrentIndex((prev) => (prev + 1) % flashcards.length);
+    }, 5500);
+
+    return () => {
+      clearTimeout(flipTimer);
+      clearTimeout(nextCardTimer);
+    };
+  }, [isPlayingDemo, currentIndex]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -56,25 +80,82 @@ export function FlashcardsPreview() {
 
   return (
     <section id="flashcards" className="py-24 bg-white border-b border-slate-100 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto space-y-4">
           <Badge variant="blue" className="gap-1">
             <Layers className="w-3.5 h-3.5" />
-            <span>Spaced Repetition Flashcards</span>
+            <span>Spaced Repetition AI Flashcards</span>
           </Badge>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Master ABA Terminology 3x Faster
+          <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] tracking-tight">
+            Master BACB Terminology 3x Faster with AI
           </h2>
           <p className="text-base text-slate-600">
-            Powered by the Leitner 5-Box Spaced Repetition Algorithm. Flip through sample flashcards below to test your memory recall.
+            Powered by the Leitner 5-Box Adaptive Memory Algorithm and Multi-Model AI Generation for RBT & BCBA exams.
           </p>
         </div>
 
-        <div className="max-w-xl mx-auto">
+        {/* 3-Step How It Works Workflow Bar */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3 relative group hover:border-blue-500/40 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-extrabold text-sm">
+              <Zap className="w-5 h-5 text-amber-600" />
+            </div>
+            <div className="text-xs font-mono font-bold text-blue-600 uppercase tracking-widest">Step 1</div>
+            <h3 className="text-base font-bold text-slate-900">AI Topic Deck Generator</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Type any ABA topic (e.g. <i>DRO vs DRA</i>) and AI instantly generates high-yield BACB exam flashcards with clinical rationales.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3 relative group hover:border-blue-500/40 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center font-extrabold text-sm">
+              <RotateCw className="w-5 h-5 text-[#2563EB]" />
+            </div>
+            <div className="text-xs font-mono font-bold text-blue-600 uppercase tracking-widest">Step 2</div>
+            <h3 className="text-base font-bold text-slate-900">Interactive 3D Recall</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Test your recall by flipping the 3D card to view BACB task list definitions, clinical scenarios, and mnemonic memory tricks.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3 relative group hover:border-blue-500/40 transition-all">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-extrabold text-sm">
+              <Brain className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div className="text-xs font-mono font-bold text-blue-600 uppercase tracking-widest">Step 3</div>
+            <h3 className="text-base font-bold text-slate-900">Adaptive Spaced Scheduling</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Rate your recall (Again, Hard, Good, Easy) to let the SM-2 algorithm schedule optimal review dates (1D, 3D, 6D, 14D).
+            </p>
+          </div>
+        </div>
+
+        {/* INTERACTIVE DEMO ANIMATION CARD BOX */}
+        <div className="max-w-xl mx-auto space-y-6">
+          <div className="flex items-center justify-between px-2 text-xs font-bold text-slate-600">
+            <span className="flex items-center space-x-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>Interactive Live Demo Preview</span>
+            </span>
+
+            {/* Auto-Play Toggle */}
+            <button
+              onClick={() => setIsPlayingDemo(!isPlayingDemo)}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                isPlayingDemo ? 'bg-amber-50 text-amber-800 border-amber-300 animate-pulse' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-300'
+              }`}
+            >
+              {isPlayingDemo ? <Pause className="w-3.5 h-3.5 text-amber-600" /> : <Play className="w-3.5 h-3.5 text-slate-600" />}
+              <span>{isPlayingDemo ? 'Pause Auto Demo' : 'Watch Live Demo Play'}</span>
+            </button>
+          </div>
+
           {/* Card Box Wrapper */}
           <div className="relative cursor-pointer perspective-1000 group" onClick={handleFlip}>
             <div
-              className={`w-full min-h-[300px] p-8 rounded-3xl bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 text-white shadow-2xl border border-slate-700/80 flex flex-col justify-between transition-transform duration-500 transform ${
+              className={`w-full min-h-[320px] p-8 rounded-3xl bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 text-white shadow-2xl border border-slate-700/80 flex flex-col justify-between transition-transform duration-500 transform ${
                 isFlipped ? 'rotate-y-180' : ''
               }`}
             >
@@ -103,21 +184,29 @@ export function FlashcardsPreview() {
 
                   <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs text-slate-400">
                     <span>Leitner Box Level {card.leitnerBox} of 5</span>
-                    <span className="text-emerald-400 font-bold">Mastery Rate: 92%</span>
+                    <span className="text-emerald-400 font-bold">Mastery Rate: 94%</span>
                   </div>
                 </div>
               ) : (
                 /* Back Side */
-                <div className="flex flex-col justify-between h-full space-y-6">
+                <div className="flex flex-col justify-between h-full space-y-6 animate-fadeIn">
                   <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="text-emerald-400 font-bold uppercase tracking-wider">Clinical Definition</span>
+                    <span className="text-emerald-400 font-bold uppercase tracking-wider">Clinical Definition & Mnemonic</span>
                     <span className="text-slate-400 text-[11px]">Card {currentIndex + 1} of {flashcards.length}</span>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <p className="text-sm sm:text-base font-medium text-slate-100 leading-relaxed">
                       "{card.definition}"
                     </p>
+
+                    <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-200 text-xs space-y-0.5">
+                      <span className="font-bold flex items-center space-x-1">
+                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Mnemonic Trick:</span>
+                      </span>
+                      <p>{card.mnemonic}</p>
+                    </div>
 
                     <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs space-y-1">
                       <span className="font-bold text-blue-300">Clinical Scenario Example:</span>
@@ -134,18 +223,18 @@ export function FlashcardsPreview() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-center gap-4 mt-8">
+          <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => handleMark(false)}
-              className="px-6 py-3 rounded-2xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-bold flex items-center space-x-2 transition-all shadow-sm"
+              className="px-5 py-3 rounded-2xl bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm"
             >
               <X className="w-4 h-4 text-rose-600" />
-              <span>Need Review</span>
+              <span>Again (1D)</span>
             </button>
 
             <button
               onClick={handleFlip}
-              className="px-6 py-3 rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold flex items-center space-x-2 transition-all"
+              className="px-5 py-3 rounded-2xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold flex items-center space-x-1.5 transition-all"
             >
               <RotateCw className="w-4 h-4 text-slate-600" />
               <span>Flip Card</span>
@@ -153,17 +242,17 @@ export function FlashcardsPreview() {
 
             <button
               onClick={() => handleMark(true)}
-              className="px-6 py-3 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-xs font-bold flex items-center space-x-2 transition-all shadow-sm"
+              className="px-5 py-3 rounded-2xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 text-xs font-bold flex items-center space-x-1.5 transition-all shadow-sm"
             >
               <Check className="w-4 h-4 text-emerald-600" />
-              <span>Got It Mastered</span>
+              <span>Easy (14D)</span>
             </button>
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="pt-4 text-center">
             <Link href="/flashcards">
-              <Button variant="primary" size="md" className="gap-2 shadow-md">
-                <span>Explore Full 250+ ABA Term Deck</span>
+              <Button variant="primary" size="md" className="gap-2 shadow-lg shadow-blue-500/20 font-extrabold">
+                <span>Start Studying Smart Flashcards</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -173,3 +262,4 @@ export function FlashcardsPreview() {
     </section>
   );
 }
+
