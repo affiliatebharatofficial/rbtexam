@@ -418,6 +418,7 @@ async function callDeepSeek(prompt: string, apiKey: string): Promise<{ text: str
       model: 'deepseek-chat',
       messages: [{ role: 'system', content: prompt }],
       temperature: 0.7,
+      max_tokens: 4000,
       response_format: { type: 'json_object' },
     }),
   });
@@ -503,238 +504,7 @@ async function callAnthropic(prompt: string, apiKey: string): Promise<{ text: st
   };
 }
 
-/**
- * Main Multi-Provider Generation Router
- */
-export async function executeAIQuestionGeneration(params: GenerationInputParams): Promise<GenerationResult> {
-  const startTime = Date.now();
-  const prompt = buildAIQuestionPrompt(params);
-
-  // Available Keys map
-  const keys: Record<string, string | undefined> = {
-    openai: params.apiKey || process.env.OPENAI_API_KEY,
-    gemini: params.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    deepseek: params.apiKey || process.env.DEEPSEEK_API_KEY,
-    openrouter: params.apiKey || process.env.OPENROUTER_API_KEY,
-    anthropic: params.apiKey || process.env.ANTHROPIC_API_KEY,
-  };
-
-  const requestedProvider = (params.provider || 'auto').toLowerCase();
-
-  // Define candidate provider order
-  let providerOrder: string[] = [];
-  if (requestedProvider !== 'auto' && keys[requestedProvider]) {
-    providerOrder.push(requestedProvider);
-  }
-
-  // Append remaining configured providers for fallback
-  const allProviders = ['deepseek', 'openai', 'gemini', 'anthropic', 'openrouter'];
-  allProviders.forEach((p) => {
-    if (keys[p] && !keys[p]!.includes('mock-') && !providerOrder.includes(p)) {
-      providerOrder.push(p);
-    }
-  });
-
-  if (providerOrder.length === 0) {
-    return {
-      success: false,
-      providerUsed: 'None',
-      modelUsed: 'None',
-      requestedCount: params.count,
-      generatedCount: 0,
-      validatedCount: 0,
-      insertedCount: 0,
-      insertedIds: [],
-      latencyMs: Date.now() - startTime,
-      inputTokens: 0,
-      outputTokens: 0,
-      totalTokens: 0,
-      estimatedCostUSD: 0,
-      fallbackUsed: false,
-      questions: [],
-      error: `AI Generation Failed: No valid API keys are configured for ${requestedProvider === 'auto' ? 'any supported AI provider (DeepSeek, OpenAI, Gemini, Anthropic, OpenRouter)' : requestedProvider}. Please configure API keys in environment variables or Admin CMS settings.`,
-    };
-  }
-
-  let rawJSONText = '';
-  let providerUsed = '';
-  let modelUsed = '';
-  let inputTokens = 0;
-  let outputTokens = 0;
-  let fallbackUsed = false;
-  let lastError = '';
-
-  for (let i = 0; i < providerOrder.length; i++) {
-    const p = providerOrder[i];
-    const key = keys[p];
-    if (!key || key.includes('mock-')) continue;
-
-    if (i > 0) fallbackUsed = true;
-
-    try {
-      let res: { text: string; model: string; inputTokens: number; outputTokens: number };
-      if (p === 'openai') {
-        res = await callOpenAI(prompt, key);
-      } else if (p === 'gemini') {
-        res = await callGemini(prompt, key);
-      } else if (p === 'deepseek') {
-        res = await callDeepSeek(prompt, key);
-      } else if (p === 'anthropic') {
-        res = await callAnthropic(prompt, key);
-      } else if (p === 'openrouter') {
-        res = await callOpenRouter(prompt, key);
-      } else {
-        continue;
-      }
-
-      rawJSONText = res.text;
-      modelUsed = res.model;
-      providerUsed = p.toUpperCase();
-      inputTokens = res.inputTokens;
-      outputTokens = res.outputTokens;
-      break;
-    } catch (err: any) {
-      console.error(`AI Provider '${p}' failed:`, err.message);
-      lastError = `${p.toUpperCase()}: ${err.message}`;
-    }
-  }
-
-  if (!rawJSONText) {
-    return {
-      success: false,
-      providerUsed: 'None',
-      modelUsed: 'None',
-      requestedCount: params.count,
-      generatedCount: 0,
-      validatedCount: 0,
-      insertedCount: 0,
-      insertedIds: [],
-      latencyMs: Date.now() - startTime,
-      inputTokens: 0,
-      outputTokens: 0,
-      totalTokens: 0,
-      estimatedCostUSD: 0,
-      fallbackUsed: false,
-      questions: [],
-      error: `AI Generation Failed: All attempted providers (${providerOrder.join(', ')}) failed to return a response. Last error: ${lastError}`,
-    };
-  }
-
-  // Resilient JSON response parser
-  let parsedPayload: any = null;
-  try {
-    let cleaned = rawJSONText.trim();
-    // Remove markdown block if present
-    const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-    if (fenceMatch && fenceMatch[1]) {
-      cleaned = fenceMatch[1].trim();
-    }
-
-    const firstBrace = cleaned.indexOf('{');
-    const firstBracket = cleaned.indexOf('[');
-    let startIdx = -1;
-    if (firstBrace !== -1 && firstBracket !== -1) {
-      startIdx = Math.min(firstBrace, firstBracket);
-    } else if (firstBrace !== -1) {
-      startIdx = firstBrace;
-    } else if (firstBracket !== -1) {
-      startIdx = firstBracket;
-    }
-
-    if (startIdx !== -1) {
-      const lastBrace = cleaned.lastIndexOf('}');
-      const lastBracket = cleaned.lastIndexOf(']');
-      const endIdx = Math.max(lastBrace, lastBracket);
-      if (endIdx > startIdx) {
-        cleaned = cleaned.substring(startIdx, endIdx + 1);
-      }
-    }
-
-    parsedPayload = JSON.parse(cleaned);
-  } catch (err: any) {
-    return {
-      success: false,
-      providerUsed,
-      modelUsed,
-      requestedCount: params.count,
-      generatedCount: 0,
-      validatedCount: 0,
-      insertedCount: 0,
-      insertedIds: [],
-      latencyMs: Date.now() - startTime,
-      inputTokens,
-      outputTokens,
-      totalTokens: inputTokens + outputTokens,
-      estimatedCostUSD: (inputTokens * 0.00000015) + (outputTokens * 0.0000006),
-      fallbackUsed,
-      questions: [],
-      error: `AI Generation Failed: Malformed JSON response from ${providerUsed}. Parse error: ${err.message}`,
-    };
-  }
-
-  let rawQuestions: any[] = [];
-  if (Array.isArray(parsedPayload)) {
-    rawQuestions = parsedPayload;
-  } else if (typeof parsedPayload === 'object' && parsedPayload !== null) {
-    rawQuestions =
-      parsedPayload.questions ||
-      parsedPayload.data ||
-      parsedPayload.items ||
-      parsedPayload.examQuestions ||
-      parsedPayload.exam_questions ||
-      parsedPayload.questionBank ||
-      parsedPayload.mcqs ||
-      parsedPayload.quiz ||
-      parsedPayload.results ||
-      [];
-  }
-
-  if (rawQuestions.length === 0) {
-    return {
-      success: false,
-      providerUsed,
-      modelUsed,
-      requestedCount: params.count,
-      generatedCount: 0,
-      validatedCount: 0,
-      insertedCount: 0,
-      insertedIds: [],
-      latencyMs: Date.now() - startTime,
-      inputTokens,
-      outputTokens,
-      totalTokens: inputTokens + outputTokens,
-      estimatedCostUSD: (inputTokens * 0.00000015) + (outputTokens * 0.0000006),
-      fallbackUsed,
-      questions: [],
-      error: `AI Generation Failed: Provider ${providerUsed} returned JSON without a 'questions' array.`,
-    };
-  }
-
-  // Validate Questions using 10-Point Validator
-  const { validQuestions, invalidCount, allErrors } = validateQuestionBatch(rawQuestions, params);
-
-  if (validQuestions.length === 0) {
-    return {
-      success: false,
-      providerUsed,
-      modelUsed,
-      requestedCount: params.count,
-      generatedCount: rawQuestions.length,
-      validatedCount: 0,
-      insertedCount: 0,
-      insertedIds: [],
-      latencyMs: Date.now() - startTime,
-      inputTokens,
-      outputTokens,
-      totalTokens: inputTokens + outputTokens,
-      estimatedCostUSD: (inputTokens * 0.00000015) + (outputTokens * 0.0000006),
-      fallbackUsed,
-      questions: [],
-      error: `AI Generation Failed: All ${rawQuestions.length} generated questions failed schema validation. Errors: ${allErrors.slice(0, 3).join(' | ')}`,
-    };
-  }
-
-  // Insert into Supabase PostgreSQL and Master Bank
+async function saveValidQuestionBatchToDatabaseAndMemory(validQuestions: any[]): Promise<{ ids: string[]; questions: MasterQuestion[] }> {
   const createdMasterQuestions: MasterQuestion[] = [];
   const insertedIds: string[] = [];
 
@@ -744,7 +514,6 @@ export async function executeAIQuestionGeneration(params: GenerationInputParams)
     insertedIds.push(saved.id);
   }
 
-  // Persist directly to Supabase PostgreSQL database if configured
   if (isSupabaseConfigured()) {
     try {
       const dbRows = validQuestions.map((q) => ({
@@ -775,13 +544,13 @@ export async function executeAIQuestionGeneration(params: GenerationInputParams)
 
       if (dbErr) {
         console.error('Supabase DB insertion error for master_questions:', dbErr.message);
-      } else if (insertedDbData && Array.isArray(insertedDbData)) {
-        // Also insert options into public.question_options
+      } else if (insertedDbData && Array.isArray(insertedDbData) && insertedDbData.length > 0) {
+        const realDbIds = insertedDbData.map((r: any) => r.id);
         const optionRows: any[] = [];
         insertedDbData.forEach((insertedQ: any, qIdx: number) => {
           const vq = validQuestions[qIdx];
           if (vq && Array.isArray(vq.options)) {
-            vq.options.forEach((opt) => {
+            vq.options.forEach((opt: any) => {
               optionRows.push({
                 question_id: insertedQ.id,
                 option_letter: opt.id,
@@ -799,31 +568,220 @@ export async function executeAIQuestionGeneration(params: GenerationInputParams)
             console.error('Supabase DB insertion error for question_options:', optErr.message);
           }
         }
+
+        return { ids: realDbIds, questions: createdMasterQuestions };
       }
     } catch (dbEx: any) {
       console.error('Exception during Supabase PostgreSQL insertion:', dbEx.message);
     }
   }
 
-  // Calculate telemetry
-  const totalTokens = inputTokens + outputTokens;
-  const estimatedCostUSD = (inputTokens * 0.00000015) + (outputTokens * 0.0000006);
+  return { ids: insertedIds, questions: createdMasterQuestions };
+}
+
+/**
+ * Main Multi-Provider Generation Router (Batched in chunks of 5)
+ */
+export async function executeAIQuestionGeneration(params: GenerationInputParams): Promise<GenerationResult> {
+  const startTime = Date.now();
+  const BATCH_SIZE = 5;
+  const requestedTotalCount = params.count || 5;
+
+  const batchCounts: number[] = [];
+  let remaining = requestedTotalCount;
+  while (remaining > 0) {
+    batchCounts.push(Math.min(remaining, BATCH_SIZE));
+    remaining -= BATCH_SIZE;
+  }
+
+  const keys: Record<string, string | undefined> = {
+    openai: params.apiKey || process.env.OPENAI_API_KEY,
+    gemini: params.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    deepseek: params.apiKey || process.env.DEEPSEEK_API_KEY,
+    openrouter: params.apiKey || process.env.OPENROUTER_API_KEY,
+    anthropic: params.apiKey || process.env.ANTHROPIC_API_KEY,
+  };
+
+  const requestedProvider = (params.provider || 'auto').toLowerCase();
+
+  let providerOrder: string[] = [];
+  if (requestedProvider !== 'auto' && keys[requestedProvider]) {
+    providerOrder.push(requestedProvider);
+  }
+
+  const allProviders = ['deepseek', 'openai', 'gemini', 'anthropic', 'openrouter'];
+  allProviders.forEach((p) => {
+    if (keys[p] && !keys[p]!.includes('mock-') && !providerOrder.includes(p)) {
+      providerOrder.push(p);
+    }
+  });
+
+  if (providerOrder.length === 0) {
+    return {
+      success: false,
+      providerUsed: 'None',
+      modelUsed: 'None',
+      requestedCount: requestedTotalCount,
+      generatedCount: 0,
+      validatedCount: 0,
+      insertedCount: 0,
+      insertedIds: [],
+      latencyMs: Date.now() - startTime,
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      estimatedCostUSD: 0,
+      fallbackUsed: false,
+      questions: [],
+      error: `AI Generation Failed: No valid API keys are configured for ${requestedProvider === 'auto' ? 'any supported AI provider (DeepSeek, OpenAI, Gemini, Anthropic, OpenRouter)' : requestedProvider}. Please configure API keys in environment variables or Admin CMS settings.`,
+    };
+  }
+
+  const allInsertedIds: string[] = [];
+  const allCreatedQuestions: MasterQuestion[] = [];
+  let totalGeneratedCount = 0;
+  let totalValidatedCount = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let providerUsed = '';
+  let modelUsed = '';
+  let fallbackUsed = false;
+  let lastError = '';
+
+  for (let bIndex = 0; bIndex < batchCounts.length; bIndex++) {
+    const currentBatchSize = batchCounts[bIndex];
+    const batchParams = { ...params, count: currentBatchSize };
+    const prompt = buildAIQuestionPrompt(batchParams);
+
+    let batchSuccess = false;
+    let batchRetries = 0;
+
+    while (!batchSuccess && batchRetries <= 1) {
+      if (batchRetries > 0) {
+        console.log(`[AI Question Engine] Retrying Batch #${bIndex + 1} (Retry #${batchRetries})...`);
+      }
+
+      for (let i = 0; i < providerOrder.length; i++) {
+        const p = providerOrder[i];
+        const key = keys[p];
+        if (!key || key.includes('mock-')) continue;
+
+        if (i > 0) fallbackUsed = true;
+
+        try {
+          let res: { text: string; model: string; inputTokens: number; outputTokens: number };
+          if (p === 'openai') {
+            res = await callOpenAI(prompt, key);
+          } else if (p === 'gemini') {
+            res = await callGemini(prompt, key);
+          } else if (p === 'deepseek') {
+            res = await callDeepSeek(prompt, key);
+          } else if (p === 'anthropic') {
+            res = await callAnthropic(prompt, key);
+          } else if (p === 'openrouter') {
+            res = await callOpenRouter(prompt, key);
+          } else {
+            continue;
+          }
+
+          providerUsed = p.toUpperCase();
+          modelUsed = res.model;
+          totalInputTokens += res.inputTokens;
+          totalOutputTokens += res.outputTokens;
+
+          let cleaned = res.text.trim();
+          const fenceMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+          if (fenceMatch && fenceMatch[1]) {
+            cleaned = fenceMatch[1].trim();
+          }
+
+          const firstBrace = cleaned.indexOf('{');
+          const firstBracket = cleaned.indexOf('[');
+          let startIdx = -1;
+          if (firstBrace !== -1 && firstBracket !== -1) {
+            startIdx = Math.min(firstBrace, firstBracket);
+          } else if (firstBrace !== -1) {
+            startIdx = firstBrace;
+          } else if (firstBracket !== -1) {
+            startIdx = firstBracket;
+          }
+
+          if (startIdx !== -1) {
+            const lastBrace = cleaned.lastIndexOf('}');
+            const lastBracket = cleaned.lastIndexOf(']');
+            const endIdx = Math.max(lastBrace, lastBracket);
+            if (endIdx > startIdx) {
+              cleaned = cleaned.substring(startIdx, endIdx + 1);
+            }
+          }
+
+          const parsedPayload = JSON.parse(cleaned);
+
+          let rawQuestions: any[] = [];
+          if (Array.isArray(parsedPayload)) {
+            rawQuestions = parsedPayload;
+          } else if (typeof parsedPayload === 'object' && parsedPayload !== null) {
+            rawQuestions =
+              parsedPayload.questions ||
+              parsedPayload.data ||
+              parsedPayload.items ||
+              parsedPayload.examQuestions ||
+              parsedPayload.exam_questions ||
+              parsedPayload.questionBank ||
+              parsedPayload.mcqs ||
+              parsedPayload.quiz ||
+              parsedPayload.results ||
+              [];
+          }
+
+          if (rawQuestions.length === 0) {
+            throw new Error(`Provider ${providerUsed} returned JSON without a 'questions' array.`);
+          }
+
+          totalGeneratedCount += rawQuestions.length;
+
+          const { validQuestions } = validateQuestionBatch(rawQuestions, batchParams);
+          totalValidatedCount += validQuestions.length;
+
+          if (validQuestions.length > 0) {
+            const saved = await saveValidQuestionBatchToDatabaseAndMemory(validQuestions);
+            allInsertedIds.push(...saved.ids);
+            allCreatedQuestions.push(...saved.questions);
+            batchSuccess = true;
+            break;
+          } else {
+            throw new Error(`All generated questions in batch failed validation.`);
+          }
+        } catch (err: any) {
+          console.error(`[AI Question Engine] Batch #${bIndex + 1} attempt failed (${p}):`, err.message);
+          lastError = `${p.toUpperCase()}: ${err.message}`;
+        }
+      }
+
+      batchRetries++;
+    }
+  }
+
+  const success = allInsertedIds.length > 0;
+  const totalTokens = totalInputTokens + totalOutputTokens;
+  const estimatedCostUSD = (totalInputTokens * 0.00000015) + (totalOutputTokens * 0.0000006);
 
   return {
-    success: true,
-    providerUsed,
-    modelUsed,
-    requestedCount: params.count,
-    generatedCount: rawQuestions.length,
-    validatedCount: validQuestions.length,
-    insertedCount: createdMasterQuestions.length,
-    insertedIds,
+    success,
+    providerUsed: providerUsed || 'None',
+    modelUsed: modelUsed || 'None',
+    requestedCount: requestedTotalCount,
+    generatedCount: totalGeneratedCount,
+    validatedCount: totalValidatedCount,
+    insertedCount: allInsertedIds.length,
+    insertedIds: allInsertedIds,
     latencyMs: Date.now() - startTime,
-    inputTokens,
-    outputTokens,
+    inputTokens: totalInputTokens,
+    outputTokens: totalOutputTokens,
     totalTokens,
     estimatedCostUSD,
     fallbackUsed,
-    questions: createdMasterQuestions,
+    questions: allCreatedQuestions,
+    error: success ? undefined : `AI Generation Failed: ${lastError}`,
   };
 }
