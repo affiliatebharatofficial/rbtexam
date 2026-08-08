@@ -354,6 +354,232 @@ export async function deleteDatabaseFlashcard(id: string): Promise<boolean> {
 }
 
 /**
+ * Parse CSV string content into Partial<Flashcard>[] array
+ */
+export function parseCSVFlashcards(csvText: string): Partial<Flashcard>[] {
+  if (!csvText || typeof csvText !== 'string') return [];
+
+  const lines: string[] = [];
+  let currentLine = '';
+  let insideQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    if (char === '"') {
+      insideQuotes = !insideQuotes;
+      currentLine += char;
+    } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+      if (char === '\r' && csvText[i + 1] === '\n') i++;
+      if (currentLine.trim()) lines.push(currentLine);
+      currentLine = '';
+    } else {
+      currentLine += char;
+    }
+  }
+  if (currentLine.trim()) lines.push(currentLine);
+
+  if (lines.length === 0) return [];
+
+  // Helper to split CSV row handling quoted fields
+  const parseRow = (line: string): string[] => {
+    const row: string[] = [];
+    let field = '';
+    let inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (inQ && line[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else {
+          inQ = !inQ;
+        }
+      } else if (c === ',' && !inQ) {
+        row.push(field.trim());
+        field = '';
+      } else {
+        field += c;
+      }
+    }
+    row.push(field.trim());
+    return row;
+  };
+
+  const headerRow = parseRow(lines[0]).map((h) => h.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+  const termIdx = headerRow.findIndex((h) => ['term', 'front', 'question', 'prompt', 'title'].includes(h));
+  const defIdx = headerRow.findIndex((h) => ['definition', 'back', 'answer', 'explanation'].includes(h));
+  const expIdx = headerRow.findIndex((h) => ['clinical_example', 'clinicalexample', 'explanation', 'rationale', 'memory_tip'].includes(h));
+  const catIdx = headerRow.findIndex((h) => ['category', 'domain'].includes(h));
+  const certIdx = headerRow.findIndex((h) => ['certification', 'cert', 'level'].includes(h));
+  const diffIdx = headerRow.findIndex((h) => ['difficulty', 'level'].includes(h));
+  const taskIdx = headerRow.findIndex((h) => ['task_list_code', 'taskcode', 'reference', 'code', 'subcategory'].includes(h));
+
+  const results: Partial<Flashcard>[] = [];
+
+  const startLineIdx = termIdx !== -1 || defIdx !== -1 ? 1 : 0;
+
+  for (let i = startLineIdx; i < lines.length; i++) {
+    const cols = parseRow(lines[i]);
+    if (cols.length < 2) continue;
+
+    const front = (termIdx !== -1 && cols[termIdx] ? cols[termIdx] : cols[0] || '').trim();
+    const back = (defIdx !== -1 && cols[defIdx] ? cols[defIdx] : cols[1] || '').trim();
+    const explanation = expIdx !== -1 && cols[expIdx] ? cols[expIdx] : cols[2] || '';
+    const category = catIdx !== -1 && cols[catIdx] ? cols[catIdx] : 'Measurement';
+    const cert = certIdx !== -1 && cols[certIdx] ? cols[certIdx] : 'RBT';
+    const diff = diffIdx !== -1 && cols[diffIdx] ? cols[diffIdx] : 'medium';
+    const reference = taskIdx !== -1 && cols[taskIdx] ? cols[taskIdx] : 'CSV Import';
+
+    if (!front || !back) continue;
+
+    results.push({
+      title: front.slice(0, 50),
+      front,
+      back,
+      explanation,
+      clinicalExplanation: explanation,
+      category: category as any,
+      certification: (cert.toUpperCase() as any) || 'RBT',
+      difficulty: (diff.toLowerCase() as any) || 'medium',
+      reference,
+      tags: ['CSV Import'],
+      cardType: 'basic',
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Bulk insert flashcards into Supabase database
+ */
+export async function importBulkFlashcards(cards: Partial<Flashcard>[]): Promise<{ insertedCount: number; insertedIds: string[] }> {
+  const adminDb = getSupabaseAdminClient();
+  const dbRows = cards.map((c) => ({
+    certification: String(c.certification || 'RBT').slice(0, 30),
+    term: String(c.front || c.title || 'Untitled Flashcard').slice(0, 250),
+    definition: c.back || c.explanation || 'No definition',
+    clinical_example: [
+      c.front && c.front.length > 250 ? `Full Question Prompt:\n${c.front}` : '',
+      c.explanation || c.clinicalExplanation || '',
+    ].filter(Boolean).join('\n\n') || null,
+    category: String(c.category || 'Measurement').slice(0, 120),
+    task_list_code: String(c.reference || c.subcategory || 'CSV Import').slice(0, 30),
+    tags: c.tags || ['CSV Import'],
+    difficulty: String(c.difficulty || 'medium').slice(0, 30),
+    is_premium: c.isPremium || false,
+    status: 'published',
+  }));
+
+  if (dbRows.length === 0) {
+    return { insertedCount: 0, insertedIds: [] };
+  }
+
+  const { data, error } = await adminDb.from('master_flashcards').insert(dbRows).select();
+
+  if (error || !data) {
+    console.error('[Flashcard Bank] Bulk import error:', error?.message);
+    throw new Error(error?.message || 'Failed to bulk import flashcards into database');
+  }
+
+  const insertedIds = data.map((r: any) => r.id);
+  data.forEach((r: any) => {
+    addCustomFlashcard({
+      id: r.id,
+      title: r.term,
+      front: r.term,
+      back: r.definition,
+      explanation: r.clinical_example || r.definition,
+      category: r.category,
+      certification: r.certification,
+      difficulty: r.difficulty,
+      reference: r.task_list_code,
+    });
+  });
+
+  return { insertedCount: data.length, insertedIds };
+}
+
+/**
+ * Convert all existing Master Questions into Database Flashcards in Supabase
+ */
+export async function convertQuestionsToDatabaseFlashcards(): Promise<{ convertedCount: number; insertedIds: string[] }> {
+  const adminDb = getSupabaseAdminClient();
+  let sourceQuestions: any[] = [...MASTER_QUESTION_BANK];
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { data: dbQuestions } = await adminDb.from('master_questions').select('*').is('deleted_at', null);
+      if (dbQuestions && dbQuestions.length > 0) {
+        const dbMapped = dbQuestions.map((q: any) => ({
+          id: q.id,
+          question: q.question_stem || q.question || 'Question Stem',
+          scenarioText: q.scenario_text || null,
+          options: [
+            { id: 'A', text: q.option_a || 'Option A' },
+            { id: 'B', text: q.option_b || 'Option B' },
+            { id: 'C', text: q.option_c || 'Option C' },
+            { id: 'D', text: q.option_d || 'Option D' },
+          ],
+          correctAnswerId: q.correct_answer || 'A',
+          answerExplanation: q.explanation || q.answer_explanation || 'Correct answer rationale',
+          clinicalExplanation: q.clinical_explanation || q.explanation || '',
+          certification: q.certification || 'RBT',
+          category: q.category || 'Measurement',
+          difficulty: q.difficulty || 'medium',
+          keywords: q.keywords || ['Question Bank'],
+        }));
+        sourceQuestions = [...dbMapped, ...sourceQuestions];
+      }
+    } catch (e) {
+      console.error('[Flashcard Bank] Failed to fetch DB questions for conversion, using seed bank:', e);
+    }
+  }
+
+  const convertedCards: Partial<Flashcard>[] = sourceQuestions.map((mq) => {
+    const correctOpt = Array.isArray(mq.options)
+      ? mq.options.find((o: any) => o.id === mq.correctAnswerId)?.text || mq.correctAnswerId
+      : 'Option A';
+
+    const frontPrompt = mq.scenarioText
+      ? `[Clinical Scenario] ${mq.scenarioText}\n\nQuestion: ${mq.question}`
+      : mq.question;
+
+    const backAnswer = `Correct Answer: ${correctOpt}\n\nRationale: ${mq.answerExplanation}`;
+    const clinicalExampleText = [
+      mq.answerExplanation,
+      mq.clinicalExplanation ? `Clinical Rationale: ${mq.clinicalExplanation}` : '',
+      mq.examTips ? `Exam Tip: ${mq.examTips}` : '',
+    ].filter(Boolean).join('\n\n');
+
+    return {
+      title: `${mq.category}: ${mq.certification} Question Card`,
+      front: frontPrompt,
+      back: backAnswer,
+      explanation: clinicalExampleText,
+      clinicalExplanation: mq.clinicalExplanation || mq.answerExplanation,
+      category: mq.category || 'Measurement',
+      certification: mq.certification || 'RBT',
+      difficulty: mq.difficulty || 'medium',
+      reference: `Converted Question #${mq.id}`,
+      tags: ['Converted Question', mq.certification || 'RBT'],
+    };
+  });
+
+  if (isSupabaseConfigured()) {
+    const res = await importBulkFlashcards(convertedCards);
+    return { convertedCount: res.insertedCount, insertedIds: res.insertedIds };
+  } else {
+    const ids: string[] = [];
+    convertedCards.forEach((c) => {
+      const created = addCustomFlashcard(c);
+      ids.push(created.id);
+    });
+    return { convertedCount: ids.length, insertedIds: ids };
+  }
+}
+
+/**
  * Filter list of flashcards with Spaced Repetition queue management
  */
 function processFilteredFlashcardsList(

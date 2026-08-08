@@ -25,10 +25,10 @@ import {
   ArrowLeft,
   X,
   AlertCircle,
-  Cpu,
-  Coins,
   Clock,
   ShieldCheck,
+  FileSpreadsheet,
+  Repeat,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -61,6 +61,62 @@ export default function AdminFlashcardsPage() {
   const [clinicalExplanation, setClinicalExplanation] = useState('');
   const [category, setCategory] = useState('Measurement');
   const [reference, setReference] = useState('BACB Task List Standard');
+
+  // CSV Import & Question Conversion State
+  const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
+  const [csvText, setCsvText] = useState('');
+  const [isImportingCsv, setIsImportingCsv] = useState(false);
+  const [isConvertingQuestions, setIsConvertingQuestions] = useState(false);
+
+  const handleImportCSV = async () => {
+    if (!csvText.trim()) return;
+    setIsImportingCsv(true);
+    setStatusMsg('');
+    setGenerationError('');
+    try {
+      const res = await fetch('/api/flashcards/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csvText }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatusMsg(`✅ ${data.message}`);
+        setIsCsvModalOpen(false);
+        setCsvText('');
+        await fetchAllFlashcards();
+      } else {
+        setGenerationError(data.error || 'Failed to import CSV flashcards');
+      }
+    } catch (err: any) {
+      setGenerationError(`Network error importing CSV: ${err.message}`);
+    } finally {
+      setIsImportingCsv(false);
+    }
+  };
+
+  const handleConvertQuestions = async () => {
+    if (!confirm('Are you sure you want to convert all system Question Bank items into Flashcards?')) return;
+    setIsConvertingQuestions(true);
+    setStatusMsg('');
+    setGenerationError('');
+    try {
+      const res = await fetch('/api/flashcards/convert-questions', {
+        method: 'POST',
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setStatusMsg(`✅ ${data.message}`);
+        await fetchAllFlashcards();
+      } else {
+        setGenerationError(data.error || 'Failed to convert questions to flashcards');
+      }
+    } catch (err: any) {
+      setGenerationError(`Network error converting questions: ${err.message}`);
+    } finally {
+      setIsConvertingQuestions(false);
+    }
+  };
 
   const fetchAllFlashcards = async () => {
     try {
@@ -211,7 +267,28 @@ export default function AdminFlashcardsPage() {
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleConvertQuestions}
+              disabled={isConvertingQuestions}
+              className="gap-2 font-bold border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+            >
+              {isConvertingQuestions ? <Loader2 className="w-4 h-4 animate-spin" /> : <Repeat className="w-4 h-4 text-indigo-600" />}
+              <span>Convert Questions</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsCsvModalOpen(true)}
+              className="gap-2 font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              <span>Import CSV</span>
+            </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -234,7 +311,7 @@ export default function AdminFlashcardsPage() {
               className="gap-2 shadow-lg shadow-blue-500/20 font-bold"
             >
               <Zap className="w-4 h-4 text-amber-300" />
-              <span>AI Bulk Flashcard Generator</span>
+              <span>AI Generator</span>
             </Button>
           </div>
         </div>
@@ -715,6 +792,94 @@ export default function AdminFlashcardsPage() {
                 className="font-extrabold"
               >
                 Save & Publish Card
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* CSV BULK IMPORT MODAL FOR ADMIN */}
+      {isCsvModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl border border-slate-100 space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center space-x-2">
+                <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-lg font-bold text-[#0F172A]">Import Flashcards from CSV</h3>
+              </div>
+              <button
+                onClick={() => setIsCsvModalOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+                <p className="font-bold text-slate-800">CSV Header Format Required:</p>
+                <p className="font-mono text-[11px] text-slate-600 bg-white p-2 rounded-xl border border-slate-200 select-all">
+                  term,definition,explanation,category,certification,difficulty
+                </p>
+                <p className="text-[11px] text-slate-500 pt-1">
+                  Example: <code>"DRO","Omission procedure","Reinforces zero target behavior","Behavior Reduction","RBT","medium"</code>
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700">Upload CSV File</label>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onload = (evt) => {
+                        if (evt.target?.result) {
+                          setCsvText(String(evt.target.result));
+                        }
+                      };
+                      reader.readAsText(file);
+                    }
+                  }}
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700">Or Paste CSV Content Directly</label>
+                <textarea
+                  rows={6}
+                  placeholder={`term,definition,explanation,category,certification,difficulty\n"Discriminative Stimulus","SD antecedent signal","Signals availability of reinforcement","Skill Acquisition","RBT","medium"`}
+                  value={csvText}
+                  onChange={(e) => setCsvText(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono text-[11px] focus:ring-2 focus:ring-[#2563EB] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100">
+              <Button variant="outline" size="sm" onClick={() => setIsCsvModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleImportCSV}
+                disabled={isImportingCsv || !csvText.trim()}
+                className="gap-2 bg-emerald-600 hover:bg-emerald-700 font-extrabold"
+              >
+                {isImportingCsv ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Importing Cards...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    <span>Bulk Import to Database</span>
+                  </>
+                )}
               </Button>
             </div>
           </div>

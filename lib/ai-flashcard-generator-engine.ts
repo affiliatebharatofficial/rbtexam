@@ -662,14 +662,17 @@ export async function executeAIFlashcardGeneration(params: FlashcardGenerationIn
           ].filter(Boolean).join('\n\n');
 
           const dbRow = {
-            certification: vCard.certification || 'RBT',
-            term: vCard.front || vCard.title || 'Untitled Card',
+            certification: String(vCard.certification || 'RBT').slice(0, 30),
+            term: String(vCard.front || vCard.title || 'Untitled Card').slice(0, 250),
             definition: vCard.back || vCard.explanation || 'No definition provided',
-            clinical_example: clinicalExampleText,
-            category: vCard.category || 'Measurement',
-            task_list_code: vCard.subcategory || vCard.reference || 'BACB Task List',
+            clinical_example: [
+              vCard.front && vCard.front.length > 250 ? `Full Question Prompt:\n${vCard.front}` : '',
+              clinicalExampleText,
+            ].filter(Boolean).join('\n\n'),
+            category: String(vCard.category || 'Measurement').slice(0, 120),
+            task_list_code: String(vCard.subcategory || vCard.reference || 'BACB Task List').slice(0, 30),
             tags: vCard.tags || ['AI Generated'],
-            difficulty: vCard.difficulty || 'medium',
+            difficulty: String(vCard.difficulty || 'medium').slice(0, 30),
             is_premium: vCard.isPremium || false,
             status: 'published',
           };
