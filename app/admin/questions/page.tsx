@@ -109,6 +109,9 @@ export default function AdminQuestionsPage() {
       const data = await res.json();
 
       if (data.success && data.questions && Array.isArray(data.questions)) {
+        data.questions.forEach((q: any) => {
+          createQuestion(q);
+        });
         loadPersistentQuestions();
         setIsAiModalOpen(false);
         setAiSuccessMsg(`✅ ${data.insertedCount || data.questions.length} questions generated & inserted into Database via ${data.providerUsed} (${data.modelUsed})! Latency: ${data.latencyMs}ms | Tokens: ${data.totalTokens || 0}`);
