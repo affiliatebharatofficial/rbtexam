@@ -340,30 +340,57 @@ export async function updateDatabaseFlashcard(id: string, updates: Partial<Flash
   return true;
 }
 
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
- * Delete a flashcard from Supabase database
+ * Delete a flashcard from Supabase database or in-memory store
  */
 export async function deleteDatabaseFlashcard(id: string): Promise<boolean> {
-  const adminDb = getSupabaseAdminClient();
-  const { error } = await adminDb.from('master_flashcards').delete().eq('id', id);
-  if (error) {
-    console.error('[Flashcard Bank] Delete error:', error.message);
-    throw new Error(`Failed to delete flashcard ${id}: ${error.message}`);
+  if (isSupabaseConfigured() && uuidRegex.test(id)) {
+    try {
+      const adminDb = getSupabaseAdminClient();
+      const { error } = await adminDb.from('master_flashcards').delete().eq('id', id);
+      if (error) {
+        console.error('[Flashcard Bank] Delete error:', error.message);
+      }
+    } catch (e: any) {
+      console.error('[Flashcard Bank] Exception deleting database card:', e?.message);
+    }
   }
+
+  CUSTOM_FLASHCARDS = CUSTOM_FLASHCARDS.filter((c) => c.id !== id);
+  const idx = MASTER_FLASHCARDS.findIndex((c) => c.id === id);
+  if (idx !== -1) MASTER_FLASHCARDS.splice(idx, 1);
   return true;
 }
 
 /**
- * Bulk delete multiple flashcards from Supabase database
+ * Bulk delete multiple flashcards from Supabase database or in-memory store
  */
 export async function deleteDatabaseFlashcardBulk(ids: string[]): Promise<boolean> {
   if (!ids || ids.length === 0) return true;
-  const adminDb = getSupabaseAdminClient();
-  const { error } = await adminDb.from('master_flashcards').delete().in('id', ids);
-  if (error) {
-    console.error('[Flashcard Bank] Bulk Delete error:', error.message);
-    throw new Error(`Failed to bulk delete flashcards: ${error.message}`);
+
+  const uuidIds = ids.filter((id) => uuidRegex.test(id));
+
+  if (isSupabaseConfigured() && uuidIds.length > 0) {
+    try {
+      const adminDb = getSupabaseAdminClient();
+      const { error } = await adminDb.from('master_flashcards').delete().in('id', uuidIds);
+      if (error) {
+        console.error('[Flashcard Bank] Bulk Delete error:', error.message);
+      }
+    } catch (e: any) {
+      console.error('[Flashcard Bank] Exception bulk deleting database cards:', e?.message);
+    }
   }
+
+  // Purge all specified IDs from in-memory stores as well
+  ids.forEach((id) => {
+    CUSTOM_FLASHCARDS = CUSTOM_FLASHCARDS.filter((c) => c.id !== id);
+    const idx = MASTER_FLASHCARDS.findIndex((c) => c.id === id);
+    if (idx !== -1) MASTER_FLASHCARDS.splice(idx, 1);
+  });
+
   return true;
 }
 

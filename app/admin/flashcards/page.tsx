@@ -149,8 +149,8 @@ export default function AdminFlashcardsPage() {
     setStatusMsg('');
     setGenerationError('');
     try {
-      const res = await fetch('/api/flashcards', {
-        method: 'DELETE',
+      const res = await fetch('/api/flashcards/bulk-delete', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedCardIds }),
       });
