@@ -348,18 +348,18 @@ export default function FlashcardsPage() {
                   setIsFlipped(!isFlipped);
                 }
               }}
-              className="relative min-h-[420px] sm:min-h-[440px] w-full cursor-pointer touch-manipulation select-none [perspective:1000px] group focus:outline-none focus:ring-4 focus:ring-blue-500/30 rounded-3xl"
+              className="relative h-[410px] sm:h-[430px] w-full cursor-pointer touch-manipulation select-none [perspective:1000px] group focus:outline-none focus:ring-4 focus:ring-blue-500/30 rounded-3xl"
             >
               {/* 3D Rotating Inner Card Body */}
               <div
-                className={`relative w-full min-h-[420px] sm:min-h-[440px] rounded-3xl transition-transform duration-700 [transform-style:preserve-3d] shadow-2xl ${
+                className={`relative w-full h-[410px] sm:h-[430px] rounded-3xl transition-transform duration-700 [transform-style:preserve-3d] shadow-2xl ${
                   isFlipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'
                 }`}
               >
                 {/* FRONT FACE OF CARD */}
-                <div className="absolute inset-0 w-full h-full rounded-3xl p-6 sm:p-8 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200/90 dark:border-slate-800 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] flex flex-col justify-between overflow-y-auto shadow-xl">
+                <div className="absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-6 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200/90 dark:border-slate-800 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] flex flex-col justify-between overflow-hidden scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-xl">
                   {/* Header Controls (Front) */}
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-center space-x-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-[#2563EB] dark:text-blue-400 text-[10px] font-extrabold">
                         {currentCard.category} • {currentCard.cardType.toUpperCase()}
@@ -396,7 +396,7 @@ export default function FlashcardsPage() {
                   </div>
 
                   {/* Front Main Body Content */}
-                  <div className="py-6 space-y-4 flex flex-col justify-center my-auto min-h-[200px]">
+                  <div className="py-4 space-y-3 flex flex-col justify-center my-auto">
                     <div className="text-xs font-mono text-slate-400 uppercase tracking-widest flex items-center justify-between">
                       <span>Front Prompt</span>
                       <span className="text-[11px] font-sans text-blue-500 font-bold flex items-center space-x-1">
@@ -404,21 +404,21 @@ export default function FlashcardsPage() {
                         <span>Click / Space to Flip</span>
                       </span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-snug">
+                    <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white leading-relaxed line-clamp-5">
                       {currentCard.front}
                     </h2>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
                     <span>Card {currentIndex + 1} of {cards.length}</span>
                     <span className="text-blue-600 dark:text-blue-400 font-bold">Tap or press Space to inspect rationale</span>
                   </div>
                 </div>
 
                 {/* BACK FACE OF CARD */}
-                <div className="absolute inset-0 w-full h-full rounded-3xl p-6 sm:p-8 bg-gradient-to-tr from-slate-900 via-slate-900 to-indigo-950 text-white border border-slate-800 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between overflow-y-auto shadow-2xl">
+                <div className="absolute inset-0 w-full h-full rounded-3xl p-5 sm:p-6 bg-gradient-to-tr from-slate-900 via-slate-900 to-indigo-950 text-white border border-slate-800 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between overflow-hidden scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-2xl">
                   {/* Header Controls (Back) */}
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                     <div className="flex items-center space-x-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-extrabold">
                         ANSWER & CLINICAL RATIONALE
@@ -455,13 +455,13 @@ export default function FlashcardsPage() {
                   </div>
 
                   {/* Back Main Body Content */}
-                  <div className="py-4 space-y-3.5 text-xs my-auto">
-                    <div className="p-4 rounded-2xl bg-white/10 border border-white/10 space-y-2 shadow-inner">
-                      <h3 className="text-lg sm:text-xl font-black text-emerald-300">
+                  <div className="py-2.5 space-y-2.5 text-xs my-auto">
+                    <div className="p-3 rounded-xl bg-white/10 border border-white/10 space-y-1 shadow-inner">
+                      <h3 className="text-base sm:text-lg font-black text-emerald-300 line-clamp-2">
                         {currentCard.back}
                       </h3>
                       {currentCard.explanation && (
-                        <p className="text-slate-200 leading-relaxed text-xs sm:text-sm">
+                        <p className="text-slate-200 leading-snug text-xs line-clamp-3">
                           {currentCard.explanation}
                         </p>
                       )}
@@ -469,29 +469,29 @@ export default function FlashcardsPage() {
 
                     {/* Mnemonic / Memory Tip */}
                     {currentCard.memoryTip && (
-                      <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-200 space-y-1">
-                        <div className="font-extrabold flex items-center space-x-1.5 text-xs">
-                          <Zap className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Mnemonic Memory Trick:</span>
+                      <div className="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-200 space-y-0.5">
+                        <div className="font-extrabold flex items-center space-x-1.5 text-[11px]">
+                          <Zap className="w-3 h-3 text-amber-400" />
+                          <span>Mnemonic Trick:</span>
                         </div>
-                        <p className="text-xs">{currentCard.memoryTip}</p>
+                        <p className="text-xs line-clamp-2">{currentCard.memoryTip}</p>
                       </div>
                     )}
 
                     {/* Clinical ABA Rationale */}
                     {currentCard.clinicalExplanation && (
-                      <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-200 space-y-1">
-                        <div className="font-extrabold flex items-center space-x-1.5 text-xs">
-                          <Brain className="w-3.5 h-3.5 text-blue-400" />
-                          <span>Clinical ABA Rationale:</span>
+                      <div className="p-2.5 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-200 space-y-0.5">
+                        <div className="font-extrabold flex items-center space-x-1.5 text-[11px]">
+                          <Brain className="w-3 h-3 text-blue-400" />
+                          <span>Clinical Rationale:</span>
                         </div>
-                        <p className="text-xs">{currentCard.clinicalExplanation}</p>
+                        <p className="text-xs line-clamp-2">{currentCard.clinicalExplanation}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-                    <span className="text-slate-400">Rate difficulty below to continue</span>
+                  <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <span className="text-slate-400 text-[11px]">Rate difficulty below</span>
                     <span className="text-slate-300 font-bold flex items-center space-x-1">
                       <RotateCw className="w-3 h-3 text-emerald-400" />
                       <span>Click / Space to Flip Back</span>

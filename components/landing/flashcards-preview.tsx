@@ -178,7 +178,7 @@ export function FlashcardsPreview() {
               }`}
             >
               {/* FRONT FACE OF CARD */}
-              <div className="absolute inset-0 w-full h-full rounded-3xl p-8 bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 text-white border border-slate-700/80 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] flex flex-col justify-between overflow-y-auto shadow-xl">
+              <div className="absolute inset-0 w-full h-full rounded-3xl p-6 sm:p-8 bg-gradient-to-tr from-slate-900 via-slate-800 to-blue-950 text-white border border-slate-700/80 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] flex flex-col justify-between overflow-hidden scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-xl">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-400/30">
                     {card.code} • {card.domain}
@@ -206,7 +206,7 @@ export function FlashcardsPreview() {
               </div>
 
               {/* BACK FACE OF CARD */}
-              <div className="absolute inset-0 w-full h-full rounded-3xl p-8 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-700/80 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between overflow-y-auto shadow-2xl">
+              <div className="absolute inset-0 w-full h-full rounded-3xl p-6 sm:p-8 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950 text-white border border-slate-700/80 [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between overflow-hidden scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-2xl">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span className="text-emerald-400 font-bold uppercase tracking-wider">Clinical Definition & Mnemonic</span>
                   <span className="text-slate-400 text-[11px]">Card {currentIndex + 1} of {flashcards.length}</span>
