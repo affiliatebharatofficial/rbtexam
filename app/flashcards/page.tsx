@@ -362,7 +362,7 @@ export default function FlashcardsPage() {
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-center space-x-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-[#2563EB] dark:text-blue-400 text-[10px] font-extrabold">
-                        {currentCard.category} • {currentCard.cardType.toUpperCase()}
+                        {currentCard.category} • Study Card
                       </span>
                       <span className="text-[10px] font-bold text-slate-400">{currentCard.reference}</span>
                     </div>

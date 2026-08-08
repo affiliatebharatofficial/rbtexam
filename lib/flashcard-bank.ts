@@ -673,7 +673,7 @@ export function transformQuestionToFlashcard(mq: any): Partial<Flashcard> {
  * Convert all existing Master Questions into Database Flashcards in Supabase
  * Includes duplicate protection checking source_question_id
  */
-export async function convertQuestionsToDatabaseFlashcards(): Promise<{ convertedCount: number; insertedIds: string[] }> {
+export async function convertQuestionsToDatabaseFlashcards(forceAll: boolean = false): Promise<{ convertedCount: number; insertedIds: string[] }> {
   const adminDb = getSupabaseAdminClient();
   let sourceQuestions: any[] = [...MASTER_QUESTION_BANK];
 
@@ -681,24 +681,35 @@ export async function convertQuestionsToDatabaseFlashcards(): Promise<{ converte
     try {
       const { data: dbQuestions } = await adminDb.from('master_questions').select('*').is('deleted_at', null);
       if (dbQuestions && dbQuestions.length > 0) {
-        const dbMapped = dbQuestions.map((q: any) => ({
-          id: q.id,
-          question: q.question_stem || q.question || 'Question Stem',
-          scenarioText: q.scenario_text || null,
-          options: [
-            { id: 'A', text: q.option_a || 'Option A' },
-            { id: 'B', text: q.option_b || 'Option B' },
-            { id: 'C', text: q.option_c || 'Option C' },
-            { id: 'D', text: q.option_d || 'Option D' },
-          ],
-          correctAnswerId: q.correct_answer || 'A',
-          answerExplanation: q.explanation || q.answer_explanation || 'Correct answer rationale',
-          clinicalExplanation: q.clinical_explanation || q.explanation || '',
-          certification: q.certification || 'RBT',
-          category: q.category || 'Measurement',
-          difficulty: q.difficulty || 'medium',
-          keywords: q.keywords || ['Question Bank'],
-        }));
+        const dbMapped = dbQuestions.map((q: any) => {
+          let opts: any[] = [];
+          if (Array.isArray(q.options)) {
+            opts = q.options;
+          } else if (typeof q.options === 'string') {
+            try { opts = JSON.parse(q.options); } catch (e) {}
+          }
+          if (!Array.isArray(opts) || opts.length === 0) {
+            opts = [
+              { id: 'A', text: q.option_a || 'Option A' },
+              { id: 'B', text: q.option_b || 'Option B' },
+              { id: 'C', text: q.option_c || 'Option C' },
+              { id: 'D', text: q.option_d || 'Option D' },
+            ];
+          }
+          return {
+            id: q.id,
+            question: q.question_text || q.question_stem || q.question || 'Question Stem',
+            scenarioText: q.scenario_text || null,
+            options: opts,
+            correctAnswerId: q.correct_answer_id || q.correct_answer || 'A',
+            answerExplanation: q.answer_explanation || q.explanation || 'Correct answer rationale',
+            clinicalExplanation: q.clinical_explanation || q.explanation || '',
+            certification: q.certification || 'RBT',
+            category: q.category || 'Measurement',
+            difficulty: q.difficulty || 'medium',
+            keywords: q.keywords || ['Question Bank'],
+          };
+        });
         sourceQuestions = [...dbMapped, ...sourceQuestions];
       }
     } catch (e) {
@@ -708,7 +719,7 @@ export async function convertQuestionsToDatabaseFlashcards(): Promise<{ converte
 
   // Deduplication check: fetch existing database cards to skip already converted source questions
   const existingSourceIds = new Set<string>();
-  if (isSupabaseConfigured()) {
+  if (isSupabaseConfigured() && !forceAll) {
     try {
       const { data: existingCards } = await adminDb.from('master_flashcards').select('task_list_code, tags');
       if (existingCards) {
@@ -731,14 +742,17 @@ export async function convertQuestionsToDatabaseFlashcards(): Promise<{ converte
     }
   }
 
-  // Filter out already converted source questions
-  const unConvertedQuestions = sourceQuestions.filter((sq) => !existingSourceIds.has(String(sq.id)));
+  // Filter out already converted source questions unless forceAll is true
+  let targetQuestions = forceAll
+    ? sourceQuestions
+    : sourceQuestions.filter((sq) => !existingSourceIds.has(String(sq.id)));
 
-  if (unConvertedQuestions.length === 0) {
-    return { convertedCount: 0, insertedIds: [] };
+  // Fallback: if all are already marked converted and forceAll wasn't passed, transform all sourceQuestions to ensure cards exist
+  if (targetQuestions.length === 0) {
+    targetQuestions = sourceQuestions;
   }
 
-  const convertedCards: Partial<Flashcard>[] = unConvertedQuestions.map(transformQuestionToFlashcard);
+  const convertedCards: Partial<Flashcard>[] = targetQuestions.map(transformQuestionToFlashcard);
 
   if (isSupabaseConfigured()) {
     const res = await importBulkFlashcards(convertedCards);
@@ -765,7 +779,8 @@ function processFilteredFlashcardsList(
 
   // Certification filter
   if (params.certification && params.certification !== 'ALL') {
-    filtered = filtered.filter((c) => c.certification === params.certification);
+    const certUpper = String(params.certification).toUpperCase();
+    filtered = filtered.filter((c) => !c.certification || String(c.certification).toUpperCase() === certUpper || (c.certification as string) === 'ALL');
   }
 
   // Category filter

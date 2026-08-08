@@ -3,7 +3,15 @@ import { convertQuestionsToDatabaseFlashcards } from '@/lib/flashcard-bank';
 
 export async function POST(request: NextRequest) {
   try {
-    const result = await convertQuestionsToDatabaseFlashcards();
+    let force = false;
+    try {
+      const body = await request.json();
+      if (body && body.force) force = Boolean(body.force);
+    } catch (e) {
+      // Optional body
+    }
+
+    const result = await convertQuestionsToDatabaseFlashcards(force);
 
     return NextResponse.json({
       success: true,
