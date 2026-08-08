@@ -7,6 +7,7 @@ import {
 } from '@/types/flashcard';
 import { createInitialCardState, calculateNextSpacedRepetition } from './spaced-repetition-engine';
 import { MASTER_QUESTION_BANK } from './master-question-bank';
+import { getSupabaseAdminClient, isSupabaseConfigured } from '@/lib/supabase';
 
 // Master Flashcard Seed Bank
 export const MASTER_FLASHCARDS: Flashcard[] = [
@@ -208,9 +209,158 @@ export function generateFlashcardsFromQuestions(): Flashcard[] {
 /**
  * Query and filter flashcards with Spaced Repetition queue management
  */
-export function getFilteredFlashcards(params: FlashcardFilterParams, userId: string = 'default_user'): FlashcardPaginationResult {
-  // Combine custom cards, seed cards, and AI generated question cards
-  const allCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
+/**
+ * Fetch flashcards directly from Supabase master_flashcards table
+ */
+export async function fetchDatabaseFlashcards(): Promise<Flashcard[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const adminDb = getSupabaseAdminClient();
+    const { data, error } = await adminDb
+      .from('master_flashcards')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
+
+    if (error || !data) {
+      console.error('[Flashcard Bank] DB fetch error:', error?.message);
+      return [];
+    }
+
+    return data.map((row: any) => ({
+      id: row.id,
+      title: row.term || 'BACB Flashcard',
+      front: row.term || 'Prompt',
+      back: row.definition || 'Answer',
+      cardType: 'ai_generated',
+      explanation: row.clinical_example || row.definition || '',
+      clinicalExplanation: row.clinical_example || row.definition || '',
+      memoryTip: 'Mnemonic memory tip',
+      realLifeExample: 'Clinical scenario',
+      commonMistakes: 'Common mistakes',
+      reference: row.task_list_code || 'BACB Task List Standard',
+      certification: (row.certification as any) || 'RBT',
+      category: (row.category as any) || 'Measurement',
+      subcategory: row.task_list_code || 'Task List Item',
+      difficulty: (row.difficulty as any) || 'medium',
+      keywords: row.tags || ['BACB', 'Flashcard'],
+      tags: row.tags || ['Published'],
+      status: (row.status as any) || 'published',
+      isPremium: row.is_premium || false,
+      isFeatured: true,
+      createdBy: 'supabase_db',
+      updatedBy: 'supabase_db',
+      createdAt: row.created_at || new Date().toISOString(),
+      updatedAt: row.updated_at || new Date().toISOString(),
+    }));
+  } catch (err: any) {
+    console.error('[Flashcard Bank] Exception fetching database flashcards:', err.message);
+    return [];
+  }
+}
+
+/**
+ * Insert a single flashcard into Supabase database
+ */
+export async function createDatabaseFlashcard(card: Partial<Flashcard>): Promise<Flashcard> {
+  const adminDb = getSupabaseAdminClient();
+  const dbRow = {
+    certification: card.certification || 'RBT',
+    term: card.front || card.title || 'Untitled Flashcard',
+    definition: card.back || card.explanation || 'No definition',
+    clinical_example: card.explanation || card.clinicalExplanation || null,
+    category: card.category || 'Measurement',
+    task_list_code: card.subcategory || card.reference || 'BACB Task List',
+    tags: card.tags || ['Custom'],
+    difficulty: card.difficulty || 'medium',
+    is_premium: card.isPremium || false,
+    status: 'published',
+  };
+
+  const { data, error } = await adminDb.from('master_flashcards').insert([dbRow]).select();
+  if (error || !data || data.length === 0) {
+    console.error('[Flashcard Bank] Create error:', error?.message);
+    throw new Error(error?.message || 'Failed to insert flashcard row into database');
+  }
+
+  const row = data[0];
+  const newCard: Flashcard = {
+    id: row.id,
+    title: row.term,
+    front: row.term,
+    back: row.definition,
+    cardType: 'basic',
+    explanation: row.clinical_example || row.definition,
+    clinicalExplanation: row.clinical_example || row.definition,
+    memoryTip: 'Mnemonic memory tip',
+    realLifeExample: 'Clinical scenario',
+    commonMistakes: 'Common mistakes',
+    reference: row.task_list_code || 'BACB Task List Standard',
+    certification: row.certification || 'RBT',
+    category: row.category || 'Measurement',
+    subcategory: row.task_list_code,
+    difficulty: row.difficulty || 'medium',
+    keywords: row.tags || ['BACB'],
+    tags: row.tags || ['Custom'],
+    status: row.status || 'published',
+    isPremium: row.is_premium || false,
+    isFeatured: true,
+    createdBy: 'user',
+    updatedBy: 'user',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+
+  addCustomFlashcard(newCard);
+  return newCard;
+}
+
+/**
+ * Update an existing flashcard in Supabase database
+ */
+export async function updateDatabaseFlashcard(id: string, updates: Partial<Flashcard>): Promise<boolean> {
+  const adminDb = getSupabaseAdminClient();
+  const payload: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (updates.front || updates.title) payload.term = updates.front || updates.title;
+  if (updates.back) payload.definition = updates.back;
+  if (updates.explanation || updates.clinicalExplanation) payload.clinical_example = updates.explanation || updates.clinicalExplanation;
+  if (updates.category) payload.category = updates.category;
+  if (updates.certification) payload.certification = updates.certification;
+  if (updates.difficulty) payload.difficulty = updates.difficulty;
+  if (updates.reference || updates.subcategory) payload.task_list_code = updates.reference || updates.subcategory;
+
+  const { error } = await adminDb.from('master_flashcards').update(payload).eq('id', id);
+  if (error) {
+    console.error('[Flashcard Bank] Update error:', error.message);
+    throw new Error(`Failed to update flashcard ${id}: ${error.message}`);
+  }
+  return true;
+}
+
+/**
+ * Delete a flashcard from Supabase database
+ */
+export async function deleteDatabaseFlashcard(id: string): Promise<boolean> {
+  const adminDb = getSupabaseAdminClient();
+  const { error } = await adminDb.from('master_flashcards').delete().eq('id', id);
+  if (error) {
+    console.error('[Flashcard Bank] Delete error:', error.message);
+    throw new Error(`Failed to delete flashcard ${id}: ${error.message}`);
+  }
+  return true;
+}
+
+/**
+ * Filter list of flashcards with Spaced Repetition queue management
+ */
+function processFilteredFlashcardsList(
+  allCards: Flashcard[],
+  params: FlashcardFilterParams,
+  userId: string = 'default_user'
+): FlashcardPaginationResult {
   let filtered = [...allCards];
 
   // Certification filter
@@ -266,7 +416,7 @@ export function getFilteredFlashcards(params: FlashcardFilterParams, userId: str
   const learningCount = cardsWithState.filter((c) => c.userState && c.userState.learningStage === 'learning').length;
 
   const page = params.page || 1;
-  const limit = params.limit || 20;
+  const limit = params.limit || 100;
   const total = modeFiltered.length;
   const totalPages = Math.ceil(total / limit) || 1;
 
@@ -282,4 +432,29 @@ export function getFilteredFlashcards(params: FlashcardFilterParams, userId: str
     page,
     totalPages,
   };
+}
+
+/**
+ * Async database + memory query function
+ */
+export async function getFilteredFlashcardsAsync(
+  params: FlashcardFilterParams,
+  userId: string = 'default_user'
+): Promise<FlashcardPaginationResult> {
+  const dbCards = await fetchDatabaseFlashcards();
+  const dbCardIds = new Set(dbCards.map((c) => c.id));
+  const memoryCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()].filter(
+    (c) => !dbCardIds.has(c.id)
+  );
+
+  const allCards = [...dbCards, ...memoryCards];
+  return processFilteredFlashcardsList(allCards, params, userId);
+}
+
+/**
+ * Synchronous query function (fallback / backwards compatibility)
+ */
+export function getFilteredFlashcards(params: FlashcardFilterParams, userId: string = 'default_user'): FlashcardPaginationResult {
+  const allCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
+  return processFilteredFlashcardsList(allCards, params, userId);
 }

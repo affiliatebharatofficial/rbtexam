@@ -60,16 +60,38 @@ export default function FlashcardsPage() {
     loadDeck();
   }, [certification, mode, category, searchQuery]);
 
-  const loadDeck = () => {
-    const result = getFilteredFlashcards({
-      certification,
-      category: category as any,
-      learningMode: mode,
-      search: searchQuery,
-    });
-    setCards(result.data);
-    setDueCount(result.dueCount);
-    setMasteredCount(result.masteredCount);
+  const loadDeck = async () => {
+    try {
+      const queryParams = new URLSearchParams({
+        certification,
+        category,
+        learningMode: mode,
+        search: searchQuery,
+      });
+      const res = await fetch(`/api/flashcards?${queryParams.toString()}`);
+      if (res.ok) {
+        const result = await res.json();
+        setCards(result.data || []);
+        setDueCount(result.dueCount || 0);
+        setMasteredCount(result.masteredCount || 0);
+      } else {
+        const fallback = getFilteredFlashcards({
+          certification,
+          category: category as any,
+          learningMode: mode,
+          search: searchQuery,
+        });
+        setCards(fallback.data);
+      }
+    } catch {
+      const fallback = getFilteredFlashcards({
+        certification,
+        category: category as any,
+        learningMode: mode,
+        search: searchQuery,
+      });
+      setCards(fallback.data);
+    }
     setCurrentIndex(0);
     setIsFlipped(false);
     setSessionCompleted(false);
@@ -125,9 +147,8 @@ export default function FlashcardsPage() {
       });
 
       const data = await res.json();
-      if (data.cards && Array.isArray(data.cards)) {
-        data.cards.forEach((c: any) => addCustomFlashcard(c));
-        setGenSuccessMsg(`✅ Generated ${data.cards.length} AI flashcards for "${aiTopic}"!`);
+      if (res.ok && data.success && Array.isArray(data.cards)) {
+        setGenSuccessMsg(`✅ Generated & persisted ${data.insertedCount || data.cards.length} AI flashcards for "${aiTopic}"!`);
         setTimeout(() => {
           setIsGeneratorModalOpen(false);
           setAiTopic('');
@@ -145,15 +166,28 @@ export default function FlashcardsPage() {
   };
 
   // Handle Manual Custom Flashcard Creation
-  const handleSaveCustomFlashcard = () => {
+  const handleSaveCustomFlashcard = async () => {
     if (!customFront.trim() || !customBack.trim()) return;
-    addCustomFlashcard({
-      front: customFront,
-      back: customBack,
-      category: customCategory as any,
-      certification,
-      cardType: 'basic',
-    });
+    try {
+      await fetch('/api/flashcards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          front: customFront,
+          back: customBack,
+          category: customCategory,
+          certification,
+        }),
+      });
+    } catch (e) {
+      addCustomFlashcard({
+        front: customFront,
+        back: customBack,
+        category: customCategory as any,
+        certification,
+        cardType: 'basic',
+      });
+    }
     setIsAddModalOpen(false);
     setCustomFront('');
     setCustomBack('');

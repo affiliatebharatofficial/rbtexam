@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,24 @@ export default function AdminFlashcardsPage() {
   const [category, setCategory] = useState('Measurement');
   const [reference, setReference] = useState('BACB Task List Standard');
 
+  const fetchAllFlashcards = async () => {
+    try {
+      const res = await fetch('/api/flashcards?limit=200');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.data) && data.data.length > 0) {
+          setFlashcards(data.data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch admin flashcards from database:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllFlashcards();
+  }, []);
+
   // Search and Filtered Cards
   const filteredCards = flashcards.filter((fc) => {
     const matchesSearch =
@@ -100,7 +118,7 @@ export default function AdminFlashcardsPage() {
       const data = await res.json();
 
       if (res.ok && data.success && Array.isArray(data.cards)) {
-        setFlashcards((prev) => [...data.cards, ...prev]);
+        await fetchAllFlashcards();
         setTelemetry({
           providerUsed: data.providerUsed,
           modelUsed: data.modelUsed,
@@ -130,20 +148,28 @@ export default function AdminFlashcardsPage() {
   };
 
   // Manual Flashcard Save Handler
-  const handleSaveManualCard = () => {
+  const handleSaveManualCard = async () => {
     if (!front.trim() || !back.trim()) return;
-    const created = addCustomFlashcard({
-      title: title.trim() || 'Custom Flashcard',
-      front: front.trim(),
-      back: back.trim(),
-      explanation: explanation.trim() || 'Socratic explanation',
-      clinicalExplanation: clinicalExplanation.trim() || 'Clinical ABA implementation note',
-      category: category as any,
-      certification: aiCert,
-      reference: reference.trim(),
-      createdBy: 'super_admin',
-    });
-    setFlashcards((prev) => [created, ...prev]);
+    try {
+      await fetch('/api/flashcards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim() || 'Custom Flashcard',
+          front: front.trim(),
+          back: back.trim(),
+          explanation: explanation.trim() || 'Socratic explanation',
+          clinicalExplanation: clinicalExplanation.trim() || 'Clinical ABA implementation note',
+          category,
+          certification: aiCert,
+          reference: reference.trim(),
+          createdBy: 'super_admin',
+        }),
+      });
+      await fetchAllFlashcards();
+    } catch (err: any) {
+      console.error('Error saving manual flashcard to database:', err);
+    }
     setIsManualModalOpen(false);
     setTitle('');
     setFront('');
@@ -152,9 +178,16 @@ export default function AdminFlashcardsPage() {
     setClinicalExplanation('');
   };
 
-  const handleDeleteCard = (id: string) => {
+  const handleDeleteCard = async (id: string) => {
     if (confirm('Are you sure you want to delete this flashcard from the master bank?')) {
-      setFlashcards((prev) => prev.filter((c) => c.id !== id));
+      try {
+        await fetch(`/api/flashcards?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        });
+        setFlashcards((prev) => prev.filter((c) => c.id !== id));
+      } catch (err: any) {
+        console.error('Error deleting flashcard:', err);
+      }
     }
   };
 

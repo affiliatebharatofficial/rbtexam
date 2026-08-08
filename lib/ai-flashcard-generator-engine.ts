@@ -4,7 +4,7 @@ import {
   FlashcardCategory,
   FlashcardType,
 } from '@/types/flashcard';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, getSupabaseAdminClient, isSupabaseConfigured } from '@/lib/supabase';
 import { addCustomFlashcard } from '@/lib/flashcard-bank';
 
 export interface FlashcardGenerationInputParams {
@@ -646,49 +646,93 @@ export async function executeAIFlashcardGeneration(params: FlashcardGenerationIn
     // Save batch to Database and Memory
     const savedBatchCards: Flashcard[] = [];
     let batchInsertedCount = 0;
+    const adminDb = getSupabaseAdminClient();
 
     for (const vCard of validBatchCards) {
-      // 1. Add to local memory bank & assign UUID
-      const memorySaved = addCustomFlashcard(vCard);
-      savedBatchCards.push(memorySaved);
-      allGeneratedCards.push(memorySaved);
-      insertedIds.push(memorySaved.id);
-      batchInsertedCount++;
-      overallInserted++;
+      let assignedId = `fc-gen-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      let dbInsertSuccess = false;
 
-      // 2. Insert into Supabase database if configured
+      // 1. Insert into Supabase database if configured
       if (isSupabaseConfigured()) {
         try {
+          const clinicalExampleText = [
+            vCard.explanation,
+            vCard.clinicalExplanation ? `Clinical Rationale: ${vCard.clinicalExplanation}` : '',
+            vCard.memoryTip ? `Mnemonic: ${vCard.memoryTip}` : '',
+          ].filter(Boolean).join('\n\n');
+
           const dbRow = {
-            id: memorySaved.id,
-            title: memorySaved.title,
-            front: memorySaved.front,
-            back: memorySaved.back,
-            card_type: 'ai_generated',
-            explanation: memorySaved.explanation,
-            clinical_explanation: memorySaved.clinicalExplanation,
-            memory_tip: memorySaved.memoryTip || null,
-            real_life_example: memorySaved.realLifeExample || null,
-            common_mistakes: memorySaved.commonMistakes || null,
-            reference: memorySaved.reference,
-            certification: memorySaved.certification,
-            category: memorySaved.category,
-            subcategory: memorySaved.subcategory || null,
-            difficulty: memorySaved.difficulty,
-            keywords: memorySaved.keywords || [],
-            tags: memorySaved.tags || ['AI Generated'],
+            certification: vCard.certification || 'RBT',
+            term: vCard.front || vCard.title || 'Untitled Card',
+            definition: vCard.back || vCard.explanation || 'No definition provided',
+            clinical_example: clinicalExampleText,
+            category: vCard.category || 'Measurement',
+            task_list_code: vCard.subcategory || vCard.reference || 'BACB Task List',
+            tags: vCard.tags || ['AI Generated'],
+            difficulty: vCard.difficulty || 'medium',
+            is_premium: vCard.isPremium || false,
             status: 'published',
-            is_premium: memorySaved.isPremium || false,
-            is_featured: true,
           };
 
-          const { error: dbErr } = await supabase.from('master_flashcards').insert([dbRow]);
+          const { data: insertedRows, error: dbErr } = await adminDb
+            .from('master_flashcards')
+            .insert([dbRow])
+            .select();
+
           if (dbErr) {
-            console.error('Supabase DB error inserting master_flashcard:', dbErr.message);
+            console.error('[AI Engine DB Error] Failed to insert row into master_flashcards:', dbErr.message);
+            batchError = `Database insertion error: ${dbErr.message}`;
+          } else if (insertedRows && insertedRows.length > 0) {
+            assignedId = insertedRows[0].id;
+            dbInsertSuccess = true;
+          } else {
+            console.error('[AI Engine DB Warning] Insert returned no data rows.');
+            batchError = 'Database insert completed but returned no row data';
           }
         } catch (dbEx: any) {
-          console.error('Exception inserting to Supabase master_flashcards:', dbEx.message);
+          console.error('[AI Engine DB Exception] Exception during insert:', dbEx.message);
+          batchError = `Database insertion exception: ${dbEx.message}`;
         }
+      } else {
+        // In local mode without Supabase, count memory save as success
+        dbInsertSuccess = true;
+      }
+
+      if (dbInsertSuccess) {
+        const finalCard: Flashcard = {
+          ...vCard,
+          id: assignedId,
+          front: vCard.front!,
+          back: vCard.back!,
+          explanation: vCard.explanation!,
+          title: vCard.title || vCard.front!.slice(0, 50),
+          cardType: 'ai_generated',
+          clinicalExplanation: vCard.clinicalExplanation || vCard.explanation!,
+          memoryTip: vCard.memoryTip || 'Memory tip',
+          realLifeExample: vCard.realLifeExample || 'Clinical example',
+          commonMistakes: vCard.commonMistakes || 'Common mistakes',
+          reference: vCard.reference || 'BACB Task List',
+          certification: vCard.certification || 'RBT',
+          category: vCard.category || 'Measurement',
+          subcategory: vCard.subcategory || vCard.reference,
+          difficulty: vCard.difficulty || 'medium',
+          keywords: vCard.keywords || ['RBT'],
+          tags: vCard.tags || ['AI Generated'],
+          status: 'published',
+          isPremium: vCard.isPremium || false,
+          isFeatured: true,
+          createdBy: vCard.createdBy || 'ai_engine',
+          updatedBy: 'ai_engine',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        const memorySaved = addCustomFlashcard(finalCard);
+        savedBatchCards.push(memorySaved);
+        allGeneratedCards.push(memorySaved);
+        insertedIds.push(assignedId);
+        batchInsertedCount++;
+        overallInserted++;
       }
     }
 
