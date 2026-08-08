@@ -37,7 +37,7 @@ export function getMasterBankExamQuestions(): Question[] {
 
       return {
         id: mq.id,
-        taskItemId: mq.references || 'A-01',
+        taskItemId: mq.references || `${domainId}-01`,
         domainId,
         scenarioText: mq.scenarioText || '',
         questionText: mq.question,
@@ -60,8 +60,8 @@ export function getMasterBankExamQuestions(): Question[] {
 export const SAMPLE_BACB_QUESTIONS: Question[] = getMasterBankExamQuestions();
 
 /**
- * Dynamically generates a randomized set of N questions (20, 50, 85, 100)
- * ensuring proportional BACB domain weighting and unique IDs.
+ * Dynamically generates a randomized set of N unique questions (up to count)
+ * ensuring 100% real questions from Master Bank without fake variant duplicates.
  */
 export function generateExamQuestions(count: number, targetDomain?: string): Question[] {
   const sourceBank = getMasterBankExamQuestions();
@@ -70,18 +70,10 @@ export function generateExamQuestions(count: number, targetDomain?: string): Que
     : sourceBank;
 
   const pool = filteredBank.length > 0 ? filteredBank : sourceBank;
-  const result: Question[] = [];
 
-  for (let i = 0; i < count; i++) {
-    const base = pool[i % pool.length];
-    const questionCopy: Question = {
-      ...base,
-      id: `${base.id}-run-${i + 1}`,
-      questionText: i >= pool.length ? `[Variant ${Math.floor(i / pool.length) + 1}] ${base.questionText}` : base.questionText,
-    };
-    result.push(questionCopy);
-  }
+  // Shuffle pool for randomized exam order
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
 
-  // Shuffle order
-  return result.sort(() => Math.random() - 0.5);
+  // Return up to 'count' unique questions without artificial [Variant X] duplicates
+  return shuffled.slice(0, Math.min(count, shuffled.length));
 }
