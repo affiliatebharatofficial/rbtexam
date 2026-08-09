@@ -28,16 +28,9 @@ export function loadPersistentQuestions(): MasterQuestion[] {
 
   try {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
+    if (saved !== null) {
       const parsed: MasterQuestion[] = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        // Merge missing SEED questions so new initial questions appear
-        SEED_QUESTIONS.forEach((sq) => {
-          if (!parsed.some((pq) => pq.id === sq.id)) {
-            parsed.push(sq);
-          }
-        });
-
+      if (Array.isArray(parsed)) {
         MASTER_QUESTION_BANK.length = 0;
         MASTER_QUESTION_BANK.push(...parsed);
         return MASTER_QUESTION_BANK;
@@ -47,7 +40,7 @@ export function loadPersistentQuestions(): MasterQuestion[] {
     console.error('Failed to parse persistent questions from localStorage:', e);
   }
 
-  // Initial seed fallback
+  // Initial seed fallback (only on clean initial state when localStorage key does not exist)
   MASTER_QUESTION_BANK.length = 0;
   MASTER_QUESTION_BANK.push(...SEED_QUESTIONS);
   savePersistentQuestions();

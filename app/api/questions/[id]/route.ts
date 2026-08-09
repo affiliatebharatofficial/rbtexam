@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getQuestionById, updateQuestion, deleteQuestion } from '@/lib/master-question-bank';
+import { getQuestionById, updateQuestion } from '@/lib/master-question-bank';
+import { deleteServerQuestion } from '@/lib/master-question-bank-server';
 
 export async function GET(request: NextRequest, { params }: { params: any }) {
   try {
@@ -38,7 +39,7 @@ export async function DELETE(request: NextRequest, { params }: { params: any }) 
   try {
     const resolvedParams = await params;
     const id = resolvedParams.id;
-    const deleted = deleteQuestion(id);
+    const deleted = deleteServerQuestion(id);
 
     if (!deleted) {
       return NextResponse.json({ error: 'Question not found' }, { status: 404 });

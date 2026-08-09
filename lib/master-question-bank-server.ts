@@ -2,7 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { MasterQuestion } from '@/types/master-question';
-import { MASTER_QUESTION_BANK, createQuestion as createQuestionInBank } from './master-question-bank';
+import {
+  MASTER_QUESTION_BANK,
+  createQuestion as createQuestionInBank,
+  deleteQuestion as deleteQuestionInBank,
+  bulkDeleteQuestions as bulkDeleteQuestionsInBank,
+} from './master-question-bank';
 
 function getPersistentFilePath(): string {
   // Use os.tmpdir() for serverless platforms (Vercel/AWS Lambda) to prevent read-only directory errors
@@ -28,7 +33,7 @@ export function loadServerPersistentQuestions(): MasterQuestion[] {
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(fileData);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         parsed.forEach((q: MasterQuestion) => {
           if (!MASTER_QUESTION_BANK.some((existing) => existing.id === q.id)) {
             MASTER_QUESTION_BANK.unshift(q);
@@ -62,4 +67,28 @@ export function createServerQuestion(data: Partial<MasterQuestion> & Omit<Master
   const created = createQuestionInBank(data);
   saveServerPersistentQuestions();
   return created;
+}
+
+/**
+ * Server-only: Delete question by ID and update server JSON store
+ */
+export function deleteServerQuestion(id: string): boolean {
+  loadServerPersistentQuestions();
+  const deleted = deleteQuestionInBank(id);
+  if (deleted) {
+    saveServerPersistentQuestions();
+  }
+  return deleted;
+}
+
+/**
+ * Server-only: Bulk delete questions and update server JSON store
+ */
+export function bulkDeleteServerQuestions(ids: string[]): number {
+  loadServerPersistentQuestions();
+  const count = bulkDeleteQuestionsInBank(ids);
+  if (count > 0) {
+    saveServerPersistentQuestions();
+  }
+  return count;
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { bulkUpdateStatus, bulkDeleteQuestions, exportQuestionsToCSV, MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
+import { bulkUpdateStatus, exportQuestionsToCSV, MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
+import { bulkDeleteServerQuestions } from '@/lib/master-question-bank-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'delete') {
-      const count = bulkDeleteQuestions(ids);
+      const count = bulkDeleteServerQuestions(ids);
       return NextResponse.json({ success: true, deletedCount: count });
     }
 
