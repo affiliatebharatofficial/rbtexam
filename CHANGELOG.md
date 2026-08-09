@@ -2,6 +2,15 @@
 
 ## Master Version History
 
+### [v3.2.0] - 2026-08-09 (Central User Persistence & Admin User Roster Sync Fix)
+#### Added / Fixed
+- **Central User Registration API (`/api/auth/register`)**:
+  - Implemented server-side user registration endpoint utilizing Supabase Service Role key to upsert signed-up users and Google SSO users into `public.users` and `public.profiles` PostgreSQL tables.
+- **Auth Context Database Persistence (`context/auth-context.tsx`)**:
+  - Updated `signUp()` and `ensureDatabaseProfile()` to invoke `/api/auth/register` immediately upon account creation, ensuring candidates are centrally saved to PostgreSQL server-side.
+- **Admin User Roster Query Sync (`app/api/admin/users/route.ts`)**:
+  - Updated GET `/api/admin/users` to fetch from `auth.users`, `public.profiles`, and `public.users` tables, ensuring all candidates registered on any device are visible in the Admin Panel (`/admin`).
+
 ### [v3.1.0] - 2026-08-08 (Official Brand Launch: RBT Practice Questions)
 #### Added / Modified
 - Complete project-wide rebrand to **RBT Practice Questions** (Domain: `https://rbtpracticequestions.com`).

@@ -68,6 +68,36 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching profiles in /api/admin/users:', err);
     }
 
+    // 3. Fetch users from public.users table
+    try {
+      const { data: users } = await adminSupabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (users && Array.isArray(users)) {
+        users.forEach((u: any) => {
+          if (u.email) {
+            const emailLower = u.email.toLowerCase().trim();
+            const existing = realUsersMap.get(emailLower) || {};
+            const isAdmin = emailLower === 'jobpegyan@gmail.com' || u.role === 'admin' || u.role === 'super_admin';
+            realUsersMap.set(emailLower, {
+              id: u.id || existing.id || `usr_${Math.random().toString(36).substring(2)}`,
+              email: emailLower,
+              fullName: u.full_name || existing.fullName || emailLower.split('@')[0],
+              role: isAdmin ? 'super_admin' : (u.role || existing.role || 'student'),
+              subscriptionTier: existing.subscriptionTier || 'pro',
+              status: existing.status || 'active',
+              joinedAt: u.created_at || existing.joinedAt || new Date().toISOString(),
+              lastLoginAt: u.updated_at || existing.lastLoginAt || new Date().toISOString(),
+            });
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching users table in /api/admin/users:', err);
+    }
+
     // Always guarantee primary owner jobpegyan@gmail.com is present
     if (!realUsersMap.has('jobpegyan@gmail.com')) {
       realUsersMap.set('jobpegyan@gmail.com', {

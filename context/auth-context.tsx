@@ -159,6 +159,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       lastLoginAt: new Date().toISOString(),
     };
 
+    // Also call server API /api/auth/register to guarantee persistence via service role key
+    try {
+      await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: userId,
+          email: cleanEmail,
+          fullName: cleanName,
+          role: assignedRole,
+          avatarUrl: avatarUrl || '',
+          subscriptionTier: isAdmin ? 'enterprise' : 'free',
+        }),
+      });
+    } catch (apiErr) {
+      console.warn('Server registration sync warning in ensureDatabaseProfile:', apiErr);
+    }
+
     // Ensure profile is synced to local registered users array as cache
     try {
       const registeredUsersStr = localStorage.getItem('rbt_registered_users');
@@ -522,7 +540,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // 5. Create Fresh Account with Verification & Status Flags
       const initialStatus = config.requireAdminApproval ? 'pending_approval' : 'pending_verification';
-      const newUser: UserProfile = {
+      let newUser: UserProfile = {
         id: `usr_${Math.random().toString(36).substring(2, 9)}`,
         email: targetEmail,
         fullName: data.fullName.trim(),
@@ -536,6 +554,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
       };
+
+      // Call central register API route to save candidate to Supabase PostgreSQL database
+      try {
+        const regRes = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: newUser.id,
+            email: newUser.email,
+            fullName: newUser.fullName,
+            role: newUser.role,
+            targetExamDate: newUser.targetExamDate,
+            accountStatus: newUser.accountStatus,
+          }),
+        });
+
+        if (regRes.ok) {
+          const regData = await regRes.json();
+          if (regData?.user?.id) {
+            newUser.id = regData.user.id;
+          }
+        }
+      } catch (regErr) {
+        console.warn('Central database registration sync warning:', regErr);
+      }
 
       registeredUsers.push(newUser);
       localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));

@@ -55,4 +55,17 @@ describe('Auth & Application Profile Creation & Synchronization Workflow', () =>
     expect(userProfile.fullName).toBe(mockName);
     expect(userProfile.role).toBe('student');
   });
+
+  it('should verify /api/auth/register route file exists and is executable', async () => {
+    const fs = await import('fs');
+    const path = await import('path');
+    const registerRoutePath = path.join(process.cwd(), 'app', 'api', 'auth', 'register', 'route.ts');
+    expect(fs.existsSync(registerRoutePath)).toBe(true);
+
+    const routeContent = fs.readFileSync(registerRoutePath, 'utf8');
+    expect(routeContent).toContain('export async function POST');
+    expect(routeContent).toContain('profiles');
+    expect(routeContent).toContain('users');
+    expect(routeContent).toContain('upsert');
+  });
 });
