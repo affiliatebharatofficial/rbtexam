@@ -10,11 +10,11 @@ export function FAQSection() {
   const faqs = [
     {
       q: 'How similar are RBT Practice Questions to the actual BACB RBT Exam?',
-      a: 'Our question engine is modeled directly after the BACB 2nd Edition Task List. Every scenario reflects real-world clinical behavior analysis cases with 4 distractors designed to test discrimination skills, latency, IRT, DTT, and ethics.',
+      a: 'Our question engine is modeled directly after the BACB RBT 3rd Edition Task List. Every scenario reflects real-world clinical behavior analysis cases with 4 distractors designed to test discrimination skills, latency, IRT, DTT, and ethics.',
     },
     {
       q: 'How does the Socrates AI Tutor work?',
-      a: 'Socrates AI is a specialized conversational model trained on the BACB Ethics Code for RBTs and ABA task list guidelines. You can ask for step-by-step explanations, request scenario roleplay, or ask it to critique your clinical reasoning.',
+      a: 'Socrates AI is a specialized conversational model trained on the RBT Ethics Code 2.0 and ABA task list guidelines. You can ask for step-by-step explanations, request scenario roleplay, or ask it to critique your clinical reasoning.',
     },
     {
       q: 'What is the 100% Money-Back Pass Guarantee?',

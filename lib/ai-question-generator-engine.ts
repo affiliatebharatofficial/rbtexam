@@ -213,7 +213,7 @@ export function validateQuestionItem(rawItem: any, params: GenerationInputParams
   // 5. Explanations & References
   const answerExplanation = (rawItem.answerExplanation || rawItem.answer_explanation || '').toString().trim();
   const clinicalExplanation = (rawItem.clinicalExplanation || rawItem.clinical_explanation || answerExplanation || '').toString().trim();
-  const references = (rawItem.references || rawItem.bacbCitation || rawItem.bacb_citation || `BACB 2nd Edition Task List Item ${params.bacbTaskCode || 'A-01'}`).toString().trim();
+  const references = (rawItem.references || rawItem.bacbCitation || rawItem.bacb_citation || `BACB RBT 3rd Edition TCO Item ${params.bacbTaskCode || 'A-01'}`).toString().trim();
 
   if (!answerExplanation || answerExplanation.length < 10) {
     errors.push(`Item #${index + 1}: Answer explanation is missing or shorter than 10 characters.`);
@@ -248,7 +248,7 @@ export function validateQuestionItem(rawItem: any, params: GenerationInputParams
     category: category,
     subCategory: params.subCategory || params.topicPrompt,
     keywords: [params.topicPrompt, params.certification, 'AI Generated', params.bacbTaskCode || 'A-01'],
-    taskListVersion: '2nd_edition',
+    taskListVersion: '3rd_edition',
     estimatedTimeSeconds: 60,
     tags: ['AI Generated', 'BACB Item', params.certification],
     status: 'published',
@@ -306,7 +306,7 @@ export function buildAIQuestionPrompt(params: GenerationInputParams): string {
   const taskCode = params.bacbTaskCode || 'A-01';
   const qType = params.questionType || 'scenario_based';
 
-  return `You are a Senior BCBA Exam Item Writer for the BACB (Behavior Analyst Certification Board) 2nd Edition Task List.
+  return `You are a Senior BCBA Exam Item Writer for the BACB (Behavior Analyst Certification Board) RBT 3rd Edition Test Content Outline (TCO).
 Generate EXACTLY ${qty} unique, highly realistic, non-copyrighted ${cert} practice exam questions for candidate preparation.
 
 Parameters:
@@ -334,7 +334,7 @@ CRITICAL RULES:
       "correctAnswerId": "B",
       "answerExplanation": "Detailed answer explanation highlighting why B is correct...",
       "clinicalExplanation": "Full clinical justification citing BACB Task List Item ${taskCode} and ABA principles...",
-      "references": "BACB 2nd Edition Task List Item ${taskCode}",
+      "references": "BACB RBT 3rd Edition TCO Item ${taskCode}",
       "category": "Behavior Reduction",
       "difficulty": "${diff}"
     }

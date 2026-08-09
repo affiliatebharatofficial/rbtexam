@@ -239,7 +239,7 @@ export default function SignUpPage() {
                   className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
                 />
                 <span className="leading-snug">
-                  I agree to the <a href="#" className="text-[#2563EB] underline">Terms of Service</a> and acknowledge the <a href="#" className="text-[#2563EB] underline">BACB 2nd Edition Ethics Code</a>.
+                  I agree to the <a href="#" className="text-[#2563EB] underline">Terms of Service</a> and acknowledge the <a href="#" className="text-[#2563EB] underline">BACB RBT Ethics Code 2.0</a>.
                 </span>
               </label>
             </div>

@@ -15,7 +15,7 @@ export function WeakStrongTopics() {
 
   const strongTopics = [
     { code: 'E-01', name: 'Objective Clinical Session Notes', domain: 'Domain E', score: 96, status: 'Mastered' },
-    { code: 'F-02', name: 'BACB RBT Ethics Code & Scope', domain: 'Domain F', score: 98, status: 'Mastered' },
+    { code: 'F-02', name: 'RBT Ethics Code 2.0 & Scope', domain: 'Domain F', score: 98, status: 'Mastered' },
   ];
 
   useEffect(() => {

@@ -31,7 +31,7 @@ export function QuickActions() {
       badge: '14 Due',
     },
     {
-      title: 'BACB 2nd Ed Study Guide',
+      title: 'BACB 3rd Ed Study Guide',
       description: 'Explore Domains A through F task item breakdowns',
       href: '/task-list',
       icon: BookOpen,

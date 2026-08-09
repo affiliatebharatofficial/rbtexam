@@ -20,7 +20,7 @@ export function Hero() {
             {/* Top Announcement Pill */}
             <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold shadow-sm">
               <Sparkles className="w-4 h-4 text-[#2563EB]" />
-              <span>Aligned with 2026 BACB 2nd Edition Task List</span>
+              <span>Aligned with BACB RBT 3rd Edition Task List</span>
               <span className="bg-[#2563EB] text-white px-2 py-0.5 rounded-full text-[10px]">99.4% Pass Rate</span>
             </div>
 

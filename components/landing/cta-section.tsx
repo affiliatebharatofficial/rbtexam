@@ -34,7 +34,7 @@ export function CtaSection() {
           </div>
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>BACB 2nd Edition Aligned</span>
+            <span>BACB RBT 3rd Edition Aligned</span>
           </div>
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -61,7 +61,7 @@ export function CtaSection() {
 
         <div className="pt-6 text-xs text-slate-400 flex items-center justify-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Official BACB 2nd Edition Task List Standards (Domains A-F)</span>
+          <span>Official BACB RBT 3rd Edition Task List Standards (Domains A-F)</span>
         </div>
       </div>
     </section>

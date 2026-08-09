@@ -1,6 +1,6 @@
 import { PromptTemplate, PromptMode, ChatMessage } from '@/types/ai-tutor';
 import { buildCandidateSystemContext, formatSystemDirective } from './ai-candidate-memory';
-import { BACB_TASK_LIST_2ND_EDITION } from './bacb-task-list';
+import { BACB_TASK_LIST_3RD_EDITION } from './bacb-task-list';
 
 export const SYSTEM_PROMPT_TEMPLATES: PromptTemplate[] = [
   {
@@ -147,7 +147,7 @@ export async function processAITutorMessage(
 
   // 1. Attempt LLM Provider Execution (Multi-Model AI Engine)
   const systemDirective = `${formatSystemDirective(candidateContext, mode)}
-You are Socrates AI, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB 2nd Edition Task List exam.
+You are Socrates AI, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB RBT 3rd Edition Test Content Outline (TCO) exam.
 Provide a clear, encouraging, structured response. Respond in valid JSON if possible with keys: "content" (markdown string response), "concept", "simpleExplanation", "clinicalExample", "examTip", "mnemonicTip", "commonMistakes".`;
 
   const historyMessages = history.slice(-4).map((m) => ({
@@ -232,7 +232,7 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
     return {
       id: `msg-${Date.now()}`,
       sender: 'assistant',
-      content: `### 📋 Clinical ABC Scenario Analysis for: "${cleanQuery}"\n\nAs your supervising BCBA, let's break down this clinical scenario into its core behavioral components according to the **BACB 2nd Edition Task List**.`,
+      content: `### 📋 Clinical ABC Scenario Analysis for: "${cleanQuery}"\n\nAs your supervising BCBA, let's break down this clinical scenario into its core behavioral components according to the **BACB RBT 3rd Edition Test Content Outline (TCO)**.`,
       timestamp: new Date().toISOString(),
       scenarioAnalysis: {
         problemBehavior: `Learner engages in ${matchedSubject} upon presentation of a task demand or transition.`,
@@ -242,7 +242,7 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
         replacementBehavior: 'Functional Communication Training (FCT): Learner is taught to hand a "Break Please" PECS card or say "I need a break".',
         interventionStrategy: 'Differential Reinforcement of Alternative Behavior (DRA) combined with proactive visual schedule timers and high-probability request sequences.',
         reinforcementSchedule: 'Continuous reinforcement (FR1) for functional communication; Extinction for problem behavior.',
-        ethicalConsiderations: 'BACB Ethics Code Section 2.01: Ensure client dignity, physical safety, and least restrictive procedural safeguards.',
+        ethicalConsiderations: 'RBT Ethics Code 2.0: Ensure client dignity, physical safety, and least restrictive procedural safeguards.',
         documentationTip: 'Record onset, duration, latency, and inter-response time (IRT) in session data log immediately following trial.',
       },
     };
@@ -339,7 +339,7 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
   }
 
   // Match query against BACB Task List items
-  let matchedTask = BACB_TASK_LIST_2ND_EDITION.flatMap((d) => d.items).find((item) =>
+  let matchedTask = BACB_TASK_LIST_3RD_EDITION.flatMap((d) => d.items).find((item) =>
     item.keyConcepts.some((kc) => queryLower.includes(kc.toLowerCase())) ||
     item.title.toLowerCase().includes(queryLower) ||
     queryLower.includes(item.id.toLowerCase())
@@ -352,7 +352,7 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
   return {
     id: `msg-${Date.now()}`,
     sender: 'assistant',
-    content: `### 💡 Socratic BCBA Mentorship: "${cleanQuery}"\n\nGreat question! Let's examine **${titleTopic}** under the **BACB 2nd Edition Task List**.\n\nIn Applied Behavior Analysis, we break down concepts into observable environmental variables, antecedents, behaviors, and consequences.\n\n**Core Clinical Principles:**\n- ${descriptionText}\n- Always prioritize least restrictive, evidence-based procedures.\n- Ensure objective data measurement and BCBA supervisor alignment.`,
+    content: `### 💡 Socratic BCBA Mentorship: "${cleanQuery}"\n\nGreat question! Let's examine **${titleTopic}** under the **BACB RBT 3rd Edition Test Content Outline (TCO)**.\n\nIn Applied Behavior Analysis, we break down concepts into observable environmental variables, antecedents, behaviors, and consequences.\n\n**Core Clinical Principles:**\n- ${descriptionText}\n- Always prioritize least restrictive, evidence-based procedures.\n- Ensure objective data measurement and BCBA supervisor alignment.`,
     timestamp: new Date().toISOString(),
     clinicalInsight: {
       concept: titleTopic,

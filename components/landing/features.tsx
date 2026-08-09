@@ -7,13 +7,13 @@ export function Features() {
     {
       icon: Sparkles,
       title: 'Adaptive AI Exam Simulator',
-      description: '85-question 90-minute timed diagnostic exams built strictly according to BACB 2nd Edition scoring weights. Dynamically adjusts question difficulty based on your performance history.',
+      description: '85-question 90-minute timed diagnostic exams built strictly according to BACB RBT 3rd Edition scoring weights. Dynamically adjusts question difficulty based on your performance history.',
       color: 'from-blue-500 to-indigo-600',
     },
     {
       icon: Brain,
       title: 'Socrates AI Ethics & Roleplay Tutor',
-      description: 'Interact with our conversational AI tutor trained on the BACB Ethics Code for RBTs. Simulate challenging client scenarios, extinction bursts, and parent boundary situations in real-time.',
+      description: 'Interact with our conversational AI tutor trained on the RBT Ethics Code 2.0. Simulate challenging client scenarios, extinction bursts, and parent boundary situations in real-time.',
       color: 'from-emerald-500 to-teal-600',
     },
     {
@@ -24,7 +24,7 @@ export function Features() {
     },
     {
       icon: ShieldCheck,
-      title: 'BACB 2nd Ed Task List Mastery',
+      title: 'BACB RBT 3rd Ed Task List Mastery',
       description: 'Complete breakdown of all 6 Task List Domains (A through F). Track individual task item mastery from A-01 (Session Prep) to F-04 (5% Monthly Supervision).',
       color: 'from-amber-500 to-orange-600',
     },

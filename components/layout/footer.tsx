@@ -28,7 +28,7 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-2 text-xs text-emerald-400 font-medium pt-2">
               <ShieldCheck className="w-4 h-4" />
-              <span>Aligned with BACB 2nd Edition Task List</span>
+              <span>Aligned with BACB RBT 3rd Edition Task List</span>
             </div>
           </div>
 

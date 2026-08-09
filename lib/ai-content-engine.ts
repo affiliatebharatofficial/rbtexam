@@ -29,7 +29,7 @@ const DRAFT_STORE: ContentDraft[] = [
         { id: 'D', text: 'Response Blocking', explanation: 'Incorrect. Response blocking physically prevents behavior, which is not described here.' },
       ],
       correctOptionId: 'A',
-      bacbCitation: 'BACB 2nd Edition Task List Item D-04',
+      bacbCitation: 'BACB RBT 3rd Edition TCO Item D-04',
     },
     createdAt: new Date(Date.now() - 3600000).toISOString(),
     updatedAt: new Date(Date.now() - 3600000).toISOString(),

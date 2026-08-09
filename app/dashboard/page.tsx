@@ -37,7 +37,7 @@ export default function DashboardPage() {
               <div className="flex items-center space-x-2">
                 <Badge variant="blue" className="gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>BACB 2nd Edition Certified Target</span>
+                  <span>BACB RBT 3rd Edition Certified Target</span>
                 </Badge>
                 <span className="text-xs font-bold text-slate-400">Scheduled: {user?.targetExamDate || 'Not Scheduled'}</span>
                 {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'clinic_admin') && (
@@ -97,7 +97,7 @@ export default function DashboardPage() {
                   Welcome to Enterprise VIP Status, {user?.fullName || 'Valued Partner'}!
                 </h2>
                 <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-                  Your account is upgraded to Enterprise VIP. You have unlimited access to Socrates Socratic AI Tutor, Leitner Smart Flashcards Engine, BACB 2nd Edition Exam Simulator, and B2B Clinic Cohort Supervision Oversight Hub.
+                  Your account is upgraded to Enterprise VIP. You have unlimited access to Socrates Socratic AI Tutor, Leitner Smart Flashcards Engine, BACB RBT 3rd Edition Exam Simulator, and B2B Clinic Cohort Supervision Oversight Hub.
                 </p>
               </div>
 

@@ -5,7 +5,7 @@ export function JsonLdSchema() {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: 'RBT Practice Questions & AI Tutor',
-    description: 'Complete AI-powered prep platform for the Registered Behavior Technician (RBT) certification exam based on the BACB 2nd Edition Task List.',
+    description: 'Complete AI-powered prep platform for the Registered Behavior Technician (RBT) certification exam based on the BACB RBT 3rd Edition Test Content Outline (TCO).',
     provider: {
       '@type': 'Organization',
       name: 'RBT Practice Questions',
@@ -28,7 +28,7 @@ export function JsonLdSchema() {
         name: 'What is covered on the RBT Exam?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The RBT exam tests 85 multiple-choice questions across 6 BACB 2nd Edition Task List domains: Measurement, Assessment, Skill Acquisition, Behavior Reduction, Documentation & Reporting, and Professional Conduct.',
+          text: 'The RBT exam tests 85 multiple-choice questions across 6 BACB RBT 3rd Edition Task List domains: Data Collection and Graphing, Behavior Assessment, Behavior Acquisition, Behavior Reduction, Documentation and Reporting, and Ethics.',
         },
       },
       {

@@ -9,14 +9,18 @@ export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 export type QuestionStatus = 'draft' | 'published' | 'archived' | 'featured' | 'premium';
 
 export type QuestionCategory =
+  | 'Data Collection and Graphing'
+  | 'Behavior Assessment'
+  | 'Behavior Acquisition'
+  | 'Behavior Reduction'
+  | 'Documentation and Reporting'
+  | 'Ethics'
   | 'Measurement'
   | 'Assessment'
   | 'Skill Acquisition'
-  | 'Behavior Reduction'
   | 'Documentation'
   | 'Reporting'
   | 'Professional Conduct'
-  | 'Ethics'
   | 'Reinforcement'
   | 'Punishment'
   | 'Prompting'
@@ -56,7 +60,7 @@ export interface MasterQuestion {
   category: QuestionCategory;
   subCategory?: string;
   keywords: string[];
-  taskListVersion: '2nd_edition' | '5th_edition' | '6th_edition';
+  taskListVersion: '3rd_edition' | '2nd_edition' | '5th_edition' | '6th_edition';
   estimatedTimeSeconds: number;
   tags: string[];
   status: QuestionStatus;

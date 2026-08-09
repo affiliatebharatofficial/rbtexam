@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BACB_TASK_LIST_2ND_EDITION } from '@/lib/bacb-task-list';
+import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { getDomainColor } from '@/utils/formatters';
 export function TaskListPreview() {
   const [activeDomainId, setActiveDomainId] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>('A');
 
-  const selectedDomain = BACB_TASK_LIST_2ND_EDITION.find(d => d.id === activeDomainId) || BACB_TASK_LIST_2ND_EDITION[0];
+  const selectedDomain = BACB_TASK_LIST_3RD_EDITION.find(d => d.id === activeDomainId) || BACB_TASK_LIST_3RD_EDITION[0];
   const colorStyle = getDomainColor(selectedDomain.id);
 
   return (
@@ -21,7 +21,7 @@ export function TaskListPreview() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <Badge variant="blue">100% BACB Coverage</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            BACB 2nd Edition Task List Explorer
+            BACB RBT 3rd Edition Task List Explorer
           </h2>
           <p className="text-base text-slate-600">
             Select a domain below to preview specific task list items, exam question weights, and essential concepts.
@@ -30,7 +30,7 @@ export function TaskListPreview() {
 
         {/* Domain Selection Tabs */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
-          {BACB_TASK_LIST_2ND_EDITION.map((domain) => {
+          {BACB_TASK_LIST_3RD_EDITION.map((domain) => {
             const isActive = domain.id === activeDomainId;
             return (
               <button

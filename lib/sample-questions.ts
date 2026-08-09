@@ -12,6 +12,12 @@ export function getMasterBankExamQuestions(): Question[] {
     .filter((mq) => mq.status === 'published' || mq.status === 'featured')
     .map((mq) => {
       const categoryMap: Record<string, BACBDomainId> = {
+        'Data Collection and Graphing': 'A',
+        'Behavior Assessment': 'B',
+        'Behavior Acquisition': 'C',
+        'Behavior Reduction': 'D',
+        'Documentation and Reporting': 'E',
+        'Ethics': 'F',
         'Measurement': 'A',
         'Data Collection': 'A',
         'Assessment': 'B',
@@ -21,7 +27,6 @@ export function getMasterBankExamQuestions(): Question[] {
         'Prompting': 'C',
         'Chaining': 'C',
         'Token Economy': 'C',
-        'Behavior Reduction': 'D',
         'Reinforcement': 'D',
         'Punishment': 'D',
         'Replacement Behaviors': 'D',
@@ -29,7 +34,6 @@ export function getMasterBankExamQuestions(): Question[] {
         'Documentation': 'E',
         'Reporting': 'E',
         'Professional Conduct': 'F',
-        'Ethics': 'F',
       };
 
       const domainId: BACBDomainId = categoryMap[mq.category] || 'A';
@@ -48,7 +52,7 @@ export function getMasterBankExamQuestions(): Question[] {
         })),
         correctOptionId: validCorrectId,
         difficulty: mq.difficulty === 'easy' ? 'Easy' : mq.difficulty === 'hard' ? 'Hard' : 'Medium',
-        bacbCitation: mq.references || `BACB 2nd Edition Task List Item ${domainId}-01`,
+        bacbCitation: mq.references || `BACB RBT 3rd Edition TCO Item ${domainId}-01`,
         aiExplanationDetail: mq.clinicalExplanation || mq.answerExplanation,
       };
     });

@@ -43,7 +43,7 @@ export function Navbar() {
                 RBT <span className="text-[#2563EB]">Practice Questions</span>
               </span>
               <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200/60">
-                2nd Ed BACB
+                3rd Ed BACB
               </span>
             </div>
           </Link>

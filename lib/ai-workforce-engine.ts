@@ -16,7 +16,7 @@ const AI_AGENTS_REGISTRY: AIAgent[] = [
     id: 'agent-01',
     role: 'question_writer',
     displayName: 'BACB Question Writer',
-    description: 'Generates high-quality BACB 2nd/5th/6th Edition Task List practice questions with realistic clinical scenarios.',
+    description: 'Generates high-quality BACB RBT 3rd Edition TCO practice questions with realistic clinical scenarios.',
     department: 'content',
     modelProvider: 'openai',
     modelName: 'gpt-4o',

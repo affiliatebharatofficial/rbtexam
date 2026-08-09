@@ -135,7 +135,7 @@ export function generateDailyStudyPlan(): DailyTask[] {
     {
       id: 'task-04',
       title: 'Review Domain C Task List Items C-01 to C-08',
-      description: 'Explore Skill Acquisition task list reference guide.',
+      description: 'Explore Behavior Acquisition task list reference guide.',
       type: 'task_list_review',
       actionUrl: '/task-list',
       estimatedMinutes: 20,
@@ -168,7 +168,7 @@ export function getCandidateAdaptiveProfile(userId: string = 'default_user', cer
     questionsAnsweredCount: 480,
     overallAccuracyPercentage: 86,
     weakTopics,
-    strongTopics: ['E-01 Documentation', 'F-02 BACB Ethics Code', 'A-01 Direct Observation'],
+    strongTopics: ['E-01 Documentation', 'F-02 RBT Ethics Code 2.0', 'A-01 Session Prep'],
     recommendations,
     dailyTasks,
     badges: [

@@ -52,7 +52,7 @@ export default async function ProgrammaticQuestionPage({ params }: { params: Pro
           <Badge variant="blue">
             BACB {question.taskItemId} • Domain {question.domainId}
           </Badge>
-          <span className="text-xs font-bold text-slate-400">Task List 2nd Edition</span>
+          <span className="text-xs font-bold text-slate-400">Task List 3rd Edition</span>
         </div>
 
         {question.scenarioText && (

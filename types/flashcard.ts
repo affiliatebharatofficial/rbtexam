@@ -13,13 +13,17 @@ export type FlashcardType =
   | 'ai_generated';
 
 export type FlashcardCategory =
+  | 'Data Collection and Graphing'
+  | 'Behavior Assessment'
+  | 'Behavior Acquisition'
+  | 'Behavior Reduction'
+  | 'Documentation and Reporting'
+  | 'Ethics'
   | 'Measurement'
   | 'Assessment'
   | 'Skill Acquisition'
-  | 'Behavior Reduction'
   | 'Documentation'
   | 'Reporting'
-  | 'Ethics'
   | 'Reinforcement'
   | 'Punishment'
   | 'Prompting'

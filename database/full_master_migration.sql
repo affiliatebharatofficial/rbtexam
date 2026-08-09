@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS public.master_questions (
   category VARCHAR(128) NOT NULL,
   sub_category VARCHAR(128),
   keywords TEXT[] DEFAULT '{}',
-  task_list_version VARCHAR(32) DEFAULT '2nd_edition',
+  task_list_version VARCHAR(32) DEFAULT '3rd_edition',
   estimated_time_seconds INTEGER DEFAULT 60,
   tags TEXT[] DEFAULT '{}',
   status VARCHAR(32) NOT NULL DEFAULT 'published',

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 export function WhyChooseUs() {
   const comparisonItems = [
     {
-      feature: 'BACB 2nd Edition Task List Alignment',
+      feature: 'BACB RBT 3rd Edition Task List Alignment',
       us: true,
       usText: '100% Updated 2026 Standards (Domains A-F)',
       them: false,

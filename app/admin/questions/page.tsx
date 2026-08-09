@@ -260,7 +260,7 @@ export default function AdminQuestionsPage() {
                 <Sparkles className="w-4 h-4 text-slate-950" />
                 <span>AI QUESTION GENERATOR ENGINE</span>
               </Badge>
-              <span className="text-xs font-semibold text-indigo-200">BACB 2nd Edition Multi-Model LLM</span>
+              <span className="text-xs font-semibold text-indigo-200">BACB RBT 3rd Edition Multi-Model LLM</span>
             </div>
             <h2 className="text-xl font-black text-white">
               Create & Publish Practice Questions with AI
@@ -590,7 +590,7 @@ export default function AdminQuestionsPage() {
                     <Sparkles className="w-5 h-5 text-indigo-600" />
                     <span>AI Bulk Question Generator (Super Admin)</span>
                   </h3>
-                  <p className="text-xs text-slate-500">Multi-Model LLM Exam Generation for BACB 2nd Edition Task List</p>
+                  <p className="text-xs text-slate-500">Multi-Model LLM Exam Generation for BACB RBT 3rd Edition TCO</p>
                 </div>
                 <button
                   onClick={() => setIsAiModalOpen(false)}

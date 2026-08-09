@@ -1,11 +1,11 @@
 import { BACBDomain } from '@/types/bacb';
 
-export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
+export const BACB_TASK_LIST_3RD_EDITION: BACBDomain[] = [
   {
     id: 'A',
-    name: 'Measurement',
-    shortName: 'Measurement',
-    description: 'Prepare for data collection, implement continuous and discontinuous measurement procedures, and enter data into graphs.',
+    name: 'Data Collection and Graphing',
+    shortName: 'Data & Graphing',
+    description: 'Prepare for data collection, implement continuous and discontinuous measurement procedures, record permanent products, and enter data into graphs.',
     iconName: 'BarChart3',
     questionCountApprox: 12,
     weightPercentage: 14,
@@ -14,7 +14,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         id: 'A-01',
         domainId: 'A',
         title: 'Prepare for data collection',
-        description: 'Read session plans, gather necessary materials (timer, clicker, data sheets), and minimize distractions before client arrival.',
+        description: 'Read session plans, gather necessary measurement tools (timer, clicker, data sheets), and define target behaviors operationally.',
         keyConcepts: ['Session preparation', 'Target behavior definition', 'Measurement tools'],
         examWeightPercentage: 2.5,
       },
@@ -38,7 +38,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         id: 'A-04',
         domainId: 'A',
         title: 'Implement permanent-product recording procedures',
-        description: 'Measure the tangible environmental outcome or physical product resulting from a behavior (e.g., completed worksheets, clean room).',
+        description: 'Measure tangible environmental outcomes or physical products resulting from behavior (e.g., completed worksheets, clean room).',
         keyConcepts: ['Permanent Product', 'Tangible Outcome', 'No direct observation required'],
         examWeightPercentage: 2.0,
       },
@@ -46,7 +46,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         id: 'A-05',
         domainId: 'A',
         title: 'Enter data and update graphs',
-        description: 'Plot collected data accurately on line graphs or scatterplots following AB design or daily tracking standards.',
+        description: 'Plot collected data accurately on line graphs or scatterplots following visual analysis and phase change tracking standards.',
         keyConcepts: ['X-axis (Time/Sessions)', 'Y-axis (Target behavior)', 'Phase change lines'],
         examWeightPercentage: 1.5,
       },
@@ -62,8 +62,8 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
   },
   {
     id: 'B',
-    name: 'Assessment',
-    shortName: 'Assessment',
+    name: 'Behavior Assessment',
+    shortName: 'Behavior Assessment',
     description: 'Assist BCBA supervisors with preference assessments, functional assessments, and skill baseline data collection.',
     iconName: 'ClipboardCheck',
     questionCountApprox: 10,
@@ -73,33 +73,33 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         id: 'B-01',
         domainId: 'B',
         title: 'Conduct preference assessments',
-        description: 'Identify potential motivators using Single Item, Paired Choice (Forced Choice), MSWO (Multiple Stimulus Without Replacement), or Free Operant methods.',
+        description: 'Identify potential reinforcers using Single Item, Paired Choice (Forced Choice), MSWO (Multiple Stimulus Without Replacement), or Free Operant methods.',
         keyConcepts: ['Free Operant', 'Paired Choice', 'MSWO', 'MSW'],
-        examWeightPercentage: 3.5,
+        examWeightPercentage: 4.0,
       },
       {
         id: 'B-02',
         domainId: 'B',
         title: 'Assist with individualized assessment procedures',
-        description: 'Collect baseline data, probe skills, and support BCBAs during VB-MAPP, ABLLS-R, or AFLS assessments.',
+        description: 'Collect baseline data, probe skills, and support BCBAs during curriculum-based assessment protocols.',
         keyConcepts: ['Baseline data', 'Skill probing', 'Curriculum-based assessments'],
-        examWeightPercentage: 2.5,
+        examWeightPercentage: 4.0,
       },
       {
         id: 'B-03',
         domainId: 'B',
         title: 'Assist with functional assessment procedures',
-        description: 'Record ABC data (Antecedent-Behavior-Consequence) during descriptive observations to determine potential behavior functions.',
+        description: 'Record ABC data (Antecedent-Behavior-Consequence) during direct descriptive observations to determine potential behavior functions.',
         keyConcepts: ['ABC Data Collection', 'Direct Observation', '4 Functions (SEAT)'],
-        examWeightPercentage: 3.0,
+        examWeightPercentage: 4.0,
       },
     ],
   },
   {
     id: 'C',
-    name: 'Skill Acquisition',
-    shortName: 'Skill Acquisition',
-    description: 'Implement written skill acquisition plans, discrete trial teaching, naturalistic teaching, task analysis, chaining, and prompt fading.',
+    name: 'Behavior Acquisition',
+    shortName: 'Behavior Acquisition',
+    description: 'Implement written skill acquisition plans, discrete trial teaching, naturalistic teaching, task analysis, chaining, prompt fading, and generalization.',
     iconName: 'GraduationCap',
     questionCountApprox: 24,
     weightPercentage: 28,
@@ -126,7 +126,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         title: 'Use contingencies of reinforcement',
         description: 'Deliver positive/negative reinforcement using continuous (CRF) or intermittent (VR, VI, FR, FI) schedules.',
         keyConcepts: ['Conditioned vs Unconditioned Reinforcers', 'Continuous vs Intermittent', 'Fixed vs Variable'],
-        examWeightPercentage: 4.5,
+        examWeightPercentage: 4.0,
       },
       {
         id: 'C-04',
@@ -134,7 +134,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         title: 'Implement Discrete Trial Teaching (DTT) procedures',
         description: 'Deliver clear Discriminative Stimulus (SD), provide prompt if needed, record response, deliver consequence, and manage inter-trial interval.',
         keyConcepts: ['SD -> Response -> Consequence', 'Inter-trial interval', 'Clear articulation'],
-        examWeightPercentage: 4.5,
+        examWeightPercentage: 4.0,
       },
       {
         id: 'C-05',
@@ -142,7 +142,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         title: 'Implement Naturalistic Teaching Procedures (NET)',
         description: 'Capitalize on client motivation, embed learning targets into natural play, and utilize incidental teaching opportunities.',
         keyConcepts: ['Incidental Teaching', 'Mand Model', 'Capturing vs Contriving motivation'],
-        examWeightPercentage: 3.5,
+        examWeightPercentage: 3.0,
       },
       {
         id: 'C-06',
@@ -150,7 +150,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         title: 'Implement Task Analysis and Chaining procedures',
         description: 'Break complex skills into sub-steps; execute Forward Chaining, Backward Chaining, or Total Task Presentation.',
         keyConcepts: ['Forward Chaining', 'Backward Chaining', 'Total Task', 'Task Analysis breakdown'],
-        examWeightPercentage: 3.5,
+        examWeightPercentage: 3.0,
       },
       {
         id: 'C-07',
@@ -174,6 +174,14 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         title: 'Implement Prompt and Prompt Fading procedures',
         description: 'Utilize Most-to-Least or Least-to-Most prompting (Full Physical, Partial Physical, Model, Gestural, Verbal, Positional).',
         keyConcepts: ['Prompt Hierarchy', 'Most-to-Least', 'Least-to-Most', 'Time Delay'],
+        examWeightPercentage: 2.0,
+      },
+      {
+        id: 'C-10',
+        domainId: 'C',
+        title: 'Implement Generalization and Maintenance procedures',
+        description: 'Promote skill maintenance over time across varied settings, people, and stimulus conditions.',
+        keyConcepts: ['Generalization across settings', 'Multiple exemplars', 'Skill Maintenance'],
         examWeightPercentage: 2.0,
       },
     ],
@@ -239,7 +247,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
   },
   {
     id: 'E',
-    name: 'Documentation & Reporting',
+    name: 'Documentation and Reporting',
     shortName: 'Documentation',
     description: 'Generate objective session notes, communicate effectively with BCBA supervisors, and follow reporting compliance rules.',
     iconName: 'FileText',
@@ -282,9 +290,9 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
   },
   {
     id: 'F',
-    name: 'Professional Conduct & Scope',
-    shortName: 'Ethics & Conduct',
-    description: 'Adhere to BACB Ethics Code for RBTs, maintain dual-relationship boundaries, and meet mandatory 5% monthly supervision requirements.',
+    name: 'Ethics',
+    shortName: 'Ethics',
+    description: 'Adhere to RBT Ethics Code 2.0, maintain dual-relationship boundaries, ensure client dignity, and meet mandatory 5% monthly supervision requirements.',
     iconName: 'UserCheck',
     questionCountApprox: 11,
     weightPercentage: 13,
@@ -302,7 +310,7 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
         domainId: 'F',
         title: 'Maintain professional boundaries (Avoid dual relationships)',
         description: 'Do not accept gifts, social media requests, babysitting jobs, or personal friendships with client families.',
-        keyConcepts: ['Dual relationships', 'Conflict of interest', 'Gift policy (<$10 or zero tolerance)'],
+        keyConcepts: ['Dual relationships', 'Conflict of interest', 'RBT Ethics Code 2.0'],
         examWeightPercentage: 4.0,
       },
       {
@@ -324,3 +332,30 @@ export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
     ],
   },
 ];
+
+// Production active task list export (3rd Edition TCO)
+export const BACB_TASK_LIST = BACB_TASK_LIST_3RD_EDITION;
+
+// Legacy registry preserved for backward-compatibility lookup of historical student data
+export const BACB_TASK_LIST_2ND_EDITION: BACBDomain[] = [
+  ...BACB_TASK_LIST_3RD_EDITION,
+];
+
+/**
+ * Returns the active production BACB Task List (3rd Edition by default)
+ */
+export function getBACBTaskList(version: '3rd_edition' | '2nd_edition' = '3rd_edition'): BACBDomain[] {
+  if (version === '2nd_edition') {
+    return BACB_TASK_LIST_2ND_EDITION;
+  }
+  return BACB_TASK_LIST_3RD_EDITION;
+}
+
+/**
+ * Finds a specific task item code across active or legacy task list registries
+ */
+export function getBACBTaskItem(taskCode: string, version: '3rd_edition' | '2nd_edition' = '3rd_edition') {
+  const taskList = getBACBTaskList(version);
+  return taskList.flatMap((d) => d.items).find((item) => item.id.toLowerCase() === taskCode.toLowerCase());
+}
+

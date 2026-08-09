@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.master_questions (
   category TEXT NOT NULL,
   sub_category TEXT,
   keywords TEXT[] DEFAULT '{}',
-  task_list_version TEXT NOT NULL DEFAULT '2nd_edition',
+  task_list_version TEXT NOT NULL DEFAULT '3rd_edition',
   estimated_time_seconds INTEGER DEFAULT 60,
   tags TEXT[] DEFAULT '{}',
   status TEXT NOT NULL CHECK (status IN ('draft', 'published', 'archived', 'featured', 'premium')) DEFAULT 'draft',

@@ -65,7 +65,7 @@ export function parseAndValidateCSV(csvText: string): ImportValidationResult {
     const correctAns = (rowValues[11] || 'A').toUpperCase();
     const answerExpl = rowValues[12] || 'Correct choice explanation.';
     const clinicalExpl = rowValues[13] || 'Clinical BACB rationale.';
-    const references = rowValues[14] || 'BACB Task List 2nd Edition';
+    const references = rowValues[14] || 'BACB RBT 3rd Edition TCO';
 
     // Field Validations
     if (!['RBT', 'BCaBA', 'BCBA'].includes(certificationRaw)) {
@@ -119,7 +119,7 @@ export function parseAndValidateCSV(csvText: string): ImportValidationResult {
         clinicalExplanation: clinicalExpl,
         references,
         keywords: [categoryRaw, certificationRaw],
-        taskListVersion: '2nd_edition',
+        taskListVersion: '3rd_edition',
         estimatedTimeSeconds: 60,
         tags: ['CSV Import'],
         status: 'draft',
@@ -206,7 +206,7 @@ export function generateSampleCSVTemplate(): string {
       'B',
       'Latency measures the elapsed time from SD presentation to response initiation.',
       'Latency measurement tracks response initiation speed relative to environmental prompts.',
-      'BACB 2nd Edition Task List Item A-02',
+      'BACB RBT 3rd Edition TCO Item A-01',
     ],
     [
       'mq-sample-02',
@@ -223,7 +223,7 @@ export function generateSampleCSVTemplate(): string {
       'C',
       'DRO reinforces zero occurrences (omission) of target problem behavior during a time interval.',
       'DRO (Omission Training) delivers reinforcement contingent on zero occurrences of the target behavior.',
-      'BACB 2nd Edition Task List Item D-04',
+      'BACB RBT 3rd Edition TCO Item D-04',
     ],
     [
       'mq-sample-03',

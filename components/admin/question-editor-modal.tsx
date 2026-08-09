@@ -43,7 +43,7 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
         setCorrectAnswerId(q.correctOptionId);
         setClinicalExplanation(q.clinicalExplanation);
         setAnswerExplanation(q.clinicalExplanation);
-        setReferences(q.bacbCitation || `BACB 2nd Edition Task List Item ${category}`);
+        setReferences(q.bacbCitation || `BACB RBT 3rd Edition TCO Item ${category}`);
       }
     } catch (e) {
       console.error(e);
@@ -63,7 +63,7 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
   const [correctAnswerId, setCorrectAnswerId] = useState('A');
   const [answerExplanation, setAnswerExplanation] = useState('');
   const [clinicalExplanation, setClinicalExplanation] = useState('');
-  const [references, setReferences] = useState('BACB 2nd Edition Task List Item A-02');
+  const [references, setReferences] = useState('BACB RBT 3rd Edition TCO Item A-01');
   const [examTips, setExamTips] = useState('');
   const [commonMistakes, setCommonMistakes] = useState('');
   const [internalNotes, setInternalNotes] = useState('');
@@ -134,7 +134,7 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
       internalNotes,
       isPremium,
       keywords: [category, certification],
-      taskListVersion: '2nd_edition',
+      taskListVersion: '3rd_edition',
       estimatedTimeSeconds: 60,
       tags: [certification, category],
     });
@@ -399,7 +399,7 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
                     required
                     value={references}
                     onChange={(e) => setReferences(e.target.value)}
-                    placeholder="e.g. BACB 2nd Edition Item A-02"
+                    placeholder="e.g. BACB RBT 3rd Edition TCO Item A-01"
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"
                   />
                 </div>

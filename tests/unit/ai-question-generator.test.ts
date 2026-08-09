@@ -31,7 +31,7 @@ describe('Admin AI Question Generator Engine & 10-Point Validator', () => {
     correctAnswerId: 'A',
     answerExplanation: 'DRA involves reinforcing a specific functional alternative behavior while withholding reinforcement for the problem behavior.',
     clinicalExplanation: 'Under BACB Task Item D-04, raising a hand serves the same attention function as shouting out, replacing it appropriately.',
-    references: 'BACB 2nd Edition Task List Item D-04',
+    references: 'BACB RBT 3rd Edition TCO Item D-04',
     category: 'Behavior Reduction',
     difficulty: 'medium',
   };

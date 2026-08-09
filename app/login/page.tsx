@@ -242,7 +242,7 @@ export default function LoginPage() {
         {/* BACB Security Badge */}
         <div className="mt-6 text-center flex items-center justify-center space-x-2 text-xs text-slate-400">
           <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>256-Bit SSL Encrypted • BACB 2nd Edition Aligned</span>
+          <span>256-Bit SSL Encrypted • BACB RBT 3rd Edition TCO Aligned</span>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { Question, ExamSession, ExamResult, DomainScore, UserAnswer } from '@/types/exam';
 import { BACBDomainId } from '@/types/bacb';
-import { BACB_TASK_LIST_2ND_EDITION } from '@/lib/bacb-task-list';
+import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import { getMasterBankExamQuestions } from '@/lib/sample-questions';
 
 export class ExamService {
@@ -66,7 +66,7 @@ export class ExamService {
     const scorePercentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
     const passed = scorePercentage >= 80; // Standard BACB pass threshold ~80%
 
-    const domainScores: DomainScore[] = BACB_TASK_LIST_2ND_EDITION.map((domain) => {
+    const domainScores: DomainScore[] = BACB_TASK_LIST_3RD_EDITION.map((domain) => {
       const stats = domainBuckets[domain.id];
       const percentageScore = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
 

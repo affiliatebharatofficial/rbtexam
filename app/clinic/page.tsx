@@ -312,7 +312,7 @@ export default function ClinicPage() {
                       onChange={(e) => setInviteCert(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold"
                     >
-                      <option value="RBT">RBT (2nd Ed Task List)</option>
+                      <option value="RBT">RBT (3rd Ed TCO)</option>
                       <option value="BCaBA">BCaBA Assistant</option>
                       <option value="BCBA">BCBA Analyst</option>
                     </select>

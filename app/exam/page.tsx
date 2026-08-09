@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Question } from '@/types/exam';
 import { SAMPLE_BACB_QUESTIONS, generateExamQuestions } from '@/lib/sample-questions';
-import { BACB_TASK_LIST_2ND_EDITION } from '@/lib/bacb-task-list';
+import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import confetti from 'canvas-confetti';
 import {
   Sparkles,
@@ -233,7 +233,7 @@ export default function ExamPage() {
             <div className="text-center max-w-2xl mx-auto space-y-4">
               <Badge variant="blue" className="gap-1">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>BACB 2nd Edition Exam Simulator</span>
+                <span>BACB RBT 3rd Edition Exam Simulator</span>
               </Badge>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
                 RBT Practice Test Engine
@@ -351,7 +351,7 @@ export default function ExamPage() {
                   >
                     All Domains A-F
                   </button>
-                  {BACB_TASK_LIST_2ND_EDITION.map((d) => (
+                  {BACB_TASK_LIST_3RD_EDITION.map((d) => (
                     <button
                       key={d.id}
                       onClick={() => setDomainFocus(d.id)}

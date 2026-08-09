@@ -13,7 +13,7 @@ export default function GlossaryPage() {
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <Badge variant="blue" className="gap-1">
           <BookOpen className="w-3.5 h-3.5" />
-          <span>BACB 2nd Edition Glossary</span>
+          <span>BACB RBT 3rd Edition Glossary</span>
         </Badge>
         <h1 className="text-3xl sm:text-4xl font-black text-[#0F172A] tracking-tight">
           ABA Clinical Terminology & Glossary Hub

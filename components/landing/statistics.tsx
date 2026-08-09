@@ -23,7 +23,7 @@ export function Statistics() {
     {
       label: 'Questions Answered',
       value: '500,000+',
-      subtext: 'BACB 2nd Edition Aligned',
+      subtext: 'BACB RBT 3rd Edition Aligned',
       icon: CheckCircle2,
       color: 'text-indigo-600',
     },

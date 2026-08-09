@@ -27,7 +27,7 @@ type AdminTab = 'broadcast' | 'templates' | 'workflows' | 'logs';
 export default function AdminNotificationPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('broadcast');
   const [title, setTitle] = useState('New BACB Task List Practice Questions Added!');
-  const [message, setMessage] = useState('We have added 50 new 2nd Edition Task List mock questions for RBT & BCBA candidates.');
+  const [message, setMessage] = useState('We have added 50 new RBT 3rd Edition TCO mock questions for RBT & BCBA candidates.');
   const [segment, setSegment] = useState('all');
   const [bcastResult, setBcastResult] = useState<number | null>(null);
 

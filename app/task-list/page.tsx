@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BACB_TASK_LIST_2ND_EDITION } from '@/lib/bacb-task-list';
+import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ export default function TaskListPage() {
   const [selectedDomainId, setSelectedDomainId] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredDomains = BACB_TASK_LIST_2ND_EDITION.filter((domain) => {
+  const filteredDomains = BACB_TASK_LIST_3RD_EDITION.filter((domain) => {
     if (selectedDomainId !== 'ALL' && domain.id !== selectedDomainId) return false;
     return true;
   });
@@ -25,9 +25,9 @@ export default function TaskListPage() {
         <Badge variant="blue" className="bg-blue-500/20 text-blue-300 border-blue-400/30">
           Official Syllabus Reference
         </Badge>
-        <h1 className="text-3xl font-extrabold tracking-tight">BACB 2nd Edition Task List Study Hub</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">BACB RBT 3rd Edition Task List Study Hub</h1>
         <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-          Master all 6 domains and 31 individual task items required for the Registered Behavior Technician certification exam.
+          Master all 6 domains and individual task items required for the Registered Behavior Technician certification exam.
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export default function TaskListPage() {
           >
             All Domains
           </button>
-          {BACB_TASK_LIST_2ND_EDITION.map((d) => (
+          {BACB_TASK_LIST_3RD_EDITION.map((d) => (
             <button
               key={d.id}
               onClick={() => setSelectedDomainId(d.id)}
