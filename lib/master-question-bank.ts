@@ -9,17 +9,13 @@ import {
   QuestionType,
 } from '@/types/master-question';
 
-import { FULL_BACB_SEED_QUESTIONS } from './seed-questions-bank';
-
-const SEED_QUESTIONS: MasterQuestion[] = FULL_BACB_SEED_QUESTIONS;
-
-// Persistent Master Question Store
-export const MASTER_QUESTION_BANK: MasterQuestion[] = [...SEED_QUESTIONS];
+// Persistent Master Question Store (Populated dynamically from Database)
+export const MASTER_QUESTION_BANK: MasterQuestion[] = [];
 
 const LOCAL_STORAGE_KEY = 'rbt_master_questions_v7';
 
 /**
- * Load Persistent Questions from LocalStorage and merge any new SEED questions
+ * Load Persistent Questions from LocalStorage
  */
 export function loadPersistentQuestions(): MasterQuestion[] {
   if (typeof window === 'undefined') {
@@ -32,39 +28,18 @@ export function loadPersistentQuestions(): MasterQuestion[] {
       saved = localStorage.getItem('rbt_master_questions_v5') || localStorage.getItem('rbt_master_questions_v4');
     }
 
-    let clientQuestions: MasterQuestion[] = [];
     if (saved !== null) {
       const parsed: MasterQuestion[] = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        clientQuestions = parsed;
+        MASTER_QUESTION_BANK.length = 0;
+        MASTER_QUESTION_BANK.push(...parsed);
+        return MASTER_QUESTION_BANK;
       }
     }
-
-    const questionMap = new Map<string, MasterQuestion>();
-    SEED_QUESTIONS.forEach((sq) => {
-      questionMap.set(sq.id, {
-        ...sq,
-        taskListVersion: '3rd_edition',
-        status: 'published',
-      });
-    });
-
-    clientQuestions.forEach((cq) => {
-      questionMap.set(cq.id, cq);
-    });
-
-    const merged = Array.from(questionMap.values());
-    MASTER_QUESTION_BANK.length = 0;
-    MASTER_QUESTION_BANK.push(...merged);
-    savePersistentQuestions();
-    return MASTER_QUESTION_BANK;
   } catch (e) {
     console.error('Failed to parse persistent questions from localStorage:', e);
   }
 
-  MASTER_QUESTION_BANK.length = 0;
-  MASTER_QUESTION_BANK.push(...SEED_QUESTIONS);
-  savePersistentQuestions();
   return MASTER_QUESTION_BANK;
 }
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exportQuestionsToCSV, MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
-import { bulkDeleteServerQuestions, bulkUpdateServerStatus } from '@/lib/master-question-bank-server';
+import { exportQuestionsToCSV } from '@/lib/master-question-bank';
+import { loadServerPersistentQuestionsAsync, bulkDeleteServerQuestionsAsync, bulkUpdateServerStatusAsync } from '@/lib/master-question-bank-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,7 +8,8 @@ export async function POST(request: NextRequest) {
     const { action, ids, status } = body;
 
     if (action === 'export') {
-      const csv = exportQuestionsToCSV(MASTER_QUESTION_BANK);
+      const allQuestions = await loadServerPersistentQuestionsAsync();
+      const csv = exportQuestionsToCSV(allQuestions);
       return new NextResponse(csv, {
         headers: {
           'Content-Type': 'text/csv',
@@ -22,12 +23,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'update_status') {
-      const count = bulkUpdateServerStatus(ids, status);
+      const count = await bulkUpdateServerStatusAsync(ids, status);
       return NextResponse.json({ success: true, updatedCount: count, status });
     }
 
     if (action === 'delete') {
-      const count = bulkDeleteServerQuestions(ids);
+      const count = await bulkDeleteServerQuestionsAsync(ids);
       return NextResponse.json({ success: true, deletedCount: count });
     }
 

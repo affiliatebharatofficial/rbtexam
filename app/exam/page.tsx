@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Question } from '@/types/exam';
-import { SAMPLE_BACB_QUESTIONS, generateExamQuestions } from '@/lib/sample-questions';
+import { SAMPLE_BACB_QUESTIONS, generateExamQuestions, convertMasterQuestionsToExamQuestions } from '@/lib/sample-questions';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import confetti from 'canvas-confetti';
 import {
@@ -89,9 +89,22 @@ export default function ExamPage() {
     return () => clearInterval(timer);
   }, [phase, mode, isPaused]);
 
-  // Start new exam session
-  const handleStartExam = () => {
-    const generated = generateExamQuestions(questionCount, domainFocus);
+  // Start new exam session with live DB questions
+  const handleStartExam = async () => {
+    let convertedQuestions: Question[] = [];
+    try {
+      const res = await fetch(`/api/questions?limit=100&certification=RBT&status=published`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+          convertedQuestions = convertMasterQuestionsToExamQuestions(json.data);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch live DB questions for exam:', e);
+    }
+
+    const generated = generateExamQuestions(questionCount, domainFocus, convertedQuestions);
     setQuestions(generated);
     setCurrentIndex(0);
     setUserAnswers({});

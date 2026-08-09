@@ -19,7 +19,7 @@ import {
   loadPersistentQuestions,
   MASTER_QUESTION_BANK,
 } from '@/lib/master-question-bank';
-import { MasterQuestion, QuestionFilterParams, CertificationLevel, QuestionCategory, QuestionDifficulty, QuestionStatus } from '@/types/master-question';
+import { MasterQuestion, QuestionFilterParams, QuestionPaginationResult, CertificationLevel, QuestionCategory, QuestionDifficulty, QuestionStatus } from '@/types/master-question';
 import {
   Brain,
   Plus,
@@ -75,11 +75,6 @@ export default function AdminQuestionsPage() {
   const [aiErrorMsg, setAiErrorMsg] = useState<string>('');
   const [aiErrorDetails, setAiErrorDetails] = useState<{ provider?: string; reason?: string } | null>(null);
 
-  // Synchronize persistent questions on mount
-  useEffect(() => {
-    loadPersistentQuestions();
-  }, []);
-
   const handleGenerateAiQuestions = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAiGenerating(true);
@@ -109,13 +104,9 @@ export default function AdminQuestionsPage() {
       const data = await res.json();
 
       if (data.success && data.questions && Array.isArray(data.questions)) {
-        data.questions.forEach((q: any) => {
-          createQuestion(q);
-        });
-        loadPersistentQuestions();
         setIsAiModalOpen(false);
         setAiSuccessMsg(`✅ ${data.insertedCount || data.questions.length} questions generated & inserted into Database via ${data.providerUsed} (${data.modelUsed})! Latency: ${data.latencyMs}ms | Tokens: ${data.totalTokens || 0}`);
-        setFilterParams((prev) => ({ ...prev }));
+        fetchQuestionsFromApi();
         setTimeout(() => setAiSuccessMsg(''), 10000);
       } else {
         setAiErrorMsg(data.error || 'AI Question Generation failed.');
@@ -133,12 +124,47 @@ export default function AdminQuestionsPage() {
     }
   };
 
-  const queryResult = getFilteredQuestions(filterParams);
+  const [queryResult, setQueryResult] = useState<QuestionPaginationResult>(() => getFilteredQuestions(filterParams));
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchQuestionsFromApi = async () => {
+    setIsLoading(true);
+    try {
+      const query = new URLSearchParams({
+        search: filterParams.search || '',
+        certification: filterParams.certification || 'ALL',
+        category: filterParams.category || 'ALL',
+        difficulty: filterParams.difficulty || 'ALL',
+        status: filterParams.status || 'ALL',
+        page: String(filterParams.page || 1),
+        limit: String(filterParams.limit || 10),
+        sortBy: filterParams.sortBy || 'createdAt',
+        sortOrder: filterParams.sortOrder || 'desc',
+      });
+      const res = await fetch(`/api/questions?${query.toString()}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.data)) {
+          setQueryResult(json);
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch questions from API:', err);
+    } finally {
+      setIsLoading(false);
+    }
+    setQueryResult(getFilteredQuestions(filterParams));
+  };
+
+  useEffect(() => {
+    fetchQuestionsFromApi();
+  }, [filterParams]);
 
   // Bulk Handlers
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedIds(queryResult.data.map((q) => q.id));
+      setSelectedIds(queryResult.data.map((q: MasterQuestion) => q.id));
     } else {
       setSelectedIds([]);
     }
@@ -507,7 +533,7 @@ export default function AdminQuestionsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
-                {queryResult.data.map((q) => {
+                {queryResult.data.map((q: MasterQuestion) => {
                   const isSel = selectedIds.includes(q.id);
                   return (
                     <tr key={q.id} className="hover:bg-slate-50 transition-colors">
