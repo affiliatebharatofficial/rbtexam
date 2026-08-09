@@ -1,25 +1,48 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Check, Sparkles, ShieldCheck, ArrowRight, Building2, User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { SubscriptionPlan } from '@/types/subscription-plan';
 
 export function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [loadingVariant, setLoadingVariant] = useState<string | null>(null);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleCheckout = async (variantId: string, tier: string) => {
-    setLoadingVariant(variantId);
+  useEffect(() => {
+    const fetchActivePlans = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/plans');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.plans)) {
+            setPlans(data.plans);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load active plans for pricing page:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchActivePlans();
+  }, []);
+
+  const handleCheckout = async (planId: string, planName: string) => {
+    setLoadingVariant(planId);
     try {
       const res = await fetch('/api/billing/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          variantId,
-          tier,
+          variantId: planId,
+          tier: planName,
           billingInterval: billingCycle,
           userEmail: 'candidate@rbtpracticequestions.com',
         }),
@@ -82,157 +105,103 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-          {/* Plan 1: Student Monthly */}
-          <Card className="p-8 border-slate-200 flex flex-col justify-between hover:shadow-lg">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <User className="w-8 h-8 text-[#2563EB]" />
-                <Badge variant="blue">RBT Candidates</Badge>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-[#0F172A]">Student Pro</h3>
-                <p className="text-xs text-slate-500 mt-1">Ideal for 30-60 day intensive study plans.</p>
-              </div>
-              <div className="flex items-baseline space-x-1">
-                <span className="text-4xl font-extrabold text-[#0F172A]">{billingCycle === 'annual' ? '$29' : '$39'}</span>
-                <span className="text-xs text-slate-400 font-semibold">/ month</span>
-              </div>
+        {isLoading ? (
+          <div className="py-16 text-center text-xs font-bold text-slate-500 space-y-2">
+            <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p>Loading Active Subscription Tiers...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+            {plans.map((plan) => {
+              const displayPrice = billingCycle === 'annual' ? plan.priceAnnual : plan.priceMonthly;
+              const isPopular = Boolean(plan.isPopular);
 
-              <ul className="space-y-3 text-xs text-slate-700 font-medium pt-4 border-t border-slate-100">
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Unlimited 85-Q Timed BACB Mock Exams</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Socrates AI Tutor Chat & Rationales</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Leitner Spaced Repetition Flashcards</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Domain Readiness Heatmap</span>
-                </li>
-              </ul>
+              return (
+                <Card
+                  key={plan.id}
+                  glass={isPopular}
+                  className={`p-8 flex flex-col justify-between transition-all ${
+                    isPopular
+                      ? 'border-2 border-[#2563EB] shadow-2xl relative scale-105 z-10'
+                      : 'border-slate-200 hover:shadow-lg'
+                  }`}
+                >
+                  {isPopular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#2563EB] to-indigo-600 text-white text-[11px] font-extrabold px-4 py-1 rounded-full uppercase tracking-wider shadow-md">
+                      Most Popular • Guaranteed Pass
+                    </div>
+                  )}
+
+                  <div className="space-y-6 pt-2">
+                    <div className="flex items-center justify-between">
+                      {isPopular ? (
+                        <Sparkles className="w-8 h-8 text-[#2563EB]" />
+                      ) : (
+                        <User className="w-8 h-8 text-[#2563EB]" />
+                      )}
+                      <Badge variant={isPopular ? 'emerald' : 'blue'}>
+                        {plan.badge || 'RBT Certification'}
+                      </Badge>
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-bold text-[#0F172A]">{plan.name}</h3>
+                      <p className="text-xs text-slate-500 mt-1 leading-relaxed">{plan.description}</p>
+                    </div>
+
+                    <div className="flex items-baseline space-x-1">
+                      <span className="text-4xl font-extrabold text-[#0F172A]">${displayPrice}</span>
+                      <span className="text-xs text-slate-400 font-semibold">/ month</span>
+                    </div>
+
+                    <ul className="space-y-3 text-xs text-slate-700 font-medium pt-4 border-t border-slate-100">
+                      {(plan.features || []).map((feat, idx) => (
+                        <li key={idx} className="flex items-center space-x-2">
+                          <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-8">
+                    <Button
+                      variant={isPopular ? 'primary' : 'outline'}
+                      size="lg"
+                      className="w-full gap-2 font-bold"
+                      onClick={() => handleCheckout(plan.id, plan.name)}
+                      disabled={loadingVariant === plan.id}
+                    >
+                      <span>{loadingVariant === plan.id ? 'Processing...' : (plan.buttonText || 'Get Started')}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Money Back Guarantee Banner */}
+        <div className="mt-16 p-8 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-7 h-7" />
             </div>
-
-            <div className="pt-8">
-              <Button
-                variant="outline"
-                size="lg"
-                className="w-full"
-                onClick={() => handleCheckout('v_monthly_pro_290', 'pro')}
-                disabled={loadingVariant === 'v_monthly_pro_290'}
-              >
-                {loadingVariant === 'v_monthly_pro_290' ? 'Processing Checkout...' : 'Start 7-Day Free Trial'}
-              </Button>
+            <div className="space-y-1">
+              <h4 className="text-lg font-bold">100% Pass Guarantee Shield Included</h4>
+              <p className="text-xs text-slate-400 max-w-xl">
+                Score 85%+ on three mock exams using RBT Practice Questions. If you don't pass your official BACB exam, get a 100% full refund immediately.
+              </p>
             </div>
-          </Card>
+          </div>
 
-          {/* Plan 2: Lifetime Pass (Featured) */}
-          <Card glass className="p-8 border-2 border-[#2563EB] flex flex-col justify-between shadow-2xl relative scale-105 z-10">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#2563EB] to-indigo-600 text-white text-[11px] font-extrabold px-4 py-1 rounded-full uppercase tracking-wider shadow-md">
-              Most Popular • Guaranteed Pass
-            </div>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between pt-2">
-                <Sparkles className="w-8 h-8 text-[#2563EB]" />
-                <Badge variant="emerald">Pass Guarantee</Badge>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-[#0F172A]">Lifetime Pass</h3>
-                <p className="text-xs text-slate-500 mt-1">One-time payment until you pass your exam.</p>
-              </div>
-              <div className="flex items-baseline space-x-1">
-                <span className="text-4xl font-extrabold text-[#0F172A]">$99</span>
-                <span className="text-xs text-slate-400 font-semibold">one-time</span>
-              </div>
-
-              <ul className="space-y-3 text-xs text-slate-700 font-medium pt-4 border-t border-slate-100">
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span><strong>Everything in Pro + Lifetime Access</strong></span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Priority Socrates AI Clinical Roleplay</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>100% Money-Back Pass Guarantee</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Downloadable BACB Task List Cheat Sheets</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-8">
-              <Button
-                variant="primary"
-                size="lg"
-                className="w-full gap-2 shadow-lg shadow-blue-500/30"
-                onClick={() => handleCheckout('v_lifetime_vip_990', 'lifetime')}
-                disabled={loadingVariant === 'v_lifetime_vip_990'}
-              >
-                <span>{loadingVariant === 'v_lifetime_vip_990' ? 'Redirecting...' : 'Get Lifetime Access'}</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </Card>
-
-          {/* Plan 3: Clinic & Agency Cohort */}
-          <Card className="p-8 border-slate-200 flex flex-col justify-between hover:shadow-lg">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <Building2 className="w-8 h-8 text-slate-800" />
-                <Badge variant="slate">B2B SaaS</Badge>
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-[#0F172A]">Clinic Enterprise</h3>
-                <p className="text-xs text-slate-500 mt-1">For ABA Agencies & RBT Training Centers.</p>
-              </div>
-              <div className="flex items-baseline space-x-1">
-                <span className="text-4xl font-extrabold text-[#0F172A]">$249</span>
-                <span className="text-xs text-slate-400 font-semibold">/ month (Up to 15 Trainees)</span>
-              </div>
-
-              <ul className="space-y-3 text-xs text-slate-700 font-medium pt-4 border-t border-slate-100">
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Supervisor B2B Management Dashboard</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Cohort Readiness & Pass Rate Analytics</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Automated Mock Assignment & Audit Logs</span>
-                </li>
-                <li className="flex items-center space-x-2">
-                  <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Dedicated BCBA Support Manager</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-8">
-              <Button
-                variant="secondary"
-                size="lg"
-                className="w-full"
-                onClick={() => handleCheckout('v_clinic_enterprise_2490', 'team')}
-                disabled={loadingVariant === 'v_clinic_enterprise_2490'}
-              >
-                {loadingVariant === 'v_clinic_enterprise_2490' ? 'Processing...' : 'Request Clinic Demo'}
-              </Button>
-            </div>
-          </Card>
+          <Link href="/profile/billing">
+            <Button variant="primary" size="md" className="gap-2 font-extrabold shadow-lg px-6 flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 border-none text-slate-950">
+              <span>View Guarantee Terms</span>
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
