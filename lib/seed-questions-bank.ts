@@ -1,7 +1,7 @@
 import { MasterQuestion } from '@/types/master-question';
 
 /**
- * 102 High-Yield BACB 2nd Edition Master Exam Questions
+ * 102 High-Yield BACB 3rd Edition Master Exam Questions
  * Covering all 6 Domains: Measurement (A), Assessment (B), Skill Acquisition (C),
  * Behavior Reduction (D), Documentation (E), and Ethics/Professional Conduct (F).
  */

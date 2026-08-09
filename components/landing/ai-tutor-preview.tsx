@@ -74,8 +74,8 @@ export function AiTutorPreview() {
         ...prev,
         {
           role: 'assistant',
-          text: `Socrates AI Analysis for "${userText}": In ABA clinical practice, always refer to the BACB Task List standards. Verify the target behavior definition, ensure proper data measurement (Domain A), and consult your supervising BCBA for protocol approval.`,
-          domain: 'BACB 2nd Edition Guidance',
+          text: `Socrates AI Analysis for "${userText}": In ABA clinical practice, always refer to the BACB 3rd Edition TCO standards. Verify the target behavior definition, ensure proper data measurement (Domain A), and consult your supervising BCBA for protocol approval.`,
+          domain: 'BACB RBT 3rd Edition Guidance',
         },
       ]);
       setIsTyping(false);
@@ -133,7 +133,7 @@ export function AiTutorPreview() {
                     <span className="text-sm font-extrabold text-[#0F172A]">Socrates AI RBT Tutor</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <span className="text-[11px] text-slate-500">Trained on BACB 2nd Edition Ethics & Clinical Code</span>
+                  <span className="text-[11px] text-slate-500">Trained on RBT Ethics Code 2.0 & Clinical TCO</span>
                 </div>
               </div>
 

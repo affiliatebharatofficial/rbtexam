@@ -9,7 +9,11 @@ export function getMasterBankExamQuestions(): Question[] {
   const currentBank = loadPersistentQuestions();
 
   return currentBank
-    .filter((mq) => mq.status === 'published' || mq.status === 'featured')
+    .filter(
+      (mq) =>
+        (mq.status === 'published' || mq.status === 'featured') &&
+        mq.taskListVersion === '3rd_edition'
+    )
     .map((mq) => {
       const categoryMap: Record<string, BACBDomainId> = {
         'Data Collection and Graphing': 'A',
@@ -39,20 +43,30 @@ export function getMasterBankExamQuestions(): Question[] {
       const domainId: BACBDomainId = categoryMap[mq.category] || 'A';
       const validCorrectId: 'A' | 'B' | 'C' | 'D' = (['A', 'B', 'C', 'D'].includes(mq.correctAnswerId) ? mq.correctAnswerId : 'A') as any;
 
+      let cleanReference = (mq.references || `BACB RBT 3rd Edition TCO Item ${domainId}-01`).trim();
+      cleanReference = cleanReference
+        .replace(/BACB\s*2nd\s*Edition\s*Task\s*List\s*Item/gi, 'BACB RBT 3rd Edition TCO Item')
+        .replace(/BACB\s*Task\s*List\s*2nd\s*Edition\s*Item/gi, 'BACB RBT 3rd Edition TCO Item')
+        .replace(/2nd\s*Edition/gi, '3rd Edition');
+
+      if (!cleanReference.includes('3rd Edition')) {
+        cleanReference = `BACB RBT 3rd Edition TCO Item ${cleanReference}`;
+      }
+
       return {
         id: mq.id,
-        taskItemId: mq.references || `${domainId}-01`,
+        taskItemId: cleanReference,
         domainId,
         scenarioText: mq.scenarioText || '',
         questionText: mq.question,
         options: mq.options.map((o) => ({
           id: (['A', 'B', 'C', 'D'].includes(o.id) ? o.id : 'A') as 'A' | 'B' | 'C' | 'D',
           text: o.text,
-          explanation: o.explanation || mq.clinicalExplanation || 'Correct rationale according to BACB task list.',
+          explanation: o.explanation || mq.clinicalExplanation || 'Correct rationale according to BACB 3rd Edition TCO.',
         })),
         correctOptionId: validCorrectId,
         difficulty: mq.difficulty === 'easy' ? 'Easy' : mq.difficulty === 'hard' ? 'Hard' : 'Medium',
-        bacbCitation: mq.references || `BACB RBT 3rd Edition TCO Item ${domainId}-01`,
+        bacbCitation: cleanReference,
         aiExplanationDetail: mq.clinicalExplanation || mq.answerExplanation,
       };
     });
@@ -69,11 +83,9 @@ export const SAMPLE_BACB_QUESTIONS: Question[] = getMasterBankExamQuestions();
  */
 export function generateExamQuestions(count: number, targetDomain?: string): Question[] {
   const sourceBank = getMasterBankExamQuestions();
-  const filteredBank = targetDomain && targetDomain !== 'ALL'
+  const pool = targetDomain && targetDomain !== 'ALL'
     ? sourceBank.filter((q) => q.domainId === targetDomain)
     : sourceBank;
-
-  const pool = filteredBank.length > 0 ? filteredBank : sourceBank;
 
   // Shuffle pool for randomized exam order
   const shuffled = [...pool].sort(() => Math.random() - 0.5);

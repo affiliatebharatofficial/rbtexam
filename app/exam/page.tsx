@@ -404,7 +404,9 @@ export default function ExamPage() {
             <Card glass className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-white/90 shadow-lg">
               <div className="flex items-center space-x-3">
                 <span className="px-2.5 py-1 rounded-lg bg-blue-100 text-[#2563EB] font-bold text-xs">
-                  {currentQ.taskItemId}
+                  {currentQ.taskItemId.includes('3rd Edition')
+                    ? currentQ.taskItemId
+                    : `BACB RBT 3rd Edition TCO Item ${currentQ.taskItemId.replace(/2nd Edition/gi, '3rd Edition')}`}
                 </span>
                 <span className="text-xs font-bold text-slate-700">
                   Domain {currentQ.domainId}: Question {currentIndex + 1} of {questions.length}
