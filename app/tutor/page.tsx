@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth-context';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { ChatMessage, CertificationLevel, PromptMode } from '@/types/ai-tutor';
 import { buildCandidateSystemContext } from '@/lib/ai-candidate-memory';
 import {
@@ -325,7 +326,11 @@ export default function TutorPage() {
                       : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none shadow-lg space-y-4'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  {msg.sender === 'user' ? (
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  ) : (
+                    <MarkdownRenderer content={msg.content} />
+                  )}
 
                   {/* STRUCTURED CLINICAL INSIGHT CARD */}
                   {msg.clinicalInsight && (
