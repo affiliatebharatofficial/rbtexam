@@ -12,7 +12,9 @@ export function getMasterBankExamQuestions(): Question[] {
     .filter(
       (mq) =>
         (mq.status === 'published' || mq.status === 'featured') &&
-        mq.taskListVersion === '3rd_edition'
+        (!mq.taskListVersion ||
+          mq.taskListVersion === '3rd_edition' ||
+          mq.taskListVersion.toLowerCase().includes('3rd'))
     )
     .map((mq) => {
       const categoryMap: Record<string, BACBDomainId> = {

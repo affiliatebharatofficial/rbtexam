@@ -150,19 +150,66 @@ export default function AdminQuestionsPage() {
     );
   };
 
-  const handleBulkPublish = () => {
+  const handleBulkPublish = async () => {
     bulkUpdateStatus(selectedIds, 'published');
+    try {
+      await fetch('/api/questions/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_status', ids: selectedIds, status: 'published' }),
+      });
+    } catch (e) {
+      console.error('Failed to sync bulk publish to server:', e);
+    }
     setSelectedIds([]);
+    setFilterParams({ ...filterParams });
   };
 
-  const handleBulkArchive = () => {
+  const handleBulkArchive = async () => {
     bulkUpdateStatus(selectedIds, 'archived');
+    try {
+      await fetch('/api/questions/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_status', ids: selectedIds, status: 'archived' }),
+      });
+    } catch (e) {
+      console.error('Failed to sync bulk archive to server:', e);
+    }
     setSelectedIds([]);
+    setFilterParams({ ...filterParams });
   };
 
-  const handleBulkDelete = () => {
-    bulkDeleteQuestions(selectedIds);
+  const handleBulkDraft = async () => {
+    bulkUpdateStatus(selectedIds, 'draft');
+    try {
+      await fetch('/api/questions/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_status', ids: selectedIds, status: 'draft' }),
+      });
+    } catch (e) {
+      console.error('Failed to sync bulk draft to server:', e);
+    }
     setSelectedIds([]);
+    setFilterParams({ ...filterParams });
+  };
+
+  const handleBulkDelete = async () => {
+    if (confirm(`Are you sure you want to delete ${selectedIds.length} question(s)?`)) {
+      bulkDeleteQuestions(selectedIds);
+      try {
+        await fetch('/api/questions/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', ids: selectedIds }),
+        });
+      } catch (e) {
+        console.error('Failed to sync bulk delete to server:', e);
+      }
+      setSelectedIds([]);
+      setFilterParams({ ...filterParams });
+    }
   };
 
   const handleExportCSV = () => {
@@ -175,20 +222,63 @@ export default function AdminQuestionsPage() {
     a.click();
   };
 
-  const handleDuplicate = (question: MasterQuestion) => {
-    createQuestion({
+  const handleDuplicate = async (question: MasterQuestion) => {
+    const dupData = {
       ...question,
       question: `[COPY] ${question.question}`,
-      status: 'draft',
-    });
+      status: 'draft' as const,
+    };
+    const created = createQuestion(dupData);
+    try {
+      await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dupData),
+      });
+    } catch (e) {
+      console.error('Failed to sync duplicate question to server:', e);
+    }
     setFilterParams({ ...filterParams });
   };
 
-  const handleSaveQuestion = (data: Partial<MasterQuestion>) => {
+  const handleSingleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this question?')) {
+      deleteQuestion(id);
+      try {
+        await fetch(`/api/questions/${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        });
+      } catch (e) {
+        console.error('Failed to sync delete to server:', e);
+      }
+      setFilterParams({ ...filterParams });
+    }
+  };
+
+  const handleSaveQuestion = async (data: Partial<MasterQuestion>) => {
+    data.taskListVersion = data.taskListVersion || '3rd_edition';
     if (editingQuestion && editingQuestion.id) {
       updateQuestion(editingQuestion.id, data);
+      try {
+        await fetch(`/api/questions/${encodeURIComponent(editingQuestion.id)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      } catch (e) {
+        console.error('Failed to sync update to server:', e);
+      }
     } else {
       createQuestion(data as any);
+      try {
+        await fetch('/api/questions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      } catch (e) {
+        console.error('Failed to sync create to server:', e);
+      }
     }
     setEditingQuestion(undefined);
     setFilterParams({ ...filterParams });
@@ -491,10 +581,7 @@ export default function AdminQuestionsPage() {
                             <Copy className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => {
-                              deleteQuestion(q.id);
-                              setFilterParams({ ...filterParams });
-                            }}
+                            onClick={() => handleSingleDelete(q.id)}
                             className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
                             title="Delete Question"
                           >
