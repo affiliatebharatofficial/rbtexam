@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteDatabaseFlashcardBulk } from '@/lib/flashcard-bank';
+import { saveDeletedCardIdsServer } from '@/lib/flashcard-bank-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     await deleteDatabaseFlashcardBulk(ids);
+    saveDeletedCardIdsServer();
 
     return NextResponse.json({
       success: true,

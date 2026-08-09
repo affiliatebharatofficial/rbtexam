@@ -3,12 +3,13 @@ import {
   getFilteredFlashcardsAsync,
   createDatabaseFlashcard,
   updateDatabaseFlashcard,
-  deleteDatabaseFlashcard,
   deleteDatabaseFlashcardBulk,
 } from '@/lib/flashcard-bank';
+import { loadDeletedCardIdsServer, saveDeletedCardIdsServer } from '@/lib/flashcard-bank-server';
 
 export async function GET(request: NextRequest) {
   try {
+    loadDeletedCardIdsServer();
     const { searchParams } = new URL(request.url);
 
     const filterParams = {
@@ -91,6 +92,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await deleteDatabaseFlashcardBulk(idsToDelete);
+    saveDeletedCardIdsServer();
     return NextResponse.json({ success: true, count: idsToDelete.length, message: `Successfully deleted ${idsToDelete.length} flashcard(s)` });
   } catch (error: any) {
     console.error('[API /api/flashcards DELETE error]:', error);
