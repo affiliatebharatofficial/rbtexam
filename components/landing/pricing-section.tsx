@@ -7,12 +7,14 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SubscriptionPlan } from '@/types/subscription-plan';
+import { GuaranteeTermsModal } from '@/components/billing/guarantee-terms-modal';
 
 export function PricingSection() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [loadingVariant, setLoadingVariant] = useState<string | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchActivePlans = async () => {
@@ -65,7 +67,7 @@ export function PricingSection() {
     <section id="pricing" className="py-24 bg-white border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-          <Badge variant="emerald">100% Money-Back Pass Guarantee</Badge>
+          <Badge variant="emerald">Pass-or-Refund Guarantee Protection</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
             Invest in Your RBT Certification Success
           </h2>
@@ -128,7 +130,7 @@ export function PricingSection() {
                 >
                   {isPopular && (
                     <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#2563EB] to-indigo-600 text-white text-[11px] font-extrabold px-4 py-1 rounded-full uppercase tracking-wider shadow-md">
-                      Most Popular • Guaranteed Pass
+                      Most Popular • Pass-or-Refund
                     </div>
                   )}
 
@@ -189,20 +191,29 @@ export function PricingSection() {
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-lg font-bold">100% Pass Guarantee Shield Included</h4>
-              <p className="text-xs text-slate-400 max-w-xl">
-                Score 85%+ on three mock exams using RBT Practice Questions. If you don't pass your official BACB exam, get a 100% full refund immediately.
+              <h4 className="text-lg font-bold">Pass-or-Refund Guarantee</h4>
+              <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                Score 85%+ on three qualifying mock exams and meet all eligibility requirements. If you then take the applicable official BACB exam and do not pass, you may qualify for a full refund under our Guarantee Terms.
               </p>
             </div>
           </div>
 
-          <Link href="/profile/billing">
-            <Button variant="primary" size="md" className="gap-2 font-extrabold shadow-lg px-6 flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 border-none text-slate-950">
-              <span>View Guarantee Terms</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          <Button
+            onClick={() => setIsTermsModalOpen(true)}
+            variant="primary"
+            size="md"
+            className="gap-2 font-extrabold shadow-lg px-6 flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 border-none text-slate-950"
+          >
+            <span>View Guarantee Terms</span>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
+
+        {/* Modal Component */}
+        <GuaranteeTermsModal
+          isOpen={isTermsModalOpen}
+          onClose={() => setIsTermsModalOpen(false)}
+        />
       </div>
     </section>
   );
