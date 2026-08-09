@@ -77,10 +77,16 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
       setDifficulty(question.difficulty);
       setQuestionType(question.questionType);
       setStatus(question.status);
-      setQuestionText(question.question);
-      setScenarioText(question.scenarioText || '');
-      setOptions(question.options.map((o) => ({ id: o.id, text: o.text, isCorrect: o.isCorrect, explanation: o.explanation || '' })));
-      setCorrectAnswerId(question.correctAnswerId);
+      if (Array.isArray(question.options)) {
+        setOptions(question.options.map((o) => ({ id: o.id, text: o.text, isCorrect: Boolean(o.isCorrect), explanation: o.explanation || '' })));
+      } else {
+        setOptions([
+          { id: 'A', text: '', isCorrect: true, explanation: '' },
+          { id: 'B', text: '', isCorrect: false, explanation: '' },
+          { id: 'C', text: '', isCorrect: false, explanation: '' },
+          { id: 'D', text: '', isCorrect: false, explanation: '' },
+        ]);
+      }
       setAnswerExplanation(question.answerExplanation);
       setClinicalExplanation(question.clinicalExplanation);
       setReferences(question.references);

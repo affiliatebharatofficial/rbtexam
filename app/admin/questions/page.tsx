@@ -512,144 +512,166 @@ export default function AdminQuestionsPage() {
 
         {/* Master Question List Table */}
         <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                  <th className="py-3 px-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedIds.length === queryResult.data.length && queryResult.data.length > 0}
-                      onChange={(e) => handleSelectAll(e.target.checked)}
-                      className="rounded border-slate-300"
-                    />
-                  </th>
-                  <th className="py-3 px-3">Cert</th>
-                  <th className="py-3 px-3">Question Prompt</th>
-                  <th className="py-3 px-3">Category</th>
-                  <th className="py-3 px-3">Diff</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {queryResult.data.map((q: MasterQuestion) => {
-                  const isSel = selectedIds.includes(q.id);
-                  return (
-                    <tr key={q.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3.5 px-3">
+          {(!queryResult?.data || queryResult.data.length === 0) ? (
+            <div className="py-12 text-center space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#2563EB] flex items-center justify-center mx-auto">
+                <Brain className="w-6 h-6" />
+              </div>
+              <div className="max-w-md mx-auto space-y-1">
+                <h3 className="text-base font-bold text-slate-900">No Master Questions Found in Database</h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Your question bank is currently empty. Use the AI Question Generator, import questions from a CSV file, or seed default BACB questions to populate your database.
+                </p>
+              </div>
+              <div className="flex justify-center space-x-3 pt-2">
+                <Button variant="primary" size="sm" onClick={() => setIsAiModalOpen(true)} className="gap-1.5 font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600">
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>Generate with AI</span>
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setIsImportModalOpen(true)} className="gap-1.5">
+                  <Upload className="w-4 h-4" />
+                  <span>Import CSV</span>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                      <th className="py-3 px-3">
                         <input
                           type="checkbox"
-                          checked={isSel}
-                          onChange={() => handleSelectOne(q.id)}
+                          checked={selectedIds.length === (queryResult?.data?.length || 0) && (queryResult?.data?.length || 0) > 0}
+                          onChange={(e) => handleSelectAll(e.target.checked)}
                           className="rounded border-slate-300"
                         />
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className={`px-2 py-0.5 rounded font-black text-[10px] ${
-                          q.certification === 'RBT'
-                            ? 'bg-blue-100 text-blue-800'
-                            : q.certification === 'BCaBA'
-                            ? 'bg-indigo-100 text-indigo-800'
-                            : 'bg-purple-100 text-purple-800'
-                        }`}>
-                          {q.certification}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 max-w-xs sm:max-w-md">
-                        <div className="font-bold text-slate-900 line-clamp-1">{q.question}</div>
-                        {q.scenarioText && (
-                          <div className="text-[11px] text-slate-400 line-clamp-1 italic">{q.scenarioText}</div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-3 font-semibold text-slate-700">{q.category}</td>
-                      <td className="py-3.5 px-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          q.difficulty === 'easy'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : q.difficulty === 'medium'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-rose-100 text-rose-800'
-                        }`}>
-                          {q.difficulty.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          q.status === 'published'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}>
-                          {q.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          <button
-                            onClick={() => setPreviewQuestion(q)}
-                            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
-                            title="Preview Question"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingQuestion(q)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
-                            title="Edit Question"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDuplicate(q)}
-                            className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg"
-                            title="Duplicate Question"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleSingleDelete(q.id)}
-                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
-                            title="Delete Question"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      </th>
+                      <th className="py-3 px-3">Cert</th>
+                      <th className="py-3 px-3">Question Prompt</th>
+                      <th className="py-3 px-3">Category</th>
+                      <th className="py-3 px-3">Diff</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3 text-right">Actions</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {(queryResult?.data || []).map((q: MasterQuestion) => {
+                      const isSel = selectedIds.includes(q.id);
+                      return (
+                        <tr key={q.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-3.5 px-3">
+                            <input
+                              type="checkbox"
+                              checked={isSel}
+                              onChange={() => handleSelectOne(q.id)}
+                              className="rounded border-slate-300"
+                            />
+                          </td>
+                          <td className="py-3.5 px-3">
+                            <span className={`px-2 py-0.5 rounded font-black text-[10px] ${
+                              q.certification === 'RBT'
+                                ? 'bg-blue-100 text-blue-800'
+                                : q.certification === 'BCaBA'
+                                ? 'bg-indigo-100 text-indigo-800'
+                                : 'bg-purple-100 text-purple-800'
+                            }`}>
+                              {q.certification || 'RBT'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 max-w-xs sm:max-w-md">
+                            <div className="font-bold text-slate-900 line-clamp-1">{q.question || 'Untitled Question'}</div>
+                            {q.scenarioText && (
+                              <div className="text-[11px] text-slate-400 line-clamp-1 italic">{q.scenarioText}</div>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-3 font-semibold text-slate-700">{q.category || 'General'}</td>
+                          <td className="py-3.5 px-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              q.difficulty === 'easy'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : q.difficulty === 'medium'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}>
+                              {(q.difficulty || 'medium').toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              q.status === 'published'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {(q.status || 'draft').toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 text-right">
+                            <div className="flex items-center justify-end space-x-1">
+                              <button
+                                onClick={() => setPreviewQuestion(q)}
+                                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+                                title="Preview Question"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setEditingQuestion(q)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                title="Edit Question"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDuplicate(q)}
+                                className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg"
+                                title="Duplicate Question"
+                              >
+                                <Copy className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleSingleDelete(q.id)}
+                                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg"
+                                title="Delete Question"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Pagination Controls */}
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs text-slate-600">
-            <div>
-              Page <strong>{queryResult.page}</strong> of <strong>{queryResult.totalPages}</strong> ({queryResult.total} Total Questions)
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                disabled={queryResult.page === 1}
-                onClick={() => setFilterParams({ ...filterParams, page: queryResult.page - 1 })}
-                variant="outline"
-                size="sm"
-                className="gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Prev</span>
-              </Button>
-              <Button
-                disabled={queryResult.page >= queryResult.totalPages}
-                onClick={() => setFilterParams({ ...filterParams, page: queryResult.page + 1 })}
-                variant="outline"
-                size="sm"
-                className="gap-1"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
+              {/* Pagination Bar */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs font-semibold text-slate-500">
+                <div>
+                  Page <strong>{queryResult.page}</strong> of <strong>{queryResult.totalPages}</strong> ({queryResult.total} Total Questions)
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={queryResult.page === 1}
+                    onClick={() => setFilterParams({ ...filterParams, page: queryResult.page - 1 })}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={queryResult.page >= queryResult.totalPages}
+                    onClick={() => setFilterParams({ ...filterParams, page: queryResult.page + 1 })}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </Card>
 
         {/* Question Editor Modal */}
