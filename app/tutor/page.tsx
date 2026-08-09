@@ -209,40 +209,42 @@ export default function TutorPage() {
                 </div>
               </div>
 
-              {/* Live AI API Settings Card */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
-                <div className="flex items-center justify-between font-bold text-slate-800">
-                  <span className="flex items-center space-x-1.5">
-                    <Cpu className="w-3.5 h-3.5 text-purple-600" />
-                    <span>LLM Engine API</span>
-                  </span>
-                  <button
-                    onClick={() => setShowKeyModal(true)}
-                    className="p-1 rounded text-blue-600 hover:bg-blue-50 font-extrabold"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-                <div className="text-[11px] text-slate-500 font-medium">
-                  {lastTelemetry?.isLive ? (
-                    <span className="text-emerald-700 font-bold flex items-center space-x-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                      <span>Live: {lastTelemetry.providerUsed}</span>
+              {/* Live AI API Settings Card (Admin Only) */}
+              {user && (user.role === 'admin' || user.role === 'super_admin') && (
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2">
+                  <div className="flex items-center justify-between font-bold text-slate-800">
+                    <span className="flex items-center space-x-1.5">
+                      <Cpu className="w-3.5 h-3.5 text-purple-600" />
+                      <span>LLM Engine API</span>
                     </span>
-                  ) : (
-                    <span>Provider: {provider === 'auto' ? 'Auto-Detect' : provider.toUpperCase()}</span>
-                  )}
+                    <button
+                      onClick={() => setShowKeyModal(true)}
+                      className="p-1 rounded text-blue-600 hover:bg-blue-50 font-extrabold"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    {lastTelemetry?.isLive ? (
+                      <span className="text-emerald-700 font-bold flex items-center space-x-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Live: {lastTelemetry.providerUsed}</span>
+                      </span>
+                    ) : (
+                      <span>Provider: {provider === 'auto' ? 'Auto-Detect' : provider.toUpperCase()}</span>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => setShowKeyModal(true)}
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-[11px] py-1 font-bold h-7 gap-1"
+                  >
+                    <Key className="w-3 h-3 text-amber-500" />
+                    <span>{apiKey ? 'API Key Saved' : 'Configure Custom API Key'}</span>
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => setShowKeyModal(true)}
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-[11px] py-1 font-bold h-7 gap-1"
-                >
-                  <Key className="w-3 h-3 text-amber-500" />
-                  <span>{apiKey ? 'API Key Saved' : 'Configure Custom API Key'}</span>
-                </Button>
-              </div>
+              )}
 
               {/* Candidate Readiness Context Badge */}
               <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 text-xs space-y-1">
