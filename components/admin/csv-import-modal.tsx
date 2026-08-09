@@ -51,20 +51,30 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
     if (!validationResult || validationResult.validRows.length === 0) return;
 
     setIsImporting(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
 
-    let count = 0;
-    validationResult.validRows.forEach((row) => {
-      createQuestion(row as any);
-      count++;
-    });
+    try {
+      const res = await fetch('/api/questions/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'import',
+          questions: validationResult.validRows,
+        }),
+      });
 
-    setIsImporting(false);
-    setImportSuccessCount(count);
-    setTimeout(() => {
-      onSuccess();
-      onClose();
-    }, 1500);
+      const data = await res.json();
+      const count = data.importedCount || validationResult.validRows.length;
+      setIsImporting(false);
+      setImportSuccessCount(count);
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 1500);
+    } catch (err) {
+      console.error('CSV import API error:', err);
+      setIsImporting(false);
+      alert('Failed to import CSV questions into database.');
+    }
   };
 
   return (

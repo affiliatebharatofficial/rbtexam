@@ -122,7 +122,7 @@ export function parseAndValidateCSV(csvText: string): ImportValidationResult {
         taskListVersion: '3rd_edition',
         estimatedTimeSeconds: 60,
         tags: ['CSV Import'],
-        status: 'draft',
+        status: 'published',
         isPremium: false,
         isFeatured: false,
       };
