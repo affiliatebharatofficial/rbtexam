@@ -728,39 +728,61 @@ export async function convertQuestionsToDatabaseFlashcards(forceAll: boolean = f
     sourceQuestions = [...MASTER_QUESTION_BANK];
   }
 
-  // Deduplication check: fetch existing database cards to skip already converted source questions
+  // 1. Deduplication & Cleanup check: remove any duplicate SQID cards from master_flashcards
   const existingSourceIds = new Set<string>();
-  if (isSupabaseConfigured() && !forceAll) {
+  if (isSupabaseConfigured()) {
     try {
-      const { data: existingCards } = await adminDb.from('master_flashcards').select('task_list_code, tags');
-      if (existingCards) {
+      const { data: existingCards } = await adminDb
+        .from('master_flashcards')
+        .select('id, task_list_code, tags')
+        .is('deleted_at', null);
+
+      if (existingCards && existingCards.length > 0) {
+        const seenSqIds = new Map<string, string>();
+        const duplicateCardIdsToDelete: string[] = [];
+
         existingCards.forEach((c: any) => {
+          let sqId: string | null = null;
           if (c.task_list_code && c.task_list_code.includes('SQID:')) {
             const match = c.task_list_code.match(/SQID:([^\s)]+)/);
-            if (match) existingSourceIds.add(match[1]);
+            if (match) sqId = match[1];
           }
-          if (Array.isArray(c.tags)) {
+          if (!sqId && Array.isArray(c.tags)) {
             c.tags.forEach((t: string) => {
               if (t.startsWith('source_question_id:')) {
-                existingSourceIds.add(t.replace('source_question_id:', ''));
+                sqId = t.replace('source_question_id:', '');
               }
             });
           }
+
+          if (sqId) {
+            if (seenSqIds.has(sqId)) {
+              duplicateCardIdsToDelete.push(c.id);
+            } else {
+              seenSqIds.set(sqId, c.id);
+              existingSourceIds.add(sqId);
+            }
+          }
         });
+
+        // Delete duplicate card rows from database if any exist
+        if (duplicateCardIdsToDelete.length > 0) {
+          await adminDb.from('master_flashcards').delete().in('id', duplicateCardIdsToDelete);
+        }
       }
     } catch (e) {
-      console.error('[Flashcard Bank] Error fetching existing cards for deduplication check:', e);
+      console.error('[Flashcard Bank] Error during deduplication check:', e);
     }
   }
 
-  // Filter out already converted source questions unless forceAll is true
-  let targetQuestions = forceAll
+  // 2. Filter out already converted source questions unless forceAll is true
+  const targetQuestions = forceAll
     ? sourceQuestions
     : sourceQuestions.filter((sq) => !existingSourceIds.has(String(sq.id)));
 
-  // Fallback: if all are already marked converted and forceAll wasn't passed, transform all sourceQuestions to ensure cards exist
+  // If all questions are already converted, return 0 without re-inserting
   if (targetQuestions.length === 0) {
-    targetQuestions = sourceQuestions;
+    return { convertedCount: 0, insertedIds: [] };
   }
 
   const convertedCards: Partial<Flashcard>[] = targetQuestions.map(transformQuestionToFlashcard);
