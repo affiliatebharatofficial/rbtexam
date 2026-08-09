@@ -125,6 +125,7 @@ export default function AdminQuestionsPage() {
   };
 
   const [queryResult, setQueryResult] = useState<QuestionPaginationResult>(() => getFilteredQuestions(filterParams));
+  const [allQuestions, setAllQuestions] = useState<MasterQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchQuestionsFromApi = async () => {
@@ -146,7 +147,15 @@ export default function AdminQuestionsPage() {
         const json = await res.json();
         if (json && Array.isArray(json.data)) {
           setQueryResult(json);
-          return;
+        }
+      }
+
+      // Fetch all questions for stat cards counter
+      const statsRes = await fetch(`/api/questions?limit=1000&status=ALL`);
+      if (statsRes.ok) {
+        const statsJson = await statsRes.json();
+        if (statsJson && Array.isArray(statsJson.data)) {
+          setAllQuestions(statsJson.data);
         }
       }
     } catch (err) {
@@ -154,7 +163,6 @@ export default function AdminQuestionsPage() {
     } finally {
       setIsLoading(false);
     }
-    setQueryResult(getFilteredQuestions(filterParams));
   };
 
   useEffect(() => {
@@ -400,42 +408,48 @@ export default function AdminQuestionsPage() {
         </Card>
 
         {/* Dashboard Statistics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-          <Card className="p-4 space-y-1 text-center">
-            <div className="text-[10px] font-bold text-slate-400 uppercase">Total Questions</div>
-            <div className="text-2xl font-black text-slate-900">{MASTER_QUESTION_BANK.length}</div>
-          </Card>
-          <Card className="p-4 space-y-1 text-center bg-emerald-50/50 border-emerald-100">
-            <div className="text-[10px] font-bold text-emerald-700 uppercase">Published</div>
-            <div className="text-2xl font-black text-emerald-600">
-              {MASTER_QUESTION_BANK.filter((q) => q.status === 'published').length}
+        {(() => {
+          const statsSource = allQuestions.length > 0 ? allQuestions : (queryResult?.data || []);
+          const totalCount = allQuestions.length > 0 ? allQuestions.length : (queryResult?.total || 0);
+          return (
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+              <Card className="p-4 space-y-1 text-center">
+                <div className="text-[10px] font-bold text-slate-400 uppercase">Total Questions</div>
+                <div className="text-2xl font-black text-slate-900">{totalCount}</div>
+              </Card>
+              <Card className="p-4 space-y-1 text-center bg-emerald-50/50 border-emerald-100">
+                <div className="text-[10px] font-bold text-emerald-700 uppercase">Published</div>
+                <div className="text-2xl font-black text-emerald-600">
+                  {statsSource.filter((q) => q.status === 'published').length}
+                </div>
+              </Card>
+              <Card className="p-4 space-y-1 text-center bg-blue-50/50 border-blue-100">
+                <div className="text-[10px] font-bold text-blue-700 uppercase">RBT Questions</div>
+                <div className="text-2xl font-black text-[#2563EB]">
+                  {statsSource.filter((q) => q.certification === 'RBT').length}
+                </div>
+              </Card>
+              <Card className="p-4 space-y-1 text-center bg-indigo-50/50 border-indigo-100">
+                <div className="text-[10px] font-bold text-indigo-700 uppercase">BCaBA Questions</div>
+                <div className="text-2xl font-black text-indigo-600">
+                  {statsSource.filter((q) => q.certification === 'BCaBA').length}
+                </div>
+              </Card>
+              <Card className="p-4 space-y-1 text-center bg-purple-50/50 border-purple-100">
+                <div className="text-[10px] font-bold text-purple-700 uppercase">BCBA Questions</div>
+                <div className="text-2xl font-black text-purple-600">
+                  {statsSource.filter((q) => q.certification === 'BCBA').length}
+                </div>
+              </Card>
+              <Card className="p-4 space-y-1 text-center bg-amber-50/50 border-amber-100">
+                <div className="text-[10px] font-bold text-amber-700 uppercase">Featured / Premium</div>
+                <div className="text-2xl font-black text-amber-600">
+                  {statsSource.filter((q) => q.isPremium || q.isFeatured).length}
+                </div>
+              </Card>
             </div>
-          </Card>
-          <Card className="p-4 space-y-1 text-center bg-blue-50/50 border-blue-100">
-            <div className="text-[10px] font-bold text-blue-700 uppercase">RBT Questions</div>
-            <div className="text-2xl font-black text-[#2563EB]">
-              {MASTER_QUESTION_BANK.filter((q) => q.certification === 'RBT').length}
-            </div>
-          </Card>
-          <Card className="p-4 space-y-1 text-center bg-indigo-50/50 border-indigo-100">
-            <div className="text-[10px] font-bold text-indigo-700 uppercase">BCaBA Questions</div>
-            <div className="text-2xl font-black text-indigo-600">
-              {MASTER_QUESTION_BANK.filter((q) => q.certification === 'BCaBA').length}
-            </div>
-          </Card>
-          <Card className="p-4 space-y-1 text-center bg-purple-50/50 border-purple-100">
-            <div className="text-[10px] font-bold text-purple-700 uppercase">BCBA Questions</div>
-            <div className="text-2xl font-black text-purple-600">
-              {MASTER_QUESTION_BANK.filter((q) => q.certification === 'BCBA').length}
-            </div>
-          </Card>
-          <Card className="p-4 space-y-1 text-center bg-amber-50/50 border-amber-100">
-            <div className="text-[10px] font-bold text-amber-700 uppercase">Featured / Premium</div>
-            <div className="text-2xl font-black text-amber-600">
-              {MASTER_QUESTION_BANK.filter((q) => q.isPremium || q.isFeatured).length}
-            </div>
-          </Card>
-        </div>
+          );
+        })()}
 
         {/* Filter Bar */}
         <Card glass className="p-4 space-y-4 shadow-lg border-white/90">
