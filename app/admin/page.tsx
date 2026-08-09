@@ -46,6 +46,7 @@ import {
   Tag,
   UploadCloud,
   Globe2,
+  FileText,
   Trash2,
   Plus,
   Send,
@@ -60,6 +61,7 @@ import { testLemonSqueezyConnection } from '@/lib/lemon-squeezy';
 type AdminTab =
   | 'overview'
   | 'users'
+  | 'articles'
   | 'ai_cms'
   | 'stripe'
   | 'smtp'
@@ -362,6 +364,7 @@ export default function SuperAdminCMSPage() {
   const tabs: { id: AdminTab; label: string; icon: any }[] = [
     { id: 'overview', label: 'Overview', icon: Activity },
     { id: 'users', label: 'User Roles', icon: Users },
+    { id: 'articles', label: 'Article CMS', icon: FileText },
     { id: 'ai_cms', label: 'AI Models', icon: Brain },
     { id: 'stripe', label: 'Lemon Squeezy', icon: CreditCard },
     { id: 'smtp', label: 'SMTP/Email', icon: Mail },

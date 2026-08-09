@@ -2,6 +2,20 @@
 
 ## Master Version History
 
+### [v3.3.0] - 2026-08-09 (Super Admin Blog & Article CMS Engine Release)
+#### Added / Fixed
+- **Super Admin Article CMS Portal (`app/admin/articles/page.tsx`)**:
+  - Full Article Management CMS interface supporting article creation, editing, publishing, deleting, category tagging, author assignment, read time calculation, and status toggles.
+  - **Live Markdown & Table Preview**: Integrated live Markdown editor tab with real-time GFM Markdown and table formatting preview.
+- **PostgreSQL Database Schema (`database/articles-schema.sql`)**:
+  - Migration script creating `public.articles` table with index optimization and Supabase RLS security policies.
+- **Article Service Engine (`lib/article-cms-engine.ts`)**:
+  - Full CRUD operations, initial high-quality seed articles, slug generator, reading time estimator, and storage sync.
+- **Admin & Public REST API Endpoints (`/api/admin/articles` & `/api/articles`)**:
+  - Server endpoints for CRUD management and public article queries.
+- **Public Blog & Article Pages (`/articles` & `/articles/[slug]`)**:
+  - Responsive articles index page and individual article reader rendering Markdown content and tables.
+
 ### [v3.2.0] - 2026-08-09 (Central User Persistence & Admin User Roster Sync Fix)
 #### Added / Fixed
 - **Central User Registration API (`/api/auth/register`)**:
