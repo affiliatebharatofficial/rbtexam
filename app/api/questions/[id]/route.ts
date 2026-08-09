@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase';
 import { mapDbRowToMasterQuestion, updateServerQuestionAsync, deleteServerQuestionAsync } from '@/lib/master-question-bank-server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest, { params }: { params: any }) {
   try {
     const resolvedParams = await params;

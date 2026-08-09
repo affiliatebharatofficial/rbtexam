@@ -117,24 +117,39 @@ export default function ExamPage() {
     localStorage.removeItem(EXAM_STORAGE_KEY);
   };
 
-  // Resume saved session
-  const handleResumeSession = () => {
+  // Resume saved session with live DB validation
+  const handleResumeSession = async () => {
     try {
       const saved = localStorage.getItem(EXAM_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        setQuestions(parsed.questions);
-        setCurrentIndex(parsed.currentIndex || 0);
-        setUserAnswers(parsed.userAnswers || {});
-        setBookmarkedIds(parsed.bookmarkedIds || []);
-        setTimeRemaining(parsed.timeRemaining || 5400);
-        setMode(parsed.mode || 'timed');
-        setQuestionCount(parsed.questionCount || 85);
-        setPhase('active');
+        // Verify questions still exist in live database
+        const res = await fetch(`/api/questions?limit=100&certification=RBT&status=published`);
+        if (res.ok) {
+          const json = await res.json();
+          const dbQuestionIds = new Set((json.data || []).map((q: any) => q.id));
+          const validQuestions = (parsed.questions || []).filter((q: Question) => dbQuestionIds.has(q.id));
+
+          if (validQuestions.length > 0) {
+            setQuestions(validQuestions);
+            setCurrentIndex(Math.min(parsed.currentIndex || 0, validQuestions.length - 1));
+            setUserAnswers(parsed.userAnswers || {});
+            setBookmarkedIds(parsed.bookmarkedIds || []);
+            setTimeRemaining(parsed.timeRemaining || 5400);
+            setMode(parsed.mode || 'timed');
+            setQuestionCount(parsed.questionCount || 85);
+            setPhase('active');
+            return;
+          }
+        }
       }
     } catch (e) {
-      handleStartExam();
+      console.error('Failed to validate saved session:', e);
     }
+    // If DB is empty or questions were deleted, clear saved session state
+    localStorage.removeItem(EXAM_STORAGE_KEY);
+    setHasSavedSession(false);
+    handleStartExam();
   };
 
   // Save session to localStorage

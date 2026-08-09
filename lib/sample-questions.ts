@@ -82,8 +82,12 @@ export function getMasterBankExamQuestions(): Question[] {
 }
 
 /**
- * Dynamic sample questions array bound to the live Master Question Bank
+ * Dynamic sample questions getter bound to live Master Question Bank
  */
+export function getSampleBacbQuestions(): Question[] {
+  return getMasterBankExamQuestions();
+}
+
 export const SAMPLE_BACB_QUESTIONS: Question[] = getMasterBankExamQuestions();
 
 /**

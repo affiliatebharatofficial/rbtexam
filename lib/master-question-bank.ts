@@ -15,44 +15,22 @@ export const MASTER_QUESTION_BANK: MasterQuestion[] = [];
 const LOCAL_STORAGE_KEY = 'rbt_master_questions_v7';
 
 /**
- * Load Persistent Questions from LocalStorage
+ * Load Persistent Questions (returns live memory bank initialized from database)
  */
 export function loadPersistentQuestions(): MasterQuestion[] {
-  if (typeof window === 'undefined') {
-    return MASTER_QUESTION_BANK;
-  }
-
-  try {
-    let saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved === null) {
-      saved = localStorage.getItem('rbt_master_questions_v5') || localStorage.getItem('rbt_master_questions_v4');
-    }
-
-    if (saved !== null) {
-      const parsed: MasterQuestion[] = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        MASTER_QUESTION_BANK.length = 0;
-        MASTER_QUESTION_BANK.push(...parsed);
-        return MASTER_QUESTION_BANK;
-      }
-    }
-  } catch (e) {
-    console.error('Failed to parse persistent questions from localStorage:', e);
-  }
-
   return MASTER_QUESTION_BANK;
 }
 
 /**
- * Save current MASTER_QUESTION_BANK state to LocalStorage
+ * Save current MASTER_QUESTION_BANK state
  */
 export function savePersistentQuestions(): void {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(MASTER_QUESTION_BANK));
-  } catch (e) {
-    console.error('Failed to save persistent questions to localStorage:', e);
-  }
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+    localStorage.removeItem('rbt_master_questions_v5');
+    localStorage.removeItem('rbt_master_questions_v4');
+  } catch (e) {}
 }
 
 /**

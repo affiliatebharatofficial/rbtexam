@@ -3,6 +3,9 @@ import { getSupabaseAdminClient } from '@/lib/supabase';
 import { mapDbRowToMasterQuestion, createServerQuestionAsync } from '@/lib/master-question-bank-server';
 import { QuestionFilterParams, MasterQuestion } from '@/types/master-question';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
