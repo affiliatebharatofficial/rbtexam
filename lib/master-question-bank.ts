@@ -16,7 +16,7 @@ const SEED_QUESTIONS: MasterQuestion[] = FULL_BACB_SEED_QUESTIONS;
 // Persistent Master Question Store
 export const MASTER_QUESTION_BANK: MasterQuestion[] = [...SEED_QUESTIONS];
 
-const LOCAL_STORAGE_KEY = 'rbt_master_questions_v4';
+const LOCAL_STORAGE_KEY = 'rbt_master_questions_v5';
 
 /**
  * Load Persistent Questions from LocalStorage and merge any new SEED questions
@@ -30,17 +30,20 @@ export function loadPersistentQuestions(): MasterQuestion[] {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved !== null) {
       const parsed: MasterQuestion[] = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        MASTER_QUESTION_BANK.length = 0;
-        MASTER_QUESTION_BANK.push(...parsed);
-        return MASTER_QUESTION_BANK;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const hasPublished = parsed.some((q) => q.status === 'published' || q.status === 'featured');
+        if (hasPublished) {
+          MASTER_QUESTION_BANK.length = 0;
+          MASTER_QUESTION_BANK.push(...parsed);
+          return MASTER_QUESTION_BANK;
+        }
       }
     }
   } catch (e) {
     console.error('Failed to parse persistent questions from localStorage:', e);
   }
 
-  // Initial seed fallback (only on clean initial state when localStorage key does not exist)
+  // Initial seed fallback
   MASTER_QUESTION_BANK.length = 0;
   MASTER_QUESTION_BANK.push(...SEED_QUESTIONS);
   savePersistentQuestions();

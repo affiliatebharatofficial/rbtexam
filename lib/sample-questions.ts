@@ -1,22 +1,34 @@
 import { Question } from '@/types/exam';
 import { MASTER_QUESTION_BANK, loadPersistentQuestions } from './master-question-bank';
+import { FULL_BACB_SEED_QUESTIONS } from './seed-questions-bank';
 import { BACBDomainId } from '@/types/bacb';
 
 /**
  * Dynamically converts MasterQuestion objects from Super Admin Bank into Exam Question format
  */
 export function getMasterBankExamQuestions(): Question[] {
-  const currentBank = loadPersistentQuestions();
+  let currentBank = loadPersistentQuestions();
 
-  return currentBank
-    .filter(
+  let eligible = currentBank.filter(
+    (mq) =>
+      (mq.status === 'published' || mq.status === 'featured') &&
+      (!mq.taskListVersion ||
+        mq.taskListVersion === '3rd_edition' ||
+        mq.taskListVersion.toLowerCase().includes('3rd'))
+  );
+
+  if (eligible.length === 0) {
+    currentBank = FULL_BACB_SEED_QUESTIONS;
+    eligible = currentBank.filter(
       (mq) =>
         (mq.status === 'published' || mq.status === 'featured') &&
         (!mq.taskListVersion ||
           mq.taskListVersion === '3rd_edition' ||
           mq.taskListVersion.toLowerCase().includes('3rd'))
-    )
-    .map((mq) => {
+    );
+  }
+
+  return eligible.map((mq) => {
       const categoryMap: Record<string, BACBDomainId> = {
         'Data Collection and Graphing': 'A',
         'Behavior Assessment': 'B',
