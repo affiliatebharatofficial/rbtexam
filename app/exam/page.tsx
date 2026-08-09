@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Question } from '@/types/exam';
 import { SAMPLE_BACB_QUESTIONS, generateExamQuestions, convertMasterQuestionsToExamQuestions } from '@/lib/sample-questions';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
+import { awardCandidateXP } from '@/lib/candidate-performance-engine';
 import confetti from 'canvas-confetti';
 import {
   Sparkles,
@@ -204,9 +205,22 @@ export default function ExamPage() {
     });
     const percentage = Math.round((correct / questions.length) * 100);
 
+    // Calculate & Award XP
+    let xpEarned = 200; // Base completion
+    let xpReason = `Completed ${questions.length}-Question Practice Exam (${percentage}%)`;
+
     if (percentage >= 85) {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      xpEarned += 500;
+      xpReason = `🎉 PASSED ${questions.length}-Q Exam (${percentage}%) - Pass Threshold Bonus!`;
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
     }
+
+    if (percentage >= 95) {
+      xpEarned += 300;
+      xpReason = `🏆 OUTSTANDING ${questions.length}-Q Exam (${percentage}%) - High Mastery Bonus!`;
+    }
+
+    awardCandidateXP(xpEarned, xpReason, 'exam');
   };
 
   const currentQ = questions[currentIndex];

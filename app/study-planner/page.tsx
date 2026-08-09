@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/context/auth-context';
 import { getCandidateAdaptiveProfile } from '@/lib/adaptive-learning-engine';
+import { awardCandidateXP } from '@/lib/candidate-performance-engine';
 import { CertificationLevel, DailyTask } from '@/types/adaptive-learning';
 import {
   Sparkles,
@@ -59,7 +60,16 @@ export default function StudyPlannerPage() {
 
   const toggleTaskCompleted = (taskId: string) => {
     setDailyTasks(
-      dailyTasks.map((t) => (t.id === taskId ? { ...t, isCompleted: !t.isCompleted } : t))
+      dailyTasks.map((t) => {
+        if (t.id === taskId) {
+          const nextState = !t.isCompleted;
+          if (nextState) {
+            awardCandidateXP(t.xpReward, `Completed Study Task: ${t.title}`, 'task', t.id);
+          }
+          return { ...t, isCompleted: nextState };
+        }
+        return t;
+      })
     );
   };
 

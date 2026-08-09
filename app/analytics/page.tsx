@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { getPlatformAnalyticsSummary, exportAnalyticsToCSV } from '@/lib/analytics-engine';
+import { CandidatePerformanceAnalyticsView } from '@/components/dashboard/candidate-performance-analytics';
 import {
   TrendingUp,
   DollarSign,
@@ -27,10 +28,10 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-type BITab = 'business' | 'students' | 'ai_tutor' | 'seo' | 'system';
+type BITab = 'candidate_xp' | 'business' | 'students' | 'ai_tutor' | 'seo' | 'system';
 
 export default function AnalyticsPage() {
-  const [activeTab, setActiveTab] = useState<BITab>('business');
+  const [activeTab, setActiveTab] = useState<BITab>('candidate_xp');
   const [timeframe, setTimeframe] = useState('30d');
 
   const summary = getPlatformAnalyticsSummary();
@@ -163,6 +164,7 @@ export default function AnalyticsPage() {
         {/* TABBED BI NAVIGATION BAR */}
         <div className="flex items-center space-x-2 border-b border-slate-200 text-xs font-bold pb-2 overflow-x-auto">
           {[
+            { id: 'candidate_xp', label: 'My XP & Candidate Performance', icon: Award },
             { id: 'business', label: 'Business & Revenue', icon: TrendingUp },
             { id: 'students', label: 'Student Intelligence', icon: Users },
             { id: 'ai_tutor', label: 'AI LLM Costs', icon: Brain },
@@ -172,9 +174,9 @@ export default function AnalyticsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as BITab)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all ${
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all flex-shrink-0 ${
                 activeTab === tab.id
-                  ? 'bg-[#0F172A] text-white shadow-md'
+                  ? 'bg-[#0F172A] text-white shadow-md font-bold'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
@@ -184,7 +186,10 @@ export default function AnalyticsPage() {
           ))}
         </div>
 
-        {/* TAB 1: BUSINESS & REVENUE ANALYTICS */}
+        {/* TAB 0: CANDIDATE XP & PERFORMANCE ANALYTICS */}
+        {activeTab === 'candidate_xp' && (
+          <CandidatePerformanceAnalyticsView />
+        )}
         {activeTab === 'business' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fadeIn">
             <div className="lg:col-span-8">
