@@ -26,21 +26,41 @@ function getPersistentFilePath(): string {
   return path.join(dataDir, 'questions-store.json');
 }
 
+import { FULL_BACB_SEED_QUESTIONS } from './seed-questions-bank';
+
 /**
  * Server-only: Load questions from server JSON store
  */
 export function loadServerPersistentQuestions(): MasterQuestion[] {
   try {
     const filePath = getPersistentFilePath();
+    let fileQuestions: MasterQuestion[] = [];
     if (fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(fileData);
       if (Array.isArray(parsed)) {
-        MASTER_QUESTION_BANK.length = 0;
-        MASTER_QUESTION_BANK.push(...parsed);
-        return MASTER_QUESTION_BANK;
+        fileQuestions = parsed;
       }
     }
+
+    const questionMap = new Map<string, MasterQuestion>();
+    FULL_BACB_SEED_QUESTIONS.forEach((sq) => {
+      questionMap.set(sq.id, {
+        ...sq,
+        taskListVersion: '3rd_edition',
+        status: 'published',
+      });
+    });
+
+    fileQuestions.forEach((fq) => {
+      questionMap.set(fq.id, fq);
+    });
+
+    const merged = Array.from(questionMap.values());
+    MASTER_QUESTION_BANK.length = 0;
+    MASTER_QUESTION_BANK.push(...merged);
+    saveServerPersistentQuestions();
+    return MASTER_QUESTION_BANK;
   } catch (err) {
     // Graceful fallback for serverless environments
   }
