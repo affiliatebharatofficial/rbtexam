@@ -18,18 +18,24 @@ export function WeakStrongTopics() {
     { code: 'F-02', name: 'RBT Ethics Code 2.0 & Scope', domain: 'Domain F', score: 98, status: 'Mastered' },
   ];
 
-  useEffect(() => {
+  const loadData = () => {
     try {
       const stored = localStorage.getItem('rbt_exam_sessions');
       if (stored) {
         const sessions = JSON.parse(stored);
-        if (sessions.length > 0) {
+        if (Array.isArray(sessions) && sessions.length > 0) {
           setHasData(true);
         }
       }
     } catch (e) {
       console.error('Failed to load topic breakdown', e);
     }
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('rbt_exam_session_saved', loadData);
+    return () => window.removeEventListener('rbt_exam_session_saved', loadData);
   }, []);
 
   if (!hasData) {

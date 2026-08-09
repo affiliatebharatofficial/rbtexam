@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/protected-route';
 import { useAuth } from '@/context/auth-context';
@@ -21,10 +21,37 @@ import { Sparkles, Brain, Flame, Sun, Moon, Calendar, ShieldCheck, ArrowRight, A
 export default function DashboardPage() {
   const { user } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
+  const [examSessions, setExamSessions] = useState<any[]>([]);
 
-  const readinessScore = user?.readinessScore ?? 0;
+  const loadSessions = () => {
+    try {
+      const stored = localStorage.getItem('rbt_exam_sessions');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) setExamSessions(parsed);
+      }
+    } catch (e) {
+      console.error('Failed to load exam sessions:', e);
+    }
+  };
+
+  useEffect(() => {
+    loadSessions();
+    window.addEventListener('rbt_exam_session_saved', loadSessions);
+    return () => window.removeEventListener('rbt_exam_session_saved', loadSessions);
+  }, []);
+
+  let readinessScore = user?.readinessScore ?? 0;
+  let passLikelihood = user?.estimatedPassLikelihood ?? 0;
+
+  if (examSessions.length > 0) {
+    const totalScoreSum = examSessions.reduce((acc, s) => acc + (Number(s.score) || 0), 0);
+    readinessScore = Math.round(totalScoreSum / examSessions.length);
+    const passedCount = examSessions.filter((s) => Number(s.score) >= 85).length;
+    passLikelihood = Math.round((passedCount / examSessions.length) * 100);
+  }
+
   const targetScore = user?.targetScore ?? 90;
-  const passLikelihood = user?.estimatedPassLikelihood ?? 0;
 
   return (
     <ProtectedRoute>

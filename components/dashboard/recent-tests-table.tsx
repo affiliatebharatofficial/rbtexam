@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 export function RecentTestsTable() {
   const [attempts, setAttempts] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadAttempts = () => {
     try {
       const stored = localStorage.getItem('rbt_exam_sessions');
       if (stored) {
@@ -19,6 +19,12 @@ export function RecentTestsTable() {
     } catch (e) {
       console.error('Failed to load exam sessions', e);
     }
+  };
+
+  useEffect(() => {
+    loadAttempts();
+    window.addEventListener('rbt_exam_session_saved', loadAttempts);
+    return () => window.removeEventListener('rbt_exam_session_saved', loadAttempts);
   }, []);
 
   if (attempts.length === 0) {

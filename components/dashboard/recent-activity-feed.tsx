@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 export function RecentActivityFeed() {
   const [activities, setActivities] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadActivities = () => {
     try {
       const stored = localStorage.getItem('rbt_activity_stream');
       if (stored) {
@@ -16,6 +16,12 @@ export function RecentActivityFeed() {
     } catch (e) {
       console.error('Failed to load activity stream', e);
     }
+  };
+
+  useEffect(() => {
+    loadActivities();
+    window.addEventListener('rbt_exam_session_saved', loadActivities);
+    return () => window.removeEventListener('rbt_exam_session_saved', loadActivities);
   }, []);
 
   if (activities.length === 0) {

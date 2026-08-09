@@ -22,12 +22,12 @@ export function PerformanceChart() {
     { code: 'F', name: 'Ethics', score: 0, color: 'bg-purple-500' },
   ]);
 
-  useEffect(() => {
+  const loadData = () => {
     try {
       const stored = localStorage.getItem('rbt_exam_sessions');
       if (stored) {
         const sessions = JSON.parse(stored);
-        if (sessions.length > 0) {
+        if (Array.isArray(sessions) && sessions.length > 0) {
           setHasActivity(true);
           const latestScore = sessions[0].score || 0;
           setTrendData([
@@ -36,11 +36,38 @@ export function PerformanceChart() {
             { label: 'Mock Exam', score: latestScore },
             { label: 'Current', score: latestScore },
           ]);
+
+          // Compute domain scores across all sessions
+          const domainTotals: Record<string, { total: number; correct: number }> = {};
+          sessions.forEach((s: any) => {
+            if (s.domainBreakdown && typeof s.domainBreakdown === 'object') {
+              Object.entries(s.domainBreakdown).forEach(([dom, val]: [string, any]) => {
+                if (!domainTotals[dom]) domainTotals[dom] = { total: 0, correct: 0 };
+                domainTotals[dom].total += Number(val.total || 0);
+                domainTotals[dom].correct += Number(val.correct || 0);
+              });
+            }
+          });
+
+          setDomainData([
+            { code: 'A', name: 'Measurement', score: domainTotals.A?.total ? Math.round((domainTotals.A.correct / domainTotals.A.total) * 100) : latestScore, color: 'bg-emerald-500' },
+            { code: 'B', name: 'Assessment', score: domainTotals.B?.total ? Math.round((domainTotals.B.correct / domainTotals.B.total) * 100) : latestScore, color: 'bg-blue-500' },
+            { code: 'C', name: 'Skill Acq', score: domainTotals.C?.total ? Math.round((domainTotals.C.correct / domainTotals.C.total) * 100) : latestScore, color: 'bg-indigo-500' },
+            { code: 'D', name: 'Behavior Red', score: domainTotals.D?.total ? Math.round((domainTotals.D.correct / domainTotals.D.total) * 100) : latestScore, color: 'bg-amber-500' },
+            { code: 'E', name: 'Documentation', score: domainTotals.E?.total ? Math.round((domainTotals.E.correct / domainTotals.E.total) * 100) : latestScore, color: 'bg-teal-500' },
+            { code: 'F', name: 'Ethics', score: domainTotals.F?.total ? Math.round((domainTotals.F.correct / domainTotals.F.total) * 100) : latestScore, color: 'bg-purple-500' },
+          ]);
         }
       }
     } catch (e) {
       console.error('Failed to load performance analytics', e);
     }
+  };
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener('rbt_exam_session_saved', loadData);
+    return () => window.removeEventListener('rbt_exam_session_saved', loadData);
   }, []);
 
   if (!hasActivity) {

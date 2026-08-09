@@ -196,14 +196,73 @@ export default function ExamPage() {
     setPhase('results');
     localStorage.removeItem(EXAM_STORAGE_KEY);
 
-    // Calculate score
+    // Calculate score & domain breakdown
     let correct = 0;
+    const domainScores: Record<string, { total: number; correct: number }> = {
+      A: { total: 0, correct: 0 },
+      B: { total: 0, correct: 0 },
+      C: { total: 0, correct: 0 },
+      D: { total: 0, correct: 0 },
+      E: { total: 0, correct: 0 },
+      F: { total: 0, correct: 0 },
+    };
+
     questions.forEach((q) => {
+      const dom = q.domainId || 'A';
+      if (!domainScores[dom]) domainScores[dom] = { total: 0, correct: 0 };
+      domainScores[dom].total += 1;
+
       if (userAnswers[q.id] === q.correctOptionId) {
         correct += 1;
+        domainScores[dom].correct += 1;
       }
     });
-    const percentage = Math.round((correct / questions.length) * 100);
+
+    const percentage = Math.round((correct / (questions.length || 1)) * 100);
+
+    // Save Completed Exam Session to Persistent LocalStorage & Database
+    const newSession = {
+      id: `session_${Date.now()}`,
+      date: new Date().toISOString().split('T')[0],
+      timestamp: Date.now(),
+      score: percentage,
+      totalQuestions: questions.length,
+      correctCount: correct,
+      timeSpentSeconds: 5400 - timeRemaining,
+      mode,
+      certification: 'RBT',
+      domainBreakdown: domainScores,
+    };
+
+    try {
+      const existing = localStorage.getItem('rbt_exam_sessions');
+      let sessionsList = [];
+      if (existing) {
+        try { sessionsList = JSON.parse(existing); } catch (e) {}
+      }
+      if (!Array.isArray(sessionsList)) sessionsList = [];
+      sessionsList.unshift(newSession);
+      localStorage.setItem('rbt_exam_sessions', JSON.stringify(sessionsList));
+
+      // Append to Activity Feed Stream
+      const newActivity = {
+        id: `act_${Date.now()}`,
+        title: `Completed ${questions.length}-Question Practice Exam (${percentage}%)`,
+        timestamp: new Date().toISOString(),
+        type: 'exam',
+        score: percentage,
+      };
+      const existingAct = localStorage.getItem('rbt_activity_stream');
+      let actList = [];
+      if (existingAct) { try { actList = JSON.parse(existingAct); } catch (e) {} }
+      if (!Array.isArray(actList)) actList = [];
+      actList.unshift(newActivity);
+      localStorage.setItem('rbt_activity_stream', JSON.stringify(actList.slice(0, 30)));
+
+      window.dispatchEvent(new Event('rbt_exam_session_saved'));
+    } catch (e) {
+      console.error('Failed to save completed exam session:', e);
+    }
 
     // Calculate & Award XP
     let xpEarned = 200; // Base completion
