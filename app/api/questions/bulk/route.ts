@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { bulkUpdateStatus, exportQuestionsToCSV, MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
-import { bulkDeleteServerQuestions } from '@/lib/master-question-bank-server';
+import { exportQuestionsToCSV, MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
+import { bulkDeleteServerQuestions, bulkUpdateServerStatus } from '@/lib/master-question-bank-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === 'update_status') {
-      const count = bulkUpdateStatus(ids, status);
+      const count = bulkUpdateServerStatus(ids, status);
       return NextResponse.json({ success: true, updatedCount: count, status });
     }
 

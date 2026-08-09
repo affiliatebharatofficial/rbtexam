@@ -383,6 +383,21 @@ export default function ExamPage() {
         )}
 
         {/* PHASE 2: ACTIVE EXAM SIMULATION */}
+        {phase === 'active' && (!currentQ || questions.length === 0) && (
+          <div className="max-w-xl mx-auto py-12">
+            <Card glass className="p-8 text-center space-y-4 border-white/90 shadow-xl">
+              <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
+              <h3 className="text-lg font-bold text-slate-900">No Published Questions Available</h3>
+              <p className="text-sm text-slate-600">
+                All questions are currently set to Draft in the Super Admin CMS. Publish questions in the Admin panel to make them active for candidate practice exams.
+              </p>
+              <Button onClick={() => setPhase('setup')} variant="outline" className="mt-4">
+                Back to Setup
+              </Button>
+            </Card>
+          </div>
+        )}
+
         {phase === 'active' && currentQ && (
           <div className="max-w-4xl mx-auto space-y-6 animate-fadeIn">
             {/* Top Exam Status Bar */}

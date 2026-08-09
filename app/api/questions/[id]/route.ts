@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getQuestionById, updateQuestion } from '@/lib/master-question-bank';
-import { deleteServerQuestion } from '@/lib/master-question-bank-server';
+import { getQuestionById } from '@/lib/master-question-bank';
+import { updateServerQuestion, deleteServerQuestion } from '@/lib/master-question-bank-server';
 
 export async function GET(request: NextRequest, { params }: { params: any }) {
   try {
@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
     const id = resolvedParams.id;
     const body = await request.json();
 
-    const updated = updateQuestion(id, body);
+    const updated = updateServerQuestion(id, body);
     if (!updated) {
       return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }

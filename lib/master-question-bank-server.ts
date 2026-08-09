@@ -1,12 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { MasterQuestion } from '@/types/master-question';
+import { MasterQuestion, QuestionStatus } from '@/types/master-question';
 import {
   MASTER_QUESTION_BANK,
   createQuestion as createQuestionInBank,
+  updateQuestion as updateQuestionInBank,
   deleteQuestion as deleteQuestionInBank,
   bulkDeleteQuestions as bulkDeleteQuestionsInBank,
+  bulkUpdateStatus as bulkUpdateStatusInBank,
 } from './master-question-bank';
 
 function getPersistentFilePath(): string {
@@ -34,11 +36,9 @@ export function loadServerPersistentQuestions(): MasterQuestion[] {
       const fileData = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(fileData);
       if (Array.isArray(parsed)) {
-        parsed.forEach((q: MasterQuestion) => {
-          if (!MASTER_QUESTION_BANK.some((existing) => existing.id === q.id)) {
-            MASTER_QUESTION_BANK.unshift(q);
-          }
-        });
+        MASTER_QUESTION_BANK.length = 0;
+        MASTER_QUESTION_BANK.push(...parsed);
+        return MASTER_QUESTION_BANK;
       }
     }
   } catch (err) {
@@ -67,6 +67,30 @@ export function createServerQuestion(data: Partial<MasterQuestion> & Omit<Master
   const created = createQuestionInBank(data);
   saveServerPersistentQuestions();
   return created;
+}
+
+/**
+ * Server-only: Update single question and persist to server JSON store
+ */
+export function updateServerQuestion(id: string, updates: Partial<MasterQuestion>): MasterQuestion | undefined {
+  loadServerPersistentQuestions();
+  const updated = updateQuestionInBank(id, updates);
+  if (updated) {
+    saveServerPersistentQuestions();
+  }
+  return updated;
+}
+
+/**
+ * Server-only: Bulk update status and persist to server JSON store
+ */
+export function bulkUpdateServerStatus(ids: string[], status: QuestionStatus): number {
+  loadServerPersistentQuestions();
+  const count = bulkUpdateStatusInBank(ids, status);
+  if (count > 0) {
+    saveServerPersistentQuestions();
+  }
+  return count;
 }
 
 /**
