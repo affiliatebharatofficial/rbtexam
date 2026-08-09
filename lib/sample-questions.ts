@@ -11,7 +11,7 @@ export function getMasterBankExamQuestions(): Question[] {
 
   let eligible = currentBank.filter(
     (mq) =>
-      (mq.status === 'published' || mq.status === 'featured') &&
+      (!mq.status || mq.status === 'published' || mq.status === 'featured') &&
       (!mq.taskListVersion ||
         mq.taskListVersion === '3rd_edition' ||
         mq.taskListVersion.toLowerCase().includes('3rd'))
@@ -21,7 +21,7 @@ export function getMasterBankExamQuestions(): Question[] {
     currentBank = FULL_BACB_SEED_QUESTIONS;
     eligible = currentBank.filter(
       (mq) =>
-        (mq.status === 'published' || mq.status === 'featured') &&
+        (!mq.status || mq.status === 'published' || mq.status === 'featured') &&
         (!mq.taskListVersion ||
           mq.taskListVersion === '3rd_edition' ||
           mq.taskListVersion.toLowerCase().includes('3rd'))
