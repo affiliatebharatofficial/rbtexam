@@ -680,11 +680,15 @@ export function transformQuestionToFlashcard(mq: any): Partial<Flashcard> {
  */
 export async function convertQuestionsToDatabaseFlashcards(forceAll: boolean = false): Promise<{ convertedCount: number; insertedIds: string[] }> {
   const adminDb = getSupabaseAdminClient();
-  let sourceQuestions: any[] = [...MASTER_QUESTION_BANK];
+  let sourceQuestions: any[] = [];
 
   if (isSupabaseConfigured()) {
     try {
-      const { data: dbQuestions } = await adminDb.from('master_questions').select('*').is('deleted_at', null);
+      const { data: dbQuestions } = await adminDb
+        .from('master_questions')
+        .select('*')
+        .is('deleted_at', null);
+
       if (dbQuestions && dbQuestions.length > 0) {
         const dbMapped = dbQuestions.map((q: any) => {
           let opts: any[] = [];
@@ -715,11 +719,13 @@ export async function convertQuestionsToDatabaseFlashcards(forceAll: boolean = f
             keywords: q.keywords || ['Question Bank'],
           };
         });
-        sourceQuestions = [...dbMapped, ...sourceQuestions];
+        sourceQuestions = dbMapped;
       }
     } catch (e) {
-      console.error('[Flashcard Bank] Failed to fetch DB questions for conversion, using seed bank:', e);
+      console.error('[Flashcard Bank] Failed to fetch DB questions for conversion:', e);
     }
+  } else {
+    sourceQuestions = [...MASTER_QUESTION_BANK];
   }
 
   // Deduplication check: fetch existing database cards to skip already converted source questions
@@ -863,13 +869,13 @@ export async function getFilteredFlashcardsAsync(
   userId: string = 'default_user'
 ): Promise<FlashcardPaginationResult> {
   const dbCards = await fetchDatabaseFlashcards();
-  const dbCardIds = new Set(dbCards.map((c) => c.id));
-  const memoryCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()].filter(
-    (c) => !dbCardIds.has(c.id)
-  );
+  if (isSupabaseConfigured() && dbCards.length > 0) {
+    const allCards = [...dbCards, ...CUSTOM_FLASHCARDS];
+    return processFilteredFlashcardsList(allCards, params, userId);
+  }
 
-  const allCards = [...dbCards, ...memoryCards];
-  return processFilteredFlashcardsList(allCards, params, userId);
+  const memoryCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
+  return processFilteredFlashcardsList(memoryCards, params, userId);
 }
 
 /**
