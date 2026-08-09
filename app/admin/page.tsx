@@ -634,10 +634,12 @@ export default function SuperAdminCMSPage() {
               <span>Total Registered Candidates</span>
               <Users className="w-4 h-4 text-[#2563EB]" />
             </div>
-            <div className="text-3xl font-black text-slate-900">{summary.students.totalStudents.toLocaleString()}</div>
+            <div className="text-3xl font-black text-slate-900">
+              {Math.max(userAccounts.length, summary.students.totalStudents).toLocaleString()}
+            </div>
             <div className="text-[10px] text-slate-400 font-mono">
-              {summary.students.totalStudents > 0
-                ? `${summary.students.activeStudentsDAU} DAU • ${summary.students.activeStudentsMAU} MAU`
+              {Math.max(userAccounts.length, summary.students.totalStudents) > 0
+                ? `${userAccounts.filter((u) => u.status === 'active').length || userAccounts.length} Active Accounts • ${Math.max(userAccounts.length, summary.students.totalStudents)} Registered`
                 : 'No registered candidates yet'}
             </div>
           </Card>
