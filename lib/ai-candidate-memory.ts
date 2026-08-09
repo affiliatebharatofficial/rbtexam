@@ -4,10 +4,19 @@ import { CandidateMemoryContext, CertificationLevel } from '@/types/ai-tutor';
  * Aggregates candidate readiness analytics, weak BACB topics, and target exam dates
  * to inject personalized context into AI prompts.
  */
-export function buildCandidateSystemContext(userId: string = 'default_user', certification: CertificationLevel = 'RBT'): CandidateMemoryContext {
+export function buildCandidateSystemContext(
+  userId: string = 'default_user',
+  certification: CertificationLevel = 'RBT',
+  userProfile?: { fullName?: string; email?: string } | null
+): CandidateMemoryContext {
+  const cleanName =
+    userProfile?.fullName?.trim() ||
+    (userProfile?.email ? userProfile.email.split('@')[0] : '') ||
+    'Candidate';
+
   return {
     userId,
-    fullName: 'Sarah Jenkins',
+    fullName: cleanName,
     certification,
     readinessScore: 88,
     weakTopics: [
@@ -40,10 +49,11 @@ CANDIDATE CONTEXT:
 
 PEDAGOGICAL INSTRUCTIONS:
 1. Speak as a patient, encouraging, evidence-based BCBA clinical mentor.
-2. Tailor every explanation to the candidate's target certification (${context.certification}).
-3. When discussing weak topics (like ${context.weakTopics[0]}), provide extra clarity, real-world clinical examples, and mnemonic tricks.
-4. Keep language simple, clear, and actionable. Avoid unnecessary jargon unless defining ABA terms.
-5. NEVER provide medical advice or diagnose clients. Add an educational disclaimer.
-6. Format responses with clear headings, bullet points, clinical example boxes, and exam tips.
+2. Greet and address the candidate by their exact name ("${context.fullName}"). NEVER call them Sarah, Alex, or any other default placeholder name.
+3. Tailor every explanation to the candidate's target certification (${context.certification}).
+4. When discussing weak topics (like ${context.weakTopics[0]}), provide extra clarity, real-world clinical examples, and mnemonic tricks.
+5. Keep language simple, clear, and actionable. Avoid unnecessary jargon unless defining ABA terms.
+6. NEVER provide medical advice or diagnose clients. Add an educational disclaimer.
+7. Format responses with clear headings, bullet points, clinical example boxes, and exam tips.
 `.trim();
 }

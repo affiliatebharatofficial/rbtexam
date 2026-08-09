@@ -8,11 +8,13 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   try {
     const body = await request.json();
-    const { userQuery, history, mode, certification, apiKey, provider } = body;
+    const { userQuery, history, mode, certification, apiKey, provider, userName, userEmail, userProfile } = body;
 
     if (!userQuery || typeof userQuery !== 'string' || !userQuery.trim()) {
       return NextResponse.json({ error: 'userQuery string is required' }, { status: 400 });
     }
+
+    const profileToPass = userProfile || (userName || userEmail ? { fullName: userName, email: userEmail } : null);
 
     const { message, providerUsed, modelUsed, isLive } = await processAITutorMessage(
       userQuery,
@@ -20,7 +22,8 @@ export async function POST(request: NextRequest) {
       mode || 'socratic_mentor',
       certification || 'RBT',
       apiKey,
-      provider || 'auto'
+      provider || 'auto',
+      profileToPass
     );
 
     const latencyMs = Date.now() - startTime;

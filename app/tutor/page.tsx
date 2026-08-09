@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/auth-context';
 import { ChatMessage, CertificationLevel, PromptMode } from '@/types/ai-tutor';
 import { buildCandidateSystemContext } from '@/lib/ai-candidate-memory';
 import {
@@ -29,6 +30,7 @@ import {
 } from 'lucide-react';
 
 export default function TutorPage() {
+  const { user } = useAuth();
   const [certification, setCertification] = useState<CertificationLevel>('RBT');
   const [mode, setMode] = useState<PromptMode>('socratic_mentor');
   const [inputQuery, setInputQuery] = useState('');
@@ -58,13 +60,14 @@ export default function TutorPage() {
     setShowKeyModal(false);
   };
 
-  const candidateContext = buildCandidateSystemContext('default_user', certification);
+  const candidateName = user?.fullName || (user?.email ? user.email.split('@')[0] : 'Candidate');
+  const candidateContext = buildCandidateSystemContext(user?.id || 'default_user', certification, user);
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'msg-welcome',
       sender: 'assistant',
-      content: `Welcome! I am **Socrates AI**, your Board Certified Behavior Analyst (BCBA) clinical mentor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
+      content: `Welcome, **${candidateName}**! I am **Socrates AI**, your Board Certified Behavior Analyst (BCBA) clinical mentor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
       timestamp: new Date().toISOString(),
       clinicalInsight: {
         concept: 'Candidate Focus Recommendation',
@@ -108,6 +111,8 @@ export default function TutorPage() {
           certification,
           apiKey: apiKey.trim() || undefined,
           provider,
+          userName: candidateName,
+          userEmail: user?.email,
         }),
       });
 

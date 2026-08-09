@@ -160,9 +160,10 @@ export async function processAITutorMessage(
   mode: PromptMode = 'socratic_mentor',
   certification: 'RBT' | 'BCaBA' | 'BCBA' = 'RBT',
   customApiKey?: string,
-  preferredProvider: string = 'auto'
+  preferredProvider: string = 'auto',
+  userProfile?: { fullName?: string; email?: string } | null
 ): Promise<{ message: ChatMessage; providerUsed: string; modelUsed: string; isLive: boolean }> {
-  const candidateContext = buildCandidateSystemContext('default_user', certification);
+  const candidateContext = buildCandidateSystemContext('default_user', certification, userProfile);
   const cleanQuery = userQuery.trim();
   const queryLower = cleanQuery.toLowerCase();
 
