@@ -53,7 +53,30 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'footer.terms': 'Terms of Service',
     'footer.guarantee': 'Guarantee Terms',
     'footer.disclaimer': 'Disclaimer',
-    'footer.builtWithPrecision': 'Built with precision for RBT Candidates',
+    // Features Section
+    'features.tagline': 'Built for Maximum Exam Success',
+    'features.mainHeading': 'Everything You Need to Pass the RBT Exam with Confidence',
+    'features.subHeading': 'Engineered with modern cognitive science, spaced repetition, and real-time AI guidance.',
+    'features.feat1.title': 'Adaptive AI Exam Simulator',
+    'features.feat1.desc': '85-question 90-minute timed diagnostic exams built strictly according to BACB RBT 3rd Edition scoring weights. Dynamically adjusts question difficulty based on your performance history.',
+    'features.feat2.title': 'Socrates AI Ethics & Roleplay Tutor',
+    'features.feat2.desc': 'Interact with our conversational AI tutor trained on the RBT Ethics Code 2.0. Simulate challenging client scenarios, extinction bursts, and parent boundary situations in real-time.',
+    'features.feat3.title': 'Spaced-Repetition Flashcards',
+    'features.feat3.desc': 'Leverage the Leitner 5-box algorithm to lock core ABA terminology (DTT, DRO/DRA, Continuous Measurement, Latency, IRT) into your long-term memory with minimal study time.',
+    'features.feat4.title': 'BACB RBT 3rd Ed Task List Mastery',
+    'features.feat4.desc': 'Complete breakdown of all 6 Task List Domains (A through F). Track individual task item mastery from A-01 (Session Prep) to F-04 (5% Monthly Supervision).',
+    'features.feat5.title': 'Domain Weakness Heatmaps',
+    'features.feat5.desc': 'Visual analytics pinpoint exact weak spots before exam day so you spend 100% of your remaining study time on high-impact improvement areas.',
+    'features.feat6.title': 'Clinic & Training Center B2B Portal',
+    'features.feat6.desc': 'Supervisors and BCBAs can oversee trainee cohorts, track student exam readiness scores, assign practice tests, and verify 100% team pass readiness.',
+
+    // Pricing Section
+    'pricing.badge': 'Pass-or-Refund Guarantee Protection',
+    'pricing.heading': 'Invest in Your RBT Certification Success',
+    'pricing.subheading': 'Choose the plan tailored for your exam target date or clinic cohort needs.',
+    'pricing.monthly': 'Monthly Plan',
+    'pricing.annual': 'Annual Pass',
+    'pricing.save': 'Save 40%',
 
     // Exam Engine
     'exam.title': 'RBT Exam Simulator',
@@ -159,6 +182,31 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'footer.guarantee': 'Términos de Garantía',
     'footer.disclaimer': 'Descargo de Responsabilidad',
     'footer.builtWithPrecision': 'Desarrollado con precisión para candidatos RBT',
+
+    // Features Section
+    'features.tagline': 'Diseñado para el Máximo Éxito en el Examen',
+    'features.mainHeading': 'Todo lo que Necesitas para Aprobar el Examen RBT con Confianza',
+    'features.subHeading': 'Diseñado con ciencia cognitiva moderna, repetición espaciada y guía de IA en tiempo real.',
+    'features.feat1.title': 'Simulador de Examen de IA Adaptativo',
+    'features.feat1.desc': 'Exámenes de diagnóstico cronometrados de 85 preguntas y 90 minutos construidos estrictamente según los pesos de calificación del Temario BACB RBT 3ª Edición. Ajusta dinámicamente la dificultad de las preguntas según tu historial.',
+    'features.feat2.title': 'Tutor de Ética y Juegos de Rol de IA Sócrates',
+    'features.feat2.desc': 'Interactúa con nuestro tutor de IA conversacional entrenado en el Código de Ética RBT 2.0. Simula escenarios complejos de clientes, explosiones de extinción y situaciones de límites con padres en tiempo real.',
+    'features.feat3.title': 'Tarjetas de Repetición Espaciada',
+    'features.feat3.desc': 'Aprovecha el algoritmo Leitner de 5 cajas para fijar la terminología básica de ABA (DTT, DRO/DRA, Medición Continua, Latencia, IRT) en tu memoria a largo plazo con el mínimo tiempo de estudio.',
+    'features.feat4.title': 'Dominio del Temario BACB RBT 3ª Edición',
+    'features.feat4.desc': 'Desglose completo de los 6 dominios del temario (A a F). Rastrea el dominio de cada elemento individual desde A-01 (Preparación de Sesión) hasta F-04 (Supervisión Mensual del 5%).',
+    'features.feat5.title': 'Mapas de Calor de Debilidades por Dominio',
+    'features.feat5.desc': 'Los análisis visuales identifican puntos débiles exactos antes del día del examen para que dediques el 100% de tu tiempo restante a áreas de alto impacto.',
+    'features.feat6.title': 'Portal B2B para Clínicas y Centros de Capacitación',
+    'features.feat6.desc': 'Los supervisores y BCBA pueden supervisar grupos de practicantes, rastrear puntajes de preparación para el examen, asignar pruebas de práctica y verificar el 100% de preparación del equipo.',
+
+    // Pricing Section
+    'pricing.badge': 'Protección de Garantía Aprueba-o-Reembolso',
+    'pricing.heading': 'Invierte en tu Éxito de Certificación RBT',
+    'pricing.subheading': 'Elige el plan adaptado a tu fecha objetivo de examen o necesidades de cohorte clínica.',
+    'pricing.monthly': 'Plan Mensual',
+    'pricing.annual': 'Pase Anual',
+    'pricing.save': 'Ahorra 40%',
 
     // Exam Engine
     'exam.title': 'Simulador de Examen RBT',

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
 import { Check, Sparkles, ShieldCheck, ArrowRight, Building2, User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { SubscriptionPlan } from '@/types/subscription-plan';
 import { GuaranteeTermsModal } from '@/components/billing/guarantee-terms-modal';
 
 export function PricingSection() {
+  const { t } = useLanguage();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [loadingVariant, setLoadingVariant] = useState<string | null>(null);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -67,12 +69,12 @@ export function PricingSection() {
     <section id="pricing" className="py-24 bg-white border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-          <Badge variant="emerald">Pass-or-Refund Guarantee Protection</Badge>
+          <Badge variant="emerald">{t('pricing.badge', 'Pass-or-Refund Guarantee Protection')}</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Invest in Your RBT Certification Success
+            {t('pricing.heading', 'Invest in Your RBT Certification Success')}
           </h2>
           <p className="text-base text-slate-600">
-            Choose the plan tailored for your exam target date or clinic cohort needs.
+            {t('pricing.subheading', 'Choose the plan tailored for your exam target date or clinic cohort needs.')}
           </p>
 
           {/* Billing Cycle Toggle */}
@@ -87,7 +89,7 @@ export function PricingSection() {
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                Monthly Plan
+                {t('pricing.monthly', 'Monthly Plan')}
               </button>
               <button
                 type="button"
@@ -98,9 +100,9 @@ export function PricingSection() {
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <span>Annual Pass</span>
+                <span>{t('pricing.annual', 'Annual Pass')}</span>
                 <span className="bg-emerald-400 text-slate-950 text-[10px] px-2 py-0.5 rounded-full font-extrabold">
-                  Save 40%
+                  {t('pricing.save', 'Save 40%')}
                 </span>
               </button>
             </div>
