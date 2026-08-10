@@ -51,6 +51,7 @@ import {
   Plus,
   Send,
   Zap,
+  Sparkles,
   X,
 } from 'lucide-react';
 import { getAllCoupons, createCoupon, toggleCouponStatus, deleteCoupon } from '@/lib/coupon-engine';

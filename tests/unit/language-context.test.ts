@@ -17,8 +17,8 @@ describe('Multilingual i18n & Spanish Language Context Unit Tests', () => {
   };
 
   it('should return English translation by default when language is "en"', () => {
-    const lang = 'en';
-    const t = (key: string) => translations[lang]?.[key] || key;
+    const lang: 'en' | 'es' = 'en';
+    const t = (key: string) => translations[lang]?.[key as keyof (typeof translations)['en']] || key;
 
     expect(t('nav.home')).toBe('Home');
     expect(t('nav.practiceQuestions')).toBe('Practice Questions');
@@ -26,8 +26,8 @@ describe('Multilingual i18n & Spanish Language Context Unit Tests', () => {
   });
 
   it('should return Spanish translation when language is "es"', () => {
-    const lang = 'es';
-    const t = (key: string) => translations[lang]?.[key] || key;
+    const lang: 'en' | 'es' = 'es';
+    const t = (key: string) => translations[lang]?.[key as keyof (typeof translations)['es']] || key;
 
     expect(t('nav.home')).toBe('Inicio');
     expect(t('nav.practiceQuestions')).toBe('Preguntas de Práctica');
