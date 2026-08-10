@@ -28,51 +28,44 @@ export function Navbar() {
     { href: '/task-list', label: t('nav.studyGuides', 'Study Guides'), icon: BookOpen },
     { href: '/tutor', label: t('nav.aiTutor', 'AI Tutor'), icon: BookOpen },
     { href: '/pricing', label: t('nav.pricing', 'Pricing'), icon: BarChart2 },
-    ...(isAuthenticated && !isAdmin ? [{ href: '/dashboard', label: t('nav.dashboard', 'Dashboard'), icon: Brain }] : []),
-    ...(isAuthenticated && isAdmin ? [{ href: '/admin', label: t('nav.adminCms', 'Admin CMS'), icon: ShieldCheck }] : []),
   ];
 
   return (
     <header className="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 gap-4">
           {/* Brand Logo */}
-          <Link href={homeRoute} className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
-              <Brain className="w-6 h-6" />
+          <Link href={homeRoute} className="flex items-center space-x-2.5 flex-shrink-0 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200 flex-shrink-0">
+              <Brain className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-xl font-bold text-[#0F172A] tracking-tight">
+            <div className="flex items-center space-x-2 whitespace-nowrap">
+              <span className="text-lg font-bold text-[#0F172A] tracking-tight whitespace-nowrap">
                 RBT <span className="text-[#2563EB]">Practice Questions</span>
               </span>
-              <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200/60">
+              <span className="hidden xl:inline-block px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200/60 whitespace-nowrap">
                 3rd Ed BACB
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-1 flex-shrink-0">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="px-3 py-2 rounded-lg text-xs font-medium text-slate-600 hover:text-[#2563EB] hover:bg-slate-50 transition-colors flex items-center space-x-1.5"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#2563EB] hover:bg-slate-50 transition-colors flex items-center space-x-1.5 whitespace-nowrap"
               >
-                <link.icon className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#2563EB]" />
+                <link.icon className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#2563EB] flex-shrink-0" />
                 <span>{link.label}</span>
               </Link>
             ))}
           </nav>
 
           {/* User Auth Action Area */}
-          <div className="hidden lg:flex items-center space-x-3">
+          <div className="hidden lg:flex items-center space-x-3 flex-shrink-0">
             <LanguageSelector />
-            <Link href="/pricing">
-              <Button variant="ghost" size="sm" className="text-slate-600 text-xs">
-                {t('nav.pricing', 'Pricing')}
-              </Button>
-            </Link>
 
             {isAuthenticated && user ? (
               <div className="relative">
