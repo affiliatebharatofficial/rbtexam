@@ -22,6 +22,7 @@ export interface GenerationInputParams {
   apiKey?: string;
   isPremium?: boolean;
   adminUserId?: string;
+  language?: string; // 'English' | 'Spanish' | 'es' | 'en'
 }
 
 export interface GenerationResult {
@@ -305,9 +306,17 @@ export function buildAIQuestionPrompt(params: GenerationInputParams): string {
   const qty = params.count;
   const taskCode = params.bacbTaskCode || 'A-01';
   const qType = params.questionType || 'scenario_based';
+  const lang = params.language || 'English';
+
+  const isSpanish = lang.toLowerCase().includes('es') || lang.toLowerCase().includes('spanish');
+  const langInstruction = isSpanish
+    ? 'Write ALL question text, scenarios, options, explanations, and clinical rationale in Spanish (Español), using standard official BACB Spanish technical ABA terminology.'
+    : `Write all content in ${lang}.`;
 
   return `You are a Senior BCBA Exam Item Writer for the BACB (Behavior Analyst Certification Board) RBT 3rd Edition Test Content Outline (TCO).
-Generate EXACTLY ${qty} unique, highly realistic, non-copyrighted ${cert} practice exam questions for candidate preparation.
+Generate EXACTLY ${qty} unique, highly realistic, non-copyrighted ${cert} practice exam questions for candidate preparation in ${lang}.
+
+Language Directive: ${langInstruction}
 
 Parameters:
 - Topic / Concept: "${targetTopic}"

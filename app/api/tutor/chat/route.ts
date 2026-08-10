@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   try {
     const body = await request.json();
-    const { userQuery, history, mode, certification, apiKey, provider, userName, userEmail, userProfile } = body;
+    const { userQuery, history, mode, certification, apiKey, provider, userName, userEmail, userProfile, language } = body;
 
     if (!userQuery || typeof userQuery !== 'string' || !userQuery.trim()) {
       return NextResponse.json({ error: 'userQuery string is required' }, { status: 400 });
@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
       certification || 'RBT',
       apiKey,
       provider || 'auto',
-      profileToPass
+      profileToPass,
+      language || 'en'
     );
 
     const latencyMs = Date.now() - startTime;

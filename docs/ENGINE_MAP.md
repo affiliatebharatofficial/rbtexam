@@ -14,6 +14,7 @@
 | **ai-content-engine.ts** | `lib/ai-content-engine.ts` | Educational content drafting & editorial review | Admin Content Engine |
 | **seo-engine.ts** | `lib/seo-engine.ts` | Programmatic SEO page metadata & JSON-LD schema | Dynamic `/rbt` Routes |
 | **health-engine.ts** | `lib/health-engine.ts` | Service status aggregation (DB, OpenAI, RAG) | `/api/health`, Infrastructure |
+| **language-context.tsx** | `context/language-context.tsx` | Multilingual i18n switcher, English & Spanish dictionaries, persistent locale storage | Navbar, AI Tutor, Exams, Flashcards, Admin |
 
 ## Related Files
 - [docs/FEATURE_MAP.md](file:///g:/RBT/docs/FEATURE_MAP.md)

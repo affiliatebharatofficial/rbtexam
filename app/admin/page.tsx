@@ -1556,26 +1556,66 @@ export default function SuperAdminCMSPage() {
         {/* TAB: LANGUAGE / I18N */}
         {activeTab === 'language' && (
           <Card glass className="p-6 shadow-xl border-white/90 space-y-6 animate-fadeIn">
-            <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
-              <Globe2 className="w-5 h-5 text-emerald-600" />
-              <span>Platform Internationalization & Language Manager</span>
-            </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
+                <Globe2 className="w-5 h-5 text-emerald-600" />
+                <span>Platform Internationalization & Multilingual Language Manager</span>
+              </h3>
+              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Active Engines: English & Spanish (Español)</span>
+              </span>
+            </div>
 
-            <div className="space-y-4 text-xs max-w-md">
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700">Default Candidate Locale</label>
-                <select
-                  value={config.language?.defaultLocale || 'en-US'}
-                  onChange={(e) => {
-                    const updated = { ...config.language, defaultLocale: e.target.value };
-                    updatePlatformConfig('language', updated);
-                    setConfig({ ...config, language: updated });
-                  }}
-                  className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-semibold"
-                >
-                  <option value="en-US">English (United States)</option>
-                  <option value="es-ES">Spanish (Español)</option>
-                </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="font-bold text-slate-700">Default Candidate Platform Locale</label>
+                  <select
+                    value={config.language?.defaultLocale || 'en-US'}
+                    onChange={(e) => {
+                      const updated = { ...config.language, defaultLocale: e.target.value };
+                      updatePlatformConfig('language', updated);
+                      setConfig({ ...config, language: updated });
+                    }}
+                    className="w-full p-2.5 bg-white border border-slate-200 rounded-xl font-semibold focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="en-US">English 🇺🇸 (United States)</option>
+                    <option value="es-ES">Spanish 🇪🇸 (Español - España)</option>
+                    <option value="es-MX">Spanish 🇲🇽 (Español - Latinoamérica)</option>
+                    <option value="es-US">Spanish 🇺🇸 (Español - EE.UU.)</option>
+                  </select>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/60 space-y-2">
+                  <div className="font-bold text-blue-900 flex items-center space-x-1.5">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
+                    <span>AI Content Translation Engine</span>
+                  </div>
+                  <p className="text-[#0F172A]/80 text-[11px] leading-relaxed">
+                    Socrates AI Tutor, AI Question Generator, and Leitner Flashcards automatically support dynamic high-yield Spanish (Español) translations with official BACB 3rd Edition Task List terminology.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="font-bold text-slate-700">Supported Locales Inventory</label>
+                <div className="space-y-2">
+                  <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                    <div className="flex items-center space-x-2 font-bold">
+                      <span className="text-base">🇺🇸</span>
+                      <span>English (en-US)</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Primary Default</span>
+                  </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between">
+                    <div className="flex items-center space-x-2 font-bold">
+                      <span className="text-base">🇪🇸</span>
+                      <span>Spanish (es-ES / es-MX / es-US)</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Active</span>
+                  </div>
+                </div>
               </div>
             </div>
           </Card>

@@ -3,10 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useLanguage } from '@/context/language-context';
 import { Brain, ShieldCheck, Heart } from 'lucide-react';
 
 export function Footer() {
   const { homeRoute, user, isAuthenticated } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = Boolean(user && (user.role === 'admin' || user.role === 'super_admin'));
 
   return (
@@ -24,46 +26,46 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
-              The premier RBT exam preparation platform with thousands of practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.
+              {t('footer.brandDescription', 'The premier RBT exam preparation platform with thousands of practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.')}
             </p>
             <div className="flex items-center space-x-2 text-xs text-emerald-400 font-medium pt-2">
               <ShieldCheck className="w-4 h-4" />
-              <span>Aligned with BACB RBT 3rd Edition Task List</span>
+              <span>{t('hero.badge', 'Aligned with BACB RBT 3rd Edition Task List')}</span>
             </div>
           </div>
 
           {/* Core Tools */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Exam Prep</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">{t('footer.examPrep', 'Exam Prep')}</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link href="/exam" className="hover:text-white transition-colors">Practice Questions</Link></li>
-              <li><Link href="/rbt/mock-exam" className="hover:text-white transition-colors">Mock Exams</Link></li>
-              <li><Link href="/flashcards" className="hover:text-white transition-colors">Flashcards</Link></li>
-              <li><Link href="/task-list" className="hover:text-white transition-colors">Study Guides</Link></li>
-              <li><Link href="/tutor" className="hover:text-white transition-colors">AI Tutor</Link></li>
+              <li><Link href="/exam" className="hover:text-white transition-colors">{t('nav.practiceQuestions', 'Practice Questions')}</Link></li>
+              <li><Link href="/rbt/mock-exam" className="hover:text-white transition-colors">{t('nav.mockExams', 'Mock Exams')}</Link></li>
+              <li><Link href="/flashcards" className="hover:text-white transition-colors">{t('nav.flashcards', 'Flashcards')}</Link></li>
+              <li><Link href="/task-list" className="hover:text-white transition-colors">{t('nav.studyGuides', 'Study Guides')}</Link></li>
+              <li><Link href="/tutor" className="hover:text-white transition-colors">{t('nav.aiTutor', 'AI Tutor')}</Link></li>
             </ul>
           </div>
 
           {/* Resources & Info */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Company & Blog</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">{t('footer.company', 'Company & Blog')}</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link href="/rbt" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/rbt/about" className="hover:text-white transition-colors">About</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-              <li><Link href={homeRoute} className="hover:text-white transition-colors">{isAdmin ? 'Admin Panel' : 'Dashboard'}</Link></li>
+              <li><Link href="/rbt" className="hover:text-white transition-colors">{t('footer.blog', 'Blog')}</Link></li>
+              <li><Link href="/rbt/about" className="hover:text-white transition-colors">{t('footer.about', 'About')}</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">{t('footer.contact', 'Contact')}</Link></li>
+              <li><Link href="/pricing" className="hover:text-white transition-colors">{t('nav.pricing', 'Pricing')}</Link></li>
+              <li><Link href={homeRoute} className="hover:text-white transition-colors">{isAdmin ? t('nav.adminCms', 'Admin Panel') : t('nav.dashboard', 'Dashboard')}</Link></li>
             </ul>
           </div>
 
           {/* Legal & Compliance */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">Legal & Policies</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">{t('footer.legal', 'Legal & Policies')}</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-              <li><Link href="/guarantee-terms" className="hover:text-white transition-colors">Guarantee Terms</Link></li>
-              <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">{t('footer.privacy', 'Privacy Policy')}</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">{t('footer.terms', 'Terms of Service')}</Link></li>
+              <li><Link href="/guarantee-terms" className="hover:text-white transition-colors">{t('footer.guarantee', 'Guarantee Terms')}</Link></li>
+              <li><Link href="/disclaimer" className="hover:text-white transition-colors">{t('footer.disclaimer', 'Disclaimer')}</Link></li>
             </ul>
           </div>
         </div>
@@ -74,7 +76,7 @@ export function Footer() {
             <strong>BACB Disclaimer:</strong> RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). RBT Practice Questions is an independent prep provider and is not affiliated with or endorsed by the BACB®.
           </p>
           <div className="flex items-center space-x-1">
-            <span>Built with precision for US RBT Candidates</span>
+            <span>{t('footer.builtWithPrecision', 'Built with precision for RBT Candidates')}</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
           </div>
         </div>

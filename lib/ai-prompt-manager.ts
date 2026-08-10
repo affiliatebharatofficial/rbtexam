@@ -161,15 +161,22 @@ export async function processAITutorMessage(
   certification: 'RBT' | 'BCaBA' | 'BCBA' = 'RBT',
   customApiKey?: string,
   preferredProvider: string = 'auto',
-  userProfile?: { fullName?: string; email?: string } | null
+  userProfile?: { fullName?: string; email?: string } | null,
+  language: string = 'en'
 ): Promise<{ message: ChatMessage; providerUsed: string; modelUsed: string; isLive: boolean }> {
   const candidateContext = buildCandidateSystemContext('default_user', certification, userProfile);
   const cleanQuery = userQuery.trim();
   const queryLower = cleanQuery.toLowerCase();
 
+  const isSpanish = language === 'es' || language.toLowerCase().includes('spanish');
+  const langDirective = isSpanish
+    ? 'IMPORTANT: You MUST speak and respond in fluent Spanish (Español). Use official BACB Spanish technical ABA terminology.'
+    : `Respond in ${language}.`;
+
   // 1. Attempt LLM Provider Execution (Multi-Model AI Engine)
   const systemDirective = `${formatSystemDirective(candidateContext, mode)}
 You are Socrates AI, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB RBT 3rd Edition Test Content Outline (TCO) exam.
+${langDirective}
 Provide a clear, encouraging, structured response. Respond in valid JSON if possible with keys: "content" (markdown string response), "concept", "simpleExplanation", "clinicalExample", "examTip", "mnemonicTip", "commonMistakes".`;
 
   const historyMessages = history.slice(-4).map((m) => ({

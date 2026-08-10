@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useLanguage } from '@/context/language-context';
 import { Flashcard, LearningMode, CertificationLevel } from '@/types/flashcard';
 import { getFilteredFlashcards, updateUserCardRating, addCustomFlashcard } from '@/lib/flashcard-bank';
 import {
@@ -28,6 +29,7 @@ import {
 } from 'lucide-react';
 
 export default function FlashcardsPage() {
+  const { language, t } = useLanguage();
   const [certification, setCertification] = useState<CertificationLevel>('RBT');
   const [mode, setMode] = useState<LearningMode>('study');
   const [category, setCategory] = useState<string>('ALL');
@@ -143,6 +145,7 @@ export default function FlashcardsPage() {
           topic: aiTopic,
           count: aiCount,
           certification,
+          language: language === 'es' ? 'Spanish' : 'English',
         }),
       });
 

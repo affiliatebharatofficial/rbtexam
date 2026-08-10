@@ -3,30 +3,33 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useLanguage } from '@/context/language-context';
+import { LanguageSelector } from '@/components/layout/language-selector';
 import { UserProfileModal } from '@/components/auth/user-profile-modal';
 import { Sparkles, Brain, BookOpen, Layers, BarChart2, Users, Menu, X, ArrowRight, User, LogOut, Settings, ShieldCheck, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Navbar() {
   const { user, isAuthenticated, logout, homeRoute } = useAuth();
+  const { t } = useLanguage();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const isAdmin = Boolean(user && (user.role === 'admin' || user.role === 'super_admin'));
-  const homeLabel = isAuthenticated ? (isAdmin ? 'Admin Panel' : 'Home') : 'Home';
+  const homeLabel = isAuthenticated ? (isAdmin ? t('nav.adminCms', 'Admin Panel') : t('nav.home', 'Home')) : t('nav.home', 'Home');
   const homeIcon = isAdmin ? ShieldCheck : Brain;
 
   const navLinks = [
     { href: homeRoute, label: homeLabel, icon: homeIcon },
-    { href: '/exam', label: 'Practice Questions', icon: Sparkles },
-    { href: '/rbt/mock-exam', label: 'Mock Exams', icon: Sparkles },
-    { href: '/flashcards', label: 'Flashcards', icon: Layers },
-    { href: '/task-list', label: 'Study Guides', icon: BookOpen },
-    { href: '/tutor', label: 'AI Tutor', icon: BookOpen },
-    { href: '/pricing', label: 'Pricing', icon: BarChart2 },
-    ...(isAuthenticated && !isAdmin ? [{ href: '/dashboard', label: 'Dashboard', icon: Brain }] : []),
-    ...(isAuthenticated && isAdmin ? [{ href: '/admin', label: 'Admin CMS', icon: ShieldCheck }] : []),
+    { href: '/exam', label: t('nav.practiceQuestions', 'Practice Questions'), icon: Sparkles },
+    { href: '/rbt/mock-exam', label: t('nav.mockExams', 'Mock Exams'), icon: Sparkles },
+    { href: '/flashcards', label: t('nav.flashcards', 'Flashcards'), icon: Layers },
+    { href: '/task-list', label: t('nav.studyGuides', 'Study Guides'), icon: BookOpen },
+    { href: '/tutor', label: t('nav.aiTutor', 'AI Tutor'), icon: BookOpen },
+    { href: '/pricing', label: t('nav.pricing', 'Pricing'), icon: BarChart2 },
+    ...(isAuthenticated && !isAdmin ? [{ href: '/dashboard', label: t('nav.dashboard', 'Dashboard'), icon: Brain }] : []),
+    ...(isAuthenticated && isAdmin ? [{ href: '/admin', label: t('nav.adminCms', 'Admin CMS'), icon: ShieldCheck }] : []),
   ];
 
   return (
@@ -64,9 +67,10 @@ export function Navbar() {
 
           {/* User Auth Action Area */}
           <div className="hidden lg:flex items-center space-x-3">
+            <LanguageSelector />
             <Link href="/pricing">
               <Button variant="ghost" size="sm" className="text-slate-600 text-xs">
-                Pricing
+                {t('nav.pricing', 'Pricing')}
               </Button>
             </Link>
 
@@ -179,6 +183,11 @@ export function Navbar() {
               <span>{link.label}</span>
             </Link>
           ))}
+
+          <div className="pt-2 pb-2 border-b border-slate-100 flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500">Language / Idioma:</span>
+            <LanguageSelector />
+          </div>
 
           <div className="pt-4 border-t border-slate-100 space-y-2">
             {isAuthenticated && user ? (

@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/context/auth-context';
+import { useLanguage } from '@/context/language-context';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
 import { ChatMessage, CertificationLevel, PromptMode } from '@/types/ai-tutor';
 import { buildCandidateSystemContext } from '@/lib/ai-candidate-memory';
@@ -32,6 +33,7 @@ import {
 
 export default function TutorPage() {
   const { user } = useAuth();
+  const { language, t } = useLanguage();
   const [certification, setCertification] = useState<CertificationLevel>('RBT');
   const [mode, setMode] = useState<PromptMode>('socratic_mentor');
   const [inputQuery, setInputQuery] = useState('');
@@ -114,6 +116,7 @@ export default function TutorPage() {
           provider,
           userName: candidateName,
           userEmail: user?.email,
+          language,
         }),
       });
 

@@ -2,6 +2,15 @@
 
 ## Master Version History
 
+### [v3.4.0] - 2026-08-10 (Multilingual i18n & Spanish Language Engine Release)
+#### Added / Fixed
+- **Spanish (Español 🇪🇸) Multilingual Support**:
+  - Implemented client-side i18n engine (`context/language-context.tsx`) supporting English (`en`) and Spanish (`es`).
+  - Added glassmorphism `LanguageSelector` dropdown component with flag icons in header navbar and mobile drawer menu.
+  - Updated Socrates AI Tutor (`lib/ai-prompt-manager.ts`), AI Question Generator (`lib/ai-question-generator-engine.ts`), and Leitner Flashcards (`lib/ai-flashcard-generator-engine.ts`) to support Spanish language requests and official BACB Spanish ABA terminology.
+  - Enhanced Super Admin Language Manager (`app/admin/page.tsx`) with supported locale inventory management (`es-ES`, `es-MX`, `es-US`).
+  - Added unit test suite `tests/unit/language-context.test.ts` and system documentation `/docs/24-i18n-multilingual-engine.md`.
+
 ### [v3.3.0] - 2026-08-09 (Super Admin Blog & Article CMS Engine Release)
 #### Added / Fixed
 - **Super Admin Article CMS Portal (`app/admin/articles/page.tsx`)**:

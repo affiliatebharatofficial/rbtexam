@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useLanguage } from '@/context/language-context';
 import { Question } from '@/types/exam';
 import { SAMPLE_BACB_QUESTIONS, generateExamQuestions, convertMasterQuestionsToExamQuestions } from '@/lib/sample-questions';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
@@ -41,6 +42,7 @@ type QuestionCount = 20 | 50 | 85 | 100;
 const EXAM_STORAGE_KEY = 'rbt_exam_active_session_v2';
 
 export default function ExamPage() {
+  const { language, t } = useLanguage();
   // Setup State
   const [phase, setPhase] = useState<ExamPhase>('setup');
   const [mode, setMode] = useState<ExamMode>('timed');

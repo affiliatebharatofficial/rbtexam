@@ -16,6 +16,7 @@
 | `feat-10` | Security & Governance Engine | Security Team | production | v2.8.0 | `/admin/security` | [security-engine.md](file:///g:/RBT/docs/security-engine.md) |
 | `feat-11` | DevOps & Infrastructure Engine | DevOps Team | production | v2.8.0 | `/admin/infrastructure` | [devops.md](file:///g:/RBT/docs/devops.md) |
 | `feat-12` | QA & Testing Center | DevOps Team | production | v2.8.0 | `/admin/qa` | [testing-engine.md](file:///g:/RBT/docs/testing-engine.md) |
+| `feat-13` | Multilingual i18n & Spanish Engine | Core/AI | production | v3.4.0 | `/` | [24-i18n-multilingual-engine.md](file:///g:/RBT/docs/24-i18n-multilingual-engine.md) |
 
 ## Related Files
 - [docs/PROJECT_BRAIN.md](file:///g:/RBT/docs/PROJECT_BRAIN.md)
