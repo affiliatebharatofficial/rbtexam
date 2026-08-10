@@ -47,13 +47,18 @@ import {
   UploadCloud,
   Globe2,
   FileText,
+  Sparkles,
+  Edit3,
+  BookOpen,
   Trash2,
   Plus,
   Send,
   Zap,
-  Sparkles,
   X,
 } from 'lucide-react';
+import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
+import { Article, ArticleCategory, ArticleStatus } from '@/types/article-cms';
+import { getAllArticles, createArticle, updateArticle, deleteArticle } from '@/lib/article-cms-engine';
 import { getAllCoupons, createCoupon, toggleCouponStatus, deleteCoupon } from '@/lib/coupon-engine';
 import { Coupon } from '@/types/subscription';
 import { AIProviderConfig } from '@/types/super-admin';
@@ -92,6 +97,44 @@ export default function SuperAdminCMSPage() {
     '/cert-badge-bacb.png',
   ]);
   const [dragOver, setDragOver] = useState(false);
+
+  // Article CMS State
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [articleSearchQuery, setArticleSearchQuery] = useState('');
+  const [articleCategoryFilter, setArticleCategoryFilter] = useState('ALL');
+  const [articleStatusFilter, setArticleStatusFilter] = useState('ALL');
+  const [isArticleModalOpen, setIsArticleModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [activeWriterTab, setActiveWriterTab] = useState<'edit' | 'preview'>('edit');
+  const [articleMsg, setArticleMsg] = useState('');
+
+  // Form Fields
+  const [formTitle, setFormTitle] = useState('');
+  const [formSummary, setFormSummary] = useState('');
+  const [formCategory, setFormCategory] = useState<ArticleCategory>('RBT Exam Guide');
+  const [formContent, setFormContent] = useState('');
+  const [formCoverImage, setFormCoverImage] = useState('/banner-rbt-hero.png');
+  const [formAuthor, setFormAuthor] = useState('Jobpe gyan');
+  const [formTags, setFormTags] = useState('RBT, Study Guide');
+  const [formStatus, setFormStatus] = useState<ArticleStatus>('published');
+
+  useEffect(() => {
+    loadArticlesData();
+  }, []);
+
+  const loadArticlesData = async () => {
+    try {
+      const res = await fetch('/api/admin/articles');
+      const data = await res.json();
+      if (data.articles && Array.isArray(data.articles)) {
+        setArticles(data.articles);
+      } else {
+        setArticles(getAllArticles());
+      }
+    } catch (e) {
+      setArticles(getAllArticles());
+    }
+  };
 
   // AI Provider Management State
   const [aiProviders, setAiProviders] = useState<AIProviderConfig[]>(DEFAULT_AI_PROVIDERS);
@@ -996,6 +1039,414 @@ export default function SuperAdminCMSPage() {
                     </Button>
                   </div>
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB: ARTICLE CMS */}
+        {activeTab === 'articles' && (
+          <div className="space-y-6 animate-fadeIn">
+            <Card glass className="p-6 shadow-xl border-white/90 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                  <h3 className="text-lg font-bold text-[#0F172A] flex items-center space-x-2">
+                    <FileText className="w-5 h-5 text-[#2563EB]" />
+                    <span>Blog & Article Educational Content CMS</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Write, edit, and publish markdown study guides, ABA technique breakdowns, and BACB ethics articles.
+                  </p>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <Link href="/articles" target="_blank">
+                    <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold border-slate-300 text-slate-700">
+                      <Globe className="w-4 h-4 text-[#2563EB]" />
+                      <span>View Live Blog</span>
+                    </Button>
+                  </Link>
+                  <Button
+                    onClick={() => {
+                      setEditingArticle(null);
+                      setFormTitle('');
+                      setFormSummary('');
+                      setFormCategory('RBT Exam Guide');
+                      setFormContent(`# Sample Article Title\n\nWrite your educational article here with **bold text**, bullet points, and markdown tables!\n\n| Domain | Weight | Focus |\n| --- | --- | --- |\n| Skill Acquisition | 28% | High |\n| Behavior Reduction | 24% | High |`);
+                      setFormCoverImage('/banner-rbt-hero.png');
+                      setFormAuthor('Jobpe gyan');
+                      setFormTags('RBT, Exam Prep');
+                      setFormStatus('published');
+                      setActiveWriterTab('edit');
+                      setIsArticleModalOpen(true);
+                    }}
+                    variant="primary"
+                    size="sm"
+                    className="gap-2 shadow-lg shadow-blue-500/25 font-extrabold"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Write New Article</span>
+                  </Button>
+                </div>
+              </div>
+
+              {articleMsg && (
+                <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900 flex items-center space-x-2 animate-fadeIn">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>{articleMsg}</span>
+                </div>
+              )}
+
+              {/* TOP SCORECARDS */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card glass className="p-4 space-y-1 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>Total Articles</span>
+                    <FileText className="w-4 h-4 text-[#2563EB]" />
+                  </div>
+                  <div className="text-2xl font-black text-slate-900">{articles.length}</div>
+                </Card>
+
+                <Card glass className="p-4 space-y-1 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>Published & Live</span>
+                    <Globe className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl font-black text-emerald-600">
+                    {articles.filter((a) => a.status === 'published').length}
+                  </div>
+                </Card>
+
+                <Card glass className="p-4 space-y-1 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>Draft In-Progress</span>
+                    <BookOpen className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div className="text-2xl font-black text-amber-600">
+                    {articles.filter((a) => a.status === 'draft').length}
+                  </div>
+                </Card>
+
+                <Card glass className="p-4 space-y-1 border-slate-200 shadow-sm">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span>Total Views</span>
+                    <Eye className="w-4 h-4 text-indigo-500" />
+                  </div>
+                  <div className="text-2xl font-black text-indigo-600">
+                    {articles.reduce((sum, a) => sum + (a.viewsCount || 0), 0).toLocaleString()}
+                  </div>
+                </Card>
+              </div>
+
+              {/* Filters */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <input
+                  type="text"
+                  placeholder="Search articles by title or slug..."
+                  value={articleSearchQuery}
+                  onChange={(e) => setArticleSearchQuery(e.target.value)}
+                  className="w-full text-xs p-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                />
+
+                <select
+                  value={articleCategoryFilter}
+                  onChange={(e) => setArticleCategoryFilter(e.target.value)}
+                  className="text-xs font-bold p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none"
+                >
+                  <option value="ALL">All Categories</option>
+                  {['RBT Exam Guide', 'ABA Techniques', 'BACB Ethics', 'Study Strategies', 'Clinical Scenarios', 'Career & Certification'].map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={articleStatusFilter}
+                  onChange={(e) => setArticleStatusFilter(e.target.value)}
+                  className="text-xs font-bold p-2.5 bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-none"
+                >
+                  <option value="ALL">All Statuses</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+
+              {/* Roster Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+                      <th className="p-3">Title & Slug</th>
+                      <th className="p-3">Category</th>
+                      <th className="p-3">Author</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {articles
+                      .filter((a) => {
+                        const mSearch = a.title.toLowerCase().includes(articleSearchQuery.toLowerCase()) || a.slug.toLowerCase().includes(articleSearchQuery.toLowerCase());
+                        const mCat = articleCategoryFilter === 'ALL' || a.category === articleCategoryFilter;
+                        const mStat = articleStatusFilter === 'ALL' || a.status === articleStatusFilter;
+                        return mSearch && mCat && mStat;
+                      })
+                      .map((art) => (
+                        <tr key={art.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="p-3 space-y-0.5 max-w-sm">
+                            <span className="font-extrabold text-slate-900 block truncate text-xs sm:text-sm">{art.title}</span>
+                            <span className="text-[10px] font-mono text-slate-400 block truncate">/articles/{art.slug}</span>
+                          </td>
+                          <td className="p-3">
+                            <Badge variant="blue" className="text-[10px] font-bold">{art.category}</Badge>
+                          </td>
+                          <td className="p-3 text-slate-600 font-semibold">{art.authorName}</td>
+                          <td className="p-3">
+                            <button
+                              onClick={() => {
+                                const nextStatus: ArticleStatus = art.status === 'published' ? 'draft' : 'published';
+                                updateArticle({ id: art.id, status: nextStatus });
+                                loadArticlesData();
+                                setArticleMsg(`Status updated to ${nextStatus.toUpperCase()}`);
+                                setTimeout(() => setArticleMsg(''), 3000);
+                              }}
+                              className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
+                                art.status === 'published' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}
+                            >
+                              {art.status.toUpperCase()}
+                            </button>
+                          </td>
+                          <td className="p-3 text-right space-x-2">
+                            {art.status === 'published' && (
+                              <Link href={`/articles/${art.slug}`} target="_blank">
+                                <button className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold" title="View Published Article">
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+                              </Link>
+                            )}
+                            <button
+                              onClick={() => {
+                                setEditingArticle(art);
+                                setFormTitle(art.title);
+                                setFormSummary(art.summary);
+                                setFormCategory(art.category);
+                                setFormContent(art.content);
+                                setFormCoverImage(art.coverImageUrl || '/banner-rbt-hero.png');
+                                setFormAuthor(art.authorName || 'Jobpe gyan');
+                                setFormTags((art.tags || []).join(', '));
+                                setFormStatus(art.status);
+                                setActiveWriterTab('edit');
+                                setIsArticleModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-bold"
+                              title="Edit Article"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm(`Delete article "${art.title}"?`)) {
+                                  deleteArticle(art.id);
+                                  loadArticlesData();
+                                  setArticleMsg(`Deleted article "${art.title}"`);
+                                  setTimeout(() => setArticleMsg(''), 3000);
+                                }
+                              }}
+                              className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold"
+                              title="Delete Article"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            {/* Writer Modal */}
+            {isArticleModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+                <Card glass className="max-w-4xl w-full max-h-[90vh] flex flex-col p-6 space-y-4 bg-white shadow-2xl border-white/90 overflow-hidden">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-shrink-0">
+                    <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                      <FileText className="w-5 h-5 text-[#2563EB]" />
+                      <span>{editingArticle ? 'Edit Educational Article' : 'Write New Article & Study Guide'}</span>
+                    </h3>
+                    <button onClick={() => setIsArticleModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-2 border-b border-slate-200 pb-2 text-xs font-bold flex-shrink-0">
+                    <button
+                      onClick={() => setActiveWriterTab('edit')}
+                      className={`px-4 py-2 rounded-xl transition-all ${
+                        activeWriterTab === 'edit' ? 'bg-[#0F172A] text-white shadow' : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      Markdown Writer
+                    </button>
+                    <button
+                      onClick={() => setActiveWriterTab('preview')}
+                      className={`px-4 py-2 rounded-xl transition-all ${
+                        activeWriterTab === 'preview' ? 'bg-[#0F172A] text-white shadow' : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      Live Markdown & Table Preview
+                    </button>
+                  </div>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!formTitle.trim() || !formContent.trim()) return;
+                      const tagsArray = formTags.split(',').map((t) => t.trim()).filter(Boolean);
+                      if (editingArticle) {
+                        const updated = updateArticle({
+                          id: editingArticle.id,
+                          title: formTitle,
+                          summary: formSummary,
+                          content: formContent,
+                          category: formCategory,
+                          tags: tagsArray,
+                          coverImageUrl: formCoverImage,
+                          authorName: formAuthor,
+                          status: formStatus,
+                        });
+                        if (updated) setArticleMsg(`✅ Article "${updated.title}" updated successfully!`);
+                      } else {
+                        const created = createArticle({
+                          title: formTitle,
+                          summary: formSummary,
+                          content: formContent,
+                          category: formCategory,
+                          tags: tagsArray,
+                          coverImageUrl: formCoverImage,
+                          authorName: formAuthor,
+                          status: formStatus,
+                        });
+                        setArticleMsg(`✅ New Article "${created.title}" created & published!`);
+                      }
+                      setIsArticleModalOpen(false);
+                      loadArticlesData();
+                      setTimeout(() => setArticleMsg(''), 4000);
+                    }}
+                    className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs"
+                  >
+                    {activeWriterTab === 'edit' ? (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="block font-bold text-slate-700">Article Title</label>
+                            <input
+                              type="text"
+                              required
+                              value={formTitle}
+                              onChange={(e) => setFormTitle(e.target.value)}
+                              placeholder="Title..."
+                              className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block font-bold text-slate-700">Category</label>
+                            <select
+                              value={formCategory}
+                              onChange={(e) => setFormCategory(e.target.value as ArticleCategory)}
+                              className="w-full text-xs font-semibold p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                            >
+                              {['RBT Exam Guide', 'ABA Techniques', 'BACB Ethics', 'Study Strategies', 'Clinical Scenarios', 'Career & Certification'].map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block font-bold text-slate-700">Summary / SEO Subtitle</label>
+                          <input
+                            type="text"
+                            required
+                            value={formSummary}
+                            onChange={(e) => setFormSummary(e.target.value)}
+                            placeholder="Brief summary..."
+                            className="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <label className="block font-bold text-slate-700">Author Name</label>
+                            <input
+                              type="text"
+                              value={formAuthor}
+                              onChange={(e) => setFormAuthor(e.target.value)}
+                              className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block font-bold text-slate-700">Tags</label>
+                            <input
+                              type="text"
+                              value={formTags}
+                              onChange={(e) => setFormTags(e.target.value)}
+                              className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block font-bold text-slate-700">Publishing Status</label>
+                            <select
+                              value={formStatus}
+                              onChange={(e) => setFormStatus(e.target.value as ArticleStatus)}
+                              className="w-full text-xs font-semibold p-2 bg-slate-50 border border-slate-200 rounded-xl"
+                            >
+                              <option value="published">Published (Live)</option>
+                              <option value="draft">Draft (Private)</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block font-bold text-slate-700">Article Content (Markdown)</label>
+                          <textarea
+                            required
+                            rows={12}
+                            value={formContent}
+                            onChange={(e) => setFormContent(e.target.value)}
+                            className="w-full p-3 font-mono text-xs bg-slate-900 text-slate-100 rounded-xl border border-slate-800 focus:outline-none"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div className="border-b border-slate-200 pb-3">
+                          <Badge variant="blue">{formCategory}</Badge>
+                          <h1 className="text-xl font-black text-slate-900 mt-2">{formTitle || 'Untitled Article'}</h1>
+                          <p className="text-xs text-slate-500 mt-1">{formSummary}</p>
+                        </div>
+                        <div className="p-4 bg-white rounded-xl shadow-sm border border-slate-200">
+                          <MarkdownRenderer content={formContent} />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="pt-3 border-t border-slate-100 flex justify-end space-x-2 flex-shrink-0">
+                      <Button type="button" onClick={() => setIsArticleModalOpen(false)} variant="outline" size="sm">
+                        Cancel
+                      </Button>
+                      <Button type="submit" variant="primary" size="sm" className="gap-2 shadow-md">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>Save & Publish Article</span>
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
               </div>
             )}
           </div>
