@@ -19,11 +19,11 @@ export default function RootLayout({
       <head>
         <JsonLdSchema />
       </head>
-      <body className="flex flex-col min-h-screen bg-slate-50 text-[#0F172A] antialiased selection:bg-[#2563EB]/20 selection:text-[#2563EB]">
+      <body className="flex flex-col min-h-dvh bg-slate-50 text-[#0F172A] antialiased selection:bg-[#2563EB]/20 selection:text-[#2563EB]">
         <AuthProvider>
           <LanguageProvider>
             <Navbar />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 w-full flex flex-col">{children}</main>
             <Footer />
           </LanguageProvider>
         </AuthProvider>

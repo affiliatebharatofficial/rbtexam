@@ -199,7 +199,7 @@ export default function FlashcardsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)] space-y-8">
+      <div className="py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full space-y-8">
         
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

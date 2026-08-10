@@ -328,7 +328,7 @@ export default function ExamPage() {
 
   return (
     <ProtectedRoute>
-      <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-4rem)]">
+      <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full">
 
         {/* PHASE 1: SETUP SCREEN */}
         {phase === 'setup' && (

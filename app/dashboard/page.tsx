@@ -55,7 +55,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/60 text-slate-900'}`}>
+      <div className={`flex-1 w-full transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/60 text-slate-900'}`}>
         <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
           {/* Top Bar: User Greeting & Dark Mode Toggle */}

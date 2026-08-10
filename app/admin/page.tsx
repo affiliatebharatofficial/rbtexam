@@ -493,7 +493,7 @@ export default function SuperAdminCMSPage() {
 
   return (
     <ProtectedRoute requireAdmin>
-      <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 min-h-[calc(100vh-4rem)]">
+      <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 flex-1 w-full">
         
         {/* Top Command Center Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
