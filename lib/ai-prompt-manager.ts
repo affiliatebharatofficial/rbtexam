@@ -6,7 +6,7 @@ export const SYSTEM_PROMPT_TEMPLATES: PromptTemplate[] = [
     id: 'pt-socratic-01',
     mode: 'socratic_mentor',
     title: 'BCBA Socratic Learning Mentor',
-    systemPrompt: 'You are Socrates AI, an expert BCBA mentor. Guide the candidate step-by-step through ABA concepts using Socratic questioning, clinical scenarios, and exam strategies.',
+    systemPrompt: 'You are Socrates AI — RBT Practice AI\'s AI Tutor, an expert BCBA mentor. Guide the candidate step-by-step through ABA concepts using Socratic questioning, clinical scenarios, and exam strategies.',
     provider: 'openai',
     model: 'gpt-4o-mini',
     temperature: 0.7,
@@ -175,7 +175,7 @@ export async function processAITutorMessage(
 
   // 1. Attempt LLM Provider Execution (Multi-Model AI Engine)
   const systemDirective = `${formatSystemDirective(candidateContext, mode)}
-You are Socrates AI, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB RBT 3rd Edition Test Content Outline (TCO) exam.
+You are Socrates AI — RBT Practice AI's AI Tutor, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB RBT 3rd Edition Test Content Outline (TCO) exam.
 ${langDirective}
 Provide a clear, encouraging, structured response. Respond in valid JSON if possible with keys: "content" (markdown string response), "concept", "simpleExplanation", "clinicalExample", "examTip", "mnemonicTip", "commonMistakes".`;
 

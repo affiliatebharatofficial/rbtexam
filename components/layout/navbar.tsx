@@ -41,7 +41,7 @@ export function Navbar() {
             </div>
             <div className="flex items-center space-x-2 whitespace-nowrap">
               <span className="text-lg font-bold text-[#0F172A] tracking-tight whitespace-nowrap">
-                RBT <span className="text-[#2563EB]">Practice Questions</span>
+                RBT <span className="text-[#2563EB]">Practice AI</span>
               </span>
               <span className="hidden xl:inline-block px-2 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-600 rounded-full border border-emerald-200/60 whitespace-nowrap">
                 3rd Ed BACB

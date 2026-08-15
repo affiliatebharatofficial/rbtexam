@@ -57,11 +57,11 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-6 h-6 text-emerald-600" />
                 <h2 className="text-xl sm:text-2xl font-black text-[#0F172A]">
-                  Pass-or-Refund Guarantee Terms
+                  RBT Practice AI Pass-or-Refund Guarantee Terms
                 </h2>
               </div>
               <p className="text-xs text-slate-500">
-                Official terms, eligibility criteria, and claim guidelines for RBTTrainingAI candidates.
+                Official terms, eligibility criteria, and claim guidelines for RBT Practice AI candidates.
               </p>
             </div>
 
@@ -122,7 +122,7 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
                 <span>Qualifying Purchase</span>
               </h3>
               <p>
-                Candidates must have an active paid subscription or valid non-refunded purchase of a qualifying prep plan purchased directly through RBTTrainingAI prior to sitting for the official BACB exam.
+                Candidates must have an active paid subscription or valid non-refunded purchase of a qualifying prep plan purchased directly through RBT Practice AI prior to sitting for the official BACB exam.
               </p>
             </div>
 
@@ -133,7 +133,7 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
                 <span>Three-Mock-Exam Requirement</span>
               </h3>
               <p>
-                Candidates must complete at least three (3) full-length (85-question) practice mock examinations on the RBTTrainingAI platform under official timed conditions prior to their official exam date.
+                Candidates must complete at least three (3) full-length (85-question) practice mock examinations on the RBT Practice AI platform under official timed conditions prior to their official exam date.
               </p>
             </div>
 
@@ -177,7 +177,7 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
                 <span>Failed-Exam Claim Process</span>
               </h3>
               <p>
-                If a candidate meets all prerequisite mock exam criteria and subsequently does not pass their official BACB examination, they may submit a refund claim by contacting support@rbtpracticequestions.com.
+                If a candidate meets all prerequisite mock exam criteria and subsequently does not pass their official BACB examination, they may submit a refund claim by contacting support@rbtpracticeai.com.
               </p>
             </div>
 
@@ -210,7 +210,7 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
                 <span>Refund Amount</span>
               </h3>
               <p>
-                Approved claims receive a 100% full refund of subscription fees actually paid by the candidate to RBTTrainingAI for the qualifying prep plan (excluding third-party exam fees paid to BACB/Pearson VUE).
+                Approved claims receive a 100% full refund of subscription fees actually paid by the candidate to RBT Practice AI for the qualifying prep plan (excluding third-party exam fees paid to BACB/Pearson VUE).
               </p>
             </div>
 
@@ -243,7 +243,7 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
                 <span>BACB Non-Affiliation Disclaimer</span>
               </h3>
               <p>
-                RBTTrainingAI is an independent provider of RBT exam preparation materials. We are not affiliated with, sponsored by, endorsed by, or associated with the Behavior Analyst Certification Board® (BACB®) or Pearson VUE. "BACB®" and "RBT®" are registered trademarks of the Behavior Analyst Certification Board®.
+                RBT Practice AI is an independent provider of RBT exam preparation materials. We are not affiliated with, sponsored by, endorsed by, or associated with the Behavior Analyst Certification Board® (BACB®) or Pearson VUE. "BACB®" and "RBT®" are registered trademarks of the Behavior Analyst Certification Board®.
               </p>
             </div>
 

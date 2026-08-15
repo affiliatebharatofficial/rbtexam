@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 
 export const SITE_CONFIG = {
-  name: 'RBT Practice Questions',
-  title: 'RBT Practice Questions | Free Mock Exams, Flashcards & AI Tutor',
-  description: 'Practice with thousands of RBT practice questions, mock exams, flashcards, AI tutor, study guides and detailed explanations to prepare for the BACB Registered Behavior Technician certification exam.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://rbtpracticequestions.com',
-  ogImage: 'https://rbtpracticequestions.com/og-image.png',
+  name: 'RBT Practice AI',
+  title: 'RBT Practice AI — RBT Exam Practice Questions & Mock Tests',
+  description: 'Prepare for the RBT certification exam with practice questions, realistic mock exams, AI tutoring, smart flashcards, and personalized study tools aligned with the current RBT exam content outline.',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://rbtpracticeai.com',
+  ogImage: 'https://rbtpracticeai.com/og-image.png',
   keywords: [
-    'RBT Practice Questions',
+    'RBT Practice AI',
     'RBT Practice Exam',
     'RBT Practice Test',
     'RBT Mock Exam',
@@ -18,7 +18,7 @@ export const SITE_CONFIG = {
     'RBT Study Guide',
     'RBT Mock Test',
   ],
-  author: 'RBT Practice Questions Inc.',
+  author: 'RBT Practice AI',
 };
 
 export function constructMetadata({
@@ -65,7 +65,7 @@ export function constructMetadata({
           url: image,
           width: 1200,
           height: 630,
-          alt: 'RBT Practice Questions Platform',
+          alt: 'RBT Practice AI Platform',
         },
       ],
       locale: 'en_US',
@@ -76,7 +76,7 @@ export function constructMetadata({
       title,
       description,
       images: [image],
-      creator: '@rbtpracticequestions',
+      creator: '@rbtpracticeai',
     },
   };
 }

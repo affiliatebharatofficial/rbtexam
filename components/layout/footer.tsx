@@ -22,7 +22,7 @@ export function Footer() {
                 <Brain className="w-5 h-5" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                RBT <span className="text-[#2563EB]">Practice Questions</span>
+                RBT <span className="text-[#2563EB]">Practice AI</span>
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -73,7 +73,7 @@ export function Footer() {
         {/* Disclaimer & Copyright */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-500 space-y-4 md:space-y-0">
           <p className="max-w-3xl leading-relaxed">
-            <strong>BACB Disclaimer:</strong> RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). RBT Practice Questions is an independent prep provider and is not affiliated with or endorsed by the BACB®.
+            <strong>BACB Disclaimer:</strong> RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). RBT Practice AI is an independent RBT exam-preparation platform and is not affiliated with or endorsed by the BACB®.
           </p>
           <div className="flex items-center space-x-1">
             <span>{t('footer.builtWithPrecision', 'Built with precision for RBT Candidates')}</span>

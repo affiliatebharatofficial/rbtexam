@@ -279,7 +279,7 @@ export default function AdminProjectBrainPage() {
               <div>
                 <h3 className="text-base font-extrabold text-[#0F172A]">Acquisition & Handover Readiness Verification</h3>
                 <p className="text-xs text-slate-500">
-                  Turnkey platform metrics verifying that RBT Practice Questions can be handed over to another engineering team in under 1 day.
+                  Turnkey platform metrics verifying that RBT Practice AI can be handed over to another engineering team in under 1 day.
                 </p>
               </div>
 

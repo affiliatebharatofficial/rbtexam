@@ -29,16 +29,16 @@ export function Hero() {
 
             {/* Main Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-[1.15]">
-              {t('hero.titlePrefix', 'Pass Your')}{' '}
+              Pass Your{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] via-blue-600 to-indigo-600">
-                {t('hero.titleHighlight', 'RBT Certification')}
+                RBT Exam
               </span>{' '}
-              {t('hero.titleSuffix', 'with Confidence')}
+              With Smarter Practice
             </h1>
 
             {/* Sub-headline */}
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed mx-auto lg:mx-0">
-              {t('hero.subtitle', 'Practice thousands of realistic RBT questions, take full-length mock exams, learn with AI Tutor, master flashcards and track your progress.')}
+              {t('hero.subtitle', 'AI-powered RBT practice questions, realistic mock exams, flashcards, and personalized study tools designed around the current RBT exam content outline.')}
             </p>
 
             {/* Feature Bullets */}

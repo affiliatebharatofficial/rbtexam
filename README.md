@@ -1,8 +1,8 @@
-# RBT Practice Questions — #1 BACB Certification Exam Prep SaaS
+# RBT Practice AI — #1 BACB Certification Exam Prep SaaS
 
-Official Domain: [https://rbtpracticequestions.com](https://rbtpracticequestions.com)
+Official Domain: [https://rbtpracticeai.com](https://rbtpracticeai.com)
 
-This is the Next.js 16 App Router codebase for **RBT Practice Questions**.
+This is the Next.js 16 App Router codebase for **RBT Practice AI**.
 
 ## Getting Started
 

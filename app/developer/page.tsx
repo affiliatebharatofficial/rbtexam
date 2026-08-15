@@ -52,11 +52,11 @@ export default function DeveloperPortalPage() {
   };
 
   const codeSnippets: Record<SDKLanguage, string> = {
-    typescript: `import { RBTPracticeQuestions } from '@rbtpracticequestions/sdk';\n\nconst client = new RBTPracticeQuestions({ apiKey: 'rbt_live_9a8f...' });\nconst questions = await client.questions.list({ limit: 10, category: 'Measurement' });`,
-    python: `from rbtpracticequestions import RBTPracticeQuestions\n\nclient = RBTPracticeQuestions(api_key="rbt_live_9a8f...")\nquestions = client.questions.list(limit=10, category="Measurement")`,
-    curl: `curl -X GET "https://rbtpracticequestions.com/api/v1/questions?limit=10" \\\n  -H "Authorization: Bearer rbt_live_9a8f..."`,
-    go: `package main\n\nimport "github.com/rbtpracticequestions/sdk-go"\n\nclient := rbtpracticequestions.NewClient("rbt_live_9a8f...")\nquestions, err := client.Questions.List(ctx, &ListOptions{Limit: 10})`,
-    flutter: `final client = RBTPracticeQuestions(apiKey: 'rbt_live_9a8f...');\nfinal questions = await client.questions.list(limit: 10);`,
+    typescript: `import { RBTPracticeAI } from '@rbtpracticeai/sdk';\n\nconst client = new RBTPracticeAI({ apiKey: 'rbt_live_9a8f...' });\nconst questions = await client.questions.list({ limit: 10, category: 'Measurement' });`,
+    python: `from rbtpracticeai import RBTPracticeAI\n\nclient = RBTPracticeAI(api_key="rbt_live_9a8f...")\nquestions = client.questions.list(limit=10, category="Measurement")`,
+    curl: `curl -X GET "https://rbtpracticeai.com/api/v1/questions?limit=10" \\\n  -H "Authorization: Bearer rbt_live_9a8f..."`,
+    go: `package main\n\nimport "github.com/rbtpracticeai/sdk-go"\n\nclient := rbtpracticeai.NewClient("rbt_live_9a8f...")\nquestions, err := client.Questions.List(ctx, &ListOptions{Limit: 10})`,
+    flutter: `final client = RBTPracticeAI(apiKey: 'rbt_live_9a8f...');\nfinal questions = await client.questions.list(limit: 10);`,
   };
 
   return (

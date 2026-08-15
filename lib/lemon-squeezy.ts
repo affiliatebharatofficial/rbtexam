@@ -106,7 +106,7 @@ export async function createLemonSqueezyCheckout({
               },
               custom_price: null,
               product_options: {
-                redirect_url: redirectUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://rbtpracticequestions.com'}/profile/billing?success=true`,
+                redirect_url: redirectUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://rbtpracticeai.com'}/profile/billing?success=true`,
               },
             },
             relationships: {

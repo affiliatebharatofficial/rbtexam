@@ -126,7 +126,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="candidate@rbtpracticequestions.com"
+              placeholder="candidate@rbtpracticeai.com"
               className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
             />
           </div>
@@ -227,7 +227,7 @@ export default function LoginPage() {
           </div>
         </Link>
         <h1 className="text-3xl font-extrabold text-[#0F172A] tracking-tight">
-          Welcome back to <span className="text-[#2563EB]">RBT Practice Questions</span>
+          Welcome back to <span className="text-[#2563EB]">RBT Practice AI</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-600">
           Log in to access your Socrates AI Tutor, domain heatmaps, and practice exam simulations.

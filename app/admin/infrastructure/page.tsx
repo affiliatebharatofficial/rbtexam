@@ -93,7 +93,7 @@ export default function AdminInfrastructurePage() {
               Infrastructure Dashboard
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
-              Real-time platform health, deployment history, environment status, and service observability for the RBT Practice Questions enterprise infrastructure.
+              Real-time platform health, deployment history, environment status, and service observability for the RBT Practice AI enterprise infrastructure.
             </p>
           </div>
           <div className="flex items-center space-x-2">

@@ -48,7 +48,7 @@ export function PricingSection() {
           variantId: planId,
           tier: planName,
           billingInterval: billingCycle,
-          userEmail: 'candidate@rbtpracticequestions.com',
+          userEmail: 'candidate@rbtpracticeai.com',
         }),
       });
 
@@ -193,7 +193,7 @@ export function PricingSection() {
               <ShieldCheck className="w-7 h-7" />
             </div>
             <div className="space-y-1">
-              <h4 className="text-lg font-bold">Pass-or-Refund Guarantee</h4>
+              <h4 className="text-lg font-bold">RBT Practice AI Pass-or-Refund Guarantee</h4>
               <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
                 Score 85%+ on three qualifying mock exams and meet all eligibility requirements. If you then take the applicable official BACB exam and do not pass, you may qualify for a full refund under our Guarantee Terms.
               </p>

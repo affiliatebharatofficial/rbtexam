@@ -4,7 +4,7 @@ import { FAQSection } from '@/components/landing/faq-section';
 import { constructMetadata } from '@/utils/seo';
 
 export const metadata = constructMetadata({
-  title: 'Pricing & Pass Guarantee - RBT Practice Questions',
+  title: 'Pricing & Pass Guarantee - RBT Practice AI',
   description: 'Choose your RBT practice plan. Student Pro, Lifetime Pass with 100% Money-Back Guarantee, or B2B Clinic Cohort licenses.',
 });
 

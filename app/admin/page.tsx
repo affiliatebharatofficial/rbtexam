@@ -210,7 +210,7 @@ export default function SuperAdminCMSPage() {
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('rbt_admin_users_roster');
-        if (saved && saved.includes('@rbtpracticequestions.com')) {
+        if (saved && saved.includes('@rbtpracticeai.com')) {
           localStorage.removeItem('rbt_admin_users_roster');
         }
       } catch (e) {}
@@ -239,7 +239,7 @@ export default function SuperAdminCMSPage() {
       const apiData = await apiRes.json();
       if (apiData.users && Array.isArray(apiData.users)) {
         apiData.users.forEach((u: any) => {
-          if (u.email && !u.email.includes('@rbtpracticequestions.com')) {
+          if (u.email && !u.email.includes('@rbtpracticeai.com')) {
             realUsersMap.set(u.email.toLowerCase().trim(), u);
           }
         });
@@ -254,7 +254,7 @@ export default function SuperAdminCMSPage() {
         const { data: dbProfiles } = await supabase.from('profiles').select('*');
         if (dbProfiles && Array.isArray(dbProfiles)) {
           dbProfiles.forEach((p: any) => {
-            if (p.email && !p.email.includes('@rbtpracticequestions.com')) {
+            if (p.email && !p.email.includes('@rbtpracticeai.com')) {
               realUsersMap.set(p.email.toLowerCase().trim(), {
                 id: p.id,
                 email: p.email,
@@ -280,7 +280,7 @@ export default function SuperAdminCMSPage() {
         if (regStr) {
           const regUsers: any[] = JSON.parse(regStr);
           regUsers.forEach((u: any) => {
-            if (u.email && !u.email.includes('@rbtpracticequestions.com')) {
+            if (u.email && !u.email.includes('@rbtpracticeai.com')) {
               realUsersMap.set(u.email.toLowerCase().trim(), {
                 id: u.id,
                 email: u.email,
@@ -299,7 +299,7 @@ export default function SuperAdminCMSPage() {
         const activeSessStr = localStorage.getItem('rbt_ai_auth_session');
         if (activeSessStr) {
           const activeSess = JSON.parse(activeSessStr);
-          if (activeSess?.user?.email && !activeSess.user.email.includes('@rbtpracticequestions.com')) {
+          if (activeSess?.user?.email && !activeSess.user.email.includes('@rbtpracticeai.com')) {
             const u = activeSess.user;
             realUsersMap.set(u.email.toLowerCase().trim(), {
               id: u.id,

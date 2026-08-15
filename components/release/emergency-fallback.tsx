@@ -10,7 +10,7 @@ interface EmergencyFallbackProps {
 
 export const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
   title = 'System Maintenance Mode Engaged',
-  description = 'RBT Practice Questions is currently undergoing scheduled platform upgrades to ensure peak reliability. We will return shortly.',
+  description = 'RBT Practice AI is currently undergoing scheduled platform upgrades to ensure peak reliability. We will return shortly.',
   onRetry,
 }) => {
   return (
@@ -33,7 +33,7 @@ export const EmergencyFallback: React.FC<EmergencyFallbackProps> = ({
             </button>
           )}
           <a
-            href="https://rbtpracticequestions.com"
+            href="https://rbtpracticeai.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-slate-500 hover:text-slate-300 underline transition-colors"

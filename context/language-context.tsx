@@ -27,7 +27,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'nav.readinessScore': 'Readiness Score',
 
     // Hero & General UI
-    'hero.badge': 'BACB 2nd Edition Task List Compliant',
+    'hero.badge': 'Aligned with BACB RBT 3rd Edition Task List',
     'hero.titlePrefix': 'Pass Your',
     'hero.titleHighlight': 'RBT Certification',
     'hero.titleSuffix': 'with Confidence',
@@ -36,13 +36,13 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'hero.bullet2': 'AI Ethics & Practice Question Tutor',
     'hero.bullet3': 'Domains A-F Task List Coverage',
     'hero.bullet4': 'Weak Area Analysis & Analytics',
-    'hero.startPractice': 'Start Free Practice',
+    'hero.startPractice': 'Start Practicing',
     'hero.mockExamBtn': 'Take a Mock Exam',
     'hero.exploreFlashcards': 'Explore Flashcards',
     'hero.aiTutorButton': 'Ask Socrates AI Tutor',
 
     // Footer
-    'footer.brandDescription': 'The premier RBT exam preparation platform with thousands of practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.',
+    'footer.brandDescription': 'The premier RBT Practice AI platform with thousands of practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.',
     'footer.examPrep': 'Exam Prep',
     'footer.company': 'Company & Blog',
     'footer.blog': 'Blog',
@@ -71,7 +71,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'features.feat6.desc': 'Supervisors and BCBAs can oversee trainee cohorts, track student exam readiness scores, assign practice tests, and verify 100% team pass readiness.',
 
     // Pricing Section
-    'pricing.badge': 'Pass-or-Refund Guarantee Protection',
+    'pricing.badge': 'RBT Practice AI Pass-or-Refund Guarantee',
     'pricing.heading': 'Invest in Your RBT Certification Success',
     'pricing.subheading': 'Choose the plan tailored for your exam target date or clinic cohort needs.',
     'pricing.monthly': 'Monthly Plan',
@@ -80,7 +80,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
 
     // Exam Engine
     'exam.title': 'RBT Exam Simulator',
-    'exam.subtitle': 'Realistic BACB 2nd Edition Task List exam practice with detailed explanations.',
+    'exam.subtitle': 'Realistic BACB RBT 3rd Edition Task List exam practice with detailed explanations.',
     'exam.selectDomain': 'Select Task List Domain',
     'exam.allDomains': 'All BACB Task List Domains',
     'exam.numQuestions': 'Number of Questions',
@@ -155,7 +155,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'nav.readinessScore': 'Puntaje de Preparación',
 
     // Hero & General UI
-    'hero.badge': 'Conforme al Temario BACB 2da Edición',
+    'hero.badge': 'Alineado con el Temario BACB RBT 3ª Edición',
     'hero.titlePrefix': 'Aprueba tu',
     'hero.titleHighlight': 'Certificación RBT',
     'hero.titleSuffix': 'con Confianza',
@@ -164,13 +164,13 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'hero.bullet2': 'Tutor de Ética y Preguntas de Práctica de IA',
     'hero.bullet3': 'Cobertura Completa del Temario Dominios A-F',
     'hero.bullet4': 'Análisis de Áreas Débiles y Métricas',
-    'hero.startPractice': 'Comenzar Práctica Gratis',
+    'hero.startPractice': 'Comenzar Práctica',
     'hero.mockExamBtn': 'Tomar Examen Simulado',
     'hero.exploreFlashcards': 'Explorar Tarjetas',
     'hero.aiTutorButton': 'Preguntar al Tutor de IA',
 
     // Footer
-    'footer.brandDescription': 'La plataforma líder de preparación para el examen RBT con miles de preguntas de práctica, exámenes simulados realistas, tarjetas y soporte de tutoría de IA para candidatos de certificación BACB.',
+    'footer.brandDescription': 'La plataforma RBT Practice AI para la preparación del examen RBT con preguntas de práctica, exámenes simulados, tarjetas y tutor de IA para candidatos a la certificación BACB.',
     'footer.examPrep': 'Preparación para el Examen',
     'footer.company': 'Empresa y Blog',
     'footer.blog': 'Blog',
@@ -201,7 +201,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'features.feat6.desc': 'Los supervisores y BCBA pueden supervisar grupos de practicantes, rastrear puntajes de preparación para el examen, asignar pruebas de práctica y verificar el 100% de preparación del equipo.',
 
     // Pricing Section
-    'pricing.badge': 'Protección de Garantía Aprueba-o-Reembolso',
+    'pricing.badge': 'Garantía RBT Practice AI Aprueba-o-Reembolso',
     'pricing.heading': 'Invierte en tu Éxito de Certificación RBT',
     'pricing.subheading': 'Elige el plan adaptado a tu fecha objetivo de examen o necesidades de cohorte clínica.',
     'pricing.monthly': 'Plan Mensual',
@@ -210,7 +210,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
 
     // Exam Engine
     'exam.title': 'Simulador de Examen RBT',
-    'exam.subtitle': 'Práctica de examen realista basada en el Temario BACB 2da Edición con explicaciones detalladas.',
+    'exam.subtitle': 'Práctica de examen realista basada en el Temario BACB RBT 3ª Edición con explicaciones detalladas.',
     'exam.selectDomain': 'Seleccionar Dominio del Temario',
     'exam.allDomains': 'Todos los Dominios del Temario BACB',
     'exam.numQuestions': 'Número de Preguntas',

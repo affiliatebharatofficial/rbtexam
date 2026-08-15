@@ -11,7 +11,7 @@ import { Brain, CheckCircle2, RefreshCw, ArrowRight } from 'lucide-react';
 function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const emailParam = searchParams.get('email') || 'candidate@rbtpracticequestions.com';
+  const emailParam = searchParams.get('email') || 'candidate@rbtpracticeai.com';
 
   const { verifyEmail, user } = useAuth();
 

@@ -9,7 +9,7 @@ export function FAQSection() {
 
   const faqs = [
     {
-      q: 'How similar are RBT Practice Questions to the actual BACB RBT Exam?',
+      q: 'How similar are RBT Practice AI questions to the actual BACB RBT Exam?',
       a: 'Our question engine is modeled directly after the BACB RBT 3rd Edition Task List. Every scenario reflects real-world clinical behavior analysis cases with 4 distractors designed to test discrimination skills, latency, IRT, DTT, and ethics.',
     },
     {
@@ -17,8 +17,8 @@ export function FAQSection() {
       a: 'Socrates AI is a specialized conversational model trained on the RBT Ethics Code 2.0 and ABA task list guidelines. You can ask for step-by-step explanations, request scenario roleplay, or ask it to critique your clinical reasoning.',
     },
     {
-      q: 'What is the 100% Money-Back Pass Guarantee?',
-      a: 'We are so confident in our platform that if you achieve an 85%+ Readiness Score on RBT Practice Questions and do not pass your official BACB RBT exam on the first attempt, we will issue a 100% full refund.',
+      q: 'What is the RBT Practice AI Pass-or-Refund Guarantee?',
+      a: 'We are so confident in our platform that if you achieve an 85%+ Readiness Score on RBT Practice AI and do not pass your official BACB RBT exam on the first attempt, you may qualify for a 100% full refund under our Guarantee Terms.',
     },
     {
       q: 'Can ABA Clinics and BCBAs track student progress?',
@@ -42,7 +42,7 @@ export function FAQSection() {
             Frequently Asked Questions
           </h2>
           <p className="text-base text-slate-600">
-            Everything you need to know about the RBT certification exam and RBT Practice Questions.
+            Everything you need to know about the RBT certification exam and RBT Practice AI.
           </p>
         </div>
 

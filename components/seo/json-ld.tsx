@@ -4,12 +4,12 @@ export function JsonLdSchema() {
   const courseSchema = {
     '@context': 'https://schema.org',
     '@type': 'Course',
-    name: 'RBT Practice Questions & AI Tutor',
-    description: 'Complete AI-powered prep platform for the Registered Behavior Technician (RBT) certification exam based on the BACB RBT 3rd Edition Test Content Outline (TCO).',
+    name: 'RBT Practice AI — Practice Questions & AI Tutor',
+    description: 'Complete AI-powered prep platform for the Registered Behavior Technician (RBT) certification exam based on the current BACB RBT 3rd Edition Test Content Outline (TCO).',
     provider: {
       '@type': 'Organization',
-      name: 'RBT Practice Questions',
-      sameAs: 'https://rbtpracticequestions.com',
+      name: 'RBT Practice AI',
+      sameAs: 'https://rbtpracticeai.com',
     },
     educationalCredentialAwarded: 'Registered Behavior Technician (RBT) Exam Readiness',
     hasCourseInstance: {
@@ -33,10 +33,10 @@ export function JsonLdSchema() {
       },
       {
         '@type': 'Question',
-        name: 'How does RBT Practice Questions calculate my pass readiness score?',
+        name: 'How does RBT Practice AI calculate my pass readiness score?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'RBT Practice Questions uses real-time adaptive diagnostic algorithms evaluating your score accuracy across all 6 BACB task list domains, time spent per question, and spaced-repetition memory retention.',
+          text: 'RBT Practice AI uses real-time adaptive diagnostic algorithms evaluating your score accuracy across all 6 BACB task list domains, time spent per question, and spaced-repetition memory retention.',
         },
       },
       {
@@ -44,7 +44,7 @@ export function JsonLdSchema() {
         name: 'Can ABA Clinics track student progress?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes! RBT Practice Questions includes a dedicated Clinic & Training Center portal for BCBA supervisors to manage cohorts, monitor pass probability, and assign mock exams.',
+          text: 'Yes! RBT Practice AI includes a dedicated Clinic & Training Center portal for BCBA supervisors to manage cohorts, monitor pass probability, and assign mock exams.',
         },
       },
     ],

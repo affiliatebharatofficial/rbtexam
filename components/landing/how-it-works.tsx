@@ -94,7 +94,7 @@ export function HowItWorks() {
             <span>Proven 4-Step Blueprint</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            How RBT Practice Questions Guarantees Your Exam Success
+            How RBT Practice AI Guarantees Your Exam Success
           </h2>
           <p className="text-base text-slate-600">
             Our scientifically-proven learning engine turns complex ABA concepts into second nature in 4 simple steps.

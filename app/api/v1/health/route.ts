@@ -7,7 +7,7 @@ export async function GET() {
   return NextResponse.json({
     status: 'healthy',
     apiVersion: 'v1.0.0',
-    gateway: 'RBT Practice Questions Enterprise Gateway',
+    gateway: 'RBT Practice AI Enterprise Gateway',
     timestamp: new Date().toISOString(),
     metrics,
   });
