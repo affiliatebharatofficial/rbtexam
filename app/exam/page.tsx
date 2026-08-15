@@ -570,38 +570,110 @@ export default function ExamPage() {
               <div className="space-y-3">
                 {currentQ.options.map((opt) => {
                   const isSelected = userAnswers[currentQ.id] === opt.id;
+                  const hasAnswered = Boolean(userAnswers[currentQ.id]);
+                  const isCorrectOpt = opt.id === currentQ.correctOptionId;
+
+                  let buttonStyle = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300';
+                  let badgeStyle = 'bg-slate-100 text-slate-700';
+                  let icon = isSelected ? <Check className="w-5 h-5 text-[#2563EB] flex-shrink-0" /> : null;
+
+                  if (mode === 'untimed' && hasAnswered) {
+                    if (isCorrectOpt) {
+                      buttonStyle = 'border-2 border-emerald-500 bg-emerald-50/90 text-emerald-950 font-bold shadow-md';
+                      badgeStyle = 'bg-emerald-600 text-white';
+                      icon = (
+                        <div className="flex items-center space-x-1.5 text-xs text-emerald-700 font-extrabold flex-shrink-0">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                          <span>Correct</span>
+                        </div>
+                      );
+                    } else if (isSelected) {
+                      buttonStyle = 'border-2 border-rose-500 bg-rose-50/90 text-rose-950 font-bold shadow-md';
+                      badgeStyle = 'bg-rose-600 text-white';
+                      icon = (
+                        <div className="flex items-center space-x-1.5 text-xs text-rose-700 font-extrabold flex-shrink-0">
+                          <XCircle className="w-5 h-5 text-rose-600" />
+                          <span>Your Selection</span>
+                        </div>
+                      );
+                    } else {
+                      buttonStyle = 'border-slate-200 bg-white/60 text-slate-400 opacity-60';
+                      badgeStyle = 'bg-slate-100 text-slate-400';
+                    }
+                  } else if (isSelected) {
+                    buttonStyle = 'border-2 border-[#2563EB] bg-blue-50/70 text-[#2563EB] font-bold shadow-md';
+                    badgeStyle = 'bg-[#2563EB] text-white';
+                  }
+
                   return (
                     <button
                       key={opt.id}
                       onClick={() => handleSelectOption(currentQ.id, opt.id)}
-                      className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between ${
-                        isSelected
-                          ? 'border-2 border-[#2563EB] bg-blue-50/70 text-[#2563EB] font-bold shadow-md'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
-                      }`}
+                      className={`w-full p-4 rounded-2xl border text-left text-xs sm:text-sm transition-all duration-200 flex items-center justify-between ${buttonStyle}`}
                     >
                       <div className="flex items-center space-x-3">
-                        <span className={`w-7 h-7 rounded-xl flex items-center justify-center font-extrabold text-xs ${
-                          isSelected ? 'bg-[#2563EB] text-white' : 'bg-slate-100 text-slate-700'
-                        }`}>
+                        <span className={`w-7 h-7 rounded-xl flex items-center justify-center font-extrabold text-xs ${badgeStyle}`}>
                           {opt.id}
                         </span>
                         <span>{opt.text}</span>
                       </div>
-                      {isSelected && <Check className="w-5 h-5 text-[#2563EB] flex-shrink-0" />}
+                      {icon}
                     </button>
                   );
                 })}
               </div>
 
-              {/* Untimed Mode Instant Rationale Toggle */}
+              {/* Untimed Study Mode Instant Rationale & Socratic Guidance */}
               {mode === 'untimed' && userAnswers[currentQ.id] && (
-                <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200/80 text-xs text-slate-800 space-y-2 animate-fadeIn">
-                  <div className="flex items-center space-x-2 font-bold text-[#2563EB]">
-                    <Zap className="w-4 h-4 text-amber-500" />
-                    <span>Socrates AI Instant Rationale:</span>
+                <div className={`p-5 rounded-2xl border text-xs sm:text-sm space-y-3 animate-fadeIn ${
+                  userAnswers[currentQ.id] === currentQ.correctOptionId
+                    ? 'bg-emerald-50/90 border-emerald-200 text-emerald-950'
+                    : 'bg-rose-50/80 border-rose-200 text-rose-950'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 font-extrabold text-xs sm:text-sm">
+                      {userAnswers[currentQ.id] === currentQ.correctOptionId ? (
+                        <span className="flex items-center space-x-1.5 text-emerald-700">
+                          <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                          <span>Correct Answer! (+10 XP)</span>
+                        </span>
+                      ) : (
+                        <span className="flex items-center space-x-1.5 text-rose-700">
+                          <XCircle className="w-5 h-5 text-rose-600" />
+                          <span>Incorrect — Correct Answer is Option {currentQ.correctOptionId}</span>
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-bold px-2.5 py-1 rounded bg-blue-100 text-blue-800">
+                      BACB Item {currentQ.taskItemId}
+                    </span>
                   </div>
-                  <p className="leading-relaxed">{currentQ.aiExplanationDetail}</p>
+
+                  <div className="space-y-1.5 pt-2 border-t border-slate-200/60">
+                    <div className="flex items-center space-x-2 font-bold text-[#2563EB]">
+                      <Zap className="w-4 h-4 text-amber-500" />
+                      <span>Socrates AI Clinical Rationale & Explanation:</span>
+                    </div>
+                    <p className="text-slate-700 leading-relaxed font-normal">
+                      {currentQ.aiExplanationDetail}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Domain {currentQ.domainId}: BACB Task List 3rd Edition
+                    </span>
+                    <Link
+                      href={`/tutor?q=${encodeURIComponent(`Explain BACB task list question: ${currentQ.questionText}`)}`}
+                      target="_blank"
+                    >
+                      <Button variant="outline" size="sm" className="gap-1.5 text-xs font-bold border-blue-200 text-blue-700 bg-white hover:bg-blue-50">
+                        <Brain className="w-3.5 h-3.5 text-[#2563EB]" />
+                        <span>Ask Socrates AI for Deeper Rationale</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               )}
 
