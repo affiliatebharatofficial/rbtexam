@@ -128,6 +128,15 @@ export default function AdminQuestionsPage() {
   const [allQuestions, setAllQuestions] = useState<MasterQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [statsSummary, setStatsSummary] = useState<{
+    total: number;
+    published: number;
+    rbt: number;
+    bcaba: number;
+    bcba: number;
+    featured: number;
+  } | null>(null);
+
   const fetchQuestionsFromApi = async () => {
     setIsLoading(true);
     try {
@@ -150,12 +159,21 @@ export default function AdminQuestionsPage() {
         }
       }
 
-      // Fetch all questions for stat cards counter
-      const statsRes = await fetch(`/api/questions?limit=1000&status=ALL`);
+      // Fetch exact DB statistics counters (no row caps)
+      const statsRes = await fetch(`/api/questions/stats`);
       if (statsRes.ok) {
-        const statsJson = await statsRes.json();
-        if (statsJson && Array.isArray(statsJson.data)) {
-          setAllQuestions(statsJson.data);
+        const statsData = await statsRes.json();
+        if (statsData && typeof statsData.total === 'number') {
+          setStatsSummary(statsData);
+        }
+      }
+
+      // Fetch all questions for bulk actions and export CSV (batching up to 10,000)
+      const allQRes = await fetch(`/api/questions?limit=10000&status=ALL`);
+      if (allQRes.ok) {
+        const allJson = await allQRes.json();
+        if (allJson && Array.isArray(allJson.data)) {
+          setAllQuestions(allJson.data);
         }
       }
     } catch (err) {
@@ -410,42 +428,38 @@ export default function AdminQuestionsPage() {
         {/* Dashboard Statistics Bar */}
         {(() => {
           const statsSource = allQuestions.length > 0 ? allQuestions : (queryResult?.data || []);
-          const totalCount = allQuestions.length > 0 ? allQuestions.length : (queryResult?.total || 0);
+          const displayTotal = statsSummary?.total ?? (allQuestions.length > 0 ? allQuestions.length : (queryResult?.total || 0));
+          const displayPublished = statsSummary?.published ?? statsSource.filter((q) => q.status === 'published').length;
+          const displayRbt = statsSummary?.rbt ?? statsSource.filter((q) => q.certification === 'RBT').length;
+          const displayBcaba = statsSummary?.bcaba ?? statsSource.filter((q) => q.certification === 'BCaBA').length;
+          const displayBcba = statsSummary?.bcba ?? statsSource.filter((q) => q.certification === 'BCBA').length;
+          const displayFeatured = statsSummary?.featured ?? statsSource.filter((q) => q.isPremium || q.isFeatured).length;
+
           return (
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
               <Card className="p-4 space-y-1 text-center">
                 <div className="text-[10px] font-bold text-slate-400 uppercase">Total Questions</div>
-                <div className="text-2xl font-black text-slate-900">{totalCount}</div>
+                <div className="text-2xl font-black text-slate-900">{displayTotal}</div>
               </Card>
               <Card className="p-4 space-y-1 text-center bg-emerald-50/50 border-emerald-100">
                 <div className="text-[10px] font-bold text-emerald-700 uppercase">Published</div>
-                <div className="text-2xl font-black text-emerald-600">
-                  {statsSource.filter((q) => q.status === 'published').length}
-                </div>
+                <div className="text-2xl font-black text-emerald-600">{displayPublished}</div>
               </Card>
               <Card className="p-4 space-y-1 text-center bg-blue-50/50 border-blue-100">
                 <div className="text-[10px] font-bold text-blue-700 uppercase">RBT Questions</div>
-                <div className="text-2xl font-black text-[#2563EB]">
-                  {statsSource.filter((q) => q.certification === 'RBT').length}
-                </div>
+                <div className="text-2xl font-black text-[#2563EB]">{displayRbt}</div>
               </Card>
               <Card className="p-4 space-y-1 text-center bg-indigo-50/50 border-indigo-100">
                 <div className="text-[10px] font-bold text-indigo-700 uppercase">BCaBA Questions</div>
-                <div className="text-2xl font-black text-indigo-600">
-                  {statsSource.filter((q) => q.certification === 'BCaBA').length}
-                </div>
+                <div className="text-2xl font-black text-indigo-600">{displayBcaba}</div>
               </Card>
               <Card className="p-4 space-y-1 text-center bg-purple-50/50 border-purple-100">
                 <div className="text-[10px] font-bold text-purple-700 uppercase">BCBA Questions</div>
-                <div className="text-2xl font-black text-purple-600">
-                  {statsSource.filter((q) => q.certification === 'BCBA').length}
-                </div>
+                <div className="text-2xl font-black text-purple-600">{displayBcba}</div>
               </Card>
               <Card className="p-4 space-y-1 text-center bg-amber-50/50 border-amber-100">
                 <div className="text-[10px] font-bold text-amber-700 uppercase">Featured / Premium</div>
-                <div className="text-2xl font-black text-amber-600">
-                  {statsSource.filter((q) => q.isPremium || q.isFeatured).length}
-                </div>
+                <div className="text-2xl font-black text-amber-600">{displayFeatured}</div>
               </Card>
             </div>
           );

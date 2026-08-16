@@ -48,9 +48,61 @@ export async function GET(request: NextRequest) {
     }
 
     const sortColumn = sortBy === 'createdAt' ? 'created_at' : sortBy === 'question' ? 'question_text' : sortBy;
-    query = query.order(sortColumn, { ascending: sortOrder === 'asc' });
-
     const startIndex = (page - 1) * limit;
+
+    // Handle large datasets (>1000 rows) by chunking requests to bypass PostgREST max_rows caps
+    if (limit > 1000) {
+      let allDbRows: any[] = [];
+      let currentOffset = startIndex;
+      const targetEnd = startIndex + limit;
+      let totalCountFound: number | null = null;
+
+      while (currentOffset < targetEnd) {
+        const chunkSize = Math.min(1000, targetEnd - currentOffset);
+        let batchQuery = adminDb
+          .from('master_questions')
+          .select('*', { count: 'exact' })
+          .is('deleted_at', null);
+
+        if (certification !== 'ALL') batchQuery = batchQuery.eq('certification', certification);
+        if (category !== 'ALL') batchQuery = batchQuery.eq('category', category);
+        if (difficulty !== 'ALL') batchQuery = batchQuery.eq('difficulty', difficulty);
+        if (status !== 'ALL') batchQuery = batchQuery.eq('status', status);
+        if (search && search.trim() !== '') {
+          const term = `%${search.trim().toLowerCase()}%`;
+          batchQuery = batchQuery.or(`question_text.ilike.${term},scenario_text.ilike.${term},question_code.ilike.${term},category.ilike.${term}`);
+        }
+        batchQuery = batchQuery.order(sortColumn, { ascending: sortOrder === 'asc' });
+        batchQuery = batchQuery.range(currentOffset, currentOffset + chunkSize - 1);
+
+        const { data: chunkData, count: chunkCount, error: chunkErr } = await batchQuery;
+        if (chunkErr) {
+          console.error('Supabase GET /api/questions batch error:', chunkErr.message);
+          break;
+        }
+        if (chunkCount !== null) totalCountFound = chunkCount;
+        if (!chunkData || chunkData.length === 0) break;
+
+        allDbRows = allDbRows.concat(chunkData);
+        currentOffset += chunkData.length;
+        if (chunkData.length < chunkSize) break;
+      }
+
+      const questions: MasterQuestion[] = allDbRows.map(mapDbRowToMasterQuestion);
+      const total = totalCountFound ?? questions.length;
+      const totalPages = Math.ceil(total / limit) || 1;
+
+      return NextResponse.json({
+        data: questions,
+        total,
+        page,
+        limit,
+        pageSize: limit,
+        totalPages,
+      });
+    }
+
+    query = query.order(sortColumn, { ascending: sortOrder === 'asc' });
     query = query.range(startIndex, startIndex + limit - 1);
 
     const { data: dbRows, count, error } = await query;
