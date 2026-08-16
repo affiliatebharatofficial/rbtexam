@@ -173,9 +173,16 @@ export async function processAITutorMessage(
     ? 'IMPORTANT: You MUST speak and respond in fluent Spanish (Español). Use official BACB Spanish technical ABA terminology.'
     : `Respond in ${language}.`;
 
+  const certOutlineTitle =
+    certification === 'BCBA'
+      ? 'BACB 5th Edition BCBA Test Content Outline (TCO)'
+      : certification === 'BCaBA'
+      ? 'BACB 5th Edition BCaBA Test Content Outline (TCO)'
+      : 'BACB RBT 3rd Edition Test Content Outline (TCO)';
+
   // 1. Attempt LLM Provider Execution (Multi-Model AI Engine)
   const systemDirective = `${formatSystemDirective(candidateContext, mode)}
-You are Socrates AI — RBT Practice AI's AI Tutor, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the BACB RBT 3rd Edition Test Content Outline (TCO) exam.
+You are Socrates AI — RBT Practice AI's AI Tutor, an elite Senior BCBA Clinical Mentor for ${certification} candidates preparing for the ${certOutlineTitle} exam.
 ${langDirective}
 Provide a clear, encouraging, structured response. Respond in valid JSON if possible with keys: "content" (markdown string response), "concept", "simpleExplanation", "clinicalExample", "examTip", "mnemonicTip", "commonMistakes".`;
 
@@ -276,17 +283,17 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
       message: {
         id: `msg-${Date.now()}`,
         sender: 'assistant',
-        content: `### 📋 Clinical ABC Scenario Analysis for: "${cleanQuery}"\n\nAs your supervising BCBA, let's break down this clinical scenario into its core behavioral components according to the **BACB RBT 3rd Edition Test Content Outline (TCO)**.`,
+        content: `### 📋 Clinical ABC Scenario Analysis for: "${cleanQuery}"\n\nAs your supervising BCBA, let's break down this clinical scenario into its core behavioral components according to the **${certOutlineTitle}**.`,
         timestamp: new Date().toISOString(),
         scenarioAnalysis: {
           problemBehavior: `Learner engages in ${matchedSubject} upon presentation of a task demand or transition.`,
-          antecedent: 'RBT presents a discriminative stimulus (SD) or transition prompt ("Time to put toys away and work").',
+          antecedent: 'Practitioner presents a discriminative stimulus (SD) or transition prompt ("Time to put toys away and work").',
           behavior: `Learner displays ${matchedSubject} lasting 30-90 seconds.`,
-          consequence: 'RBT delivers functional communication prompt or temporary demand removal.',
+          consequence: 'Practitioner delivers functional communication prompt or temporary demand removal.',
           replacementBehavior: 'Functional Communication Training (FCT): Learner is taught to hand a "Break Please" PECS card or say "I need a break".',
           interventionStrategy: 'Differential Reinforcement of Alternative Behavior (DRA) combined with proactive visual schedule timers and high-probability request sequences.',
           reinforcementSchedule: 'Continuous reinforcement (FR1) for functional communication; Extinction for problem behavior.',
-          ethicalConsiderations: 'RBT Ethics Code 2.0: Ensure client dignity, physical safety, and least restrictive procedural safeguards.',
+          ethicalConsiderations: 'Ethics Code for Behavior Analysts: Ensure client dignity, physical safety, and least restrictive procedural safeguards.',
           documentationTip: 'Record onset, duration, latency, and inter-response time (IRT) in session data log immediately following trial.',
         },
       },
@@ -302,13 +309,13 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
       message: {
         id: `msg-${Date.now()}`,
         sender: 'assistant',
-        content: `### ⚡ Question & Distractor Elimination Breakdown: "${cleanQuery}"\n\nLet's deconstruct this practice question item according to the **BACB RBT 3rd Edition Task List** rules:\n\n1. **Core Concept Analyzed**: Identify the primary behavioral principle in the question stem.\n2. **Correct Option Rationale**: The correct response aligns directly with least intrusive, objective measurement and functional reinforcement principles.\n3. **Distractor Traps Avoided**: Incorrect choices often present subjective interpretations, improper prompt fading sequences, or unauthorized protocol modifications.\n\n*Pro Tip: Always look for answer choices that preserve client dignity and adhere strictly to BCBA-approved plans.*`,
+        content: `### ⚡ Question & Distractor Elimination Breakdown: "${cleanQuery}"\n\nLet's deconstruct this practice question item according to the **${certOutlineTitle}** rules:\n\n1. **Core Concept Analyzed**: Identify the primary behavioral principle in the question stem.\n2. **Correct Option Rationale**: The correct response aligns directly with least intrusive, objective measurement and functional reinforcement principles for ${certification} candidates.\n3. **Distractor Traps Avoided**: Incorrect choices often present subjective interpretations, improper prompt fading sequences, or unauthorized protocol modifications.\n\n*Pro Tip: Always look for answer choices that preserve client dignity and adhere strictly to BCBA-approved plans.*`,
         timestamp: new Date().toISOString(),
         clinicalInsight: {
           concept: `Distractor Analysis: ${cleanQuery.slice(0, 40)}`,
           simpleExplanation: `Deconstruction of question stem and option traps for ${certification} candidates.`,
           clinicalExample: 'Identify the functional relationship between stimulus control and reinforcement density.',
-          examTip: 'BACB Exam Trap: Watch out for options that sound clinically plausible but violate procedural fidelity or supervision rules.',
+          examTip: `BACB ${certification} Exam Trap: Watch out for options that sound clinically plausible but violate procedural fidelity or supervision rules.`,
           mnemonicTip: 'Distractor Filter: Eliminate subjective descriptors, unauthorized plan changes, and punitive defaults.',
         },
       },
@@ -322,13 +329,13 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
     message: {
       id: `msg-${Date.now()}`,
       sender: 'assistant',
-      content: `### 🧩 Socratic Mentorship: "${cleanQuery}"\n\nTo master this concept for your **${certification} Exam**, let's analyze how the **BACB 3rd Edition Task List** evaluates this item.\n\nKey Focus Area: Ensure you operationalize definitions, identify functional relationships, and maintain client dignity at all times.`,
+      content: `### 🧩 Socratic Mentorship: "${cleanQuery}"\n\nTo master this concept for your **${certification} Exam**, let's analyze how the **${certOutlineTitle}** evaluates this item.\n\nKey Focus Area: Ensure you operationalize definitions, identify functional relationships, and maintain client dignity at all times.`,
       timestamp: new Date().toISOString(),
       clinicalInsight: {
         concept: cleanQuery.slice(0, 45),
-        simpleExplanation: `Operational definition and implementation guidelines for ${cleanQuery}.`,
+        simpleExplanation: `Operational definition and implementation guidelines for ${cleanQuery} (${certification} level).`,
         clinicalExample: `Example: In a 1-on-1 ABA therapy session, record continuous measurement data while providing differential reinforcement.`,
-        examTip: 'BACB Exam Rule: Always select options that prioritize least intrusive procedures and client safety.',
+        examTip: `BACB ${certification} Exam Rule: Always select options that prioritize least intrusive procedures and client safety.`,
         mnemonicTip: 'ABA Priority: Measurement -> Assessment -> Acquisition -> Behavior Reduction.',
       },
     },

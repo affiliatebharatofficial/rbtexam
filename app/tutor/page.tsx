@@ -102,7 +102,58 @@ export default function TutorPage() {
     }
   };
 
-  const getStarterChipsForMode = (activeMode: PromptMode) => {
+  const getStarterChipsForMode = (activeMode: PromptMode, cert: CertificationLevel) => {
+    if (cert === 'BCBA') {
+      if (activeMode === 'scenario_analyzer') {
+        return [
+          'Analyze: BCBA conducts analogue Functional Analysis (FA) for self-injurious behavior',
+          'Deconstruct: System-wide OBM performance management feedback loop failure',
+          'Analyze: Component analysis of 3-token reinforcement schedule vs DRO',
+          'Deconstruct: BCBA supervisor handling RBT procedural drift in clinic setting',
+        ];
+      }
+      if (activeMode === 'question_explainer') {
+        return [
+          'Explain Question: Differentiate Component vs Parametric Analysis in behavior change plans',
+          'Deconstruct: Reversal vs Multiple Baseline experimental design threats to internal validity',
+          'Explain Question: BCBA supervision requirements for RBTs and BCaBAs under Ethics Code',
+          'Deconstruct: Functional Analysis vs Indirect Assessment interpretation traps',
+        ];
+      }
+      return [
+        'Explain Component vs Parametric Analysis with a clinical example',
+        'How to design an OBM Performance Diagnostic Checklist (PDC-HS)',
+        'Differentiate Reversal vs Multiple Baseline experimental designs',
+        'Explain BCBA ethical responsibilities for RBT and BCaBA supervision',
+      ];
+    }
+
+    if (cert === 'BCaBA') {
+      if (activeMode === 'scenario_analyzer') {
+        return [
+          'Analyze: BCaBA assists in conducting Attention vs Escape Functional Analysis conditions',
+          'Deconstruct: BCaBA designing token economy backup reinforcer exchange schedule',
+          'Analyze: BCaBA observing RBT implementing discrete trial training protocol',
+          'Deconstruct: BCaBA evaluating indirect FAI assessment data from caregiver',
+        ];
+      }
+      if (activeMode === 'question_explainer') {
+        return [
+          'Explain Question: What are the BCaBA RBT supervision percentage requirements?',
+          'Deconstruct: Functional Analysis Attention condition vs Demand condition triggers',
+          'Explain Question: How to establish backup reinforcers in a clinic token economy',
+          'Deconstruct: Indirect vs Direct behavior assessment methods for BCaBA candidates',
+        ];
+      }
+      return [
+        'Explain Functional Analysis (FA) Attention vs Escape conditions',
+        'What are the BCaBA RBT supervision requirements under the BACB?',
+        'Design a token economy backup reinforcer system for a classroom',
+        'Explain Indirect vs Direct behavioral assessment methods',
+      ];
+    }
+
+    // Default RBT
     if (activeMode === 'scenario_analyzer') {
       return [
         'Analyze: Learner screams and hits when transition timer goes off',
@@ -166,14 +217,38 @@ export default function TutorPage() {
     };
   };
 
+  const handleCertificationChange = (newCert: CertificationLevel) => {
+    if (newCert === certification) return;
+    setCertification(newCert);
+
+    let certNotice = '';
+    if (newCert === 'BCBA') {
+      certNotice = `🎓 **Target Certification Changed to BCBA (Board Certified Behavior Analyst)**\n\nTargeting the **BACB 5th Edition BCBA Test Content Outline (TCO)**. Socrates AI is now configured for advanced behavior analysis, Functional Analysis (FA) interpretation, component/parametric analysis, OBM performance management, and clinical supervision.`;
+    } else if (newCert === 'BCaBA') {
+      certNotice = `🎓 **Target Certification Changed to BCaBA (Board Certified Assistant Behavior Analyst)**\n\nTargeting the **BACB 5th Edition BCaBA Test Content Outline (TCO)**. Socrates AI is now configured for assistant behavior analyst competencies, FA conditions, RBT supervision rules, and program modification under BCBA oversight.`;
+    } else {
+      certNotice = `🎓 **Target Certification Changed to RBT (Registered Behavior Technician)**\n\nTargeting the **BACB RBT 3rd Edition Test Content Outline (TCO)**. Socrates AI is now configured for 1-on-1 direct therapy implementation, measurement data collection, prompt fading, and session documentation.`;
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `msg-cert-switch-${Date.now()}`,
+        sender: 'assistant',
+        content: certNotice,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  };
+
   const handleModeChange = (newMode: PromptMode) => {
     if (newMode === mode) return;
     setMode(newMode);
     let modeWelcome = '';
     if (newMode === 'scenario_analyzer') {
-      modeWelcome = `📋 **Clinical ABC Analyzer Mode Activated**\n\nSend me any clinical case study, transition challenge, or problem behavior scenario. I will break it down into Antecedent (A), Behavior (B), Consequence (C), Function, Replacement Behavior (FCT), and BACB Ethical Safeguards.`;
+      modeWelcome = `📋 **Clinical ABC Analyzer Mode Activated**\n\nSend me any clinical case study, transition challenge, or problem behavior scenario. I will break it down into Antecedent (A), Behavior (B), Consequence (C), Function, Replacement Behavior (FCT), and BACB Ethical Safeguards (${certification} Exam).`;
     } else if (newMode === 'question_explainer') {
-      modeWelcome = `⚡ **Question & Distractor Explainer Mode Activated**\n\nPaste any practice exam question or BACB Task List item. I will identify the correct option, explain why it is correct, and perform a Distractor Elimination Analysis on options A, B, C, and D.`;
+      modeWelcome = `⚡ **Question & Distractor Explainer Mode Activated**\n\nPaste any practice exam question or BACB Task List item. I will identify the correct option, explain why it is correct, and perform a Distractor Elimination Analysis on options A, B, C, and D (${certification} Exam).`;
     } else {
       modeWelcome = `🧠 **Socratic Mentor Mode Activated**\n\nAsk me any ABA concept, measurement method, or ethical dilemma. I will guide you step-by-step through Socratic mentorship for your **${certification} Exam**.`;
     }
@@ -190,7 +265,7 @@ export default function TutorPage() {
   };
 
   const currentModeInfo = getModeInfo(mode);
-  const activeStarterChips = getStarterChipsForMode(mode);
+  const activeStarterChips = getStarterChipsForMode(mode, certification);
 
   return (
     <ProtectedRoute>
@@ -221,7 +296,7 @@ export default function TutorPage() {
                   {(['RBT', 'BCaBA', 'BCBA'] as CertificationLevel[]).map((cert) => (
                     <button
                       key={cert}
-                      onClick={() => setCertification(cert)}
+                      onClick={() => handleCertificationChange(cert)}
                       className={`py-1.5 rounded-lg transition-all ${
                         certification === cert ? 'bg-white text-[#2563EB] shadow font-black' : 'text-slate-500'
                       }`}
