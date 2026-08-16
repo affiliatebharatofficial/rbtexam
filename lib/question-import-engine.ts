@@ -8,6 +8,31 @@ import {
 } from '@/types/master-question';
 import { MASTER_QUESTION_BANK } from './master-question-bank';
 
+export function normalizeCategory(rawCat: string): QuestionCategory {
+  if (!rawCat) return 'Behavior Assessment';
+  const clean = rawCat.trim().toLowerCase();
+
+  if (clean.includes('domain b') || clean.includes('assessment')) {
+    return 'Behavior Assessment';
+  }
+  if (clean.includes('domain a') || clean.includes('measurement') || clean.includes('graphing')) {
+    return 'Measurement';
+  }
+  if (clean.includes('domain c') || clean.includes('acquisition') || clean.includes('skill')) {
+    return 'Skill Acquisition';
+  }
+  if (clean.includes('domain d') || clean.includes('reduction')) {
+    return 'Behavior Reduction';
+  }
+  if (clean.includes('domain e') || clean.includes('documentation') || clean.includes('reporting')) {
+    return 'Documentation and Reporting';
+  }
+  if (clean.includes('domain f') || clean.includes('ethics') || clean.includes('conduct')) {
+    return 'Ethics';
+  }
+  return rawCat as QuestionCategory;
+}
+
 /**
  * Parses raw CSV string data into structured question candidates
  * with full field validation and duplicate detection.
@@ -53,7 +78,7 @@ export function parseAndValidateCSV(csvText: string): ImportValidationResult {
 
     // Map row columns dynamically or by index
     const certificationRaw = (rowValues[1] || 'RBT').toUpperCase();
-    const categoryRaw = rowValues[2] || 'Measurement';
+    const categoryRaw = normalizeCategory(rowValues[2] || 'Behavior Assessment');
     const difficultyRaw = (rowValues[3] || 'medium').toLowerCase();
     const typeRaw = (rowValues[4] || 'scenario_based').toLowerCase();
     const questionText = rowValues[5] || rowValues[0] || '';

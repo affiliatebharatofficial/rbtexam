@@ -214,13 +214,15 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
                     onChange={(e) => setCategory(e.target.value as QuestionCategory)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900"
                   >
-                    <option value="Measurement">Measurement</option>
+                    <option value="Behavior Assessment">Domain B: Behavior Assessment</option>
                     <option value="Assessment">Assessment</option>
-                    <option value="Skill Acquisition">Skill Acquisition</option>
-                    <option value="Behavior Reduction">Behavior Reduction</option>
-                    <option value="Documentation">Documentation</option>
+                    <option value="Measurement">Domain A: Measurement</option>
+                    <option value="Data Collection and Graphing">Data Collection and Graphing</option>
+                    <option value="Skill Acquisition">Domain C: Skill Acquisition</option>
+                    <option value="Behavior Reduction">Domain D: Behavior Reduction</option>
+                    <option value="Documentation">Domain E: Documentation</option>
                     <option value="Reporting">Reporting</option>
-                    <option value="Professional Conduct">Professional Conduct</option>
+                    <option value="Professional Conduct">Domain F: Professional Conduct</option>
                     <option value="Ethics">Ethics</option>
                     <option value="Reinforcement">Reinforcement</option>
                     <option value="Token Economy">Token Economy</option>

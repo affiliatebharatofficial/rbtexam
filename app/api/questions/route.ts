@@ -31,7 +31,22 @@ export async function GET(request: NextRequest) {
     }
 
     if (category !== 'ALL') {
-      query = query.eq('category', category);
+      const cleanCat = category.trim().toLowerCase();
+      if (cleanCat.includes('assessment') || cleanCat.includes('domain b')) {
+        query = query.or('category.ilike.%Assessment%,category.ilike.%Domain B%');
+      } else if (cleanCat.includes('measurement') || cleanCat.includes('domain a')) {
+        query = query.or('category.ilike.%Measurement%,category.ilike.%Domain A%');
+      } else if (cleanCat.includes('acquisition') || cleanCat.includes('domain c')) {
+        query = query.or('category.ilike.%Acquisition%,category.ilike.%Domain C%');
+      } else if (cleanCat.includes('reduction') || cleanCat.includes('domain d')) {
+        query = query.or('category.ilike.%Reduction%,category.ilike.%Domain D%');
+      } else if (cleanCat.includes('documentation') || cleanCat.includes('domain e')) {
+        query = query.or('category.ilike.%Documentation%,category.ilike.%Domain E%');
+      } else if (cleanCat.includes('ethics') || cleanCat.includes('domain f')) {
+        query = query.or('category.ilike.%Ethics%,category.ilike.%Domain F%');
+      } else {
+        query = query.eq('category', category);
+      }
     }
 
     if (difficulty !== 'ALL') {

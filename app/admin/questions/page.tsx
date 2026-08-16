@@ -483,6 +483,20 @@ export default function AdminQuestionsPage() {
             {/* Select Filters */}
             <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
               <select
+                value={filterParams.category || 'ALL'}
+                onChange={(e) => setFilterParams({ ...filterParams, category: e.target.value as any, page: 1 })}
+                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
+              >
+                <option value="ALL">All Categories / Domains</option>
+                <option value="Behavior Assessment">Domain B: Behavior Assessment</option>
+                <option value="Measurement">Domain A: Measurement</option>
+                <option value="Skill Acquisition">Domain C: Skill Acquisition</option>
+                <option value="Behavior Reduction">Domain D: Behavior Reduction</option>
+                <option value="Documentation and Reporting">Domain E: Documentation & Reporting</option>
+                <option value="Ethics">Domain F: Professional Conduct & Ethics</option>
+              </select>
+
+              <select
                 value={filterParams.certification}
                 onChange={(e) => setFilterParams({ ...filterParams, certification: e.target.value as any, page: 1 })}
                 className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800"
