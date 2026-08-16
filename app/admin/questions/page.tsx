@@ -728,7 +728,8 @@ export default function AdminQuestionsPage() {
         <CSVImportModal
           isOpen={isImportModalOpen}
           onClose={() => setIsImportModalOpen(false)}
-          onSuccess={() => setFilterParams({ ...filterParams })}
+          onSuccess={() => fetchQuestionsFromApi()}
+          existingQuestions={allQuestions}
         />
 
         {/* Preview Drawer */}

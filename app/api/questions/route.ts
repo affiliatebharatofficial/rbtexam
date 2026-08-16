@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdminClient } from '@/lib/supabase';
-import { mapDbRowToMasterQuestion, createServerQuestionAsync } from '@/lib/master-question-bank-server';
+import { mapDbRowToMasterQuestion, createServerQuestionAsync, loadServerPersistentQuestionsAsync } from '@/lib/master-question-bank-server';
+import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
 import { QuestionFilterParams, MasterQuestion } from '@/types/master-question';
 
 export const dynamic = 'force-dynamic';
@@ -150,6 +151,14 @@ export async function POST(request: NextRequest) {
 
     if (!body.question || !body.certification || !body.options) {
       return NextResponse.json({ error: 'Missing mandatory fields: question, certification, options' }, { status: 400 });
+    }
+
+    const norm = normalizeQuestionForComparison(body.question);
+    const existingAll = await loadServerPersistentQuestionsAsync();
+    const isDuplicate = existingAll.some((q) => normalizeQuestionForComparison(q.question) === norm);
+
+    if (isDuplicate) {
+      return NextResponse.json({ error: 'Duplicate question prompt detected. A question with this text already exists in the master item bank.' }, { status: 409 });
     }
 
     const created = await createServerQuestionAsync(body);

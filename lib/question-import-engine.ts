@@ -33,11 +33,22 @@ export function normalizeCategory(rawCat: string): QuestionCategory {
   return rawCat as QuestionCategory;
 }
 
+export function normalizeQuestionForComparison(text: string): string {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+}
+
 /**
  * Parses raw CSV string data into structured question candidates
  * with full field validation and duplicate detection.
  */
-export function parseAndValidateCSV(csvText: string): ImportValidationResult {
+export function parseAndValidateCSV(
+  csvText: string,
+  existingBank: MasterQuestion[] = []
+): ImportValidationResult {
   const lines = csvText.split(/\r?\n/).filter((line) => line.trim().length > 0);
 
   if (lines.length < 2) {
@@ -58,6 +69,18 @@ export function parseAndValidateCSV(csvText: string): ImportValidationResult {
   const validRows: Partial<MasterQuestion>[] = [];
   const invalidRows: { row: number; rawData: any; errors: string[] }[] = [];
   let duplicateCount = 0;
+
+  // Build normalized lookup set from existing system question bank
+  const existingNormalizedStems = new Set<string>();
+  const bankToUse = existingBank.length > 0 ? existingBank : MASTER_QUESTION_BANK;
+  for (const q of bankToUse) {
+    if (q.question) {
+      existingNormalizedStems.add(normalizeQuestionForComparison(q.question));
+    }
+  }
+
+  // Also track normalized stems within current CSV file to catch intra-file duplicates
+  const seenInCurrentCsv = new Set<string>();
 
   // Header verification
   const headers = parseCSVLine(lines[0]).map((h) => h.trim().toLowerCase());
@@ -109,14 +132,20 @@ export function parseAndValidateCSV(csvText: string): ImportValidationResult {
       errors.push('At least Options A and B are mandatory.');
     }
 
-    // Duplicate Detection Check against current bank
-    const isDuplicate = MASTER_QUESTION_BANK.some(
-      (existing) => existing.question.trim().toLowerCase() === questionText.trim().toLowerCase()
-    );
+    // Duplicate Detection Check against database bank & current CSV file rows
+    const normStem = normalizeQuestionForComparison(questionText);
+    const isDuplicateInBank = normStem ? existingNormalizedStems.has(normStem) : false;
+    const isDuplicateInCsv = normStem ? seenInCurrentCsv.has(normStem) : false;
 
-    if (isDuplicate) {
+    if (isDuplicateInBank || isDuplicateInCsv) {
       duplicateCount++;
-      errors.push('Duplicate question detected in system.');
+      errors.push(
+        isDuplicateInCsv
+          ? 'Duplicate question prompt detected within this CSV file.'
+          : 'Duplicate question prompt already exists in system bank.'
+      );
+    } else if (normStem) {
+      seenInCurrentCsv.add(normStem);
     }
 
     if (errors.length > 0) {

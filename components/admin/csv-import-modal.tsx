@@ -12,9 +12,10 @@ interface CSVImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  existingQuestions?: MasterQuestion[];
 }
 
-export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalProps) {
+export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions = [] }: CSVImportModalProps) {
   const [csvContent, setCsvContent] = useState('');
   const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -41,7 +42,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess }: CSVImportModalPro
     reader.onload = (event) => {
       const text = event.target?.result as string;
       setCsvContent(text);
-      const result = parseAndValidateCSV(text);
+      const result = parseAndValidateCSV(text, existingQuestions);
       setValidationResult(result);
     };
     reader.readAsText(file);

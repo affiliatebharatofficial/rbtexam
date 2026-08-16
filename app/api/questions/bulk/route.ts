@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exportQuestionsToCSV } from '@/lib/master-question-bank';
+import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
 import {
   loadServerPersistentQuestionsAsync,
   bulkDeleteServerQuestionsAsync,
@@ -31,12 +32,32 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Array of questions required for import' }, { status: 400 });
       }
 
-      let count = 0;
+      // Load existing questions to prevent duplicate database insertions
+      const existingAll = await loadServerPersistentQuestionsAsync();
+      const existingNormalizedStems = new Set<string>(
+        existingAll.map((q) => normalizeQuestionForComparison(q.question)).filter(Boolean)
+      );
+
+      let importedCount = 0;
+      let skippedDuplicatesCount = 0;
+
       for (const q of questions) {
+        const norm = normalizeQuestionForComparison(q.question || '');
+        if (norm && existingNormalizedStems.has(norm)) {
+          skippedDuplicatesCount++;
+          continue;
+        }
+
         await createServerQuestionAsync(q);
-        count++;
+        if (norm) existingNormalizedStems.add(norm);
+        importedCount++;
       }
-      return NextResponse.json({ success: true, importedCount: count });
+
+      return NextResponse.json({
+        success: true,
+        importedCount,
+        skippedDuplicatesCount,
+      });
     }
 
     if (!Array.isArray(ids) || ids.length === 0) {
