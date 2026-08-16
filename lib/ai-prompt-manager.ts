@@ -296,6 +296,28 @@ Provide a clear, encouraging, structured response. Respond in valid JSON if poss
     };
   }
 
+  // Question Explainer & Distractor Elimination Mode
+  if (mode === 'question_explainer' || queryLower.includes('question') || queryLower.includes('option') || queryLower.includes('distractor')) {
+    return {
+      message: {
+        id: `msg-${Date.now()}`,
+        sender: 'assistant',
+        content: `### ⚡ Question & Distractor Elimination Breakdown: "${cleanQuery}"\n\nLet's deconstruct this practice question item according to the **BACB RBT 3rd Edition Task List** rules:\n\n1. **Core Concept Analyzed**: Identify the primary behavioral principle in the question stem.\n2. **Correct Option Rationale**: The correct response aligns directly with least intrusive, objective measurement and functional reinforcement principles.\n3. **Distractor Traps Avoided**: Incorrect choices often present subjective interpretations, improper prompt fading sequences, or unauthorized protocol modifications.\n\n*Pro Tip: Always look for answer choices that preserve client dignity and adhere strictly to BCBA-approved plans.*`,
+        timestamp: new Date().toISOString(),
+        clinicalInsight: {
+          concept: `Distractor Analysis: ${cleanQuery.slice(0, 40)}`,
+          simpleExplanation: `Deconstruction of question stem and option traps for ${certification} candidates.`,
+          clinicalExample: 'Identify the functional relationship between stimulus control and reinforcement density.',
+          examTip: 'BACB Exam Trap: Watch out for options that sound clinically plausible but violate procedural fidelity or supervision rules.',
+          mnemonicTip: 'Distractor Filter: Eliminate subjective descriptors, unauthorized plan changes, and punitive defaults.',
+        },
+      },
+      providerUsed: 'Socratic Engine',
+      modelUsed: 'v3-knowledge-base',
+      isLive: false,
+    };
+  }
+
   return {
     message: {
       id: `msg-${Date.now()}`,

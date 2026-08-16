@@ -102,13 +102,95 @@ export default function TutorPage() {
     }
   };
 
-  const starterChips = [
-    'Explain DRO vs DRA with a clinical example',
-    'Deconstruct a flopping transition scenario for ABC data',
-    'What are the 4 functions of behavior?',
-    'Explain Discrete Trial Teaching (DTT) 5 steps',
-    'Explain BACB ethical rules on client gift acceptance',
-  ];
+  const getStarterChipsForMode = (activeMode: PromptMode) => {
+    if (activeMode === 'scenario_analyzer') {
+      return [
+        'Analyze: Learner screams and hits when transition timer goes off',
+        'Deconstruct: Learner flops to floor during math worksheet presentation',
+        'Analyze: Learner engages in self-stimulatory hand flapping during downtime',
+        'Deconstruct: Learner grabs peer\'s toy without asking during free play',
+      ];
+    }
+    if (activeMode === 'question_explainer') {
+      return [
+        'Explain Question: An RBT records data every 15 seconds regardless of behavior. What measurement is this?',
+        'Deconstruct: Why is DRO selected over extinction for self-injurious behavior?',
+        'Explain Question: A BCBA asks RBT to modify BIP without parent consent. What ethical code item applies?',
+        'Deconstruct: Differentiate continuous vs discontinuous measurement items',
+      ];
+    }
+    return [
+      'Explain DRO vs DRA with a clinical example',
+      'Deconstruct a flopping transition scenario for ABC data',
+      'What are the 4 functions of behavior?',
+      'Explain Discrete Trial Teaching (DTT) 5 steps',
+      'Explain BACB ethical rules on client gift acceptance',
+    ];
+  };
+
+  const getInputPlaceholder = (activeMode: PromptMode, cert: string) => {
+    if (activeMode === 'scenario_analyzer') {
+      return `Describe or paste a clinical scenario for ABC deconstruction (${cert} Exam)...`;
+    }
+    if (activeMode === 'question_explainer') {
+      return `Paste a practice question or question stem to break down distractors (${cert} Exam)...`;
+    }
+    return `Ask Socrates AI any ${cert} question, ABA concept, or clinical scenario...`;
+  };
+
+  const getModeInfo = (activeMode: PromptMode) => {
+    if (activeMode === 'scenario_analyzer') {
+      return {
+        title: 'Clinical ABC Scenario Analyzer',
+        badge: 'ABC Deconstruction Engine',
+        color: 'bg-purple-100 text-purple-700',
+        dotColor: 'bg-purple-500',
+        icon: FileText,
+      };
+    }
+    if (activeMode === 'question_explainer') {
+      return {
+        title: 'Question & Distractor Explainer',
+        badge: 'Option Elimination Engine',
+        color: 'bg-amber-100 text-amber-800',
+        dotColor: 'bg-amber-500',
+        icon: Zap,
+      };
+    }
+    return {
+      title: 'Socrates AI Mentor',
+      badge: 'Socratic Dialogue Engine',
+      color: 'bg-emerald-100 text-emerald-700',
+      dotColor: 'bg-emerald-500',
+      icon: Brain,
+    };
+  };
+
+  const handleModeChange = (newMode: PromptMode) => {
+    if (newMode === mode) return;
+    setMode(newMode);
+    let modeWelcome = '';
+    if (newMode === 'scenario_analyzer') {
+      modeWelcome = `📋 **Clinical ABC Analyzer Mode Activated**\n\nSend me any clinical case study, transition challenge, or problem behavior scenario. I will break it down into Antecedent (A), Behavior (B), Consequence (C), Function, Replacement Behavior (FCT), and BACB Ethical Safeguards.`;
+    } else if (newMode === 'question_explainer') {
+      modeWelcome = `⚡ **Question & Distractor Explainer Mode Activated**\n\nPaste any practice exam question or BACB Task List item. I will identify the correct option, explain why it is correct, and perform a Distractor Elimination Analysis on options A, B, C, and D.`;
+    } else {
+      modeWelcome = `🧠 **Socratic Mentor Mode Activated**\n\nAsk me any ABA concept, measurement method, or ethical dilemma. I will guide you step-by-step through Socratic mentorship for your **${certification} Exam**.`;
+    }
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `msg-mode-switch-${Date.now()}`,
+        sender: 'assistant',
+        content: modeWelcome,
+        timestamp: new Date().toISOString(),
+      },
+    ]);
+  };
+
+  const currentModeInfo = getModeInfo(mode);
+  const activeStarterChips = getStarterChipsForMode(mode);
 
   return (
     <ProtectedRoute>
@@ -163,7 +245,7 @@ export default function TutorPage() {
                   ].map((m) => (
                     <button
                       key={m.id}
-                      onClick={() => setMode(m.id as PromptMode)}
+                      onClick={() => handleModeChange(m.id as PromptMode)}
                       className={`w-full p-2.5 rounded-xl text-left text-xs font-bold flex items-center space-x-2 border transition-all ${
                         mode === m.id
                           ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md'
@@ -207,23 +289,21 @@ export default function TutorPage() {
           <Card glass className="p-4 flex items-center justify-between shadow-lg border-white/90">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#2563EB] via-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-md">
-                <Brain className="w-6 h-6 text-white" />
+                <currentModeInfo.icon className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h2 className="text-base font-extrabold text-[#0F172A] flex items-center space-x-2">
-                  <span>Socrates AI Mentor</span>
-                  <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 flex items-center space-x-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Live AI Clinical Mentor</span>
+                  <span>{currentModeInfo.title}</span>
+                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center space-x-1 ${currentModeInfo.color}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${currentModeInfo.dotColor}`}></span>
+                    <span>{currentModeInfo.badge}</span>
                   </span>
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Target: {certification} Exam • Mode: {mode.replace('_', ' ').toUpperCase()}
+                  Target: {certification} Exam • Active Mode: {mode.replace('_', ' ').toUpperCase()}
                 </p>
               </div>
             </div>
-
-
           </Card>
 
           {/* CHAT MESSAGE STREAM CONTAINER */}
@@ -231,62 +311,56 @@ export default function TutorPage() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} space-y-2`}
+                className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} space-y-1.5`}
               >
                 {/* Message Bubble */}
                 <div
-                  className={`max-w-2xl p-5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                  className={`p-4 sm:p-5 rounded-2xl max-w-3xl text-xs sm:text-sm leading-relaxed shadow-sm ${
                     msg.sender === 'user'
-                      ? 'bg-[#2563EB] text-white rounded-br-none shadow-md font-medium'
-                      : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-bl-none shadow-lg space-y-4'
+                      ? 'bg-[#2563EB] text-white rounded-br-none font-medium'
+                      : 'bg-slate-50 border border-slate-200/80 text-slate-900 rounded-bl-none font-normal shadow-lg'
                   }`}
                 >
-                  {msg.sender === 'user' ? (
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                  ) : (
-                    <MarkdownRenderer content={msg.content} />
-                  )}
+                  <MarkdownRenderer content={msg.content} />
 
                   {/* STRUCTURED CLINICAL INSIGHT CARD */}
                   {msg.clinicalInsight && (
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 text-xs space-y-3 mt-3">
-                      <div className="flex items-center justify-between font-bold text-[#2563EB]">
-                        <span className="flex items-center space-x-1.5">
-                          <Award className="w-4 h-4 text-amber-500" />
-                          <span>Clinical ABA Insight: {msg.clinicalInsight.concept}</span>
+                    <div className="mt-4 p-4 rounded-xl bg-gradient-to-tr from-slate-900 to-indigo-950 text-white space-y-2 border border-indigo-500/30">
+                      <div className="flex items-center justify-between text-xs font-bold border-b border-slate-800 pb-2">
+                        <span className="text-blue-300 flex items-center space-x-1">
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Clinical Concept: {msg.clinicalInsight.concept}</span>
                         </span>
+                        <Badge variant="blue" className="text-[10px] bg-blue-500/20 text-blue-300 border-none">
+                          BACB 3rd Ed
+                        </Badge>
                       </div>
 
-                      <p className="text-slate-700 dark:text-slate-300 font-medium">
-                        {msg.clinicalInsight.simpleExplanation}
-                      </p>
+                      <p className="text-xs text-slate-300 font-sans">{msg.clinicalInsight.simpleExplanation}</p>
 
                       {msg.clinicalInsight.clinicalExample && (
-                        <div className="p-2.5 rounded-lg bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900 text-blue-900 dark:text-blue-200 text-[11px] space-y-0.5">
-                          <div className="font-bold text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-wider">
-                            Clinical ABA Example
-                          </div>
-                          <div>{msg.clinicalInsight.clinicalExample}</div>
+                        <div className="text-xs p-2.5 rounded-lg bg-slate-800/80 text-slate-200 border border-slate-700">
+                          <strong className="text-emerald-400 block mb-0.5">Real-World ABA Session Scenario:</strong>
+                          {msg.clinicalInsight.clinicalExample}
                         </div>
                       )}
 
-                      {msg.clinicalInsight.examTip && (
-                        <div className="p-2.5 rounded-lg bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900 text-amber-900 dark:text-amber-200 text-[11px] space-y-0.5">
-                          <div className="font-bold text-[10px] text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center space-x-1">
-                            <Sparkles className="w-3 h-3 text-amber-500" />
-                            <span>BACB Exam Strategy Tip</span>
-                          </div>
-                          <div>{msg.clinicalInsight.examTip}</div>
-                        </div>
-                      )}
+                      <div className="flex items-center justify-between pt-1 text-[11px]">
+                        <span className="text-amber-400 font-semibold">🎯 Exam Tip: {msg.clinicalInsight.examTip}</span>
+                        {msg.clinicalInsight.mnemonicTip && (
+                          <span className="text-blue-300 font-mono text-[10px] bg-blue-900/60 px-2 py-0.5 rounded">
+                            {msg.clinicalInsight.mnemonicTip}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
 
                   {/* SCENARIO ANALYSIS BOX */}
                   {msg.scenarioAnalysis && (
-                    <div className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs space-y-3 mt-3 shadow-inner">
-                      <div className="font-bold text-amber-400 text-xs flex items-center space-x-1.5">
-                        <FileText className="w-4 h-4" />
+                    <div className="mt-4 p-4 rounded-xl bg-slate-900 text-white space-y-2 border border-slate-800">
+                      <div className="text-xs font-extrabold text-emerald-400 flex items-center space-x-1 border-b border-slate-800 pb-2">
+                        <FileText className="w-4 h-4 text-emerald-400" />
                         <span>Clinical ABC Scenario Deconstruction</span>
                       </div>
                       <div className="grid grid-cols-1 gap-2 text-[11px]">
@@ -317,20 +391,18 @@ export default function TutorPage() {
           </Card>
 
           {/* STARTER CHIPS */}
-          {messages.length < 3 && (
-            <div className="flex flex-wrap gap-2">
-              {starterChips.map((chip, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => handleSendMessage(chip)}
-                  className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-blue-400 hover:text-[#2563EB] transition-all shadow-sm flex items-center space-x-1"
-                >
-                  <span>{chip}</span>
-                  <ChevronRight className="w-3 h-3 text-slate-400" />
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {activeStarterChips.map((chip, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSendMessage(chip)}
+                className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:border-blue-400 hover:text-[#2563EB] transition-all shadow-sm flex items-center space-x-1"
+              >
+                <span>{chip}</span>
+                <ChevronRight className="w-3 h-3 text-slate-400" />
+              </button>
+            ))}
+          </div>
 
           {/* INPUT BAR CONTAINER */}
           <Card glass className="p-3 shadow-xl border-white/90">
@@ -351,7 +423,7 @@ export default function TutorPage() {
                     handleSendMessage();
                   }
                 }}
-                placeholder={`Ask Socrates AI any ${certification} question, concept, or scenario...`}
+                placeholder={getInputPlaceholder(mode, certification)}
                 className="flex-1 p-3 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 resize-none"
               />
 
@@ -370,8 +442,6 @@ export default function TutorPage() {
         </div>
 
       </div>
-
-
     </ProtectedRoute>
   );
 }
