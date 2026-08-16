@@ -28,9 +28,10 @@ import {
 function QuestionsListContent() {
   const searchParams = useSearchParams();
   const initialDomain = searchParams.get('domain') || 'ALL';
+  const initialSearch = searchParams.get('search') || '';
 
   const [selectedDomain, setSelectedDomain] = useState<string>(initialDomain);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [questions, setQuestions] = useState<MasterQuestion[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [revealedIds, setRevealedIds] = useState<string[]>([]);

@@ -27,7 +27,13 @@ import {
   Globe,
 } from 'lucide-react';
 
-export default function TutorPage() {
+import { useSearchParams } from 'next/navigation';
+import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
+
+function TutorContent() {
+  const searchParams = useSearchParams();
+  const topicParam = searchParams.get('topic');
+
   const { user } = useAuth();
   const { language, t } = useLanguage();
   const [certification, setCertification] = useState<CertificationLevel>('RBT');
@@ -39,21 +45,53 @@ export default function TutorPage() {
   const candidateName = user?.fullName || (user?.email ? user.email.split('@')[0] : 'Candidate');
   const candidateContext = buildCandidateSystemContext(user?.id || 'default_user', certification, user);
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'msg-welcome',
-      sender: 'assistant',
-      content: `Welcome, **${candidateName}**! I am **Socrates AI**, your Board Certified Behavior Analyst (BCBA) clinical mentor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
-      timestamp: new Date().toISOString(),
-      clinicalInsight: {
-        concept: 'Candidate Focus Recommendation',
-        simpleExplanation: `Your current top weakness target is ${candidateContext.weakTopics[0]}.`,
-        clinicalExample: 'Ask me: "Explain DRO vs DRA with a clinical scenario" or "Deconstruct a transition tantrum scenario".',
-        examTip: 'Mastering Differential Reinforcement (Domain D) accounts for ~24% of your official BACB exam grade.',
-        mnemonicTip: 'DRO = ZERO occurrences. DRA = Alternative Card.',
+  // Find task list item if topic parameter was passed from Study Hub
+  let matchedTaskItem: any = null;
+  if (topicParam) {
+    for (const domain of BACB_TASK_LIST_3RD_EDITION) {
+      const found = domain.items.find((it) => it.id.toLowerCase() === topicParam.toLowerCase());
+      if (found) {
+        matchedTaskItem = found;
+        break;
+      }
+    }
+  }
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (matchedTaskItem) {
+      return [
+        {
+          id: `msg-welcome-topic-${Date.now()}`,
+          sender: 'assistant',
+          content: `🎯 **BACB Task List Mentorship Active: Item ${matchedTaskItem.id} — ${matchedTaskItem.title}**\n\n${matchedTaskItem.description}\n\n**Key Concepts to Master**: ${matchedTaskItem.keyConcepts.join(', ')}.\n\nAsk me any Socratic question, clinical scenario, or exam item strategy for **Item ${matchedTaskItem.id}**!`,
+          timestamp: new Date().toISOString(),
+          clinicalInsight: {
+            concept: `BACB Task List Item ${matchedTaskItem.id}`,
+            simpleExplanation: matchedTaskItem.description,
+            clinicalExample: `Clinical Session Practice: Implement ${matchedTaskItem.title} according to BCBA operational criteria.`,
+            examTip: `BACB ${certification} Exam Weight: ~${matchedTaskItem.examWeightPercentage}% of total score.`,
+            mnemonicTip: `Key Terms: ${matchedTaskItem.keyConcepts.join(' • ')}`,
+          },
+        },
+      ];
+    }
+
+    return [
+      {
+        id: 'msg-welcome',
+        sender: 'assistant',
+        content: `Welcome, **${candidateName}**! I am **Socrates AI**, your Board Certified Behavior Analyst (BCBA) clinical mentor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
+        timestamp: new Date().toISOString(),
+        clinicalInsight: {
+          concept: 'Candidate Focus Recommendation',
+          simpleExplanation: `Your current top weakness target is ${candidateContext.weakTopics[0]}.`,
+          clinicalExample: 'Ask me: "Explain DRO vs DRA with a clinical scenario" or "Deconstruct a transition tantrum scenario".',
+          examTip: 'Mastering Differential Reinforcement (Domain D) accounts for ~24% of your official BACB exam grade.',
+          mnemonicTip: 'DRO = ZERO occurrences. DRA = Alternative Card.',
+        },
       },
-    },
-  ]);
+    ];
+  });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -518,5 +556,13 @@ export default function TutorPage() {
 
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function TutorPage() {
+  return (
+    <React.Suspense fallback={<div className="py-20 text-center text-xs font-bold text-slate-500">Loading AI Mentor...</div>}>
+      <TutorContent />
+    </React.Suspense>
   );
 }

@@ -134,9 +134,17 @@ export default function TaskListPage() {
                       </div>
                     </div>
 
-                    <div className="pt-2 flex justify-end">
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                      <Link href={`/rbt/questions?search=${item.id}`}>
+                        <Button variant="outline" size="sm" className="text-xs text-slate-700 font-bold border-slate-200 hover:border-blue-300 gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-[#2563EB]" />
+                          <span>View Questions</span>
+                        </Button>
+                      </Link>
+
                       <Link href={`/tutor?topic=${item.id}`}>
-                        <Button variant="ghost" size="sm" className="text-xs text-[#2563EB] gap-1">
+                        <Button variant="primary" size="sm" className="text-xs font-bold gap-1 shadow-sm">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                           <span>Practice Item with AI</span>
                           <ChevronRight className="w-3.5 h-3.5" />
                         </Button>
