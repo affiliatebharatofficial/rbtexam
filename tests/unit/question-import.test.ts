@@ -181,5 +181,32 @@ describe('BCBA CSV Question Import & RFC 4180 Validation Engine', () => {
     expect(result.duplicateCount).toBe(0);
     expect(result.validRows.length).toBe(2);
   });
+
+  it('should correctly parse smart curly quotes (“... , ...”) containing commas without splitting cells', () => {
+    const smartQuoteCSV = `ID,Certification,Question Text,Option A,Option B,Option C,Option D,Correct Answer ID,Answer Explanation
+“q-301”,“BCBA”,“The systematic application of principles derived from the science of behavior, to improve socially significant behavior”,“Option A”,“Option B”,“Option C”,“Option D”,“A”,“Answer explanation with, commas”`;
+
+    const parsed = parseCSV(smartQuoteCSV);
+    expect(parsed.length).toBe(2);
+    expect(parsed[1].length).toBe(9);
+    expect(parsed[1][2]).toBe('The systematic application of principles derived from the science of behavior, to improve socially significant behavior');
+    expect(parsed[1][7]).toBe('A');
+
+    const result = parseAndValidateCSV(smartQuoteCSV, [], 'BCBA');
+    expect(result.totalRows).toBe(1);
+    expect(result.invalidRows.length).toBe(0);
+    expect(result.validRows.length).toBe(1);
+  });
+
+  it('should trim trailing empty Excel cells so rows match header column count', () => {
+    const excelTrailingCSV = `ID,Certification,Question Text,Option A,Option B,Option C,Option D,Correct Answer ID
+"q-401","BCBA","What is baseline logic?","A","B","C","D","B",,,`;
+
+    const result = parseAndValidateCSV(excelTrailingCSV, [], 'BCBA');
+    expect(result.totalRows).toBe(1);
+    expect(result.invalidRows.length).toBe(0);
+    expect(result.validRows.length).toBe(1);
+  });
 });
+
 

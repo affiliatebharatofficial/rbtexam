@@ -54,10 +54,15 @@ export function normalizeQuestionForComparison(text: string): string {
     .trim();
 }
 
+function isQuoteChar(c: string): boolean {
+  return c === '"' || c === '“' || c === '”' || c === '«' || c === '»' || c === '‟';
+}
+
 /**
- * RFC 4180 Compliant CSV Parser
- * Correctly parses multi-line quoted fields, escaped quotes (""),
- * fields containing commas/apostrophes, and strips UTF-8 BOM.
+ * RFC 4180 Compliant CSV Parser with Smart Quote Support
+ * Correctly parses multi-line quoted fields, escaped quotes ("" / “”),
+ * fields containing commas/apostrophes, smart curly quotes from Word/Excel/Mac Pages,
+ * and strips UTF-8 BOM.
  */
 export function parseCSV(csvText: string): string[][] {
   if (!csvText) return [];
@@ -76,8 +81,8 @@ export function parseCSV(csvText: string): string[][] {
     const char = text[i];
 
     if (inQuotes) {
-      if (char === '"') {
-        if (i + 1 < text.length && text[i + 1] === '"') {
+      if (isQuoteChar(char)) {
+        if (i + 1 < text.length && isQuoteChar(text[i + 1])) {
           currentCell += '"';
           i++; // Skip escaped quote
         } else {
@@ -87,21 +92,22 @@ export function parseCSV(csvText: string): string[][] {
         currentCell += char;
       }
     } else {
-      if (char === '"') {
+      if (isQuoteChar(char) && currentCell.trim().length === 0) {
         inQuotes = true;
+        currentCell = ''; // Strip any leading space before quote
       } else if (char === ',') {
-        currentRow.push(currentCell);
+        currentRow.push(currentCell.trim());
         currentCell = '';
       } else if (char === '\r') {
         if (i + 1 < text.length && text[i + 1] === '\n') {
           i++; // Skip \n
         }
-        currentRow.push(currentCell);
+        currentRow.push(currentCell.trim());
         currentCell = '';
         rows.push(currentRow);
         currentRow = [];
       } else if (char === '\n') {
-        currentRow.push(currentCell);
+        currentRow.push(currentCell.trim());
         currentCell = '';
         rows.push(currentRow);
         currentRow = [];
@@ -112,11 +118,11 @@ export function parseCSV(csvText: string): string[][] {
   }
 
   if (currentCell.length > 0 || currentRow.length > 0) {
-    currentRow.push(currentCell);
+    currentRow.push(currentCell.trim());
     rows.push(currentRow);
   }
 
-  return rows.filter((r) => r.some((cell) => cell.trim().length > 0));
+  return rows.filter((r) => r.some((cell) => cell.length > 0));
 }
 
 export interface ColumnMap {
@@ -238,7 +244,7 @@ export function mapCSVHeaders(headers: string[]): ColumnMap {
 }
 
 /**
- * Reads Correct Answer ID strictly from the designated column.
+ * Reads Correct Answer ID strictly from designated column or scans row fallback.
  * Valid values are strictly A, B, C, or D (case-insensitive).
  */
 export function parseCorrectAnswerId(raw: string): string | null {
@@ -246,6 +252,23 @@ export function parseCorrectAnswerId(raw: string): string | null {
   const clean = raw.trim().toUpperCase();
   if (['A', 'B', 'C', 'D'].includes(clean)) {
     return clean;
+  }
+  return null;
+}
+
+/**
+ * Fallback scanner to recover Correct Answer ID if column alignment shifted slightly.
+ */
+function findCorrectAnswerIdFallback(rowValues: string[], preferIdx: number): string | null {
+  // Check preferIdx first
+  if (preferIdx >= 0 && preferIdx < rowValues.length) {
+    const res = parseCorrectAnswerId(rowValues[preferIdx]);
+    if (res) return res;
+  }
+  // Scan cells after options (typically index 10 onwards)
+  for (let i = Math.max(0, preferIdx - 2); i < Math.min(rowValues.length, preferIdx + 5); i++) {
+    const res = parseCorrectAnswerId(rowValues[i]);
+    if (res) return res;
   }
   return null;
 }
@@ -299,17 +322,35 @@ export function parseAndValidateCSV(
 
   // Dynamic Header Column Mapping
   const rawHeaders = parsedRows[0];
+  // Trim trailing empty cells from header row
+  while (rawHeaders.length > 0 && rawHeaders[rawHeaders.length - 1].trim() === '') {
+    rawHeaders.pop();
+  }
   const colMap = mapCSVHeaders(rawHeaders);
   const headerCount = rawHeaders.length;
 
   for (let i = 1; i < parsedRows.length; i++) {
-    const rowValues = parsedRows[i];
+    const rowValues = [...parsedRows[i]];
     const rowNumber = i + 1; // 1-indexed row number (Row 1 is header)
     const errors: string[] = [];
 
+    const originalCount = rowValues.length;
+
+    // Trim trailing empty cells if row length exceeds header length
+    while (rowValues.length > headerCount && rowValues[rowValues.length - 1].trim() === '') {
+      rowValues.pop();
+    }
+
+    const effectiveCount = rowValues.length;
+
+    // Pad rowValues with empty strings if row length is less than header length
+    while (rowValues.length < headerCount) {
+      rowValues.push('');
+    }
+
     // Column Count Validation per Requirement 2
-    if (rowValues.length !== headerCount) {
-      errors.push(`Column count mismatch: expected ${headerCount} columns, but row has ${rowValues.length} columns.`);
+    if (effectiveCount !== headerCount && originalCount !== headerCount) {
+      errors.push(`Column count mismatch: expected ${headerCount} columns, but row has ${originalCount} columns.`);
     }
 
     // Safely extract cell values using column map
@@ -334,7 +375,7 @@ export function parseAndValidateCSV(
     const optC = getVal(colMap.optionC, '');
     const optD = getVal(colMap.optionD, '');
     const rawCorrect = getVal(colMap.correctChoice, '');
-    const parsedCorrectId = parseCorrectAnswerId(rawCorrect);
+    const parsedCorrectId = parseCorrectAnswerId(rawCorrect) || findCorrectAnswerIdFallback(rowValues, colMap.correctChoice);
     const answerExpl = getVal(colMap.answerExplanation, 'Correct choice explanation.');
     const clinicalExpl = getVal(colMap.clinicalExplanation, 'Clinical BACB rationale.');
     const references = getVal(colMap.references, `BACB ${certificationRaw} 3rd Edition TCO`);
