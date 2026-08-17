@@ -25,10 +25,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   avatar_url TEXT,
   certification_target TEXT CHECK (certification_target IN ('RBT','BCaBA','BCBA')) DEFAULT 'RBT',
   exam_date DATE,
-  subscription_tier TEXT DEFAULT 'free',
+  subscription_tier TEXT DEFAULT 'pro',
+  trial_ends_at TIMESTAMPTZ DEFAULT (timezone('utc'::text, now()) + interval '7 days'),
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Ensure trial_ends_at column exists if table was created previously
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ DEFAULT (timezone('utc'::text, now()) + interval '7 days');
 
 -- 3. Automatic User & Profile Creation Function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -36,6 +40,7 @@ RETURNS TRIGGER AS $$
 DECLARE
   extracted_name TEXT;
   extracted_avatar TEXT;
+  trial_end_time TIMESTAMPTZ;
 BEGIN
   extracted_name := COALESCE(
     NEW.raw_user_meta_data->>'full_name',
@@ -48,6 +53,8 @@ BEGIN
     NEW.raw_user_meta_data->>'picture',
     ''
   );
+
+  trial_end_time := timezone('utc'::text, now()) + interval '7 days';
 
   -- Upsert public.users
   INSERT INTO public.users (id, email, full_name, role, target_score, created_at, updated_at)
@@ -65,15 +72,16 @@ BEGIN
     full_name = COALESCE(EXCLUDED.full_name, public.users.full_name),
     updated_at = NOW();
 
-  -- Upsert public.profiles
-  INSERT INTO public.profiles (id, email, full_name, avatar_url, certification_target, subscription_tier, created_at, updated_at)
+  -- Upsert public.profiles (Grant 7-Day Free Pro Access)
+  INSERT INTO public.profiles (id, email, full_name, avatar_url, certification_target, subscription_tier, trial_ends_at, created_at, updated_at)
   VALUES (
     NEW.id,
     NEW.email,
     extracted_name,
     extracted_avatar,
     'RBT',
-    'free',
+    'pro',
+    trial_end_time,
     NOW(),
     NOW()
   )
@@ -82,6 +90,20 @@ BEGIN
     full_name = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
     avatar_url = COALESCE(EXCLUDED.avatar_url, public.profiles.avatar_url),
     updated_at = NOW();
+
+  -- Upsert public.subscriptions (Trialing status)
+  INSERT INTO public.subscriptions (user_id, tier, status, trial_ends_at, current_period_start, current_period_end, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    'pro',
+    'trialing',
+    trial_end_time,
+    timezone('utc'::text, now()),
+    trial_end_time,
+    NOW(),
+    NOW()
+  )
+  ON CONFLICT (user_id) DO NOTHING;
 
   RETURN NEW;
 END;

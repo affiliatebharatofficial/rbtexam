@@ -13,8 +13,9 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = fullName || cleanEmail.split('@')[0];
     const assignedRole = cleanEmail === 'jobpegyan@gmail.com' ? 'super_admin' : (role || 'student');
-    const assignedTier = cleanEmail === 'jobpegyan@gmail.com' ? 'enterprise' : (subscriptionTier || 'free');
+    const assignedTier = cleanEmail === 'jobpegyan@gmail.com' ? 'enterprise' : (subscriptionTier || 'pro');
     const status = accountStatus || 'active';
+    const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
     const serviceRoleKey =
@@ -80,6 +81,7 @@ export async function POST(request: NextRequest) {
       avatar_url: avatarUrl || '',
       certification_target: 'RBT',
       subscription_tier: assignedTier,
+      trial_ends_at: trialEndsAt,
       account_status: status,
       updated_at: now,
     };
@@ -96,7 +98,25 @@ export async function POST(request: NextRequest) {
       console.error('Error upserting public.profiles:', profileErr);
     }
 
-    // 4. Upsert into public.users
+    // 4. Upsert into public.subscriptions
+    try {
+      await adminSupabase.from('subscriptions').upsert(
+        {
+          user_id: userId,
+          tier: assignedTier,
+          status: 'trialing',
+          trial_ends_at: trialEndsAt,
+          current_period_start: now,
+          current_period_end: trialEndsAt,
+          updated_at: now,
+        },
+        { onConflict: 'user_id' }
+      );
+    } catch (subErr) {
+      console.warn('Subscriptions upsert warning:', subErr);
+    }
+
+    // 5. Upsert into public.users
     const userPayload: any = {
       id: userId,
       email: cleanEmail,
@@ -126,6 +146,7 @@ export async function POST(request: NextRequest) {
         fullName: cleanName,
         role: assignedRole,
         subscriptionTier: assignedTier,
+        trialEndsAt: trialEndsAt,
         status: status,
         createdAt: now,
       },

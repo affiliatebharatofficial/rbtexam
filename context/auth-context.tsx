@@ -119,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // If public.profiles record is missing or subscription tier needs enterprise
+        const defaultTrialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
         if (!dbProfile || (isAdmin && dbProfile.subscription_tier !== 'enterprise')) {
           const { data: insertedProfile, error: insertProfileErr } = await supabase
             .from('profiles')
@@ -128,7 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               full_name: cleanName,
               avatar_url: avatarUrl || '',
               certification_target: 'RBT',
-              subscription_tier: isAdmin ? 'enterprise' : 'free',
+              subscription_tier: isAdmin ? 'enterprise' : 'pro',
+              trial_ends_at: defaultTrialEndsAt,
               updated_at: new Date().toISOString(),
             })
             .select()
@@ -143,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    const calculatedTrialEndsAt = dbProfile?.trial_ends_at || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const profile: UserProfile = {
       id: userId,
       email: dbUser?.email || dbProfile?.email || cleanEmail,
@@ -151,6 +154,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       role: isAdmin ? 'super_admin' : ((dbUser?.role as any) || 'student'),
       emailVerified: true,
       accountStatus: 'active',
+      subscriptionTier: isAdmin ? 'enterprise' : (dbProfile?.subscription_tier || 'pro'),
+      trialEndsAt: calculatedTrialEndsAt,
       targetExamDate: dbUser?.target_exam_date || dbProfile?.exam_date || '',
       targetScore: dbUser?.target_score || 90,
       readinessScore: 0,
@@ -170,7 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: cleanName,
           role: assignedRole,
           avatarUrl: avatarUrl || '',
-          subscriptionTier: isAdmin ? 'enterprise' : 'free',
+          subscriptionTier: isAdmin ? 'enterprise' : 'pro',
         }),
       });
     } catch (apiErr) {
@@ -538,8 +543,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: 'An account with this email address already exists. Please log in instead.' };
       }
 
-      // 5. Create Fresh Account with Verification & Status Flags
+      // 5. Create Fresh Account with Verification & Status Flags (Grant 7-Day Free Pro Access)
       const initialStatus = config.requireAdminApproval ? 'pending_approval' : 'pending_verification';
+      const trialEndsAtDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const userTier = isEmailAdmin(targetEmail) ? 'enterprise' : 'pro';
+
       let newUser: UserProfile = {
         id: `usr_${Math.random().toString(36).substring(2, 9)}`,
         email: targetEmail,
@@ -547,6 +555,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: isEmailAdmin(targetEmail) ? 'super_admin' : (data.role || 'student'),
         emailVerified: false,
         accountStatus: initialStatus,
+        subscriptionTier: userTier,
+        trialEndsAt: trialEndsAtDate,
         targetExamDate: data.targetExamDate || '',
         targetScore: 90,
         readinessScore: 0,
@@ -565,6 +575,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: newUser.email,
             fullName: newUser.fullName,
             role: newUser.role,
+            subscriptionTier: userTier,
             targetExamDate: newUser.targetExamDate,
             accountStatus: newUser.accountStatus,
           }),

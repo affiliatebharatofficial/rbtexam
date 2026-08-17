@@ -16,6 +16,7 @@ import { RecentTestsTable } from '@/components/dashboard/recent-tests-table';
 import { RecentActivityFeed } from '@/components/dashboard/recent-activity-feed';
 import { PerformanceChart } from '@/components/dashboard/performance-chart';
 import { QuickActions } from '@/components/dashboard/quick-actions';
+import { TrialBanner } from '@/components/dashboard/trial-banner';
 import { Sparkles, Brain, Flame, Sun, Moon, Calendar, ShieldCheck, ArrowRight, Award, Users } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -57,6 +58,9 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <div className={`flex-1 w-full transition-colors duration-300 ${darkMode ? 'bg-slate-950 text-slate-100' : 'bg-slate-50/60 text-slate-900'}`}>
         <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+
+          {/* 7-Day Free Pro Access Trial Banner */}
+          <TrialBanner />
 
           {/* Top Bar: User Greeting & Dark Mode Toggle */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

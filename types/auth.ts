@@ -4,6 +4,8 @@ export type UserRole = 'student' | 'therapist' | 'clinic_admin' | 'instructor' |
 
 export type AccountStatus = 'active' | 'pending_verification' | 'pending_approval' | 'suspended';
 
+import { PlanTier } from './subscription';
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -12,6 +14,8 @@ export interface UserProfile {
   role: UserRole;
   emailVerified: boolean;
   accountStatus?: AccountStatus;
+  subscriptionTier?: PlanTier;
+  trialEndsAt?: string;
   targetExamDate?: string;
   targetScore: number;
   readinessScore: number;

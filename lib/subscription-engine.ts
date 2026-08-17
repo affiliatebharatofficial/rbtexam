@@ -181,3 +181,56 @@ export function checkAndTrackUsageQuota(
 
   return { allowed: true, remaining: 10 };
 }
+
+import { UserProfile } from '@/types/auth';
+
+/**
+ * Calculates the effective subscription tier for a user, taking 7-day Pro free trial expiration into account.
+ */
+export function getEffectiveSubscriptionTier(user: Partial<UserProfile> | null | undefined): PlanTier {
+  if (!user) return 'free';
+
+  // Admin & Super Admin users always have enterprise access
+  if (user.role === 'admin' || user.role === 'super_admin') {
+    return 'enterprise';
+  }
+
+  const rawTier: PlanTier = user.subscriptionTier || 'pro'; // Default to pro for candidates
+
+  // Check 7-day trial expiry if user is on 'pro' trial
+  if (rawTier === 'pro' && user.trialEndsAt) {
+    const trialEndTime = new Date(user.trialEndsAt).getTime();
+    const nowTime = Date.now();
+    if (nowTime > trialEndTime) {
+      // Trial has expired, downgrade to normal/free plan
+      return 'free';
+    }
+  }
+
+  return rawTier;
+}
+
+/**
+ * Checks remaining days on 7-day Pro trial
+ */
+export function getTrialDaysRemaining(user: Partial<UserProfile> | null | undefined): { isTrialActive: boolean; daysRemaining: number; hoursRemaining: number } {
+  if (!user || !user.trialEndsAt) {
+    return { isTrialActive: false, daysRemaining: 0, hoursRemaining: 0 };
+  }
+
+  const trialEndTime = new Date(user.trialEndsAt).getTime();
+  const diffMs = trialEndTime - Date.now();
+
+  if (diffMs <= 0) {
+    return { isTrialActive: false, daysRemaining: 0, hoursRemaining: 0 };
+  }
+
+  const daysRemaining = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  const hoursRemaining = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60)));
+
+  return {
+    isTrialActive: true,
+    daysRemaining,
+    hoursRemaining,
+  };
+}
