@@ -5,6 +5,7 @@ import {
   QuestionType,
   QuestionDifficulty,
   QuestionCategory,
+  RowValidationDebug,
 } from '@/types/master-question';
 import { MASTER_QUESTION_BANK } from './master-question-bank';
 
@@ -33,12 +34,88 @@ export function normalizeCategory(rawCat: string): QuestionCategory {
   return rawCat as QuestionCategory;
 }
 
+/**
+ * Normalizes question text strictly for duplicate detection.
+ * 1. Trims whitespace
+ * 2. Converts repeated whitespace / newlines (\s+) to single space
+ * 3. Normalizes smart quotes (“ ” ‘ ’) to standard quotes
+ * 4. Converts to lower case
+ * 5. Removes leading and trailing accidental punctuation
+ */
 export function normalizeQuestionForComparison(text: string): string {
   if (!text) return '';
   return text
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '')
+    .replace(/^[.\s?:,;'"-]+|[.\s?:,;'"-]+$/g, '')
     .trim();
+}
+
+/**
+ * RFC 4180 Compliant CSV Parser
+ * Correctly parses multi-line quoted fields, escaped quotes (""),
+ * fields containing commas/apostrophes, and strips UTF-8 BOM.
+ */
+export function parseCSV(csvText: string): string[][] {
+  let text = csvText;
+  // Strip UTF-8 BOM
+  if (text.charCodeAt(0) === 0xFEFF) {
+    text = text.slice(1);
+  }
+
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+
+    if (inQuotes) {
+      if (char === '"') {
+        if (i + 1 < text.length && text[i + 1] === '"') {
+          currentCell += '"';
+          i++; // Skip escaped quote
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        currentCell += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+      } else if (char === ',') {
+        currentRow.push(currentCell);
+        currentCell = '';
+      } else if (char === '\r') {
+        if (i + 1 < text.length && text[i + 1] === '\n') {
+          i++; // Skip \n
+        }
+        currentRow.push(currentCell);
+        currentCell = '';
+        rows.push(currentRow);
+        currentRow = [];
+      } else if (char === '\n') {
+        currentRow.push(currentCell);
+        currentCell = '';
+        rows.push(currentRow);
+        currentRow = [];
+      } else {
+        currentCell += char;
+      }
+    }
+  }
+
+  if (currentCell.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentCell);
+    rows.push(currentRow);
+  }
+
+  return rows.filter((r) => r.some((cell) => cell.trim().length > 0));
 }
 
 export interface ColumnMap {
@@ -60,99 +137,88 @@ export interface ColumnMap {
 }
 
 /**
- * Dynamically resolves column indexes from CSV header labels
+ * Dynamically maps CSV header labels to target schema attributes with prioritized matching.
  */
 export function mapCSVHeaders(headers: string[]): ColumnMap {
   const clean = headers.map((h) => h.trim().toLowerCase());
 
-  const find = (keywords: string[], fallbackIdx: number): number => {
-    const idx = clean.findIndex((h) =>
-      keywords.some((kw) => {
-        if (kw.length === 1) {
-          return new RegExp(`(?:^|\\W)${kw}(?:$|\\W)`, 'i').test(h);
-        }
-        return h === kw || h.includes(kw);
-      })
-    );
-    return idx !== -1 ? idx : fallbackIdx;
+  const findExactOrIncludes = (exactMatches: string[], includesKw: string[], fallback: number): number => {
+    // 1. Try exact match
+    let idx = clean.findIndex((h) => exactMatches.includes(h));
+    if (idx !== -1) return idx;
+
+    // 2. Try includes match
+    idx = clean.findIndex((h) => includesKw.some((kw) => h.includes(kw)));
+    return idx !== -1 ? idx : fallback;
   };
 
+  // Specific matcher for Correct Answer ID to ensure it never matches "Answer Explanation"
+  let correctChoiceIdx = clean.findIndex(
+    (h) =>
+      h.includes('correct answer id') ||
+      h.includes('correct_answer_id') ||
+      h.includes('correct choice') ||
+      h.includes('correct_choice') ||
+      h.includes('correct answer') ||
+      h.includes('correct_answer') ||
+      h.includes('correct option') ||
+      h === 'correct' ||
+      h === 'key'
+  );
+
+  // Fallback for correct choice if not matched specifically (excluding explanation headers)
+  if (correctChoiceIdx === -1) {
+    correctChoiceIdx = clean.findIndex(
+      (h) => h.includes('answer') && !h.includes('explanation') && !h.includes('rationale')
+    );
+  }
+  if (correctChoiceIdx === -1) correctChoiceIdx = 11; // Standard fallback index
+
   return {
-    id: find(['id', 'question_id', 'question id', 'num'], 0),
-    certification: find(['certification', 'cert', 'exam level', 'level', 'exam'], 1),
-    category: find(['category', 'domain', 'topic', 'subject', 'task list'], 2),
-    difficulty: find(['difficulty', 'diff'], 3),
-    questionType: find(['question_type', 'question type', 'type', 'format'], 4),
-    question: find(['question_text', 'question text', 'question', 'stem', 'prompt', 'item', 'title'], 5),
-    scenario: find(['scenario_text', 'scenario text', 'scenario', 'context', 'case'], 6),
-    optionA: find(['option_a', 'option a', 'choice_a', 'choice a', 'opt_a', 'opt a', 'ans a', 'a'], 7),
-    optionB: find(['option_b', 'option b', 'choice_b', 'choice b', 'opt_b', 'opt b', 'ans b', 'b'], 8),
-    optionC: find(['option_c', 'option c', 'choice_c', 'choice c', 'opt_c', 'opt c', 'ans c', 'c'], 9),
-    optionD: find(['option_d', 'option d', 'choice_d', 'choice d', 'opt_d', 'opt d', 'ans d', 'd'], 10),
-    correctChoice: find(['correct_choice', 'correct choice', 'correct_answer', 'correct answer', 'answer', 'key', 'solution'], 11),
-    answerExplanation: find(['answer_explanation', 'answer explanation', 'explanation', 'rationale', 'reason'], 12),
-    clinicalExplanation: find(['clinical_explanation', 'clinical rationale', 'clinical explanation', 'clinical'], 13),
-    references: find(['bacb_task_reference', 'task reference', 'reference', 'references'], 14),
+    id: findExactOrIncludes(['id', 'question_id', 'question id'], ['id', 'num'], 0),
+    certification: findExactOrIncludes(['certification', 'cert', 'certification level'], ['cert', 'level', 'exam'], 1),
+    category: findExactOrIncludes(['category', 'domain', 'bacb domain'], ['cat', 'domain', 'topic', 'subject'], 2),
+    difficulty: findExactOrIncludes(['difficulty'], ['diff'], 3),
+    questionType: findExactOrIncludes(['question type', 'question_type', 'type'], ['type', 'format'], 4),
+    question: findExactOrIncludes(['question text', 'question_text', 'question prompt', 'question', 'stem', 'prompt'], ['question', 'stem', 'prompt', 'item text'], 5),
+    scenario: findExactOrIncludes(['scenario text', 'scenario_text', 'scenario', 'case study'], ['scen', 'case', 'context'], 6),
+    optionA: findExactOrIncludes(['option a', 'option_a', 'choice a', 'choice_a'], ['option a', 'choice a', 'opt a', 'a'], 7),
+    optionB: findExactOrIncludes(['option b', 'option_b', 'choice b', 'choice_b'], ['option b', 'choice b', 'opt b', 'b'], 8),
+    optionC: findExactOrIncludes(['option c', 'option_c', 'choice c', 'choice_c'], ['option c', 'choice c', 'opt c', 'c'], 9),
+    optionD: findExactOrIncludes(['option d', 'option_d', 'choice d', 'choice_d'], ['option d', 'choice d', 'opt d', 'd'], 10),
+    correctChoice: correctChoiceIdx,
+    answerExplanation: findExactOrIncludes(['answer explanation', 'answer_explanation', 'explanation', 'rationale'], ['explanation', 'rationale', 'reason'], 12),
+    clinicalExplanation: findExactOrIncludes(['clinical explanation', 'clinical_explanation', 'clinical rationale'], ['clinical'], 13),
+    references: findExactOrIncludes(['bacb task reference', 'task reference', 'references', 'reference'], ['ref', 'task reference'], 14),
   };
 }
 
 /**
- * Smartly resolves raw correct choice value (letter 'A'-'D', number '1'-'4', or option text match)
+ * Reads Correct Answer ID strictly from the designated column.
+ * Valid values are strictly A, B, C, or D (case-insensitive).
  */
-export function resolveCorrectChoice(
-  rawChoice: string,
-  optA: string = '',
-  optB: string = '',
-  optC: string = '',
-  optD: string = ''
-): string {
-  if (!rawChoice) return 'A';
-  const clean = rawChoice.trim().toUpperCase();
-
-  // Direct Letter Match
-  if (['A', 'B', 'C', 'D'].includes(clean)) return clean;
-
-  // Number Mapping
-  if (clean === '1') return 'A';
-  if (clean === '2') return 'B';
-  if (clean === '3') return 'C';
-  if (clean === '4') return 'D';
-
-  // Prefix Match (e.g. "Option B", "Choice C", "A)", "B.")
-  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*A[\s.:)]/i.test(clean) || clean.startsWith('A)') || clean.startsWith('A.')) return 'A';
-  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*B[\s.:)]/i.test(clean) || clean.startsWith('B)') || clean.startsWith('B.')) return 'B';
-  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*C[\s.:)]/i.test(clean) || clean.startsWith('C)') || clean.startsWith('C.')) return 'C';
-  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*D[\s.:)]/i.test(clean) || clean.startsWith('D)') || clean.startsWith('D.')) return 'D';
-
-  // Text Matching against Option Contents
-  const normRaw = normalizeQuestionForComparison(clean);
-  if (normRaw.length > 3) {
-    const normA = normalizeQuestionForComparison(optA);
-    const normB = normalizeQuestionForComparison(optB);
-    const normC = normalizeQuestionForComparison(optC);
-    const normD = normalizeQuestionForComparison(optD);
-
-    if (normA && (normRaw === normA || normRaw.includes(normA) || normA.includes(normRaw))) return 'A';
-    if (normB && (normRaw === normB || normRaw.includes(normB) || normB.includes(normRaw))) return 'B';
-    if (normC && (normRaw === normC || normRaw.includes(normC) || normC.includes(normRaw))) return 'C';
-    if (normD && (normRaw === normD || normRaw.includes(normD) || normD.includes(normRaw))) return 'D';
+export function parseCorrectAnswerId(raw: string): string | null {
+  if (!raw) return null;
+  const clean = raw.trim().toUpperCase();
+  if (['A', 'B', 'C', 'D'].includes(clean)) {
+    return clean;
   }
-
-  return 'A'; // Safe fallback default
+  return null;
 }
 
 /**
  * Parses raw CSV string data into structured question candidates
- * with dynamic column header mapping, full field validation, and duplicate detection.
+ * with RFC 4180 parsing, dynamic header mapping, exact duplicate detection,
+ * and comprehensive validation debugging.
  */
 export function parseAndValidateCSV(
   csvText: string,
   existingBank: MasterQuestion[] = [],
   defaultCertification: CertificationLevel = 'BCBA'
 ): ImportValidationResult {
-  const lines = csvText.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const parsedRows = parseCSV(csvText);
 
-  if (lines.length < 2) {
+  if (parsedRows.length < 2) {
     return {
       validRows: [],
       invalidRows: [
@@ -164,37 +230,41 @@ export function parseAndValidateCSV(
       ],
       totalRows: 0,
       duplicateCount: 0,
+      debugResults: [],
     };
   }
 
   const validRows: Partial<MasterQuestion>[] = [];
   const invalidRows: { row: number; rawData: any; errors: string[] }[] = [];
+  const debugResults: RowValidationDebug[] = [];
   let duplicateCount = 0;
 
   // Build normalized lookup set from existing system question bank
-  const existingNormalizedStems = new Set<string>();
-  const bankToUse = existingBank.length > 0 ? existingBank : MASTER_QUESTION_BANK;
-  for (const q of bankToUse) {
-    if (q.question) {
-      existingNormalizedStems.add(normalizeQuestionForComparison(q.question));
+  const existingDatabaseStems = new Set<string>();
+  if (existingBank && existingBank.length > 0) {
+    for (const q of existingBank) {
+      if (q.question) {
+        existingDatabaseStems.add(normalizeQuestionForComparison(q.question));
+      }
     }
   }
 
-  // Track normalized stems within current CSV file to catch intra-file duplicates
-  const seenInCurrentCsv = new Set<string>();
+  // Track normalized stems within current CSV file: normStem -> rowNumber
+  const seenInCurrentCsv = new Map<string, number>();
 
   // Dynamic Header Column Mapping
-  const rawHeaders = parseCSVLine(lines[0]);
+  const rawHeaders = parsedRows[0];
   const colMap = mapCSVHeaders(rawHeaders);
+  const headerCount = rawHeaders.length;
 
-  for (let i = 1; i < lines.length; i++) {
-    const rowValues = parseCSVLine(lines[i]);
-    const rowNumber = i + 1;
+  for (let i = 1; i < parsedRows.length; i++) {
+    const rowValues = parsedRows[i];
+    const rowNumber = i + 1; // 1-indexed row number (Row 1 is header)
     const errors: string[] = [];
 
-    // Safely extract cell values using dynamic column map
+    // Safely extract cell values using column map
     const getVal = (idx: number, fallback: string = ''): string => {
-      return (rowValues[idx] !== undefined && rowValues[idx] !== null) ? rowValues[idx].trim() : fallback;
+      return rowValues[idx] !== undefined && rowValues[idx] !== null ? rowValues[idx].trim() : fallback;
     };
 
     const certCandidate = getVal(colMap.certification, defaultCertification).toUpperCase();
@@ -212,8 +282,8 @@ export function parseAndValidateCSV(
     const optB = getVal(colMap.optionB, '');
     const optC = getVal(colMap.optionC, '');
     const optD = getVal(colMap.optionD, '');
-    const rawCorrect = getVal(colMap.correctChoice, 'A');
-    const correctAns = resolveCorrectChoice(rawCorrect, optA, optB, optC, optD);
+    const rawCorrect = getVal(colMap.correctChoice, '');
+    const parsedCorrectId = parseCorrectAnswerId(rawCorrect);
     const answerExpl = getVal(colMap.answerExplanation, 'Correct choice explanation.');
     const clinicalExpl = getVal(colMap.clinicalExplanation, 'Clinical BACB rationale.');
     const references = getVal(colMap.references, `BACB ${certificationRaw} 3rd Edition TCO`);
@@ -227,31 +297,52 @@ export function parseAndValidateCSV(
       errors.push('At least Options A and B are mandatory.');
     }
 
-    // Duplicate Detection Check against database bank & current CSV file rows
-    const normStem = normalizeQuestionForComparison(questionText);
-    if (normStem.length > 5) {
-      const isDuplicateInBank = existingNormalizedStems.has(normStem);
-      const isDuplicateInCsv = seenInCurrentCsv.has(normStem);
+    if (!parsedCorrectId) {
+      errors.push(`Invalid Correct Answer ID "${rawCorrect}". Must be A, B, C, or D.`);
+    }
 
-      if (isDuplicateInBank || isDuplicateInCsv) {
+    // Duplicate Detection Check strictly comparing normalized Question Text
+    const normStem = normalizeQuestionForComparison(questionText);
+    let isDuplicate = false;
+    let duplicateMatchedRow: number | undefined = undefined;
+    let duplicateReason: string | undefined = undefined;
+
+    if (normStem.length > 5) {
+      if (seenInCurrentCsv.has(normStem)) {
+        isDuplicate = true;
+        duplicateMatchedRow = seenInCurrentCsv.get(normStem);
+        duplicateReason = `Duplicate question prompt detected within this CSV file (matches Row ${duplicateMatchedRow}).`;
         duplicateCount++;
-        errors.push(
-          isDuplicateInCsv
-            ? 'Duplicate question prompt detected within this CSV file.'
-            : 'Duplicate question prompt already exists in system bank.'
-        );
+        errors.push(duplicateReason);
+      } else if (existingDatabaseStems.has(normStem)) {
+        isDuplicate = true;
+        duplicateReason = 'Duplicate question prompt already exists in database system bank.';
+        duplicateCount++;
+        errors.push(duplicateReason);
       } else {
-        seenInCurrentCsv.add(normStem);
+        seenInCurrentCsv.set(normStem, rowNumber);
       }
     }
+
+    // Record validation debug output
+    debugResults.push({
+      row: rowNumber,
+      questionTextSnippet: questionText.length > 60 ? `${questionText.substring(0, 60)}...` : questionText,
+      correctAnswerId: parsedCorrectId || rawCorrect,
+      isDuplicate,
+      duplicateMatchedRow,
+      duplicateReason,
+      errors: [...errors],
+    });
 
     if (errors.length > 0) {
       invalidRows.push({
         row: rowNumber,
-        rawData: lines[i],
+        rawData: rowValues.join(','),
         errors,
       });
     } else {
+      const finalCorrectId = parsedCorrectId || 'A';
       const parsedQuestion: Partial<MasterQuestion> = {
         certification: certificationRaw,
         category: categoryRaw,
@@ -260,12 +351,12 @@ export function parseAndValidateCSV(
         question: questionText,
         scenarioText,
         options: [
-          { id: 'A', text: optA, isCorrect: correctAns === 'A' },
-          { id: 'B', text: optB, isCorrect: correctAns === 'B' },
-          { id: 'C', text: optC || 'N/A', isCorrect: correctAns === 'C' },
-          { id: 'D', text: optD || 'N/A', isCorrect: correctAns === 'D' },
+          { id: 'A', text: optA, isCorrect: finalCorrectId === 'A' },
+          { id: 'B', text: optB, isCorrect: finalCorrectId === 'B' },
+          { id: 'C', text: optC || 'N/A', isCorrect: finalCorrectId === 'C' },
+          { id: 'D', text: optD || 'N/A', isCorrect: finalCorrectId === 'D' },
         ],
-        correctAnswerId: correctAns,
+        correctAnswerId: finalCorrectId,
         answerExplanation: answerExpl,
         clinicalExplanation: clinicalExpl,
         references,
@@ -285,37 +376,10 @@ export function parseAndValidateCSV(
   return {
     validRows,
     invalidRows,
-    totalRows: lines.length - 1,
+    totalRows: parsedRows.length - 1,
     duplicateCount,
+    debugResults,
   };
-}
-
-/**
- * Simple CSV Line Splitting Helper with quote handling
- */
-function parseCSVLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
-    if (char === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        current += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === ',' && !inQuotes) {
-      result.push(current);
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  result.push(current);
-  return result;
 }
 
 /**
@@ -329,13 +393,13 @@ export function generateSampleCSVTemplate(): string {
     'Category',
     'Difficulty',
     'Type',
-    'Question',
+    'Question Text',
     'Scenario',
     'Option A',
     'Option B',
     'Option C',
     'Option D',
-    'Correct Choice',
+    'Correct Answer ID',
     'Answer Explanation',
     'Clinical Rationale',
     'BACB Task Reference',
@@ -344,7 +408,7 @@ export function generateSampleCSVTemplate(): string {
   const sampleRows = [
     [
       'mq-sample-01',
-      'RBT',
+      'BCBA',
       'Measurement',
       'medium',
       'scenario_based',
@@ -361,7 +425,7 @@ export function generateSampleCSVTemplate(): string {
     ],
     [
       'mq-sample-02',
-      'RBT',
+      'BCBA',
       'Behavior Reduction',
       'hard',
       'scenario_based',

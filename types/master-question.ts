@@ -105,9 +105,20 @@ export interface ImportValidationError {
   message: string;
 }
 
+export interface RowValidationDebug {
+  row: number;
+  questionTextSnippet: string;
+  correctAnswerId: string;
+  isDuplicate: boolean;
+  duplicateMatchedRow?: number;
+  duplicateReason?: string;
+  errors: string[];
+}
+
 export interface ImportValidationResult {
   validRows: Partial<MasterQuestion>[];
   invalidRows: { row: number; rawData: any; errors: string[] }[];
   totalRows: number;
   duplicateCount: number;
+  debugResults?: RowValidationDebug[];
 }
