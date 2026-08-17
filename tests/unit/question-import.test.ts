@@ -157,4 +157,29 @@ describe('BCBA CSV Question Import & RFC 4180 Validation Engine', () => {
     expect(result.debugResults?.every((d) => !d.isDuplicate)).toBe(true);
     expect(result.debugResults?.every((d) => d.errors.length === 0)).toBe(true);
   });
+
+  it('should flag column count mismatch when row length differs from header length', () => {
+    const csvWithMismatch = `ID,Certification,Question Text,Option A,Option B,Option C,Option D,Correct Answer ID
+"q-1","BCBA","Sample question prompt text","Opt A","Opt B","Opt C","Opt D","A"
+"q-2","BCBA","Missing column row","Opt A","Opt B","Opt C","A"`;
+
+    const result = parseAndValidateCSV(csvWithMismatch, [], 'BCBA');
+    expect(result.totalRows).toBe(2);
+    expect(result.invalidRows.length).toBe(1);
+    expect(result.invalidRows[0].row).toBe(3);
+    expect(result.invalidRows[0].errors[0]).toContain('Column count mismatch');
+  });
+
+  it('should not mark distinct questions as duplicates even if they share metadata fields', () => {
+    const csvWithSharedMetadata = `ID,Task Code,Subcategory,Category,Difficulty,Question Type,Question Text,Option A,Option B,Option C,Option D,Correct Answer ID,Answer Explanation,Clinical Rationale,References
+"q-10","A-1","Prediction","Measurement","hard","multiple_choice","First unique prediction question prompt?","A","B","C","D","A","Expl","Clin","Ref"
+"q-20","A-1","Prediction","Measurement","hard","multiple_choice","Second unique prediction question prompt?","A","B","C","D","A","Expl","Clin","Ref"`;
+
+    const result = parseAndValidateCSV(csvWithSharedMetadata, [], 'BCBA');
+    expect(result.totalRows).toBe(2);
+    expect(result.invalidRows.length).toBe(0);
+    expect(result.duplicateCount).toBe(0);
+    expect(result.validRows.length).toBe(2);
+  });
 });
+

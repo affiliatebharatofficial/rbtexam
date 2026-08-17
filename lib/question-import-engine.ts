@@ -47,10 +47,10 @@ export function normalizeQuestionForComparison(text: string): string {
   return text
     .trim()
     .replace(/\s+/g, ' ')
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
+    .replace(/[“”«»]/g, '"')
+    .replace(/[‘’`]/g, "'")
     .toLowerCase()
-    .replace(/^[.\s?:,;'"-]+|[.\s?:,;'"-]+$/g, '')
+    .replace(/^[.\s?:,;'"!-]+|[.\s?:,;'"!-]+$/g, '')
     .trim();
 }
 
@@ -60,6 +60,7 @@ export function normalizeQuestionForComparison(text: string): string {
  * fields containing commas/apostrophes, and strips UTF-8 BOM.
  */
 export function parseCSV(csvText: string): string[][] {
+  if (!csvText) return [];
   let text = csvText;
   // Strip UTF-8 BOM
   if (text.charCodeAt(0) === 0xFEFF) {
@@ -142,54 +143,97 @@ export interface ColumnMap {
 export function mapCSVHeaders(headers: string[]): ColumnMap {
   const clean = headers.map((h) => h.trim().toLowerCase());
 
-  const findExactOrIncludes = (exactMatches: string[], includesKw: string[], fallback: number): number => {
+  const findHeader = (
+    exactMatches: string[],
+    includesKw: string[],
+    excludeKw: string[] = []
+  ): number => {
     // 1. Try exact match
     let idx = clean.findIndex((h) => exactMatches.includes(h));
     if (idx !== -1) return idx;
 
-    // 2. Try includes match
-    idx = clean.findIndex((h) => includesKw.some((kw) => h.includes(kw)));
-    return idx !== -1 ? idx : fallback;
+    // 2. Try includes match with exclusions
+    idx = clean.findIndex(
+      (h) =>
+        includesKw.some((kw) => h.includes(kw)) &&
+        !excludeKw.some((ex) => h.includes(ex))
+    );
+    return idx;
   };
 
-  // Specific matcher for Correct Answer ID to ensure it never matches "Answer Explanation"
-  let correctChoiceIdx = clean.findIndex(
-    (h) =>
-      h.includes('correct answer id') ||
-      h.includes('correct_answer_id') ||
-      h.includes('correct choice') ||
-      h.includes('correct_choice') ||
-      h.includes('correct answer') ||
-      h.includes('correct_answer') ||
-      h.includes('correct option') ||
-      h === 'correct' ||
-      h === 'key'
+  // Correct Choice Header Matching: Must NEVER match explanation or rationale headers
+  let correctChoiceIdx = findHeader(
+    [
+      'correct answer id',
+      'correct_answer_id',
+      'correct choice',
+      'correct_choice',
+      'correct answer',
+      'correct_answer',
+      'correct option',
+      'correct_option',
+      'correct',
+      'key',
+    ],
+    ['correct'],
+    ['explanation', 'rationale', 'reason', 'mistake', 'tip']
   );
-
-  // Fallback for correct choice if not matched specifically (excluding explanation headers)
   if (correctChoiceIdx === -1) {
     correctChoiceIdx = clean.findIndex(
-      (h) => h.includes('answer') && !h.includes('explanation') && !h.includes('rationale')
+      (h) =>
+        h.includes('answer') &&
+        !h.includes('explanation') &&
+        !h.includes('rationale') &&
+        !h.includes('text')
     );
   }
-  if (correctChoiceIdx === -1) correctChoiceIdx = 11; // Standard fallback index
+
+  // Question Text Header Matching: Must NEVER match question type, options, or explanations
+  const questionIdx = findHeader(
+    ['question text', 'question_text', 'question prompt', 'question_prompt', 'question', 'stem', 'prompt', 'item text'],
+    ['question', 'stem', 'prompt', 'item text'],
+    ['type', 'format', 'id', 'category', 'explanation', 'option', 'choice']
+  );
+
+  // Question Type Header Matching: Must NEVER match question text
+  const questionTypeIdx = findHeader(
+    ['question type', 'question_type', 'type', 'item type', 'format'],
+    ['type', 'format'],
+    ['text', 'prompt', 'stem', 'question text']
+  );
 
   return {
-    id: findExactOrIncludes(['id', 'question_id', 'question id'], ['id', 'num'], 0),
-    certification: findExactOrIncludes(['certification', 'cert', 'certification level'], ['cert', 'level', 'exam'], 1),
-    category: findExactOrIncludes(['category', 'domain', 'bacb domain'], ['cat', 'domain', 'topic', 'subject'], 2),
-    difficulty: findExactOrIncludes(['difficulty'], ['diff'], 3),
-    questionType: findExactOrIncludes(['question type', 'question_type', 'type'], ['type', 'format'], 4),
-    question: findExactOrIncludes(['question text', 'question_text', 'question prompt', 'question', 'stem', 'prompt'], ['question', 'stem', 'prompt', 'item text'], 5),
-    scenario: findExactOrIncludes(['scenario text', 'scenario_text', 'scenario', 'case study'], ['scen', 'case', 'context'], 6),
-    optionA: findExactOrIncludes(['option a', 'option_a', 'choice a', 'choice_a'], ['option a', 'choice a', 'opt a', 'a'], 7),
-    optionB: findExactOrIncludes(['option b', 'option_b', 'choice b', 'choice_b'], ['option b', 'choice b', 'opt b', 'b'], 8),
-    optionC: findExactOrIncludes(['option c', 'option_c', 'choice c', 'choice_c'], ['option c', 'choice c', 'opt c', 'c'], 9),
-    optionD: findExactOrIncludes(['option d', 'option_d', 'choice d', 'choice_d'], ['option d', 'choice d', 'opt d', 'd'], 10),
-    correctChoice: correctChoiceIdx,
-    answerExplanation: findExactOrIncludes(['answer explanation', 'answer_explanation', 'explanation', 'rationale'], ['explanation', 'rationale', 'reason'], 12),
-    clinicalExplanation: findExactOrIncludes(['clinical explanation', 'clinical_explanation', 'clinical rationale'], ['clinical'], 13),
-    references: findExactOrIncludes(['bacb task reference', 'task reference', 'references', 'reference'], ['ref', 'task reference'], 14),
+    id: findHeader(['id', 'question_id', 'question id', 'num', '#'], ['id', 'num'], []),
+    certification: findHeader(
+      ['certification', 'cert', 'certification level', 'cert level', 'exam level'],
+      ['certification', 'cert level'],
+      ['difficulty', 'type', 'task']
+    ),
+    category: findHeader(['category', 'domain', 'bacb domain', 'topic', 'subject'], ['cat', 'domain', 'topic', 'subject'], []),
+    difficulty: findHeader(['difficulty', 'diff'], ['diff'], []),
+    questionType: questionTypeIdx,
+    question: questionIdx !== -1 ? questionIdx : 5,
+    scenario: findHeader(['scenario text', 'scenario_text', 'scenario', 'case study', 'scenario prompt'], ['scen', 'case study'], []),
+    optionA: findHeader(['option a', 'option_a', 'choice a', 'choice_a'], ['option a', 'choice a', 'opt a'], []),
+    optionB: findHeader(['option b', 'option_b', 'choice b', 'choice_b'], ['option b', 'choice b', 'opt b'], []),
+    optionC: findHeader(['option c', 'option_c', 'choice c', 'choice_c'], ['option c', 'choice c', 'opt c'], []),
+    optionD: findHeader(['option d', 'option_d', 'choice d', 'choice_d'], ['option d', 'choice d', 'opt d'], []),
+    correctChoice: correctChoiceIdx !== -1 ? correctChoiceIdx : 11,
+    answerExplanation: findHeader(
+      ['answer explanation', 'answer_explanation', 'explanation', 'rationale', 'answer rationale'],
+      ['explanation', 'rationale'],
+      ['clinical']
+    ),
+    clinicalExplanation: findHeader(
+      ['clinical explanation', 'clinical_explanation', 'clinical rationale', 'clinical background'],
+      ['clinical'],
+      []
+    ),
+    references: findHeader(
+      ['bacb task reference', 'task reference', 'references', 'reference', 'task code'],
+      ['task reference', 'references', 'reference'],
+      []
+    ),
   };
 }
 
@@ -244,7 +288,8 @@ export function parseAndValidateCSV(
   if (existingBank && existingBank.length > 0) {
     for (const q of existingBank) {
       if (q.question) {
-        existingDatabaseStems.add(normalizeQuestionForComparison(q.question));
+        const norm = normalizeQuestionForComparison(q.question);
+        if (norm) existingDatabaseStems.add(norm);
       }
     }
   }
@@ -262,8 +307,14 @@ export function parseAndValidateCSV(
     const rowNumber = i + 1; // 1-indexed row number (Row 1 is header)
     const errors: string[] = [];
 
+    // Column Count Validation per Requirement 2
+    if (rowValues.length !== headerCount) {
+      errors.push(`Column count mismatch: expected ${headerCount} columns, but row has ${rowValues.length} columns.`);
+    }
+
     // Safely extract cell values using column map
     const getVal = (idx: number, fallback: string = ''): string => {
+      if (idx < 0 || idx >= rowValues.length) return fallback;
       return rowValues[idx] !== undefined && rowValues[idx] !== null ? rowValues[idx].trim() : fallback;
     };
 
@@ -307,7 +358,7 @@ export function parseAndValidateCSV(
     let duplicateMatchedRow: number | undefined = undefined;
     let duplicateReason: string | undefined = undefined;
 
-    if (normStem.length > 5) {
+    if (normStem.length > 0) {
       if (seenInCurrentCsv.has(normStem)) {
         isDuplicate = true;
         duplicateMatchedRow = seenInCurrentCsv.get(normStem);
@@ -324,7 +375,7 @@ export function parseAndValidateCSV(
       }
     }
 
-    // Record validation debug output
+    // Record validation debug output per Requirement 13
     debugResults.push({
       row: rowNumber,
       questionTextSnippet: questionText.length > 60 ? `${questionText.substring(0, 60)}...` : questionText,
