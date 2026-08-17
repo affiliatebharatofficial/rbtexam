@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { parseAndValidateCSV, generateSampleCSVTemplate } from '@/lib/question-import-engine';
-import { ImportValidationResult, MasterQuestion } from '@/types/master-question';
+import { CertificationLevel, ImportValidationResult, MasterQuestion } from '@/types/master-question';
 import { createQuestion } from '@/lib/master-question-bank';
-import { X, Upload, CheckCircle2, AlertCircle, FileText, ArrowRight, RefreshCw, Download } from 'lucide-react';
+import { X, Upload, CheckCircle2, AlertCircle, FileText, ArrowRight, RefreshCw, Download, Layers } from 'lucide-react';
 
 interface CSVImportModalProps {
   isOpen: boolean;
@@ -17,11 +17,25 @@ interface CSVImportModalProps {
 
 export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions = [] }: CSVImportModalProps) {
   const [csvContent, setCsvContent] = useState('');
+  const [targetCert, setTargetCert] = useState<CertificationLevel>('BCBA');
   const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccessCount, setImportSuccessCount] = useState<number | null>(null);
 
   if (!isOpen) return null;
+
+  const runValidation = (text: string, cert: CertificationLevel) => {
+    if (!text) return;
+    const result = parseAndValidateCSV(text, existingQuestions, cert);
+    setValidationResult(result);
+  };
+
+  const handleCertChange = (cert: CertificationLevel) => {
+    setTargetCert(cert);
+    if (csvContent) {
+      runValidation(csvContent, cert);
+    }
+  };
 
   const handleDownloadSampleCSV = () => {
     const csv = generateSampleCSVTemplate();
@@ -29,7 +43,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `sample_bacb_questions_template_${Date.now()}.csv`;
+    a.download = `sample_${targetCert.toLowerCase()}_questions_template_${Date.now()}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
@@ -42,8 +56,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
     reader.onload = (event) => {
       const text = event.target?.result as string;
       setCsvContent(text);
-      const result = parseAndValidateCSV(text, existingQuestions);
-      setValidationResult(result);
+      runValidation(text, targetCert);
     };
     reader.readAsText(file);
   };
@@ -95,6 +108,31 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
 
           {importSuccessCount === null ? (
             <div className="space-y-6">
+              {/* Target Certification Selector */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                <div className="flex items-center space-x-2 text-xs font-bold text-slate-700">
+                  <Layers className="w-4 h-4 text-blue-600" />
+                  <span>Target Certification Level:</span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  {(['BCBA', 'BCaBA', 'RBT'] as CertificationLevel[]).map((cert) => (
+                    <button
+                      key={cert}
+                      type="button"
+                      onClick={() => handleCertChange(cert)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        targetCert === cert
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      {cert}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* File Upload Zone */}
               <div className="p-8 border-2 border-dashed border-slate-300 hover:border-blue-400 rounded-2xl text-center space-y-3 bg-slate-50/50">
                 <div className="w-12 h-12 rounded-2xl bg-blue-100 text-[#2563EB] flex items-center justify-center mx-auto">

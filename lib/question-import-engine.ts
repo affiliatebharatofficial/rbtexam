@@ -41,13 +41,114 @@ export function normalizeQuestionForComparison(text: string): string {
     .trim();
 }
 
+export interface ColumnMap {
+  id: number;
+  certification: number;
+  category: number;
+  difficulty: number;
+  questionType: number;
+  question: number;
+  scenario: number;
+  optionA: number;
+  optionB: number;
+  optionC: number;
+  optionD: number;
+  correctChoice: number;
+  answerExplanation: number;
+  clinicalExplanation: number;
+  references: number;
+}
+
+/**
+ * Dynamically resolves column indexes from CSV header labels
+ */
+export function mapCSVHeaders(headers: string[]): ColumnMap {
+  const clean = headers.map((h) => h.trim().toLowerCase());
+
+  const find = (keywords: string[], fallbackIdx: number): number => {
+    const idx = clean.findIndex((h) =>
+      keywords.some((kw) => {
+        if (kw.length === 1) {
+          return new RegExp(`(?:^|\\W)${kw}(?:$|\\W)`, 'i').test(h);
+        }
+        return h === kw || h.includes(kw);
+      })
+    );
+    return idx !== -1 ? idx : fallbackIdx;
+  };
+
+  return {
+    id: find(['id', 'question_id', 'question id', 'num'], 0),
+    certification: find(['certification', 'cert', 'exam level', 'level', 'exam'], 1),
+    category: find(['category', 'domain', 'topic', 'subject', 'task list'], 2),
+    difficulty: find(['difficulty', 'diff'], 3),
+    questionType: find(['question_type', 'question type', 'type', 'format'], 4),
+    question: find(['question_text', 'question text', 'question', 'stem', 'prompt', 'item', 'title'], 5),
+    scenario: find(['scenario_text', 'scenario text', 'scenario', 'context', 'case'], 6),
+    optionA: find(['option_a', 'option a', 'choice_a', 'choice a', 'opt_a', 'opt a', 'ans a', 'a'], 7),
+    optionB: find(['option_b', 'option b', 'choice_b', 'choice b', 'opt_b', 'opt b', 'ans b', 'b'], 8),
+    optionC: find(['option_c', 'option c', 'choice_c', 'choice c', 'opt_c', 'opt c', 'ans c', 'c'], 9),
+    optionD: find(['option_d', 'option d', 'choice_d', 'choice d', 'opt_d', 'opt d', 'ans d', 'd'], 10),
+    correctChoice: find(['correct_choice', 'correct choice', 'correct_answer', 'correct answer', 'answer', 'key', 'solution'], 11),
+    answerExplanation: find(['answer_explanation', 'answer explanation', 'explanation', 'rationale', 'reason'], 12),
+    clinicalExplanation: find(['clinical_explanation', 'clinical rationale', 'clinical explanation', 'clinical'], 13),
+    references: find(['bacb_task_reference', 'task reference', 'reference', 'references'], 14),
+  };
+}
+
+/**
+ * Smartly resolves raw correct choice value (letter 'A'-'D', number '1'-'4', or option text match)
+ */
+export function resolveCorrectChoice(
+  rawChoice: string,
+  optA: string = '',
+  optB: string = '',
+  optC: string = '',
+  optD: string = ''
+): string {
+  if (!rawChoice) return 'A';
+  const clean = rawChoice.trim().toUpperCase();
+
+  // Direct Letter Match
+  if (['A', 'B', 'C', 'D'].includes(clean)) return clean;
+
+  // Number Mapping
+  if (clean === '1') return 'A';
+  if (clean === '2') return 'B';
+  if (clean === '3') return 'C';
+  if (clean === '4') return 'D';
+
+  // Prefix Match (e.g. "Option B", "Choice C", "A)", "B.")
+  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*A[\s.:)]/i.test(clean) || clean.startsWith('A)') || clean.startsWith('A.')) return 'A';
+  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*B[\s.:)]/i.test(clean) || clean.startsWith('B)') || clean.startsWith('B.')) return 'B';
+  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*C[\s.:)]/i.test(clean) || clean.startsWith('C)') || clean.startsWith('C.')) return 'C';
+  if (/^(OPTION|CHOICE|ANS|ANSWER)?\s*D[\s.:)]/i.test(clean) || clean.startsWith('D)') || clean.startsWith('D.')) return 'D';
+
+  // Text Matching against Option Contents
+  const normRaw = normalizeQuestionForComparison(clean);
+  if (normRaw.length > 3) {
+    const normA = normalizeQuestionForComparison(optA);
+    const normB = normalizeQuestionForComparison(optB);
+    const normC = normalizeQuestionForComparison(optC);
+    const normD = normalizeQuestionForComparison(optD);
+
+    if (normA && (normRaw === normA || normRaw.includes(normA) || normA.includes(normRaw))) return 'A';
+    if (normB && (normRaw === normB || normRaw.includes(normB) || normB.includes(normRaw))) return 'B';
+    if (normC && (normRaw === normC || normRaw.includes(normC) || normC.includes(normRaw))) return 'C';
+    if (normD && (normRaw === normD || normRaw.includes(normD) || normD.includes(normRaw))) return 'D';
+  }
+
+  return 'A'; // Safe fallback default
+}
+
 /**
  * Parses raw CSV string data into structured question candidates
- * with full field validation and duplicate detection.
+ * with dynamic column header mapping, full field validation, and duplicate detection.
  */
 export function parseAndValidateCSV(
   csvText: string,
-  existingBank: MasterQuestion[] = []
+  existingBank: MasterQuestion[] = [],
+  defaultCertification: CertificationLevel = 'BCBA'
 ): ImportValidationResult {
   const lines = csvText.split(/\r?\n/).filter((line) => line.trim().length > 0);
 
@@ -79,53 +180,47 @@ export function parseAndValidateCSV(
     }
   }
 
-  // Also track normalized stems within current CSV file to catch intra-file duplicates
+  // Track normalized stems within current CSV file to catch intra-file duplicates
   const seenInCurrentCsv = new Set<string>();
 
-  // Header verification
-  const headers = parseCSVLine(lines[0]).map((h) => h.trim().toLowerCase());
+  // Dynamic Header Column Mapping
+  const rawHeaders = parseCSVLine(lines[0]);
+  const colMap = mapCSVHeaders(rawHeaders);
 
   for (let i = 1; i < lines.length; i++) {
     const rowValues = parseCSVLine(lines[i]);
     const rowNumber = i + 1;
     const errors: string[] = [];
 
-    if (rowValues.length < 5) {
-      invalidRows.push({
-        row: rowNumber,
-        rawData: lines[i],
-        errors: ['Insufficient columns in row.'],
-      });
-      continue;
-    }
+    // Safely extract cell values using dynamic column map
+    const getVal = (idx: number, fallback: string = ''): string => {
+      return (rowValues[idx] !== undefined && rowValues[idx] !== null) ? rowValues[idx].trim() : fallback;
+    };
 
-    // Map row columns dynamically or by index
-    const certificationRaw = (rowValues[1] || 'RBT').toUpperCase();
-    const categoryRaw = normalizeCategory(rowValues[2] || 'Behavior Assessment');
-    const difficultyRaw = (rowValues[3] || 'medium').toLowerCase();
-    const typeRaw = (rowValues[4] || 'scenario_based').toLowerCase();
-    const questionText = rowValues[5] || rowValues[0] || '';
-    const scenarioText = rowValues[6] || '';
-    const optA = rowValues[7] || '';
-    const optB = rowValues[8] || '';
-    const optC = rowValues[9] || '';
-    const optD = rowValues[10] || '';
-    const correctAns = (rowValues[11] || 'A').toUpperCase();
-    const answerExpl = rowValues[12] || 'Correct choice explanation.';
-    const clinicalExpl = rowValues[13] || 'Clinical BACB rationale.';
-    const references = rowValues[14] || 'BACB RBT 3rd Edition TCO';
+    const certCandidate = getVal(colMap.certification, defaultCertification).toUpperCase();
+    const certificationRaw: CertificationLevel = ['RBT', 'BCaBA', 'BCBA'].includes(certCandidate)
+      ? (certCandidate as CertificationLevel)
+      : defaultCertification;
+
+    const categoryRaw = normalizeCategory(getVal(colMap.category, 'Behavior Assessment'));
+    const difficultyRaw = getVal(colMap.difficulty, 'medium').toLowerCase();
+    const typeRaw = getVal(colMap.questionType, 'scenario_based').toLowerCase();
+
+    const questionText = getVal(colMap.question, '');
+    const scenarioText = getVal(colMap.scenario, '');
+    const optA = getVal(colMap.optionA, '');
+    const optB = getVal(colMap.optionB, '');
+    const optC = getVal(colMap.optionC, '');
+    const optD = getVal(colMap.optionD, '');
+    const rawCorrect = getVal(colMap.correctChoice, 'A');
+    const correctAns = resolveCorrectChoice(rawCorrect, optA, optB, optC, optD);
+    const answerExpl = getVal(colMap.answerExplanation, 'Correct choice explanation.');
+    const clinicalExpl = getVal(colMap.clinicalExplanation, 'Clinical BACB rationale.');
+    const references = getVal(colMap.references, `BACB ${certificationRaw} 3rd Edition TCO`);
 
     // Field Validations
-    if (!['RBT', 'BCaBA', 'BCBA'].includes(certificationRaw)) {
-      errors.push(`Invalid certification level "${certificationRaw}". Must be RBT, BCaBA, or BCBA.`);
-    }
-
     if (!questionText.trim()) {
       errors.push('Question text is mandatory.');
-    }
-
-    if (!['A', 'B', 'C', 'D'].includes(correctAns)) {
-      errors.push(`Invalid correct choice letter "${correctAns}". Must be A, B, C, or D.`);
     }
 
     if (!optA.trim() || !optB.trim()) {
@@ -134,18 +229,20 @@ export function parseAndValidateCSV(
 
     // Duplicate Detection Check against database bank & current CSV file rows
     const normStem = normalizeQuestionForComparison(questionText);
-    const isDuplicateInBank = normStem ? existingNormalizedStems.has(normStem) : false;
-    const isDuplicateInCsv = normStem ? seenInCurrentCsv.has(normStem) : false;
+    if (normStem.length > 5) {
+      const isDuplicateInBank = existingNormalizedStems.has(normStem);
+      const isDuplicateInCsv = seenInCurrentCsv.has(normStem);
 
-    if (isDuplicateInBank || isDuplicateInCsv) {
-      duplicateCount++;
-      errors.push(
-        isDuplicateInCsv
-          ? 'Duplicate question prompt detected within this CSV file.'
-          : 'Duplicate question prompt already exists in system bank.'
-      );
-    } else if (normStem) {
-      seenInCurrentCsv.add(normStem);
+      if (isDuplicateInBank || isDuplicateInCsv) {
+        duplicateCount++;
+        errors.push(
+          isDuplicateInCsv
+            ? 'Duplicate question prompt detected within this CSV file.'
+            : 'Duplicate question prompt already exists in system bank.'
+        );
+      } else {
+        seenInCurrentCsv.add(normStem);
+      }
     }
 
     if (errors.length > 0) {
@@ -156,8 +253,8 @@ export function parseAndValidateCSV(
       });
     } else {
       const parsedQuestion: Partial<MasterQuestion> = {
-        certification: certificationRaw as CertificationLevel,
-        category: categoryRaw as QuestionCategory,
+        certification: certificationRaw,
+        category: categoryRaw,
         difficulty: (['easy', 'medium', 'hard'].includes(difficultyRaw) ? difficultyRaw : 'medium') as QuestionDifficulty,
         questionType: (['multiple_choice', 'true_false', 'scenario_based', 'case_study'].includes(typeRaw) ? typeRaw : 'scenario_based') as QuestionType,
         question: questionText,
@@ -175,7 +272,7 @@ export function parseAndValidateCSV(
         keywords: [categoryRaw, certificationRaw],
         taskListVersion: '3rd_edition',
         estimatedTimeSeconds: 60,
-        tags: ['CSV Import'],
+        tags: ['CSV Import', certificationRaw],
         status: 'published',
         isPremium: false,
         isFeatured: false,
