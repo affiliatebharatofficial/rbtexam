@@ -54,12 +54,10 @@ function LoginForm() {
   const handleGoogleSignIn = async () => {
     setErrorMessage('');
     setIsSubmitting(true);
-    const res = await loginWithGoogle(email || undefined);
+    const res = await loginWithGoogle();
     setIsSubmitting(false);
 
-    if (res.success) {
-      performRedirect();
-    } else if (res.error) {
+    if (res.error) {
       setErrorMessage(res.error);
     }
   };

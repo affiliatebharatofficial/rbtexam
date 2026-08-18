@@ -11,7 +11,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: (email?: string, name?: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
   completeGoogleAuthSession: (email: string, name?: string, userId?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: SignUpData) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
@@ -433,18 +433,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async (email?: string, name?: string) => {
+  const loginWithGoogle = async () => {
     setIsLoading(true);
     try {
-      // If email parameter is provided, complete session directly without re-triggering OAuth
-      if (email) {
-        return await completeGoogleAuthSession(email, name);
-      }
-
-      // 1. SUPABASE AUTH GOOGLE SSO (When Supabase is configured)
+      // 1. SUPABASE AUTH GOOGLE SSO (Primary Authentication Provider)
       if (isSupabaseConfigured()) {
-        const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback';
-        const { error } = await supabase.auth.signInWithOAuth({
+        const origin =
+          typeof window !== 'undefined' && window.location.origin
+            ? window.location.origin
+            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://rbtexam.manorhub533.workers.dev');
+        const redirectUrl = `${origin}/auth/callback`;
+
+        const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: redirectUrl,
@@ -461,6 +461,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { success: false, error: error.message };
         }
 
+        if (data?.url && typeof window !== 'undefined') {
+          window.location.assign(data.url);
+        }
+
         logAuditEvent('SYSTEM', 'GOOGLE_OAUTH_INITIATED', 'Supabase Auth', `Initiated Supabase Google OAuth redirect to ${redirectUrl}`);
         return { success: true };
       }
@@ -468,30 +472,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // 2. Direct Official Google Cloud OAuth (Fallback if Supabase is unconfigured)
       const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
       if (googleClientId && !googleClientId.includes('mock-')) {
-        const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback`);
-        window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
+        const origin =
+          typeof window !== 'undefined' && window.location.origin
+            ? window.location.origin
+            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://rbtexam.manorhub533.workers.dev');
+        const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
+        if (typeof window !== 'undefined') {
+          window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
+        }
         return { success: true };
       }
 
-      // 3. Direct Candidate Account Authentication
-      let targetEmail = (email || '').toLowerCase().trim();
-
-      if (!targetEmail && typeof window !== 'undefined') {
-        const prompted = window.prompt('Please enter your Google/Gmail email address to sign in:', '');
-        if (prompted) {
-          targetEmail = prompted.toLowerCase().trim();
-        }
-      }
-
-      if (!targetEmail) {
-        setIsLoading(false);
-        return {
-          success: false,
-          error: 'Please enter your email address to continue with Google sign-in.',
-        };
-      }
-
-      return await completeGoogleAuthSession(targetEmail, name);
+      setIsLoading(false);
+      return {
+        success: false,
+        error: 'Google OAuth provider is not configured. Please contact administrator.',
+      };
     } catch (err: any) {
       setIsLoading(false);
       return { success: false, error: err.message || 'Google login authentication failed.' };

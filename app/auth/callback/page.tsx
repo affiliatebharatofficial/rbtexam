@@ -12,11 +12,21 @@ function AuthCallbackContent() {
   const { completeGoogleAuthSession } = useAuth();
 
   useEffect(() => {
+    let isSubscribed = true;
+
     async function handleAuthCallback() {
       try {
+        const errorParam = searchParams.get('error') || searchParams.get('error_description');
+        if (errorParam) {
+          console.error('OAuth error returned:', errorParam);
+          router.push(`/login?error=${encodeURIComponent(errorParam)}`);
+          return;
+        }
+
         if (isSupabaseConfigured()) {
+          // 1. Check existing session
           const { data, error } = await supabase.auth.getSession();
-          if (!error && data?.session?.user?.email) {
+          if (!error && data?.session?.user?.email && isSubscribed) {
             const userEmail = data.session.user.email;
             const userId = data.session.user.id;
             const userName = data.session.user.user_metadata?.full_name || data.session.user.user_metadata?.name;
@@ -25,15 +35,35 @@ function AuthCallbackContent() {
             router.push('/dashboard');
             return;
           }
-        }
 
-        const email = searchParams.get('email') || searchParams.get('user_email');
-        const name = searchParams.get('name') || searchParams.get('full_name');
+          // 2. Listen for auth state change (e.g. hash token exchange)
+          const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session?.user?.email && isSubscribed) {
+              const userEmail = session.user.email;
+              const userId = session.user.id;
+              const userName = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+              const userAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
+              await completeGoogleAuthSession(userEmail, userName || undefined, userId, userAvatar || undefined);
+              router.push('/dashboard');
+            }
+          });
 
-        if (email) {
-          await completeGoogleAuthSession(email, name || undefined);
+          // Timeout fallback if no session received within 5 seconds
+          const timeout = setTimeout(() => {
+            if (isSubscribed) {
+              authListener?.subscription.unsubscribe();
+              router.push('/login?error=oauth_timeout');
+            }
+          }, 5000);
+
+          return () => {
+            isSubscribed = false;
+            clearTimeout(timeout);
+            authListener?.subscription.unsubscribe();
+          };
+        } else {
+          router.push('/login?error=auth_unconfigured');
         }
-        router.push('/dashboard');
       } catch (err) {
         console.error('OAuth Callback handling error:', err);
         router.push('/login?error=oauth_failed');
@@ -41,6 +71,10 @@ function AuthCallbackContent() {
     }
 
     handleAuthCallback();
+
+    return () => {
+      isSubscribed = false;
+    };
   }, [router, searchParams, completeGoogleAuthSession]);
 
   return (
