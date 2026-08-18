@@ -101,18 +101,18 @@ export default function AdminQuestionsPage() {
       });
 
       setAiProgressStep('Validating 10-point JSON schema & verifying database persistence...');
-      const data = await res.json();
+      const data = (await res.json()) as any;
 
-      if (data.success && data.questions && Array.isArray(data.questions)) {
+      if (data && data.success && data.questions && Array.isArray(data.questions)) {
         setIsAiModalOpen(false);
         setAiSuccessMsg(`✅ ${data.insertedCount || data.questions.length} questions generated & inserted into Database via ${data.providerUsed} (${data.modelUsed})! Latency: ${data.latencyMs}ms | Tokens: ${data.totalTokens || 0}`);
         fetchQuestionsFromApi();
         setTimeout(() => setAiSuccessMsg(''), 10000);
       } else {
-        setAiErrorMsg(data.error || 'AI Question Generation failed.');
+        setAiErrorMsg((data && data.error) || 'AI Question Generation failed.');
         setAiErrorDetails({
-          provider: data.providerUsed || aiProvider,
-          reason: data.error || 'Provider returned error response.',
+          provider: (data && data.providerUsed) || aiProvider,
+          reason: (data && data.error) || 'Provider returned error response.',
         });
       }
     } catch (err: any) {
@@ -153,7 +153,7 @@ export default function AdminQuestionsPage() {
       });
       const res = await fetch(`/api/questions?${query.toString()}`);
       if (res.ok) {
-        const json = await res.json();
+        const json = (await res.json()) as any;
         if (json && Array.isArray(json.data)) {
           setQueryResult(json);
         }
@@ -162,7 +162,7 @@ export default function AdminQuestionsPage() {
       // Fetch exact DB statistics counters (no row caps)
       const statsRes = await fetch(`/api/questions/stats`);
       if (statsRes.ok) {
-        const statsData = await statsRes.json();
+        const statsData = (await statsRes.json()) as any;
         if (statsData && typeof statsData.total === 'number') {
           setStatsSummary(statsData);
         }
@@ -171,7 +171,7 @@ export default function AdminQuestionsPage() {
       // Fetch all questions for bulk actions and export CSV (batching up to 10,000)
       const allQRes = await fetch(`/api/questions?limit=10000&status=ALL`);
       if (allQRes.ok) {
-        const allJson = await allQRes.json();
+        const allJson = (await allQRes.json()) as any;
         if (allJson && Array.isArray(allJson.data)) {
           setAllQuestions(allJson.data);
         }

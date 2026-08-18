@@ -39,8 +39,8 @@ export default function PublicArticleDetailPage() {
     setLoading(true);
     try {
       const res = await fetch(`/api/articles?slug=${encodeURIComponent(slugParam)}`);
-      const data = await res.json();
-      if (data.article) {
+      const data = (await res.json()) as any;
+      if (data && data.article) {
         setArticle(data.article);
       } else {
         const local = getArticleBySlug(slugParam);

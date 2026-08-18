@@ -98,8 +98,8 @@ export default function ExamPage() {
     try {
       const res = await fetch(`/api/questions?limit=100&certification=RBT&status=published`);
       if (res.ok) {
-        const json = await res.json();
-        if (json.data && Array.isArray(json.data) && json.data.length > 0) {
+        const json = (await res.json()) as any;
+        if (json && json.data && Array.isArray(json.data) && json.data.length > 0) {
           convertedQuestions = convertMasterQuestionsToExamQuestions(json.data);
         }
       }
@@ -129,8 +129,8 @@ export default function ExamPage() {
         // Verify questions still exist in live database
         const res = await fetch(`/api/questions?limit=100&certification=RBT&status=published`);
         if (res.ok) {
-          const json = await res.json();
-          const dbQuestionIds = new Set((json.data || []).map((q: any) => q.id));
+          const json = (await res.json()) as any;
+          const dbQuestionIds = new Set((json?.data || []).map((q: any) => q.id));
           const validQuestions = (parsed.questions || []).filter((q: Question) => dbQuestionIds.has(q.id));
 
           if (validQuestions.length > 0) {

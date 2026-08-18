@@ -91,9 +91,9 @@ Your primary objective is to guide the candidate through ABA concepts using Socr
 
   const certOutlineName =
     context.certification === 'BCBA'
-      ? 'BACB 5th Edition BCBA Test Content Outline (TCO)'
+      ? 'BACB 6th Edition BCBA Test Content Outline (TCO)'
       : context.certification === 'BCaBA'
-      ? 'BACB 5th Edition BCaBA Test Content Outline (TCO)'
+      ? 'BACB 6th Edition BCaBA Test Content Outline (TCO)'
       : 'BACB RBT 3rd Edition Test Content Outline (TCO)';
 
   const roleScopeInstruction =

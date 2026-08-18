@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     let force = false;
     try {
-      const body = await request.json();
+      const body = (await request.json()) as any;
       if (body && body.force) force = Boolean(body.force);
     } catch (e) {
       // Optional body

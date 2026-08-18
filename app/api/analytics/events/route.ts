@@ -3,7 +3,7 @@ import { trackAnalyticsEvent } from '@/lib/analytics-engine';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { eventName, category, payload, userId } = body;
 
     if (!eventName || !category) {

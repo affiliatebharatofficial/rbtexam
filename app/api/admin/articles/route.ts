@@ -6,13 +6,17 @@ import {
   updateArticle,
   deleteArticle,
 } from '@/lib/article-cms-engine';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-    const serviceRoleKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjA1NjEzMywiZXhwIjoyMTAxNjMyMTMzfQ.OEKK73cH84lpMAr9ma2MMdzUeq5nI8IsLZVtBT2qHxQ';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
     const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false },
@@ -62,8 +66,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { title, summary, content, category, tags, coverImageUrl, authorName, status } = body;
 
     if (!title || !content || !summary) {
@@ -84,9 +93,7 @@ export async function POST(request: NextRequest) {
     // Optionally sync to Supabase DB
     try {
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-      const serviceRoleKey =
-        process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjA1NjEzMywiZXhwIjoyMTAxNjMyMTMzfQ.OEKK73cH84lpMAr9ma2MMdzUeq5nI8IsLZVtBT2qHxQ';
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
       const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
         auth: { persistSession: false },
@@ -117,8 +124,13 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { id, title, summary, content, category, tags, coverImageUrl, authorName, status } = body;
 
     if (!id) {
@@ -148,6 +160,11 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

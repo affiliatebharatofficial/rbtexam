@@ -10,7 +10,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as any;
     const { errorName, errorMessage, stackTrace, severity, environment, metadata } = body;
 
     if (!errorName || !errorMessage) {

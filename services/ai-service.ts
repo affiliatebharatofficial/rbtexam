@@ -8,7 +8,7 @@ export class AIService {
   static async sendTutorMessage(messages: ChatMessage[], userMessageText: string): Promise<ChatMessage> {
     const textLower = userMessageText.toLowerCase();
 
-    let responseContent = `Great question regarding RBT practice! In Applied Behavior Analysis, it is essential to align all actions with the BACB 2nd Edition Task List.`;
+    let responseContent = `Great question regarding RBT practice! In Applied Behavior Analysis, it is essential to align all actions with the BACB RBT 3rd Edition Test Content Outline (TCO).`;
     let bacbRef = 'BACB Task List Overview';
 
     if (textLower.includes('dtt') || textLower.includes('discrete trial')) {

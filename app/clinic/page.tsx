@@ -47,9 +47,9 @@ export default function ClinicPage() {
     try {
       const targetInviterEmail = user?.email || '';
       const res = await fetch(`/api/clinic/trainees?inviterEmail=${encodeURIComponent(targetInviterEmail)}`);
-      const data = await res.json();
+      const data = (await res.json()) as any;
 
-      if (data.trainees && Array.isArray(data.trainees)) {
+      if (data && data.trainees && Array.isArray(data.trainees)) {
         setTrainees(data.trainees);
       } else {
         setTrainees([]);
@@ -80,7 +80,7 @@ export default function ClinicPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as any;
       if (data.success) {
         setGeneratedInviteLink(data.inviteLink || `${window.location.origin}/signup?email=${encodeURIComponent(inviteEmail)}`);
         setMsg(`✅ Candidate ${inviteEmail} successfully invited to Enterprise Clinic Cohort!`);

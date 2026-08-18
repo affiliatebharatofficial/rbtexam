@@ -376,9 +376,9 @@ async function callOpenAI(prompt: string, apiKey: string): Promise<{ text: strin
     throw new Error(`OpenAI API HTTP ${res.status}: ${errText}`);
   }
 
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-  const usage = data.usage || {};
+  const data = (await res.json()) as any;
+  const content = data?.choices?.[0]?.message?.content || '';
+  const usage = data?.usage || {};
 
   return {
     text: content,
@@ -404,9 +404,9 @@ async function callGemini(prompt: string, apiKey: string): Promise<{ text: strin
     throw new Error(`Google Gemini API HTTP ${res.status}: ${errText}`);
   }
 
-  const data = await res.json();
-  const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  const usage = data.usageMetadata || {};
+  const data = (await res.json()) as any;
+  const content = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const usage = data?.usageMetadata || {};
 
   return {
     text: content,
@@ -437,9 +437,9 @@ async function callDeepSeek(prompt: string, apiKey: string): Promise<{ text: str
     throw new Error(`DeepSeek API HTTP ${res.status}: ${errText}`);
   }
 
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-  const usage = data.usage || {};
+  const data = (await res.json()) as any;
+  const content = data?.choices?.[0]?.message?.content || '';
+  const usage = data?.usage || {};
 
   return {
     text: content,
@@ -469,13 +469,13 @@ async function callOpenRouter(prompt: string, apiKey: string): Promise<{ text: s
     throw new Error(`OpenRouter API HTTP ${res.status}: ${errText}`);
   }
 
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-  const usage = data.usage || {};
+  const data = (await res.json()) as any;
+  const content = data?.choices?.[0]?.message?.content || '';
+  const usage = data?.usage || {};
 
   return {
     text: content,
-    model: data.model || 'openrouter-auto',
+    model: data?.model || 'openrouter-auto',
     inputTokens: usage.prompt_tokens || 0,
     outputTokens: usage.completion_tokens || 0,
   };
@@ -501,9 +501,9 @@ async function callAnthropic(prompt: string, apiKey: string): Promise<{ text: st
     throw new Error(`Anthropic API HTTP ${res.status}: ${errText}`);
   }
 
-  const data = await res.json();
-  const content = data.content?.[0]?.text || '';
-  const usage = data.usage || {};
+  const data = (await res.json()) as any;
+  const content = data?.content?.[0]?.text || '';
+  const usage = data?.usage || {};
 
   return {
     text: content,

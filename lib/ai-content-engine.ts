@@ -50,7 +50,7 @@ const DRAFT_STORE: ContentDraft[] = [
       front: 'What is the distinction between a Motivating Operation (MO) and a Discriminative Stimulus (SD)?',
       back: 'An MO alters the VALUE of a reinforcer (value-altering effect), whereas an SD signals the AVAILABILITY of a reinforcer (reinforcer-availability signal).',
       mnemonic: 'MO = Value. SD = Availability.',
-      bacbCitation: 'BACB 5th Edition Task List Item B-01',
+      bacbCitation: 'BACB 6th Edition Task List Item B-01',
     },
     createdAt: new Date(Date.now() - 7200000).toISOString(),
     updatedAt: new Date(Date.now() - 7200000).toISOString(),

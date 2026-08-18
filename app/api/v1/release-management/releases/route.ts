@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as any;
     const { version, name, releaseType, environment, description, features, bugFixes } = body;
 
     if (!version || !name) {

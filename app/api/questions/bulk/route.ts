@@ -13,7 +13,7 @@ export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { action, ids, status, questions } = body;
 
     if (action === 'export') {

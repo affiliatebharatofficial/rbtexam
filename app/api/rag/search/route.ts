@@ -4,7 +4,7 @@ import { RAGSearchQuery, CertificationTarget, DifficultyLevel } from '@/types/ra
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { query, userId, certification, category, difficulty, topK } = body;
 
     if (!query || typeof query !== 'string' || query.trim().length === 0) {

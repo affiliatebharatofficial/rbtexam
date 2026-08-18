@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       const csvText = await request.text();
       cardsToImport = parseCSVFlashcards(csvText);
     } else {
-      const body = await request.json();
+      const body = (await request.json()) as any;
       if (body.csvText) {
         cardsToImport = parseCSVFlashcards(body.csvText);
       } else if (Array.isArray(body.cards)) {

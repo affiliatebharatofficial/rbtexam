@@ -129,8 +129,8 @@ function TutorContent() {
         }),
       });
 
-      const data = await apiRes.json();
-      if (data.message) {
+      const data = (await apiRes.json()) as any;
+      if (data && data.message) {
         setMessages((prev) => [...prev, data.message]);
       }
     } catch (e) {
@@ -261,9 +261,9 @@ function TutorContent() {
 
     let certNotice = '';
     if (newCert === 'BCBA') {
-      certNotice = `🎓 **Target Certification Changed to BCBA (Board Certified Behavior Analyst)**\n\nTargeting the **BACB 5th Edition BCBA Test Content Outline (TCO)**. Socrates AI is now configured for advanced behavior analysis, Functional Analysis (FA) interpretation, component/parametric analysis, OBM performance management, and clinical supervision.`;
+      certNotice = `🎓 **Target Certification Changed to BCBA (Board Certified Behavior Analyst)**\n\nTargeting the **BACB 6th Edition BCBA Test Content Outline (TCO)**. Socrates AI is now configured for advanced behavior analysis, Functional Analysis (FA) interpretation, component/parametric analysis, OBM performance management, and clinical supervision.`;
     } else if (newCert === 'BCaBA') {
-      certNotice = `🎓 **Target Certification Changed to BCaBA (Board Certified Assistant Behavior Analyst)**\n\nTargeting the **BACB 5th Edition BCaBA Test Content Outline (TCO)**. Socrates AI is now configured for assistant behavior analyst competencies, FA conditions, RBT supervision rules, and program modification under BCBA oversight.`;
+      certNotice = `🎓 **Target Certification Changed to BCaBA (Board Certified Assistant Behavior Analyst)**\n\nTargeting the **BACB 6th Edition BCaBA Test Content Outline (TCO)**. Socrates AI is now configured for assistant behavior analyst competencies, FA conditions, RBT supervision rules, and program modification under BCBA oversight.`;
     } else {
       certNotice = `🎓 **Target Certification Changed to RBT (Registered Behavior Technician)**\n\nTargeting the **BACB RBT 3rd Edition Test Content Outline (TCO)**. Socrates AI is now configured for 1-on-1 direct therapy implementation, measurement data collection, prompt fading, and session documentation.`;
     }

@@ -34,9 +34,7 @@ let adminSupabaseInstance: SupabaseClient | null = null;
 
 export function getSupabaseAdminClient(): SupabaseClient {
   if (!adminSupabaseInstance) {
-    const serviceRoleKey =
-      process.env.SUPABASE_SERVICE_ROLE_KEY ||
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjA1NjEzMywiZXhwIjoyMTAxNjMyMTMzfQ.OEKK73cH84lpMAr9ma2MMdzUeq5nI8IsLZVtBT2qHxQ';
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
     adminSupabaseInstance = createClient(SUPABASE_URL, serviceRoleKey, {
       auth: { persistSession: false },
     });

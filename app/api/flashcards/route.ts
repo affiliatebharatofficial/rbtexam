@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     if (!body.front && !body.title) {
       return NextResponse.json({ error: 'Flashcard prompt/front/title is required' }, { status: 400 });
     }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { id, ...updates } = body;
     if (!id) {
       return NextResponse.json({ error: 'Flashcard ID is required for update' }, { status: 400 });
@@ -78,8 +78,8 @@ export async function DELETE(request: NextRequest) {
       idsToDelete = [id];
     } else {
       try {
-        const body = await request.json();
-        if (Array.isArray(body.ids)) {
+        const body = (await request.json()) as any;
+        if (body && Array.isArray(body.ids)) {
           idsToDelete = body.ids;
         }
       } catch (e) {

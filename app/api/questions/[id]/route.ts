@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
   try {
     const resolvedParams = await params;
     const id = resolvedParams.id;
-    const body = await request.json();
+    const body = (await request.json()) as any;
 
     const updated = await updateServerQuestionAsync(id, body);
     if (!updated) {

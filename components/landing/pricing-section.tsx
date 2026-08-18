@@ -24,8 +24,8 @@ export function PricingSection() {
       try {
         const res = await fetch('/api/plans');
         if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.plans)) {
+          const data = (await res.json()) as any;
+          if (data && Array.isArray(data.plans)) {
             setPlans(data.plans);
           }
         }
@@ -52,8 +52,8 @@ export function PricingSection() {
         }),
       });
 
-      const data = await res.json();
-      if (data.checkoutUrl) {
+      const data = (await res.json()) as any;
+      if (data && data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       } else {
         window.location.href = '/profile/billing';

@@ -72,7 +72,7 @@ export default function FlashcardsPage() {
       });
       const res = await fetch(`/api/flashcards?${queryParams.toString()}`);
       if (res.ok) {
-        const result = await res.json();
+        const result = (await res.json()) as any;
         setCards(result.data || []);
         setDueCount(result.dueCount || 0);
         setMasteredCount(result.masteredCount || 0);
@@ -149,8 +149,8 @@ export default function FlashcardsPage() {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok && data.success && Array.isArray(data.cards)) {
+      const data = (await res.json()) as any;
+      if (res.ok && data && data.success && Array.isArray(data.cards)) {
         setGenSuccessMsg(`✅ Generated & persisted ${data.insertedCount || data.cards.length} AI flashcards for "${aiTopic}"!`);
         setTimeout(() => {
           setIsGeneratorModalOpen(false);
@@ -159,7 +159,7 @@ export default function FlashcardsPage() {
           loadDeck();
         }, 1200);
       } else {
-        alert(data.error || 'Failed to generate AI flashcards');
+        alert((data && data.error) || 'Failed to generate AI flashcards');
       }
     } catch (err: any) {
       alert('Error connecting to AI Flashcard Engine: ' + err.message);

@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllAIAgents, updateAgentModelRouting } from '@/lib/ai-workforce-engine';
 import { AgentRole, AIModelProvider, ModelName } from '@/types/ai-workforce';
+import { requireAdminAuth } from '@/lib/server-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const agents = getAllAIAgents();
     return NextResponse.json({ success: true, count: agents.length, agents });
@@ -12,8 +18,13 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { role, modelProvider, modelName } = body;
 
     if (!role || !modelProvider || !modelName) {

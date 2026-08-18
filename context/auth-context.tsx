@@ -578,7 +578,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (regRes.ok) {
-          const regData = await regRes.json();
+          const regData = (await regRes.json()) as any;
           if (regData?.user?.id) {
             newUser.id = regData.user.id;
           }

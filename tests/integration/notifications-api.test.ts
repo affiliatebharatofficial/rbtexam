@@ -23,7 +23,7 @@ function makePostRequest(body: Record<string, any>): NextRequest {
 describe('GET /api/notifications', () => {
   it('returns 200 with notifications array', async () => {
     const res = await GET(makeGetRequest('default_user'));
-    const json = await res.json();
+    const json = (await res.json()) as any;
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
     expect(Array.isArray(json.notifications)).toBe(true);
@@ -31,7 +31,7 @@ describe('GET /api/notifications', () => {
 
   it('returns empty array for unknown user', async () => {
     const res = await GET(makeGetRequest('totally-unknown-user-xyz-9999'));
-    const json = await res.json();
+    const json = (await res.json()) as any;
     expect(res.status).toBe(200);
     expect(json.notifications).toEqual([]);
   });

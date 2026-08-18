@@ -76,8 +76,8 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
         }),
       });
 
-      const data = await res.json();
-      const count = data.importedCount || validationResult.validRows.length;
+      const data = (await res.json()) as any;
+      const count = (data && data.importedCount) || validationResult.validRows.length;
       setIsImporting(false);
       setImportSuccessCount(count);
       setTimeout(() => {

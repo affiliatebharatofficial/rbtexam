@@ -125,8 +125,8 @@ export default function SuperAdminCMSPage() {
   const loadArticlesData = async () => {
     try {
       const res = await fetch('/api/admin/articles');
-      const data = await res.json();
-      if (data.articles && Array.isArray(data.articles)) {
+      const data = (await res.json()) as any;
+      if (data && data.articles && Array.isArray(data.articles)) {
         setArticles(data.articles);
       } else {
         setArticles(getAllArticles());
@@ -236,8 +236,8 @@ export default function SuperAdminCMSPage() {
     // 1. Fetch real users from Server API Route /api/admin/users
     try {
       const apiRes = await fetch('/api/admin/users');
-      const apiData = await apiRes.json();
-      if (apiData.users && Array.isArray(apiData.users)) {
+      const apiData = (await apiRes.json()) as any;
+      if (apiData && apiData.users && Array.isArray(apiData.users)) {
         apiData.users.forEach((u: any) => {
           if (u.email && !u.email.includes('@rbtpracticeai.com')) {
             realUsersMap.set(u.email.toLowerCase().trim(), u);

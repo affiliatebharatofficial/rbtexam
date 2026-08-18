@@ -48,8 +48,8 @@ export default function AdminPlansPage() {
     try {
       const res = await fetch('/api/admin/plans');
       if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.plans)) {
+        const data = (await res.json()) as any;
+        if (data && Array.isArray(data.plans)) {
           setPlans(data.plans);
         }
       }

@@ -35,8 +35,8 @@ export function QuestionEditorModal({ isOpen, question, onClose, onSave }: Quest
         }),
       });
 
-      const data = await res.json();
-      if (data.questions && data.questions[0]) {
+      const data = (await res.json()) as any;
+      if (data && data.questions && data.questions[0]) {
         const q = data.questions[0];
         setQuestionText(q.question);
         setOptions(q.options.map((o: any) => ({ id: o.id, text: o.text, isCorrect: o.id === q.correctOptionId, explanation: o.explanation || '' })));

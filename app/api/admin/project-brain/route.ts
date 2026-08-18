@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   getProjectBrainOverview,
   getFeatureRegistry,
@@ -6,8 +6,14 @@ import {
   getDatabaseRegistry,
   getEngineDependencyGraph,
 } from '@/lib/project-brain-engine';
+import { requireAdminAuth } from '@/lib/server-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const overview = getProjectBrainOverview();
     const features = getFeatureRegistry();

@@ -75,8 +75,8 @@ async function callLLMProviderForTutor(
           }),
         });
         if (res.ok) {
-          const data = await res.json();
-          const text = data.choices?.[0]?.message?.content;
+          const data = (await res.json()) as any;
+          const text = data?.choices?.[0]?.message?.content;
           if (text) return { text, provider: 'OpenAI', model: 'gpt-4o-mini' };
         }
       } else if (p === 'gemini') {
@@ -92,8 +92,8 @@ async function callLLMProviderForTutor(
             }),
           });
           if (res.ok) {
-            const data = await res.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            const data = (await res.json()) as any;
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
             if (text) return { text, provider: 'Google Gemini', model: m };
           }
         }
@@ -108,8 +108,8 @@ async function callLLMProviderForTutor(
           }),
         });
         if (res.ok) {
-          const data = await res.json();
-          const text = data.choices?.[0]?.message?.content;
+          const data = (await res.json()) as any;
+          const text = data?.choices?.[0]?.message?.content;
           if (text) return { text, provider: 'DeepSeek', model: 'deepseek-chat' };
         }
       } else if (p === 'openrouter') {
@@ -122,9 +122,9 @@ async function callLLMProviderForTutor(
           }),
         });
         if (res.ok) {
-          const data = await res.json();
-          const text = data.choices?.[0]?.message?.content;
-          if (text) return { text, provider: 'OpenRouter', model: data.model || 'auto' };
+          const data = (await res.json()) as any;
+          const text = data?.choices?.[0]?.message?.content;
+          if (text) return { text, provider: 'OpenRouter', model: data?.model || 'auto' };
         }
       } else if (p === 'anthropic') {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -137,8 +137,8 @@ async function callLLMProviderForTutor(
           }),
         });
         if (res.ok) {
-          const data = await res.json();
-          const text = data.content?.[0]?.text;
+          const data = (await res.json()) as any;
+          const text = data?.content?.[0]?.text;
           if (text) return { text, provider: 'Anthropic Claude', model: 'claude-3-5-haiku' };
         }
       }
@@ -175,9 +175,9 @@ export async function processAITutorMessage(
 
   const certOutlineTitle =
     certification === 'BCBA'
-      ? 'BACB 5th Edition BCBA Test Content Outline (TCO)'
+      ? 'BACB 6th Edition BCBA Test Content Outline (TCO)'
       : certification === 'BCaBA'
-      ? 'BACB 5th Edition BCaBA Test Content Outline (TCO)'
+      ? 'BACB 6th Edition BCaBA Test Content Outline (TCO)'
       : 'BACB RBT 3rd Edition Test Content Outline (TCO)';
 
   // 1. Attempt LLM Provider Execution (Multi-Model AI Engine)

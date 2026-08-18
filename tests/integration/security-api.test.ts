@@ -11,7 +11,7 @@ describe('GET /api/security/summary', () => {
   it('returns 200 with security health metrics', async () => {
     const req = new NextRequest('http://localhost:3000/api/security/summary');
     const res = await SecurityGET();
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(json).toHaveProperty('overallSecurityScore');
@@ -22,7 +22,7 @@ describe('GET /api/security/summary', () => {
 
   it('security score is a positive number', async () => {
     const res = await SecurityGET();
-    const json = await res.json();
+    const json = (await res.json()) as any;
     expect(typeof json.overallSecurityScore).toBe('number');
     expect(json.overallSecurityScore).toBeGreaterThan(0);
   });
@@ -36,7 +36,7 @@ describe('POST /api/privacy/request', () => {
       body: JSON.stringify({ email: 'test@example.com', requestType: 'export_data' }),
     });
     const res = await PrivacyPOST(req);
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);

@@ -7,7 +7,7 @@ export const revalidate = 0;
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { userQuery, history, mode, certification, apiKey, provider, userName, userEmail, userProfile, language } = body;
 
     if (!userQuery || typeof userQuery !== 'string' || !userQuery.trim()) {

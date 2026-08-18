@@ -4,7 +4,7 @@ import { ReleaseEnvironment } from '@/types/release-management';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => ({}));
+    const body = ((await req.json().catch(() => ({}))) || {}) as any;
     const env = (body.environment as ReleaseEnvironment) || 'production';
 
     const report = await runPreLaunchValidation(env);

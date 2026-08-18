@@ -6,12 +6,19 @@ import { logAuditEvent } from '@/lib/platform-config';
 export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.text();
-    const signature = request.headers.get('x-signature') || request.headers.get('stripe-signature') || '';
+    const signature = request.headers.get('x-signature') || '';
 
     const config = getLemonSqueezyConfig();
-    const webhookSecret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || config.webhookSecretMasked;
+    const webhookSecret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || config.webhookSecretMasked || '';
 
-    console.log('Lemon Squeezy Webhook Received. Signature:', signature ? 'Present' : 'Missing');
+    // Enforce mandatory cryptographic HMAC SHA-256 webhook signature validation
+    if (!signature || !webhookSecret || !verifyLemonSqueezyWebhookSignature(rawBody, signature, webhookSecret)) {
+      console.warn('Rejected unauthorized billing webhook attempt. Signature validation failed.');
+      return NextResponse.json(
+        { error: 'Unauthorized: Invalid or missing webhook HMAC signature.' },
+        { status: 401 }
+      );
+    }
 
     // Parse JSON Event
     let payload: any = {};

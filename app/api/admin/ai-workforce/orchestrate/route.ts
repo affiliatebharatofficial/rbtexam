@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeOrchestrationPipeline } from '@/lib/ai-workforce-engine';
 import { AgentRole, WorkQueueType } from '@/types/ai-workforce';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { pipelineRoles, payload, queueType } = body;
 
     if (!Array.isArray(pipelineRoles) || pipelineRoles.length === 0) {

@@ -58,20 +58,20 @@ export default function AdminLaunchControlPage() {
     setLoading(true);
     try {
       const [relRes, flagRes, healthRes, maintRes, rollbackRes, betaRes] = await Promise.all([
-        fetch('/api/v1/release-management/releases').then((r) => r.json()),
-        fetch('/api/v1/release-management/feature-flags').then((r) => r.json()),
-        fetch('/api/v1/health/system').then((r) => r.json()),
-        fetch('/api/v1/release-management/maintenance').then((r) => r.json()),
-        fetch('/api/v1/release-management/rollback').then((r) => r.json()),
-        fetch('/api/v1/beta/invites').then((r) => r.json()),
+        fetch('/api/v1/release-management/releases').then((r) => r.json() as Promise<any>),
+        fetch('/api/v1/release-management/feature-flags').then((r) => r.json() as Promise<any>),
+        fetch('/api/v1/health/system').then((r) => r.json() as Promise<any>),
+        fetch('/api/v1/release-management/maintenance').then((r) => r.json() as Promise<any>),
+        fetch('/api/v1/release-management/rollback').then((r) => r.json() as Promise<any>),
+        fetch('/api/v1/beta/invites').then((r) => r.json() as Promise<any>),
       ]);
 
-      if (relRes.success) setReleases(relRes.data);
-      if (flagRes.success) setFeatureFlags(flagRes.data);
-      if (healthRes.success) setHealthReport(healthRes.report);
-      if (maintRes.success) setMaintenanceState(maintRes.state);
-      if (rollbackRes.success) setRollbackLogs(rollbackRes.logs);
-      if (betaRes.success) setBetaFeedbacks(betaRes.feedbacks);
+      if (relRes && relRes.success) setReleases(relRes.data);
+      if (flagRes && flagRes.success) setFeatureFlags(flagRes.data);
+      if (healthRes && healthRes.success) setHealthReport(healthRes.report);
+      if (maintRes && maintRes.success) setMaintenanceState(maintRes.state);
+      if (rollbackRes && rollbackRes.success) setRollbackLogs(rollbackRes.logs);
+      if (betaRes && betaRes.success) setBetaFeedbacks(betaRes.feedbacks);
     } catch (err) {
       console.error('Failed to load launch control data:', err);
     } finally {
@@ -88,8 +88,8 @@ export default function AdminLaunchControlPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ environment: 'production' }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = (await res.json()) as any;
+      if (data && data.success) {
         setValidationReport(data.report);
         setStatusMessage('Validation matrix run complete!');
       }
@@ -115,8 +115,8 @@ export default function AdminLaunchControlPage() {
           releaseType: newType,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = (await res.json()) as any;
+      if (data && data.success) {
         setStatusMessage(`Release v${newVersion} created successfully!`);
         setNewVersion('');
         setNewName('');
@@ -138,8 +138,8 @@ export default function AdminLaunchControlPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...flag, status: nextStatus }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = (await res.json()) as any;
+      if (data && data.success) {
         setFeatureFlags((prev) => prev.map((f) => (f.id === flag.id ? data.flag : f)));
       }
     } catch (err) {
@@ -162,8 +162,8 @@ export default function AdminLaunchControlPage() {
           targetingRules: { percentageRollout: 100 },
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = (await res.json()) as any;
+      if (data && data.success) {
         setFlagKey('');
         setFlagName('');
         fetchInitialData();
@@ -187,8 +187,8 @@ export default function AdminLaunchControlPage() {
           reason: rollbackReason,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = (await res.json()) as any;
+      if (data && data.success) {
         setStatusMessage(`Rollback to v${rollbackVersion} completed.`);
         setRollbackReason('');
         fetchInitialData();
@@ -207,8 +207,8 @@ export default function AdminLaunchControlPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
-      const data = await res.json();
-      if (data.success) {
+      const data = (await res.json()) as any;
+      if (data && data.success) {
         setMaintenanceState(data.state);
       }
     } catch (err) {

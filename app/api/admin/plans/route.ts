@@ -3,11 +3,17 @@ import {
   loadServerSubscriptionPlansAsync,
   createServerPlanAsync,
 } from '@/lib/subscription-plans-server';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const plans = await loadServerSubscriptionPlansAsync();
     return NextResponse.json({ success: true, plans, total: plans.length });
@@ -17,8 +23,13 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { name, description, priceMonthly, priceAnnual, badge, features, isPopular, isActive, buttonText, targetAudience } = body;
 
     if (!name || priceMonthly === undefined) {

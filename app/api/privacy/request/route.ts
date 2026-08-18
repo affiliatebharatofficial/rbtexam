@@ -3,7 +3,7 @@ import { submitDataSubjectRequest } from '@/lib/security-engine';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { email, requestType, userId } = body;
 
     if (!email || !requestType) {

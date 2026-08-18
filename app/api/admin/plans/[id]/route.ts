@@ -3,14 +3,20 @@ import {
   updateServerPlanAsync,
   deleteServerPlanAsync,
 } from '@/lib/subscription-plans-server';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const { id } = await params;
-    const body = await request.json();
+    const body = (await request.json()) as any;
 
     const updated = await updateServerPlanAsync(id, body);
     if (!updated) {
@@ -24,6 +30,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const { id } = await params;
     const success = await deleteServerPlanAsync(id);

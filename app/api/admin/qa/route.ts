@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -60,6 +61,11 @@ function scanTestSuites(): TestSuiteMeta[] {
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
     const suites = scanTestSuites();
     const totalTestsRun = suites.reduce((acc, curr) => acc + curr.testsCount, 0);
@@ -91,6 +97,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   const startTime = Date.now();
   try {
     const suites = scanTestSuites();

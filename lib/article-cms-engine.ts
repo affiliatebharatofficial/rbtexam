@@ -6,11 +6,11 @@ export const INITIAL_SEED_ARTICLES: Article[] = [
   {
     id: 'art-rbt-2026-guide',
     slug: 'complete-rbt-exam-study-guide-2026',
-    title: 'Complete RBT Exam 2026 Study Guide: BACB 2nd Edition TCO Breakdown',
-    summary: 'A comprehensive, domain-by-domain preparation guide for RBT candidates covering Measurement, Assessment, Skill Acquisition, Behavior Reduction, Documentation, and Ethics.',
+    title: 'Complete RBT Exam 2026 Study Guide: BACB 3rd Edition TCO Breakdown',
+    summary: 'A comprehensive breakdown of all 6 domains in the 2026 BACB RBT 3rd Edition Test Content Outline (TCO), including continuous measurement, ABC data, and ethics.',
     content: `# Complete RBT Exam 2026 Study Guide
 
-Preparing for your **Registered Behavior Technician (RBT)** examination requires a clear understanding of the 6 core domains outlined in the BACB RBT 2nd Edition Test Content Outline (TCO).
+Preparing for your **Registered Behavior Technician (RBT)** examination requires a clear understanding of the 6 core domains outlined in the BACB RBT 3rd Edition Test Content Outline (TCO).
 
 ## BACB RBT Exam Domain Weightage
 

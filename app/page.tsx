@@ -62,7 +62,7 @@ export default function HomePage() {
       {/* 7. Spaced Repetition Flashcards Preview */}
       <FlashcardsPreview />
 
-      {/* 8. BACB 2nd Edition Task List Explorer */}
+      {/* 8. BACB RBT 3rd Edition TCO Explorer */}
       <TaskListPreview />
 
       {/* 9. Verified Student & Clinic Testimonials */}

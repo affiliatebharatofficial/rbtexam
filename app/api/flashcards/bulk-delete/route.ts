@@ -4,7 +4,7 @@ import { saveDeletedCardIdsServer } from '@/lib/flashcard-bank-server';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const ids: string[] = Array.isArray(body.ids) ? body.ids : [];
 
     if (ids.length === 0) {

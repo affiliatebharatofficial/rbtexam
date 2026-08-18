@@ -21,7 +21,7 @@ describe('POST /api/rag/search', () => {
   it('returns 200 and result for a valid query', async () => {
     const req = createRequest({ query: 'differential reinforcement', topK: 3 });
     const res = await POST(req);
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
@@ -44,7 +44,7 @@ describe('POST /api/rag/search', () => {
   it('respects topK limit (max 10)', async () => {
     const req = createRequest({ query: 'measurement', topK: 50 });
     const res = await POST(req);
-    const json = await res.json();
+    const json = (await res.json()) as any;
     expect(res.status).toBe(200);
     expect(json.result.retrievedContexts.length).toBeLessThanOrEqual(10);
   });
@@ -52,7 +52,7 @@ describe('POST /api/rag/search', () => {
   it('accepts certification filter', async () => {
     const req = createRequest({ query: 'reinforcement', certification: 'RBT', topK: 3 });
     const res = await POST(req);
-    const json = await res.json();
+    const json = (await res.json()) as any;
     expect(res.status).toBe(200);
     expect(json.result).toBeDefined();
   });

@@ -10,7 +10,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as any;
     const updated = updateMaintenanceState(body);
     return NextResponse.json({
       success: true,

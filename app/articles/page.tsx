@@ -42,8 +42,8 @@ export default function PublicArticlesPage() {
   const loadArticles = async () => {
     try {
       const res = await fetch('/api/articles');
-      const data = await res.json();
-      if (data.articles && Array.isArray(data.articles)) {
+      const data = (await res.json()) as any;
+      if (data && data.articles && Array.isArray(data.articles)) {
         setArticles(data.articles);
       } else {
         setArticles(getPublishedArticles());

@@ -53,8 +53,8 @@ export default function AdminQADashboardPage() {
     try {
       const res = await fetch('/api/admin/qa');
       if (res.ok) {
-        const json = await res.json();
-        if (json.summary && Array.isArray(json.suites)) {
+        const json = (await res.json()) as any;
+        if (json && json.summary && Array.isArray(json.suites)) {
           setSummary(json.summary);
           setSuites(json.suites);
         }
@@ -75,8 +75,8 @@ export default function AdminQADashboardPage() {
     try {
       const res = await fetch('/api/admin/qa', { method: 'POST' });
       if (res.ok) {
-        const json = await res.json();
-        if (json.summary && Array.isArray(json.suites)) {
+        const json = (await res.json()) as any;
+        if (json && json.summary && Array.isArray(json.suites)) {
           setSummary(json.summary);
           setSuites(json.suites);
           setToastMessage(json.message || 'Live QA audit completed with 100% pass rate.');

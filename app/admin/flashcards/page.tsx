@@ -79,14 +79,14 @@ export default function AdminFlashcardsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ csvText }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = (await res.json()) as any;
+      if (res.ok && data && data.success) {
         setStatusMsg(`✅ ${data.message}`);
         setIsCsvModalOpen(false);
         setCsvText('');
         await fetchAllFlashcards();
       } else {
-        setGenerationError(data.error || 'Failed to import CSV flashcards');
+        setGenerationError((data && data.error) || 'Failed to import CSV flashcards');
       }
     } catch (err: any) {
       setGenerationError(`Network error importing CSV: ${err.message}`);
@@ -104,12 +104,12 @@ export default function AdminFlashcardsPage() {
       const res = await fetch('/api/flashcards/convert-questions', {
         method: 'POST',
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = (await res.json()) as any;
+      if (res.ok && data && data.success) {
         setStatusMsg(`✅ ${data.message}`);
         await fetchAllFlashcards();
       } else {
-        setGenerationError(data.error || 'Failed to convert questions to flashcards');
+        setGenerationError((data && data.error) || 'Failed to convert questions to flashcards');
       }
     } catch (err: any) {
       setGenerationError(`Network error converting questions: ${err.message}`);
@@ -154,13 +154,13 @@ export default function AdminFlashcardsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids: selectedCardIds }),
       });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = (await res.json()) as any;
+      if (res.ok && data && data.success) {
         setStatusMsg(`✅ Successfully deleted ${selectedCardIds.length} flashcards!`);
         setFlashcards((prev) => prev.filter((c) => !selectedCardIds.includes(c.id)));
         setSelectedCardIds([]);
       } else {
-        setGenerationError(data.error || 'Failed to bulk delete flashcards');
+        setGenerationError((data && data.error) || 'Failed to bulk delete flashcards');
       }
     } catch (err: any) {
       setGenerationError(`Network error bulk deleting flashcards: ${err.message}`);
@@ -173,8 +173,8 @@ export default function AdminFlashcardsPage() {
     try {
       const res = await fetch('/api/flashcards?limit=200');
       if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.data) && data.data.length > 0) {
+        const data = (await res.json()) as any;
+        if (data && Array.isArray(data.data) && data.data.length > 0) {
           setFlashcards(data.data);
         }
       }
@@ -222,9 +222,9 @@ export default function AdminFlashcardsPage() {
         }),
       });
 
-      const data = await res.json();
+      const data = (await res.json()) as any;
 
-      if (res.ok && data.success && Array.isArray(data.cards)) {
+      if (res.ok && data && data.success && Array.isArray(data.cards)) {
         await fetchAllFlashcards();
         setTelemetry({
           providerUsed: data.providerUsed,
@@ -244,7 +244,7 @@ export default function AdminFlashcardsPage() {
           `✅ Successfully generated, validated & persisted ${data.insertedCount} Flashcards to Database & Global Bank!`
         );
       } else {
-        const errorDetail = data.error || 'AI Flashcard generation failed.';
+        const errorDetail = (data && data.error) || 'AI Flashcard generation failed.';
         setGenerationError(errorDetail);
       }
     } catch (err: any) {

@@ -3,7 +3,7 @@ import { updateUserCardRating } from '@/lib/flashcard-bank';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { cardId, rating, userId } = body;
 
     if (!cardId || rating === undefined) {

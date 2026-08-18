@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateDraftReviewStatus } from '@/lib/ai-content-engine';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) {
+    return auth.response!;
+  }
+
   try {
-    const body = await request.json();
+    const body = (await request.json()) as any;
     const { draftId, status, reviewerNotes } = body;
 
     if (!draftId || !status) {

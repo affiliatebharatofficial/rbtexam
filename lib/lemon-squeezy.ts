@@ -127,12 +127,12 @@ export async function createLemonSqueezyCheckout({
         }),
       });
 
-      const resData = await response.json();
+      const resData = (await response.json()) as any;
       if (!response.ok) {
-        throw new Error(resData.errors?.[0]?.detail || 'Failed to create Lemon Squeezy checkout session.');
+        throw new Error(resData?.errors?.[0]?.detail || 'Failed to create Lemon Squeezy checkout session.');
       }
 
-      const checkoutUrl = resData.data.attributes.url;
+      const checkoutUrl = resData?.data?.attributes?.url;
       logAuditEvent(userEmail, 'CHECKOUT_CREATED', 'Lemon Squeezy', `Created Lemon Squeezy checkout for variant ${variantId}`);
       return { success: true, checkoutUrl };
     }
@@ -156,11 +156,14 @@ export async function createLemonSqueezyCheckout({
  * Validates HMAC SHA256 Webhook signature from Lemon Squeezy
  */
 export function verifyLemonSqueezyWebhookSignature(rawBody: string, signature: string, secret: string): boolean {
-  if (!signature || !secret) return false;
+  if (!signature || !secret || !rawBody) return false;
   try {
     const hmac = crypto.createHmac('sha256', secret);
     const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8');
     const signatureBuffer = Buffer.from(signature, 'utf8');
+    if (digest.length !== signatureBuffer.length) {
+      return false;
+    }
     return crypto.timingSafeEqual(digest, signatureBuffer);
   } catch (err) {
     return false;

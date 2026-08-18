@@ -27,7 +27,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
       '15 Flashcards per Day',
       '1 Diagnostic Quiz per Day',
       '5 Socrates AI Tutor Messages per Day',
-      'BACB 2nd Edition Task List Reference',
+      'BACB RBT 3rd Edition TCO Reference',
     ],
     isActive: true,
   },
