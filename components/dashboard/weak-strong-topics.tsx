@@ -5,18 +5,37 @@ import Link from 'next/link';
 import { AlertTriangle, Star, Brain, ArrowRight, CheckCircle2, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { CertificationLevel } from '@/types/certification';
 
-export function WeakStrongTopics() {
+interface WeakStrongTopicsProps {
+  certification?: CertificationLevel;
+}
+
+export function WeakStrongTopics({ certification = 'RBT' }: WeakStrongTopicsProps) {
   const [hasData, setHasData] = useState(false);
-  const weakTopics = [
+
+  const rbtWeakTopics = [
     { code: 'D-04', name: 'Differential Reinforcement (DRO/DRA)', domain: 'Domain D', score: 74, reason: 'Confusing DRO interval rules' },
     { code: 'C-04', name: 'Discrete Trial Teaching Prompt Fading', domain: 'Domain C', score: 78, reason: 'Time delay prompt errors' },
   ];
 
-  const strongTopics = [
+  const rbtStrongTopics = [
     { code: 'E-01', name: 'Objective Clinical Session Notes', domain: 'Domain E', score: 96, status: 'Mastered' },
     { code: 'F-02', name: 'RBT Ethics Code 2.0 & Scope', domain: 'Domain F', score: 98, status: 'Mastered' },
   ];
+
+  const bcbaWeakTopics = [
+    { code: 'A.2', name: 'Philosophical Assumptions (Determinism/Parsimony)', domain: 'Domain A', score: 72, reason: 'Selectionism vs pragmatism distinctions' },
+    { code: 'B.11', name: 'Motivating Operations (CMO-S vs CMO-R vs CMO-T)', domain: 'Domain B', score: 75, reason: 'Reflexive vs transitive CMO discrimination' },
+  ];
+
+  const bcbaStrongTopics = [
+    { code: 'A.5', name: '7 Dimensions of ABA (Baer, Wolf, & Risley)', domain: 'Domain A', score: 98, status: 'Mastered' },
+    { code: 'B.4', name: 'Positive & Negative Reinforcement Schedules', domain: 'Domain B', score: 94, status: 'Mastered' },
+  ];
+
+  const weakTopics = certification === 'BCBA' ? bcbaWeakTopics : rbtWeakTopics;
+  const strongTopics = certification === 'BCBA' ? bcbaStrongTopics : rbtStrongTopics;
 
   const loadData = () => {
     try {
@@ -24,9 +43,16 @@ export function WeakStrongTopics() {
       if (stored) {
         const sessions = JSON.parse(stored);
         if (Array.isArray(sessions) && sessions.length > 0) {
-          setHasData(true);
+          const matchingSessions = sessions.filter(
+            (s: any) => s.certification === certification || (!s.certification && certification === 'RBT')
+          );
+          if (matchingSessions.length > 0) {
+            setHasData(true);
+            return;
+          }
         }
       }
+      setHasData(false);
     } catch (e) {
       console.error('Failed to load topic breakdown', e);
     }
@@ -36,16 +62,16 @@ export function WeakStrongTopics() {
     loadData();
     window.addEventListener('rbt_exam_session_saved', loadData);
     return () => window.removeEventListener('rbt_exam_session_saved', loadData);
-  }, []);
+  }, [certification]);
 
   if (!hasData) {
     return (
       <EmptyState
         icon={Target}
-        title="No Domain Topic Breakdown Available"
-        description="Your weak and strong BACB task list topic areas will be calculated automatically after your first completed exam drill."
+        title={`No ${certification} Domain Topic Breakdown Available`}
+        description={`Your weak and strong ${certification} topic areas will be calculated automatically after your first completed ${certification} exam session.`}
         badgeLabel="Topic Breakdown Pending"
-        actionLabel="Take 15-Min Diagnostic"
+        actionLabel={`Take 15-Min ${certification} Practice`}
         onAction={() => window.location.href = '/exam'}
       />
     );
@@ -80,7 +106,7 @@ export function WeakStrongTopics() {
           ))}
         </div>
 
-        <Link href="/tutor" className="block pt-1">
+        <Link href={`/tutor?certification=${certification}`} className="block pt-1">
           <Button variant="primary" size="sm" className="w-full gap-2 shadow-md">
             <Brain className="w-4 h-4" />
             <span>Drill Weak Topics with Socrates AI</span>
@@ -126,3 +152,4 @@ export function WeakStrongTopics() {
     </div>
   );
 }
+

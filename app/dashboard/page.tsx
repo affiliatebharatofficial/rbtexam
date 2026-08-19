@@ -18,11 +18,16 @@ import { PerformanceChart } from '@/components/dashboard/performance-chart';
 import { QuickActions } from '@/components/dashboard/quick-actions';
 import { TrialBanner } from '@/components/dashboard/trial-banner';
 import { Sparkles, Brain, Flame, Sun, Moon, Calendar, ShieldCheck, ArrowRight, Award, Users } from 'lucide-react';
+import { CertificationLevel } from '@/types/certification';
+import { getCertificationConfig } from '@/lib/certifications-config';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [certification, setCertification] = useState<CertificationLevel>('RBT');
   const [darkMode, setDarkMode] = useState(false);
   const [examSessions, setExamSessions] = useState<any[]>([]);
+
+  const certConfig = getCertificationConfig(certification);
 
   const loadSessions = () => {
     try {
@@ -42,14 +47,21 @@ export default function DashboardPage() {
     return () => window.removeEventListener('rbt_exam_session_saved', loadSessions);
   }, []);
 
+  const filteredSessions = examSessions.filter(
+    (s) => s.certification === certification || (!s.certification && certification === 'RBT')
+  );
+
   let readinessScore = user?.readinessScore ?? 0;
   let passLikelihood = user?.estimatedPassLikelihood ?? 0;
 
-  if (examSessions.length > 0) {
-    const totalScoreSum = examSessions.reduce((acc, s) => acc + (Number(s.score) || 0), 0);
-    readinessScore = Math.round(totalScoreSum / examSessions.length);
-    const passedCount = examSessions.filter((s) => Number(s.score) >= 85).length;
-    passLikelihood = Math.round((passedCount / examSessions.length) * 100);
+  if (filteredSessions.length > 0) {
+    const totalScoreSum = filteredSessions.reduce((acc, s) => acc + (Number(s.score) || 0), 0);
+    readinessScore = Math.round(totalScoreSum / filteredSessions.length);
+    const passedCount = filteredSessions.filter((s) => Number(s.score) >= certConfig.passingScorePercentage).length;
+    passLikelihood = Math.round((passedCount / filteredSessions.length) * 100);
+  } else {
+    readinessScore = 0;
+    passLikelihood = 0;
   }
 
   const targetScore = user?.targetScore ?? 90;
@@ -62,13 +74,13 @@ export default function DashboardPage() {
           {/* 7-Day Free Pro Access Trial Banner */}
           <TrialBanner />
 
-          {/* Top Bar: User Greeting & Dark Mode Toggle */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Top Bar: User Greeting & Certification Selector */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                 <Badge variant="blue" className="gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>BACB RBT 3rd Edition Certified Target</span>
+                  <span>{certConfig.examStandard} Target</span>
                 </Badge>
                 <span className="text-xs font-bold text-slate-400">Scheduled: {user?.targetExamDate || 'Not Scheduled'}</span>
                 {(user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'clinic_admin') && (
@@ -81,12 +93,30 @@ export default function DashboardPage() {
                 Candidate Command Center
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Real-time BACB exam pass likelihood analytics for <strong>{user?.fullName || 'Candidate'}</strong>.
+                Real-time {certification} exam pass likelihood analytics for <strong>{user?.fullName || 'Candidate'}</strong>.
               </p>
             </div>
 
-            {/* Dark Mode Toggle Button */}
-            <div className="flex items-center space-x-3">
+            {/* Certification Switcher & Dark Mode Toggle */}
+            <div className="flex items-center space-x-3 flex-wrap gap-y-2">
+              {/* Target Certification Toggle */}
+              <div className="flex items-center bg-slate-200/70 dark:bg-slate-800 p-1 rounded-xl text-xs font-extrabold">
+                {(['RBT', 'BCBA', 'BCaBA'] as CertificationLevel[]).map((cert) => (
+                  <button
+                    key={cert}
+                    onClick={() => setCertification(cert)}
+                    className={`px-3 py-1.5 rounded-lg transition-all ${
+                      certification === cert
+                        ? 'bg-[#2563EB] text-white shadow-sm font-black'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+                    }`}
+                  >
+                    {cert}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dark Mode Toggle Button */}
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center space-x-2 text-xs font-bold"
@@ -94,12 +124,12 @@ export default function DashboardPage() {
                 {darkMode ? (
                   <>
                     <Sun className="w-4 h-4 text-amber-400" />
-                    <span>Light Theme</span>
+                    <span>Light</span>
                   </>
                 ) : (
                   <>
                     <Moon className="w-4 h-4 text-indigo-500" />
-                    <span>Dark Theme</span>
+                    <span>Dark</span>
                   </>
                 )}
               </button>
@@ -107,7 +137,7 @@ export default function DashboardPage() {
               <Link href="/exam">
                 <Button variant="primary" size="md" className="gap-2 shadow-lg shadow-blue-500/25">
                   <Sparkles className="w-4 h-4" />
-                  <span>Start Mock Exam</span>
+                  <span>Start Practice Exam</span>
                 </Button>
               </Link>
             </div>
@@ -199,7 +229,7 @@ export default function DashboardPage() {
 
           {/* Priority Focus Areas (Weak & Strong Topics) */}
           <Card glass className="p-6 shadow-xl border-white/80 dark:border-slate-800 dark:bg-slate-900/80">
-            <WeakStrongTopics />
+            <WeakStrongTopics certification={certification} />
           </Card>
 
           {/* Recent Test Attempts & Activity Feed Grid */}

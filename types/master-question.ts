@@ -32,7 +32,17 @@ export type QuestionCategory =
   | 'Preference Assessment'
   | 'Behavior Intervention Plans'
   | 'ABC Data'
-  | 'Replacement Behaviors';
+  | 'Replacement Behaviors'
+  | 'A — Behaviorism and Philosophical Foundations'
+  | 'B — Concepts and Principles'
+  | 'C — Measurement, Data Display, and Interpretation'
+  | 'D — Experimental Design'
+  | 'E — Ethics'
+  | 'F — Behavior Assessment'
+  | 'G — Behavior-Change Procedures'
+  | 'H — Selecting and Implementing Interventions'
+  | 'I — Personnel Supervision and Management'
+  | string;
 
 export type AdminRole = 'super_admin' | 'admin' | 'editor' | 'reviewer';
 
@@ -60,7 +70,7 @@ export interface MasterQuestion {
   category: QuestionCategory;
   subCategory?: string;
   keywords: string[];
-  taskListVersion: '3rd_edition' | '2nd_edition' | '5th_edition' | '6th_edition';
+  taskListVersion: '3rd_edition' | '2nd_edition' | '5th_edition' | '6th_edition' | 'current' | string;
   estimatedTimeSeconds: number;
   tags: string[];
   status: QuestionStatus;

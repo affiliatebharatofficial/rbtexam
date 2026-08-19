@@ -3,6 +3,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase';
 import { mapDbRowToMasterQuestion, createServerQuestionAsync } from '@/lib/master-question-bank-server';
 import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
 import { QuestionFilterParams, MasterQuestion } from '@/types/master-question';
+import { isValidCertification } from '@/lib/certifications-config';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -12,7 +13,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     const search = searchParams.get('search') || undefined;
-    const certification = searchParams.get('certification') || 'ALL';
+    const rawCert = searchParams.get('certification') || 'ALL';
+    const certification = rawCert !== 'ALL' && isValidCertification(rawCert) ? rawCert : rawCert === 'ALL' ? 'ALL' : 'RBT';
     const category = searchParams.get('category') || 'ALL';
     const difficulty = searchParams.get('difficulty') || 'ALL';
     const status = searchParams.get('status') || 'ALL';

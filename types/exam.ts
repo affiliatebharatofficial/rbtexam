@@ -1,4 +1,7 @@
 import { BACBDomainId } from './bacb';
+import { CertificationLevel } from './certification';
+
+export type ExamDomainId = BACBDomainId | string;
 
 export interface QuestionOption {
   id: 'A' | 'B' | 'C' | 'D';
@@ -8,8 +11,8 @@ export interface QuestionOption {
 
 export interface Question {
   id: string;
-  taskItemId: string; // e.g. "C-03"
-  domainId: BACBDomainId;
+  taskItemId: string; // e.g. "C-03", "A.1"
+  domainId: ExamDomainId;
   scenarioText: string;
   questionText: string;
   options: QuestionOption[];
@@ -17,6 +20,7 @@ export interface Question {
   difficulty: 'Easy' | 'Medium' | 'Hard';
   bacbCitation: string;
   aiExplanationDetail: string;
+  certification?: CertificationLevel;
 }
 
 export interface UserAnswer {
@@ -32,7 +36,8 @@ export interface ExamSession {
   id: string;
   userId: string;
   mode: ExamMode;
-  targetDomainId?: BACBDomainId;
+  certification?: CertificationLevel;
+  targetDomainId?: ExamDomainId;
   questions: Question[];
   userAnswers: Record<string, UserAnswer>;
   startedAt: string;
@@ -43,7 +48,7 @@ export interface ExamSession {
 }
 
 export interface DomainScore {
-  domainId: BACBDomainId;
+  domainId: ExamDomainId;
   domainName: string;
   totalQuestions: number;
   correctCount: number;
@@ -53,6 +58,7 @@ export interface DomainScore {
 
 export interface ExamResult {
   sessionId: string;
+  certification?: CertificationLevel;
   scorePercentage: number;
   passed: boolean;
   totalQuestions: number;

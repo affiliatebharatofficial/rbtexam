@@ -1,27 +1,49 @@
-import { Question, ExamSession, ExamResult, DomainScore, UserAnswer } from '@/types/exam';
-import { BACBDomainId } from '@/types/bacb';
-import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
+import { Question, ExamSession, ExamResult, DomainScore, UserAnswer, ExamDomainId } from '@/types/exam';
+import { CertificationLevel } from '@/types/certification';
 import { getMasterBankExamQuestions } from '@/lib/sample-questions';
+import { getCertificationConfig } from '@/lib/certifications-config';
+
+export interface CreateExamSessionOptions {
+  mode: 'diagnostic' | 'full_mock' | 'domain_focus';
+  targetDomainId?: ExamDomainId;
+  certification?: CertificationLevel;
+  customDurationSeconds?: number;
+}
 
 export class ExamService {
   /**
-   * Generates a new exam session based on mode and domain filter
+   * Generates a new exam session based on mode, certification, and domain filter
    */
-  static createExamSession(mode: 'diagnostic' | 'full_mock' | 'domain_focus', targetDomainId?: BACBDomainId): ExamSession {
-    let questions = getMasterBankExamQuestions();
+  static createExamSession(
+    modeOrOptions: 'diagnostic' | 'full_mock' | 'domain_focus' | CreateExamSessionOptions,
+    legacyTargetDomainId?: ExamDomainId
+  ): ExamSession {
+    const options: CreateExamSessionOptions =
+      typeof modeOrOptions === 'string'
+        ? { mode: modeOrOptions, targetDomainId: legacyTargetDomainId, certification: 'RBT' }
+        : modeOrOptions;
 
-    if (mode === 'domain_focus' && targetDomainId) {
-      questions = questions.filter(q => q.domainId === targetDomainId);
+    const cert: CertificationLevel = options.certification || 'RBT';
+    const config = getCertificationConfig(cert);
+
+    let questions = getMasterBankExamQuestions(cert);
+
+    if (options.mode === 'domain_focus' && options.targetDomainId) {
+      questions = questions.filter((q) => q.domainId === options.targetDomainId);
     }
 
-    // Default duration: 90 minutes (5400 seconds) for full mock, 25 minutes for diagnostic
-    const durationSeconds = mode === 'full_mock' ? 5400 : 1500;
+    // Duration based on certification config and exam mode
+    const fullMockDuration = config.officialExamDurationMinutes * 60;
+    const diagnosticDuration = Math.round(fullMockDuration * 0.28); // ~25 mins for RBT, ~65 mins for BCBA
+    const durationSeconds =
+      options.customDurationSeconds || (options.mode === 'full_mock' ? fullMockDuration : diagnosticDuration);
 
     return {
       id: `session-${Date.now()}`,
       userId: 'demo-student-id',
-      mode,
-      targetDomainId,
+      mode: options.mode,
+      certification: cert,
+      targetDomainId: options.targetDomainId,
       questions,
       userAnswers: {},
       startedAt: new Date().toISOString(),
@@ -32,42 +54,46 @@ export class ExamService {
   }
 
   /**
-   * Evaluates user answers and builds detailed BACB diagnostic report
+   * Evaluates user answers and builds detailed certification-aware diagnostic report
    */
   static calculateResults(session: ExamSession): ExamResult {
+    const cert: CertificationLevel = session.certification || 'RBT';
+    const config = getCertificationConfig(cert);
     const totalQuestions = session.questions.length;
+
     let correctCount = 0;
     let incorrectCount = 0;
     let unansweredCount = 0;
 
-    const domainBuckets: Record<BACBDomainId, { total: number; correct: number }> = {
-      A: { total: 0, correct: 0 },
-      B: { total: 0, correct: 0 },
-      C: { total: 0, correct: 0 },
-      D: { total: 0, correct: 0 },
-      E: { total: 0, correct: 0 },
-      F: { total: 0, correct: 0 },
-    };
+    // Dynamically initialize domain buckets based on certification TCO
+    const domainBuckets: Record<string, { total: number; correct: number }> = {};
+    config.domains.forEach((d) => {
+      domainBuckets[d.id] = { total: 0, correct: 0 };
+    });
 
     session.questions.forEach((q) => {
       const answer: UserAnswer | undefined = session.userAnswers[q.id];
-      domainBuckets[q.domainId].total += 1;
+      const domId = q.domainId || 'A';
+      if (!domainBuckets[domId]) {
+        domainBuckets[domId] = { total: 0, correct: 0 };
+      }
+      domainBuckets[domId].total += 1;
 
       if (!answer || !answer.selectedOptionId) {
         unansweredCount += 1;
       } else if (answer.selectedOptionId === q.correctOptionId) {
         correctCount += 1;
-        domainBuckets[q.domainId].correct += 1;
+        domainBuckets[domId].correct += 1;
       } else {
         incorrectCount += 1;
       }
     });
 
     const scorePercentage = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
-    const passed = scorePercentage >= 80; // Standard BACB pass threshold ~80%
+    const passed = scorePercentage >= config.passingScorePercentage;
 
-    const domainScores: DomainScore[] = BACB_TASK_LIST_3RD_EDITION.map((domain) => {
-      const stats = domainBuckets[domain.id];
+    const domainScores: DomainScore[] = config.domains.map((domain) => {
+      const stats = domainBuckets[domain.id] || { total: 0, correct: 0 };
       const percentageScore = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
 
       let masteryStatus: 'Mastered' | 'Proficient' | 'Needs Review' | 'Critical Focus' = 'Mastered';
@@ -86,13 +112,18 @@ export class ExamService {
     });
 
     // Generate AI recommendations based on lowest domains
-    const weakDomains = domainScores.filter(d => d.percentageScore < 80);
-    const aiRecommendations: string[] = weakDomains.length > 0
-      ? weakDomains.map(d => `Focus on Domain ${d.domainId} (${d.domainName}): Review key Task List items and practice 15+ scenario questions.`)
-      : ['Outstanding readiness score! Maintain your knowledge using spaced repetition flashcards daily.'];
+    const weakDomains = domainScores.filter((d) => d.totalQuestions > 0 && d.percentageScore < config.passingScorePercentage);
+    const aiRecommendations: string[] =
+      weakDomains.length > 0
+        ? weakDomains.map(
+            (d) =>
+              `Focus on Domain ${d.domainId} (${d.domainName}): Review key Task List items and practice scenario questions to reach ${config.passingScorePercentage}% mastery.`
+          )
+        : ['Outstanding readiness score! Maintain your knowledge using spaced repetition flashcards daily.'];
 
     return {
       sessionId: session.id,
+      certification: cert,
       scorePercentage,
       passed,
       totalQuestions,
@@ -106,3 +137,4 @@ export class ExamService {
     };
   }
 }
+
