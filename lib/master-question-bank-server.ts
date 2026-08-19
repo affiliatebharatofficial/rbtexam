@@ -200,6 +200,34 @@ export async function batchCreateServerQuestionsAsync(
 }
 
 /**
+ * Server-only: Fetch all question stems from Supabase across chunks (bypassing PostgREST 1000-row limit)
+ * Used strictly for comprehensive duplicate detection.
+ */
+export async function getAllQuestionStemsAsync(): Promise<string[]> {
+  const adminDb = getSupabaseAdminClient();
+  const stems: string[] = [];
+  let from = 0;
+  const CHUNK_SIZE = 1000;
+
+  while (true) {
+    const { data, error } = await adminDb
+      .from('master_questions')
+      .select('question_text')
+      .is('deleted_at', null)
+      .range(from, from + CHUNK_SIZE - 1);
+
+    if (error || !data || data.length === 0) break;
+    for (const r of data) {
+      if (r.question_text) stems.push(r.question_text);
+    }
+    if (data.length < CHUNK_SIZE) break;
+    from += CHUNK_SIZE;
+  }
+
+  return stems;
+}
+
+/**
  * Server-only: Update question in Supabase database
  */
 export async function updateServerQuestionAsync(id: string, updates: Partial<MasterQuestion>): Promise<MasterQuestion | undefined> {

@@ -7,6 +7,7 @@ import {
   bulkDeleteServerQuestionsAsync,
   bulkUpdateServerStatusAsync,
   batchCreateServerQuestionsAsync,
+  getAllQuestionStemsAsync,
 } from '@/lib/master-question-bank-server';
 
 export const dynamic = 'force-dynamic';
@@ -15,10 +16,10 @@ export const revalidate = 0;
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as any;
-    const { action, ids, status, questions } = body;
+    const { action, ids, status, questions, limit = 200 } = body;
 
     if (action === 'export') {
-      const allQuestions = await loadServerPersistentQuestionsAsync(200);
+      const allQuestions = await loadServerPersistentQuestionsAsync(limit);
       const csv = exportQuestionsToCSV(allQuestions);
       return new NextResponse(csv, {
         headers: {
@@ -33,15 +34,11 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Array of questions required for import' }, { status: 400 });
       }
 
-      const adminDb = getSupabaseAdminClient();
-      // Targeted query for existing stems to avoid loading entire entities into memory
-      const { data: existingRows } = await adminDb
-        .from('master_questions')
-        .select('question_text')
-        .is('deleted_at', null);
+      // Exhaustive fetch of all question stems across database chunks
+      const existingStems = await getAllQuestionStemsAsync();
 
       const existingNormalizedStems = new Set<string>(
-        (existingRows || []).map((r: any) => normalizeQuestionForComparison(r.question_text || '')).filter(Boolean)
+        existingStems.map((text: string) => normalizeQuestionForComparison(text || '')).filter(Boolean)
       );
 
       const questionsToInsert: any[] = [];

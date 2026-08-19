@@ -21,14 +21,39 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
   const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [importSuccessCount, setImportSuccessCount] = useState<number | null>(null);
+  const [dbStems, setDbStems] = useState<MasterQuestion[]>([]);
 
-  if (!isOpen) return null;
+  // Fetch all live database stems for exhaustive duplicate detection
+  React.useEffect(() => {
+    if (!isOpen) return;
+    fetch('/api/questions/stems')
+      .then((res) => res.json())
+      .then((data: any) => {
+        if (data && Array.isArray(data.stems)) {
+          const mapped = data.stems.map((text: string) => ({ question: text } as MasterQuestion));
+          setDbStems(mapped);
+        }
+      })
+      .catch((err) => console.error('Failed to load database stems for duplicate detection:', err));
+  }, [isOpen]);
+
+  const allKnownQuestions = React.useMemo(() => {
+    return [...existingQuestions, ...dbStems];
+  }, [existingQuestions, dbStems]);
 
   const runValidation = (text: string, cert: CertificationLevel) => {
     if (!text) return;
-    const result = parseAndValidateCSV(text, existingQuestions, cert);
+    const result = parseAndValidateCSV(text, allKnownQuestions, cert);
     setValidationResult(result);
   };
+
+  React.useEffect(() => {
+    if (csvContent && dbStems.length > 0) {
+      runValidation(csvContent, targetCert);
+    }
+  }, [dbStems]);
+
+  if (!isOpen) return null;
 
   const handleCertChange = (cert: CertificationLevel) => {
     setTargetCert(cert);
@@ -77,11 +102,18 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
       });
 
       const data = (await res.json()) as any;
-      if (!res.ok || !data || data.success === false || data.importedCount === 0) {
+      if (!res.ok || !data || data.success === false) {
         setIsImporting(false);
         alert(data?.error || 'Failed to import CSV questions into database.');
         return;
       }
+
+      if (data.importedCount === 0 && (data.skippedDuplicatesCount > 0 || validationResult.validRows.length > 0)) {
+        setIsImporting(false);
+        alert(`All ${data.skippedDuplicatesCount || validationResult.validRows.length} question(s) already exist in the database as duplicates and were skipped.`);
+        return;
+      }
+
       const count = data.importedCount;
       setIsImporting(false);
       setImportSuccessCount(count);
