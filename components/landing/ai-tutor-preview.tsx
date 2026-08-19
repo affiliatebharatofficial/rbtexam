@@ -94,10 +94,10 @@ export function AiTutorPreview() {
             <span>Interactive Live Sandbox</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Preview Socrates AI Tutor in Action
+            Socrates AI Tutor: Real-Time RBT Practice Explanations
           </h2>
           <p className="text-base text-slate-600">
-            Ask any question on BACB Ethics, ABA procedures, or scenario-based practice questions. Try out our live Socratic learning assistant below.
+            Experience how Socrates AI delivers instant clinical rationales, breaks down confusing ABA concepts, and provides 24/7 exam guidance during your 7-day free trial.
           </p>
         </div>
 

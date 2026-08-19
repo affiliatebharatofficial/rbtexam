@@ -17,6 +17,13 @@ export function WhyChooseUs() {
       themText: 'Often outdated 1st Edition content',
     },
     {
+      feature: '85-Question 90-Min Timed Practice Exams',
+      us: true,
+      usText: 'Computer-based simulation with review grid',
+      them: false,
+      themText: 'Static PDFs or untimed generic quizzes',
+    },
+    {
       feature: 'Real-Time Conversational AI Tutor',
       us: true,
       usText: 'Socrates AI explains why wrong answers are incorrect 24/7',
@@ -38,18 +45,18 @@ export function WhyChooseUs() {
       themText: 'Static PDF lists or printable paper cards',
     },
     {
-      feature: 'First-Time Exam Pass Rate',
+      feature: '7-Day Free Trial with Full Pro Access',
       us: true,
-      usText: '99.4% First-Try Pass Rate',
+      usText: 'Full access to mocks, AI tutor & flashcards',
       them: false,
-      themText: '74% BACB National First-Time Average',
+      themText: 'Upfront paywalls or non-refundable purchases',
     },
     {
-      feature: '100% Money-Back Pass Guarantee',
+      feature: 'Pass-or-Refund Guarantee Protection',
       us: true,
-      usText: 'Full refund if you fail after achieving 85% readiness',
+      usText: 'Refund if you fail after 85% readiness (Terms apply)',
       them: false,
-      themText: 'No money-back guarantee',
+      themText: 'No guarantee or support',
     },
   ];
 
@@ -59,10 +66,10 @@ export function WhyChooseUs() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <Badge variant="blue">The Smart Choice for RBT Candidates</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Why Students & ABA Clinics Choose RBT Practice AI
+            Why Use RBT Practice AI for Your Exam Prep?
           </h2>
           <p className="text-base text-slate-600">
-            Compare our next-generation adaptive AI preparation platform against legacy static video courses and PDF question banks.
+            Compare our next-generation adaptive AI preparation platform with 7-day free trial against legacy static video courses and PDF question banks.
           </p>
         </div>
 

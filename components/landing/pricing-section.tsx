@@ -69,12 +69,12 @@ export function PricingSection() {
     <section id="pricing" className="py-24 bg-white border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12">
-          <Badge variant="emerald">{t('pricing.badge', 'Pass-or-Refund Guarantee Protection')}</Badge>
+          <Badge variant="emerald">7-Day Free Trial • Pass-or-Refund Guarantee Protection</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            {t('pricing.heading', 'Invest in Your RBT Certification Success')}
+            What You Get With Your 7-Day Free Trial & Transparent Plans
           </h2>
           <p className="text-base text-slate-600">
-            {t('pricing.subheading', 'Choose the plan tailored for your exam target date or clinic cohort needs.')}
+            Every candidate begins with a 7-day free trial. Practice with full 85-question mock exams, Socrates AI tutoring, and pass guarantee protection before choosing your plan.
           </p>
 
           {/* Billing Cycle Toggle */}

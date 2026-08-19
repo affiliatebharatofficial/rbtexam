@@ -13,9 +13,9 @@ export function HowItWorks() {
   const steps = [
     {
       stepNumber: '01',
-      title: 'Take the Free 15-Minute Diagnostic Exam',
+      title: 'Start Your 7-Day Free Trial & Take the Diagnostic',
       subtitle: 'Identify Your Baseline Skill Level across 6 BACB Domains',
-      description: 'Answer 15 targeted questions representing all 6 BACB RBT 3rd Edition Task List domains. Our scoring engine measures your response speed, confidence level, and conceptual accuracy.',
+      description: 'Answer targeted practice questions representing all 6 BACB RBT 3rd Edition Task List domains. Our scoring engine measures your response speed, confidence level, and conceptual accuracy.',
       icon: Target,
       color: 'from-blue-500 to-cyan-500',
       badgeText: 'Instant Baseline',
@@ -66,8 +66,8 @@ export function HowItWorks() {
     {
       stepNumber: '04',
       title: 'Pass Your RBT Exam with Guaranteed Confidence',
-      subtitle: '99.4% First-Time Pass Rate • Pass Guarantee',
-      description: 'Take simulated 85-question 90-minute exams with exact Pearson VUE interface conditions. When your score crosses 85% readiness, you are guaranteed to pass your official BACB exam.',
+      subtitle: '85-Question Mocks • Pass-or-Refund Guarantee',
+      description: 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.',
       icon: ShieldCheck,
       color: 'from-emerald-500 to-teal-600',
       badgeText: '100% Pass Guarantee',
@@ -94,10 +94,10 @@ export function HowItWorks() {
             <span>Proven 4-Step Blueprint</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            How RBT Practice AI Guarantees Your Exam Success
+            How the RBT Practice Platform Works
           </h2>
           <p className="text-base text-slate-600">
-            Our scientifically-proven learning engine turns complex ABA concepts into second nature in 4 simple steps.
+            Follow our proven 4-step roadmap during your 7-day free trial to turn complex ABA principles into second nature.
           </p>
         </div>
 

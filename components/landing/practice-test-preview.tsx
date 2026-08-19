@@ -87,10 +87,10 @@ export function PracticeTestPreview() {
             <span>Interactive Exam Simulator</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Try a Live BACB Practice Exam Question
+            RBT Exam Practice Questions and Live Simulator Preview
           </h2>
           <p className="text-base text-slate-600">
-            Experience our realistic exam simulator with instant Socratic rationale and BACB Task List domain tagging.
+            Experience our realistic exam simulator with instant Socratic rationale, continuous measurement scenarios, and BACB Task List domain tagging.
           </p>
         </div>
 

@@ -9,24 +9,44 @@ export function FAQSection() {
 
   const faqs = [
     {
-      q: 'How similar are RBT Practice AI questions to the actual BACB RBT Exam?',
-      a: 'Our question engine is modeled directly after the BACB RBT 3rd Edition Task List. Every scenario reflects real-world clinical behavior analysis cases with 4 distractors designed to test discrimination skills, latency, IRT, DTT, and ethics.',
+      q: 'What is RBT practice and how does RBT Practice AI help me prepare?',
+      a: 'RBT practice involves working through realistic, scenario-based practice questions and timed mock exams aligned with the BACB RBT Test Content Outline. RBT Practice AI combines an 85-question exam simulator, Leitner spaced repetition flashcards, Socrates AI tutor explanations, and domain mastery tracking across all 6 BACB 3rd Edition content areas.',
+    },
+    {
+      q: 'What does the 7-day free trial include?',
+      a: 'The 7-day free trial gives you complete Pro access to the platform, including realistic practice questions, full 85-question 90-minute timed mock exams, Socrates AI tutor explanations, spaced repetition flashcards, and personalized domain diagnostic heatmaps.',
+    },
+    {
+      q: 'Is the platform aligned with the BACB RBT 3rd Edition Test Content Outline?',
+      a: 'Yes. 100% of our practice questions, flashcards, and study modules are mapped directly to the current BACB RBT 3rd Edition Test Content Outline across Domains A through F: Data Collection and Graphing, Behavior Assessment, Behavior Acquisition, Behavior Reduction, Documentation and Reporting, and Professional Conduct.',
+    },
+    {
+      q: 'Are RBT Practice AI questions official BACB exam questions?',
+      a: 'No. The BACB does not publish or license official exam questions. All questions on RBT Practice AI are original practice questions crafted by BCBA clinical experts to mirror the difficulty, structure, clinical scenarios, and cognitive levels of the actual certification exam.',
+    },
+    {
+      q: 'Can I take a full 85-question RBT practice exam online?',
+      a: 'Yes! RBT Practice AI includes full 85-question, 90-minute timed mock exams with question weighting that mirrors the official exam distribution across all 6 BACB 3rd Edition domains.',
     },
     {
       q: 'How does the Socrates AI Tutor work?',
-      a: 'Socrates AI is a specialized conversational model trained on the RBT Ethics Code 2.0 and ABA task list guidelines. You can ask for step-by-step explanations, request scenario roleplay, or ask it to critique your clinical reasoning.',
+      a: 'Socrates AI is a specialized conversational assistant trained on ABA principles and the RBT Ethics Code 2.0. It provides instant step-by-step rationales for why correct options are right and why distractors are incorrect, helps you practice clinical roleplay, and clears up difficult concepts in real time.',
     },
     {
-      q: 'What is the RBT Practice AI Pass-or-Refund Guarantee?',
-      a: 'We are so confident in our platform that if you achieve an 85%+ Readiness Score on RBT Practice AI and do not pass your official BACB RBT exam on the first attempt, you may qualify for a 100% full refund under our Guarantee Terms.',
-    },
-    {
-      q: 'Can ABA Clinics and BCBAs track student progress?',
-      a: 'Yes! Our Clinic Enterprise plan allows clinical directors and supervisors to invite trainees, monitor pass probability heatmaps, assign targeted domain practice, and track supervision logs.',
+      q: 'How does the practice exam match Pearson VUE testing conditions?',
+      a: 'The actual BACB RBT exam is administered via computer at Pearson VUE test centers. Our mock exam simulator replicates these conditions with an 85-question 90-minute timer, question flagging, navigation review grid, and instant post-exam domain score breakdowns.',
     },
     {
       q: 'How does the Leitner Spaced Repetition Flashcard system work?',
-      a: 'Cards move between 5 boxes based on how easily you recall them. Cards you struggle with appear daily, while cards you have mastered appear every 14-30 days, optimizing your memory retention.',
+      a: 'Our flashcard engine sorts ABA terms into 5 Leitner boxes based on your recall accuracy. Challenging concepts appear frequently for active reinforcement, while mastered terms appear at expanding intervals to guarantee long-term memory retention.',
+    },
+    {
+      q: 'What is the RBT Practice AI Pass-or-Refund Guarantee?',
+      a: 'Candidates who achieve an 85%+ readiness score on three qualifying mock exams and meet all eligibility requirements are covered by our Pass-or-Refund Guarantee. If you take your official BACB exam and do not pass, you may qualify for a full refund subject to our Guarantee Terms.',
+    },
+    {
+      q: 'Can ABA Clinics and BCBA supervisors monitor student progress?',
+      a: 'Yes. Our Clinic Enterprise portal allows clinical directors and BCBA supervisors to manage trainee cohorts, assign mock exams, track domain readiness heatmaps, and verify exam preparedness across their organization.',
     },
   ];
 
@@ -39,10 +59,10 @@ export function FAQSection() {
             <span>Got Questions?</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Frequently Asked Questions
+            Frequently Asked Questions About the RBT Exam & RBT Practice
           </h2>
           <p className="text-base text-slate-600">
-            Everything you need to know about the RBT certification exam and RBT Practice AI.
+            Everything you need to know about preparing for the RBT certification exam and your 7-day free trial with RBT Practice AI.
           </p>
         </div>
 

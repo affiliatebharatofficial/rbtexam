@@ -89,10 +89,10 @@ export function FlashcardsPreview() {
             <span>Spaced Repetition AI Flashcards</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-black text-[#0F172A] tracking-tight">
-            Master BACB Terminology 3x Faster with AI
+            RBT Exam Flashcards & Active Recall System
           </h2>
           <p className="text-base text-slate-600">
-            Powered by the Leitner 5-Box Adaptive Memory Algorithm and Multi-Model AI Generation for RBT & BCBA exams.
+            Lock essential ABA terminology into long-term memory with our Leitner 5-box spaced repetition algorithm during your 7-day free trial.
           </p>
         </div>
 

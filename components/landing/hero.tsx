@@ -23,49 +23,49 @@ export function Hero() {
             {/* Top Announcement Pill */}
             <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold shadow-sm">
               <Sparkles className="w-4 h-4 text-[#2563EB]" />
-              <span>{t('hero.badge', 'Aligned with BACB RBT 3rd Edition Task List')}</span>
-              <span className="bg-[#2563EB] text-white px-2 py-0.5 rounded-full text-[10px]">99.4% Pass Rate</span>
+              <span>BACB RBT 3rd Edition Test Content Outline</span>
+              <span className="bg-[#2563EB] text-white px-2 py-0.5 rounded-full text-[10px] font-bold">7-Day Free Trial</span>
             </div>
 
-            {/* Main Headline */}
+            {/* Single Primary H1 */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-[1.15]">
-              Pass Your{' '}
+              RBT Practice &{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#2563EB] via-blue-600 to-indigo-600">
-                RBT Exam
+                RBT Exam Prep
               </span>{' '}
-              With Smarter Practice
+              for 2026
             </h1>
 
-            {/* Sub-headline */}
+            {/* Sub-headline with clear 7-day free trial value proposition */}
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed mx-auto lg:mx-0">
-              {t('hero.subtitle', 'AI-powered RBT practice questions, realistic mock exams, flashcards, and personalized study tools designed around the current RBT exam content outline.')}
+              Start your 7-day free trial and practice with realistic RBT exam questions, 85-question timed mock exams, Socrates AI explanations, and complete study tools designed around the current BACB 3rd Edition outline.
             </p>
 
             {/* Feature Bullets */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm font-medium text-slate-700 max-w-xl mx-auto lg:mx-0">
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{t('hero.bullet1', '85-Question 90-Min Timed BACB Mocks')}</span>
+                <span>85-Question 90-Min Timed Practice Exams</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{t('hero.bullet2', 'AI Ethics & Practice Question Tutor')}</span>
+                <span>Socrates AI Tutor & Ethics Rationale</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{t('hero.bullet3', 'Domains A-F Task List Coverage')}</span>
+                <span>Domains A–F Task List Coverage</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                <span>{t('hero.bullet4', 'Weak Area Analysis & Analytics')}</span>
+                <span>Pass-or-Refund Guarantee Protection</span>
               </div>
             </div>
 
             {/* Primary Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
               <Link href="/signup" className="w-full sm:w-auto">
-                <Button size="lg" variant="primary" className="w-full sm:w-auto gap-2 text-base px-8 py-4 shadow-xl shadow-blue-500/25">
-                  <span>{t('hero.startPractice', 'Start Free Practice')}</span>
+                <Button size="lg" variant="primary" className="w-full sm:w-auto gap-2 text-base px-8 py-4 shadow-xl shadow-blue-500/25 font-bold">
+                  <span>Start Your 7-Day Free Trial</span>
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
@@ -73,7 +73,7 @@ export function Hero() {
               <Link href="/rbt/mock-exam" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base px-6 py-4">
                   <Brain className="w-5 h-5 text-[#2563EB]" />
-                  <span>{t('hero.mockExamBtn', 'Take a Mock Exam')}</span>
+                  <span>Take a Practice Exam</span>
                 </Button>
               </Link>
             </div>

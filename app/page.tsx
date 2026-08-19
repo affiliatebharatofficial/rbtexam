@@ -14,6 +14,7 @@ import { TaskListPreview } from '@/components/landing/task-list-preview';
 import { Testimonials } from '@/components/landing/testimonials';
 import { Statistics } from '@/components/landing/statistics';
 import { PricingSection } from '@/components/landing/pricing-section';
+import { SeoContentSection } from '@/components/landing/seo-content-section';
 import { FAQSection } from '@/components/landing/faq-section';
 import { CtaSection } from '@/components/landing/cta-section';
 
@@ -74,10 +75,13 @@ export default function HomePage() {
       {/* 11. Transparent Pricing Tiers */}
       <PricingSection />
 
-      {/* 12. Frequently Asked Questions Accordion */}
+      {/* 12. Comprehensive 800-1200 Word SEO Educational Guide */}
+      <SeoContentSection />
+
+      {/* 13. Frequently Asked Questions Accordion */}
       <FAQSection />
 
-      {/* 13. Bottom High-Conversion CTA Banner */}
+      {/* 14. Bottom High-Conversion CTA Banner */}
       <CtaSection />
     </div>
   );

@@ -21,10 +21,10 @@ export function TaskListPreview() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <Badge variant="blue">100% BACB Coverage</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            BACB RBT 3rd Edition Task List Explorer
+            Study by RBT Content Area: BACB 3rd Edition Task List
           </h2>
           <p className="text-base text-slate-600">
-            Select a domain below to preview specific task list items, exam question weights, and essential concepts.
+            Select a domain below to preview specific task list items, exam question weights, and essential concepts aligned with the current BACB RBT 3rd Edition Test Content Outline.
           </p>
         </div>
 

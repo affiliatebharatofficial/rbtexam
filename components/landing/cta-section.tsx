@@ -15,22 +15,22 @@ export function CtaSection() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 relative z-10">
         <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold border border-blue-400/30">
           <Sparkles className="w-4 h-4 text-emerald-400" />
-          <span>Backed by 100% Money-Back Pass Guarantee</span>
+          <span>7-Day Free Trial • Pass-or-Refund Guarantee Protection</span>
         </div>
 
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-          Ready to Pass Your RBT Exam On Your First Try?
+          Start Your 7-Day Free Trial and Master the RBT Exam
         </h2>
 
         <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
-          Get instant domain mastery scores and personalized AI study recommendations in under 15 minutes.
+          Start your 7-day free trial and practice with realistic RBT exam questions, 85-question timed mock exams, Socrates AI explanations, and complete 3rd Edition study tools.
         </p>
 
         {/* Bullet Trust Checks */}
         <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm font-medium text-slate-300">
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>No Credit Card Required</span>
+            <span>Full 7-Day Pro Access</span>
           </div>
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -44,17 +44,17 @@ export function CtaSection() {
 
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-          <Link href="/exam" className="w-full sm:w-auto">
-            <Button variant="primary" size="lg" className="w-full sm:w-auto px-10 py-4 text-base gap-2 shadow-2xl shadow-blue-500/40">
-              <span>Start Free Diagnostic Exam</span>
+          <Link href="/signup" className="w-full sm:w-auto">
+            <Button variant="primary" size="lg" className="w-full sm:w-auto px-10 py-4 text-base gap-2 shadow-2xl shadow-blue-500/40 font-bold">
+              <span>Start Your 7-Day Free Trial</span>
               <ArrowRight className="w-5 h-5" />
             </Button>
           </Link>
 
-          <Link href="/tutor" className="w-full sm:w-auto">
+          <Link href="/rbt/mock-exam" className="w-full sm:w-auto">
             <Button variant="outline" size="lg" className="w-full sm:w-auto px-8 py-4 text-base gap-2 border-slate-700 hover:bg-white/10 text-white">
               <Brain className="w-5 h-5 text-blue-400" />
-              <span>Try Socrates AI Tutor</span>
+              <span>Take a Practice Exam</span>
             </Button>
           </Link>
         </div>
