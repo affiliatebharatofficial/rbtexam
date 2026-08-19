@@ -5,11 +5,9 @@ import {
   updateDatabaseFlashcard,
   deleteDatabaseFlashcardBulk,
 } from '@/lib/flashcard-bank';
-import { loadDeletedCardIdsServer, saveDeletedCardIdsServer } from '@/lib/flashcard-bank-server';
 
 export async function GET(request: NextRequest) {
   try {
-    loadDeletedCardIdsServer();
     const { searchParams } = new URL(request.url);
 
     const filterParams = {
@@ -21,8 +19,8 @@ export async function GET(request: NextRequest) {
       onlyDue: searchParams.get('onlyDue') === 'true',
       onlyFavorites: searchParams.get('onlyFavorites') === 'true',
       onlyWeak: searchParams.get('onlyWeak') === 'true',
-      page: parseInt(searchParams.get('page') || '1', 10),
-      limit: parseInt(searchParams.get('limit') || '500', 10),
+      page: Math.max(1, parseInt(searchParams.get('page') || '1', 10)),
+      limit: Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10))),
     };
 
     const result = await getFilteredFlashcardsAsync(filterParams);
@@ -92,11 +90,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     await deleteDatabaseFlashcardBulk(idsToDelete);
-    saveDeletedCardIdsServer();
     return NextResponse.json({ success: true, count: idsToDelete.length, message: `Successfully deleted ${idsToDelete.length} flashcard(s)` });
   } catch (error: any) {
     console.error('[API /api/flashcards DELETE error]:', error);
     return NextResponse.json({ error: 'Failed to delete flashcards', message: error.message }, { status: 500 });
   }
 }
+
 

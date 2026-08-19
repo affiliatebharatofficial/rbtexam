@@ -26,16 +26,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AUTH_STORAGE_KEY = 'rbt_ai_auth_session';
 
-export const ADMIN_EMAILS: string[] = [
-  'jobpegyan@gmail.com',
-  'support@rbtpracticeai.com',
-  'admin@rbtpracticeai.com',
-];
-
-export function isEmailAdmin(email?: string | null): boolean {
-  if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase().trim());
-}
+import { ADMIN_EMAILS, isEmailAdmin } from '@/lib/admin-whitelist';
+export { ADMIN_EMAILS, isEmailAdmin };
 
 export function getHomeRoute(user: Partial<UserProfile> | null, isAuthenticated: boolean): string {
   if (!isAuthenticated || !user) return '/';

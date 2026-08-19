@@ -77,17 +77,22 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
       });
 
       const data = (await res.json()) as any;
-      const count = (data && data.importedCount) || validationResult.validRows.length;
+      if (!res.ok || !data || data.success === false || data.importedCount === 0) {
+        setIsImporting(false);
+        alert(data?.error || 'Failed to import CSV questions into database.');
+        return;
+      }
+      const count = data.importedCount;
       setIsImporting(false);
       setImportSuccessCount(count);
       setTimeout(() => {
         onSuccess();
         onClose();
       }, 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error('CSV import API error:', err);
       setIsImporting(false);
-      alert('Failed to import CSV questions into database.');
+      alert(err.message || 'Failed to import CSV questions into database.');
     }
   };
 

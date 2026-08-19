@@ -132,9 +132,28 @@ function TutorContent() {
       const data = (await apiRes.json()) as any;
       if (data && data.message) {
         setMessages((prev) => [...prev, data.message]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            sender: 'assistant',
+            content: `⚠️ **Socrates AI Notice**: ${data?.error || data?.message || 'Unable to generate response. Please try again with another ABA question.'}`,
+            timestamp: new Date().toISOString(),
+          },
+        ]);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Socrates AI Tutor Chat Error:', e);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `err-${Date.now()}`,
+          sender: 'assistant',
+          content: '⚠️ **Network Notice**: Connection interrupted. Please check your internet or retry your question.',
+          timestamp: new Date().toISOString(),
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }

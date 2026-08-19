@@ -2,6 +2,21 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Supabase Integration & Client Initialization with Mock Fallback for zero-config deployment
 
+export function getRuntimeEnv(key: string): string {
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key] as string;
+  }
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getCloudflareContext } = require('@opennextjs/cloudflare');
+    const ctx = getCloudflareContext();
+    if (ctx?.env && ctx.env[key]) {
+      return ctx.env[key] as string;
+    }
+  } catch {}
+  return '';
+}
+
 export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   'https://ntwomhtfkuazqgtnkffk.supabase.co';
@@ -13,8 +28,10 @@ export const SUPABASE_ANON_KEY =
 let supabaseInstance: SupabaseClient | null = null;
 
 export function getSupabaseClient(): SupabaseClient {
+  const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || SUPABASE_URL;
+  const anonKey = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || SUPABASE_ANON_KEY;
   if (!supabaseInstance) {
-    supabaseInstance = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseInstance = createClient(url, anonKey);
   }
   return supabaseInstance;
 }
@@ -22,24 +39,26 @@ export function getSupabaseClient(): SupabaseClient {
 export const supabase = getSupabaseClient();
 
 export function isSupabaseConfigured(): boolean {
+  const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || SUPABASE_URL;
+  const anonKey = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || SUPABASE_ANON_KEY;
   return Boolean(
-    SUPABASE_URL &&
-    SUPABASE_ANON_KEY &&
-    !SUPABASE_URL.includes('mock-') &&
-    SUPABASE_ANON_KEY !== 'mock-anon-key'
+    url &&
+    anonKey &&
+    !url.includes('mock-') &&
+    anonKey !== 'mock-anon-key'
   );
 }
 
-let adminSupabaseInstance: SupabaseClient | null = null;
-
 export function getSupabaseAdminClient(): SupabaseClient {
-  if (!adminSupabaseInstance) {
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-    adminSupabaseInstance = createClient(SUPABASE_URL, serviceRoleKey, {
-      auth: { persistSession: false },
-    });
-  }
-  return adminSupabaseInstance;
+  const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || SUPABASE_URL;
+  const serviceRoleKey =
+    getRuntimeEnv('SUPABASE_SERVICE_ROLE_KEY') ||
+    getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
+    SUPABASE_ANON_KEY;
+
+  return createClient(url, serviceRoleKey, {
+    auth: { persistSession: false },
+  });
 }
 
 export async function fetchMockOrRealUserProgress() {

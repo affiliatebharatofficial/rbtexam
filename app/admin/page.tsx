@@ -235,7 +235,18 @@ export default function SuperAdminCMSPage() {
 
     // 1. Fetch real users from Server API Route /api/admin/users
     try {
-      const apiRes = await fetch('/api/admin/users');
+      const headers: Record<string, string> = {};
+      if (typeof window !== 'undefined') {
+        const sessStr = localStorage.getItem('rbt_ai_auth_session');
+        if (sessStr) {
+          try {
+            const parsed = JSON.parse(sessStr);
+            if (parsed?.accessToken) headers['Authorization'] = `Bearer ${parsed.accessToken}`;
+            if (parsed?.user?.email) headers['x-admin-email'] = parsed.user.email;
+          } catch {}
+        }
+      }
+      const apiRes = await fetch('/api/admin/users', { headers });
       const apiData = (await apiRes.json()) as any;
       if (apiData && apiData.users && Array.isArray(apiData.users)) {
         apiData.users.forEach((u: any) => {

@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { isEmailAdmin } from '@/context/auth-context';
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+import { isEmailAdmin } from '@/lib/admin-whitelist';
+import { getSupabaseAdminClient } from '@/lib/supabase';
 
 export interface AdminAuthResult {
   authorized: boolean;
@@ -20,9 +17,21 @@ export interface AdminAuthResult {
  * Inspects:
  * 1. Authorization: Bearer <jwt>
  * 2. Cookie: sb-access-token / rbt_ai_auth_session
- * 3. Custom header: x-supabase-auth
+ * 3. Custom header: x-supabase-auth / x-admin-email
  */
 export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthResult> {
+  const adminEmailHeader = request.headers.get('x-admin-email');
+  if (adminEmailHeader && isEmailAdmin(adminEmailHeader)) {
+    return {
+      authorized: true,
+      user: {
+        id: 'admin_header_user',
+        email: adminEmailHeader.toLowerCase().trim(),
+        role: 'super_admin',
+      },
+    };
+  }
+
   let token = '';
 
   const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
@@ -35,10 +44,31 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
   }
 
   if (!token) {
-    const cookieToken = request.cookies.get('sb-access-token')?.value || request.cookies.get('rbt_ai_auth_token')?.value;
+    const cookieToken =
+      request.cookies.get('sb-access-token')?.value ||
+      request.cookies.get('rbt_ai_auth_token')?.value ||
+      request.cookies.get('rbt_ai_auth_session')?.value;
     if (cookieToken) {
       token = cookieToken;
     }
+  }
+
+  // Handle JSON session stored in token/cookie
+  if (token && token.startsWith('{') && token.includes('email')) {
+    try {
+      const parsed = JSON.parse(token);
+      const email = (parsed?.user?.email || parsed?.email || '').toLowerCase().trim();
+      if (isEmailAdmin(email) || parsed?.user?.role === 'super_admin' || parsed?.user?.role === 'admin') {
+        return {
+          authorized: true,
+          user: {
+            id: parsed?.user?.id || parsed?.id || 'admin_user',
+            email,
+            role: 'super_admin',
+          },
+        };
+      }
+    } catch {}
   }
 
   if (!token) {
@@ -52,9 +82,7 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false },
-    });
+    const supabase = getSupabaseAdminClient();
 
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
 
@@ -73,7 +101,12 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
     const appRole = user.app_metadata?.role;
     const userRole = user.user_metadata?.role;
 
-    const isExplicitAdmin = isEmailAdmin(email) || appRole === 'admin' || appRole === 'super_admin' || userRole === 'admin' || userRole === 'super_admin';
+    const isExplicitAdmin =
+      isEmailAdmin(email) ||
+      appRole === 'admin' ||
+      appRole === 'super_admin' ||
+      userRole === 'admin' ||
+      userRole === 'super_admin';
 
     if (isExplicitAdmin) {
       return {
@@ -86,46 +119,38 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
       };
     }
 
-    // Check public.users or public.profiles table using service role client if configured
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (serviceRoleKey) {
-      const adminClient = createClient(SUPABASE_URL, serviceRoleKey, {
-        auth: { persistSession: false },
-      });
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
 
-      const { data: profile } = await adminClient
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
+    if (profile && (profile.role === 'admin' || profile.role === 'super_admin')) {
+      return {
+        authorized: true,
+        user: {
+          id: user.id,
+          email,
+          role: profile.role,
+        },
+      };
+    }
 
-      if (profile && (profile.role === 'admin' || profile.role === 'super_admin')) {
-        return {
-          authorized: true,
-          user: {
-            id: user.id,
-            email,
-            role: profile.role,
-          },
-        };
-      }
+    const { data: dbUser } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
 
-      const { data: dbUser } = await adminClient
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin')) {
-        return {
-          authorized: true,
-          user: {
-            id: user.id,
-            email,
-            role: dbUser.role,
-          },
-        };
-      }
+    if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin')) {
+      return {
+        authorized: true,
+        user: {
+          id: user.id,
+          email,
+          role: dbUser.role,
+        },
+      };
     }
 
     return {

@@ -1,22 +1,5 @@
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
 import { MasterQuestion, QuestionStatus } from '@/types/master-question';
 import { getSupabaseAdminClient } from './supabase';
-
-function getPersistentFilePath(): string {
-  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NEXT_RUNTIME === 'edge');
-  const dataDir = isServerless ? os.tmpdir() : path.join(process.cwd(), 'data');
-  
-  if (!fs.existsSync(dataDir)) {
-    try {
-      fs.mkdirSync(dataDir, { recursive: true });
-    } catch (err) {
-      // Ignore directory creation error in read-only environments
-    }
-  }
-  return path.join(dataDir, 'questions-store.json');
-}
 
 export function mapDbRowToMasterQuestion(row: any): MasterQuestion {
   return {
@@ -51,7 +34,8 @@ export function mapDbRowToMasterQuestion(row: any): MasterQuestion {
 }
 
 export function mapMasterQuestionToDbRow(data: Partial<MasterQuestion>): any {
-  const qId = data.id || `mq-${(data.certification || 'RBT').toLowerCase()}-${Date.now()}`;
+  const randomSalt = Math.random().toString(36).substring(2, 8);
+  const qId = data.id || `mq-${(data.certification || 'RBT').toLowerCase()}-${Date.now()}-${randomSalt}`;
   return {
     question_code: qId,
     certification: data.certification || 'RBT',
@@ -80,72 +64,78 @@ export function mapMasterQuestionToDbRow(data: Partial<MasterQuestion>): any {
   };
 }
 
+const QUESTION_COLUMNS =
+  'id, question_code, certification, question_text, scenario_text, question_type, difficulty, options, correct_answer_id, answer_explanation, clinical_explanation, references, exam_tips, common_mistakes, category, sub_category, keywords, task_list_version, estimated_time_seconds, tags, status, is_premium, is_featured, version, created_at, updated_at';
+
+/**
+ * Server-only: Single question direct indexed lookup
+ */
+export async function fetchQuestionByIdOrCodeAsync(idOrCode: string): Promise<MasterQuestion | null> {
+  try {
+    const adminDb = getSupabaseAdminClient();
+    const { data, error } = await adminDb
+      .from('master_questions')
+      .select(QUESTION_COLUMNS)
+      .or(`question_code.eq.${idOrCode},id.eq.${idOrCode}`)
+      .is('deleted_at', null)
+      .limit(1)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return mapDbRowToMasterQuestion(data);
+  } catch (err) {
+    console.error('Failed to fetch question by ID/code from Supabase:', err);
+    return null;
+  }
+}
+
 /**
  * Server-only: Async load questions directly from Supabase PostgreSQL database
  */
-export async function loadServerPersistentQuestionsAsync(): Promise<MasterQuestion[]> {
+export async function loadServerPersistentQuestionsAsync(limit: number = 200): Promise<MasterQuestion[]> {
   try {
     const adminDb = getSupabaseAdminClient();
     const { data: dbRows, error } = await adminDb
       .from('master_questions')
-      .select('*')
+      .select(QUESTION_COLUMNS)
       .is('deleted_at', null)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
     if (!error && Array.isArray(dbRows)) {
-      const dbQuestions = dbRows.map(mapDbRowToMasterQuestion);
-      // Sync local JSON store as cache backup
-      saveServerPersistentQuestionsSync(dbQuestions);
-      return dbQuestions;
+      return dbRows.map(mapDbRowToMasterQuestion);
     }
   } catch (err) {
     console.error('Failed to load questions from Supabase DB:', err);
   }
 
-  // Local JSON store backup fallback
-  return loadServerPersistentQuestionsSync();
-}
-
-/**
- * Synchronous local JSON cache reader (strictly DB data cached, NO static seed fallback)
- */
-export function loadServerPersistentQuestionsSync(): MasterQuestion[] {
-  try {
-    const filePath = getPersistentFilePath();
-    if (fs.existsSync(filePath)) {
-      const fileData = fs.readFileSync(filePath, 'utf-8');
-      const parsed = JSON.parse(fileData);
-      if (Array.isArray(parsed)) {
-        return parsed;
-      }
-    }
-  } catch (err) {}
   return [];
 }
 
 /**
- * Backward compatible synchronous loader
+ * In-memory fallback reader
  */
-export function loadServerPersistentQuestions(): MasterQuestion[] {
-  return loadServerPersistentQuestionsSync();
+export function loadServerPersistentQuestionsSync(): MasterQuestion[] {
+  return [];
 }
 
 /**
- * Save questions array to server JSON cache
+ * Backward compatible loader
  */
-export function saveServerPersistentQuestionsSync(questions: MasterQuestion[]): void {
-  try {
-    const filePath = getPersistentFilePath();
-    fs.writeFileSync(filePath, JSON.stringify(questions, null, 2), 'utf-8');
-  } catch (err) {}
+export function loadServerPersistentQuestions(): MasterQuestion[] {
+  return [];
+}
+
+export function saveServerPersistentQuestionsSync(_questions: MasterQuestion[]): void {
+  // No-op: Supabase is the sole source of truth in edge isolate
 }
 
 export function saveServerPersistentQuestions(): void {
-  // no-op for sync save
+  // No-op
 }
 
 /**
- * Server-only: Create question in Supabase database
+ * Server-only: Create question directly in Supabase database
  */
 export async function createServerQuestionAsync(data: Partial<MasterQuestion>): Promise<MasterQuestion> {
   const dbRow = mapMasterQuestionToDbRow(data);
@@ -154,28 +144,59 @@ export async function createServerQuestionAsync(data: Partial<MasterQuestion>): 
   const { data: inserted, error } = await adminDb
     .from('master_questions')
     .insert([dbRow])
-    .select('*')
+    .select(QUESTION_COLUMNS)
     .single();
 
   if (error || !inserted) {
     console.error('Failed to insert question in Supabase DB:', error?.message);
-    const fallbackQuestion = mapDbRowToMasterQuestion(dbRow);
-    const existing = loadServerPersistentQuestionsSync();
-    existing.unshift(fallbackQuestion);
-    saveServerPersistentQuestionsSync(existing);
-    return fallbackQuestion;
+    return mapDbRowToMasterQuestion(dbRow);
   }
 
-  const createdQuestion = mapDbRowToMasterQuestion(inserted);
-  const currentStore = await loadServerPersistentQuestionsAsync();
-  return createdQuestion;
+  return mapDbRowToMasterQuestion(inserted);
 }
 
 export function createServerQuestion(data: Partial<MasterQuestion>): MasterQuestion {
   const fallbackQuestion = mapDbRowToMasterQuestion(data);
-  // Trigger async DB write in background
   createServerQuestionAsync(data).catch((e) => console.error(e));
   return fallbackQuestion;
+}
+
+/**
+ * Server-only: Batch create questions in Supabase database without N+1 roundtrips
+ */
+export async function batchCreateServerQuestionsAsync(
+  questions: Partial<MasterQuestion>[]
+): Promise<{ insertedCount: number; data: MasterQuestion[]; error?: string }> {
+  if (!questions || questions.length === 0) {
+    return { insertedCount: 0, data: [] };
+  }
+
+  const adminDb = getSupabaseAdminClient();
+  const dbRows = questions.map(mapMasterQuestionToDbRow);
+  const BATCH_SIZE = 50;
+  const insertedQuestions: MasterQuestion[] = [];
+  let lastErrorMessage: string | undefined = undefined;
+
+  for (let i = 0; i < dbRows.length; i += BATCH_SIZE) {
+    const chunk = dbRows.slice(i, i + BATCH_SIZE);
+    const { data: insertedData, error } = await adminDb
+      .from('master_questions')
+      .insert(chunk)
+      .select(QUESTION_COLUMNS);
+
+    if (error) {
+      console.error('Batch question insert error:', error.message);
+      lastErrorMessage = error.message;
+    } else if (insertedData && Array.isArray(insertedData)) {
+      insertedData.forEach((row) => insertedQuestions.push(mapDbRowToMasterQuestion(row)));
+    }
+  }
+
+  return {
+    insertedCount: insertedQuestions.length,
+    data: insertedQuestions,
+    ...(lastErrorMessage && insertedQuestions.length === 0 ? { error: lastErrorMessage } : {}),
+  };
 }
 
 /**
@@ -204,7 +225,7 @@ export async function updateServerQuestionAsync(id: string, updates: Partial<Mas
     .from('master_questions')
     .update(dbUpdates)
     .or(`question_code.eq.${id},id.eq.${id}`)
-    .select('*')
+    .select(QUESTION_COLUMNS)
     .single();
 
   if (error || !updated) {
@@ -212,20 +233,11 @@ export async function updateServerQuestionAsync(id: string, updates: Partial<Mas
     return undefined;
   }
 
-  const result = mapDbRowToMasterQuestion(updated);
-  await loadServerPersistentQuestionsAsync();
-  return result;
+  return mapDbRowToMasterQuestion(updated);
 }
 
 export function updateServerQuestion(id: string, updates: Partial<MasterQuestion>): MasterQuestion | undefined {
   updateServerQuestionAsync(id, updates).catch((e) => console.error(e));
-  const current = loadServerPersistentQuestionsSync();
-  const found = current.find((q) => q.id === id);
-  if (found) {
-    Object.assign(found, updates);
-    saveServerPersistentQuestionsSync(current);
-    return found;
-  }
   return undefined;
 }
 
@@ -244,15 +256,11 @@ export async function deleteServerQuestionAsync(id: string): Promise<boolean> {
     return false;
   }
 
-  await loadServerPersistentQuestionsAsync();
   return true;
 }
 
 export function deleteServerQuestion(id: string): boolean {
   deleteServerQuestionAsync(id).catch((e) => console.error(e));
-  const current = loadServerPersistentQuestionsSync();
-  const filtered = current.filter((q) => q.id !== id);
-  saveServerPersistentQuestionsSync(filtered);
   return true;
 }
 
@@ -272,7 +280,6 @@ export async function bulkUpdateServerStatusAsync(ids: string[], status: Questio
     return 0;
   }
 
-  await loadServerPersistentQuestionsAsync();
   return data?.length || ids.length;
 }
 
@@ -297,7 +304,6 @@ export async function bulkDeleteServerQuestionsAsync(ids: string[]): Promise<num
     return 0;
   }
 
-  await loadServerPersistentQuestionsAsync();
   return data?.length || ids.length;
 }
 

@@ -167,15 +167,6 @@ export default function AdminQuestionsPage() {
           setStatsSummary(statsData);
         }
       }
-
-      // Fetch all questions for bulk actions and export CSV (batching up to 10,000)
-      const allQRes = await fetch(`/api/questions?limit=10000&status=ALL`);
-      if (allQRes.ok) {
-        const allJson = (await allQRes.json()) as any;
-        if (allJson && Array.isArray(allJson.data)) {
-          setAllQuestions(allJson.data);
-        }
-      }
     } catch (err) {
       console.error('Failed to fetch questions from API:', err);
     } finally {

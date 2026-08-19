@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exportQuestionsToCSV } from '@/lib/master-question-bank';
 import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
+import { getSupabaseAdminClient } from '@/lib/supabase';
 import {
   loadServerPersistentQuestionsAsync,
   bulkDeleteServerQuestionsAsync,
   bulkUpdateServerStatusAsync,
-  createServerQuestionAsync,
+  batchCreateServerQuestionsAsync,
 } from '@/lib/master-question-bank-server';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
     const { action, ids, status, questions } = body;
 
     if (action === 'export') {
-      const allQuestions = await loadServerPersistentQuestionsAsync();
+      const allQuestions = await loadServerPersistentQuestionsAsync(200);
       const csv = exportQuestionsToCSV(allQuestions);
       return new NextResponse(csv, {
         headers: {
@@ -32,31 +33,50 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Array of questions required for import' }, { status: 400 });
       }
 
-      // Load existing questions to prevent duplicate database insertions
-      const existingAll = await loadServerPersistentQuestionsAsync();
+      const adminDb = getSupabaseAdminClient();
+      // Targeted query for existing stems to avoid loading entire entities into memory
+      const { data: existingRows } = await adminDb
+        .from('master_questions')
+        .select('question_text')
+        .is('deleted_at', null);
+
       const existingNormalizedStems = new Set<string>(
-        existingAll.map((q) => normalizeQuestionForComparison(q.question)).filter(Boolean)
+        (existingRows || []).map((r: any) => normalizeQuestionForComparison(r.question_text || '')).filter(Boolean)
       );
 
-      let importedCount = 0;
+      const questionsToInsert: any[] = [];
       let skippedDuplicatesCount = 0;
 
       for (const q of questions) {
-        const norm = normalizeQuestionForComparison(q.question || '');
+        const norm = normalizeQuestionForComparison(q.question || q.question_text || '');
         if (norm && existingNormalizedStems.has(norm)) {
           skippedDuplicatesCount++;
           continue;
         }
 
-        await createServerQuestionAsync(q);
+        questionsToInsert.push(q);
         if (norm) existingNormalizedStems.add(norm);
-        importedCount++;
+      }
+
+      const result = await batchCreateServerQuestionsAsync(questionsToInsert);
+
+      if (result.error && result.insertedCount === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: result.error,
+            importedCount: 0,
+            skippedDuplicatesCount,
+          },
+          { status: 500 }
+        );
       }
 
       return NextResponse.json({
-        success: true,
-        importedCount,
+        success: result.insertedCount > 0 || questionsToInsert.length === 0,
+        importedCount: result.insertedCount,
         skippedDuplicatesCount,
+        ...(result.error ? { warning: result.error } : {}),
       });
     }
 
@@ -79,3 +99,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Bulk action failed', message: error.message }, { status: 500 });
   }
 }
+

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth, isEmailAdmin } from '@/context/auth-context';
 import { useRouter, usePathname } from 'next/navigation';
 import { Brain, RefreshCw } from 'lucide-react';
 
@@ -24,7 +24,7 @@ export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }:
       }
 
       if (requireAdmin) {
-        const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+        const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || isEmailAdmin(user?.email);
         if (!isAdmin) {
           router.push('/dashboard');
           return;
@@ -33,7 +33,8 @@ export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }:
 
       if (allowedRoles && allowedRoles.length > 0) {
         const userRole = user?.role || 'student';
-        if (!allowedRoles.includes(userRole)) {
+        const isExemptAdmin = isEmailAdmin(user?.email);
+        if (!isExemptAdmin && !allowedRoles.includes(userRole)) {
           router.push('/dashboard');
           return;
         }

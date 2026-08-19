@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdminClient } from '@/lib/supabase';
+import { isEmailAdmin } from '@/lib/admin-whitelist';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,17 +13,13 @@ export async function POST(request: NextRequest) {
 
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = fullName || cleanEmail.split('@')[0];
-    const assignedRole = cleanEmail === 'jobpegyan@gmail.com' ? 'super_admin' : (role || 'student');
-    const assignedTier = cleanEmail === 'jobpegyan@gmail.com' ? 'enterprise' : (subscriptionTier || 'pro');
+    const isAdmin = isEmailAdmin(cleanEmail);
+    const assignedRole = isAdmin ? 'super_admin' : (role || 'student');
+    const assignedTier = isAdmin ? 'enterprise' : (subscriptionTier || 'pro');
     const status = accountStatus || 'active';
     const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-    const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false },
-    });
+    const adminSupabase = getSupabaseAdminClient();
 
     let userId = id;
 

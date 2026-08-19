@@ -40,7 +40,7 @@ function QuestionsListContent() {
     const fetchQuestions = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch('/api/questions?certification=RBT&limit=10000&status=ALL');
+        const res = await fetch('/api/questions?certification=RBT&limit=100&status=ALL');
         if (res.ok) {
           const json = (await res.json()) as any;
           if (json && Array.isArray(json.data)) {

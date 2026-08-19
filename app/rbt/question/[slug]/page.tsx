@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { loadServerPersistentQuestionsAsync } from '@/lib/master-question-bank-server';
+import { fetchQuestionByIdOrCodeAsync } from '@/lib/master-question-bank-server';
 import { generateQuestionJSONLD, generateBreadcrumbJSONLD, getRelatedInternalLinks } from '@/lib/seo-engine';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,10 +13,9 @@ export const revalidate = 0;
 
 export default async function ProgrammaticQuestionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const questions = await loadServerPersistentQuestionsAsync();
+  const foundQuestion = await fetchQuestionByIdOrCodeAsync(slug);
 
-  const foundQuestion = questions.find((q) => q.id === slug || (q as any).questionCode === slug);
-  const question: MasterQuestion = foundQuestion || questions[0] || {
+  const question: MasterQuestion = foundQuestion || {
     id: 'sample-01',
     certification: 'RBT',
     category: 'Measurement',
@@ -36,9 +35,16 @@ export default async function ProgrammaticQuestionPage({ params }: { params: Pro
     references: 'BACB RBT 3rd Edition Task List',
     keywords: ['Latency', 'Measurement'],
     taskListVersion: '3rd_edition',
+    estimatedTimeSeconds: 60,
+    tags: ['BACB', 'Measurement'],
     status: 'published',
     isPremium: false,
     isFeatured: false,
+    version: 1,
+    createdBy: 'System',
+    updatedBy: 'System',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   const domainId = question.category?.includes('Measurement') ? 'A' : 'B';

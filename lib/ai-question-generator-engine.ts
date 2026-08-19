@@ -6,7 +6,7 @@ import {
   QuestionType,
   QuestionCategory,
 } from '@/types/master-question';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, getRuntimeEnv } from '@/lib/supabase';
 import { createServerQuestion } from '@/lib/master-question-bank-server';
 
 export interface GenerationInputParams {
@@ -604,11 +604,11 @@ export async function executeAIQuestionGeneration(params: GenerationInputParams)
   }
 
   const keys: Record<string, string | undefined> = {
-    openai: params.apiKey || process.env.OPENAI_API_KEY,
-    gemini: params.apiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    deepseek: params.apiKey || process.env.DEEPSEEK_API_KEY,
-    openrouter: params.apiKey || process.env.OPENROUTER_API_KEY,
-    anthropic: params.apiKey || process.env.ANTHROPIC_API_KEY,
+    openai: params.apiKey || getRuntimeEnv('OPENAI_API_KEY'),
+    gemini: params.apiKey || getRuntimeEnv('GEMINI_API_KEY') || getRuntimeEnv('GOOGLE_GENERATIVE_AI_API_KEY'),
+    deepseek: params.apiKey || getRuntimeEnv('DEEPSEEK_API_KEY'),
+    openrouter: params.apiKey || getRuntimeEnv('OPENROUTER_API_KEY'),
+    anthropic: params.apiKey || getRuntimeEnv('ANTHROPIC_API_KEY'),
   };
 
   const requestedProvider = (params.provider || 'auto').toLowerCase();

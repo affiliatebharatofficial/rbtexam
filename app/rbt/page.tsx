@@ -27,43 +27,41 @@ export default function RBTPillarPage() {
   const jsonLd = generateCourseJSONLD('RBT');
   const relatedLinks = getRelatedInternalLinks('Measurement');
 
-  const [dbQuestions, setDbQuestions] = useState<MasterQuestion[]>([]);
+  const [stats, setStats] = useState<{ total: number; rbt: number; domainCounts: Record<string, number> }>({
+    total: 0,
+    rbt: 0,
+    domainCounts: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
+  });
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchLiveQuestions = async () => {
+  const fetchLiveStats = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/questions?certification=RBT&limit=10000&status=ALL');
+      const res = await fetch('/api/questions/stats');
       if (res.ok) {
         const json = (await res.json()) as any;
-        if (json && Array.isArray(json.data)) {
-          setDbQuestions(json.data);
+        if (json) {
+          setStats({
+            total: json.total || 0,
+            rbt: json.rbt || json.total || 0,
+            domainCounts: json.domainCounts || { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
+          });
         }
       }
     } catch (e) {
-      console.error('Failed to fetch live database questions for RBT Hub:', e);
+      console.error('Failed to fetch question statistics for RBT Hub:', e);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLiveQuestions();
+    fetchLiveStats();
   }, []);
 
   // Helper to count live DB questions for a specific BACB Domain
-  const getLiveDomainCount = (domainId: string, domainName: string) => {
-    if (dbQuestions.length === 0) return 0;
-    return dbQuestions.filter((q) => {
-      const cat = (q.category || '').toLowerCase();
-      if (domainId === 'A' && (cat.includes('measurement') || cat.includes('data collection') || cat.includes('graphing'))) return true;
-      if (domainId === 'B' && (cat.includes('assessment') || cat.includes('preference'))) return true;
-      if (domainId === 'C' && (cat.includes('acquisition') || cat.includes('skill') || cat.includes('dtt') || cat.includes('prompt'))) return true;
-      if (domainId === 'D' && (cat.includes('reduction') || cat.includes('behavior reduction') || cat.includes('bip') || cat.includes('extinction') || cat.includes('reinforcement'))) return true;
-      if (domainId === 'E' && (cat.includes('documentation') || cat.includes('reporting') || cat.includes('session notes'))) return true;
-      if (domainId === 'F' && (cat.includes('ethics') || cat.includes('professional') || cat.includes('code'))) return true;
-      return cat.includes(domainName.toLowerCase());
-    }).length;
+  const getLiveDomainCount = (domainId: string) => {
+    return stats.domainCounts[domainId] || 0;
   };
 
   return (
@@ -84,7 +82,7 @@ export default function RBTPillarPage() {
 
           <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black flex items-center space-x-1.5 border border-emerald-200">
             <Database className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-            <span>Live Database: {dbQuestions.length} RBT Questions</span>
+            <span>Live Database: {stats.rbt || stats.total || 0} RBT Questions</span>
           </span>
         </div>
 
@@ -120,7 +118,7 @@ export default function RBTPillarPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchLiveQuestions}
+            onClick={fetchLiveStats}
             disabled={isLoading}
             className="gap-1.5 text-xs font-bold"
           >
@@ -131,7 +129,7 @@ export default function RBTPillarPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {BACB_TASK_LIST_3RD_EDITION.map((d) => {
-            const liveCount = getLiveDomainCount(d.id, d.name);
+            const liveCount = getLiveDomainCount(d.id);
             return (
               <Card key={d.id} glass className="p-6 space-y-3 hover:border-blue-300 transition-all shadow-md">
                 <div className="flex items-center justify-between">

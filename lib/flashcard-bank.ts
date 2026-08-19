@@ -234,17 +234,18 @@ export function generateFlashcardsFromQuestions(): Flashcard[] {
  * Query and filter flashcards with Spaced Repetition queue management
  */
 /**
- * Fetch flashcards directly from Supabase master_flashcards table
+ * Fetch flashcards directly from Supabase master_flashcards table with pagination and explicit columns
  */
-export async function fetchDatabaseFlashcards(): Promise<Flashcard[]> {
+export async function fetchDatabaseFlashcards(limit: number = 100, offset: number = 0): Promise<Flashcard[]> {
   if (!isSupabaseConfigured()) return [];
   try {
     const adminDb = getSupabaseAdminClient();
     const { data, error } = await adminDb
       .from('master_flashcards')
-      .select('*')
+      .select('id, term, definition, clinical_example, category, task_list_code, tags, difficulty, is_premium, status, created_at, updated_at')
       .is('deleted_at', null)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error || !data) {
       console.error('[Flashcard Bank] DB fetch error:', error?.message);
@@ -256,7 +257,7 @@ export async function fetchDatabaseFlashcards(): Promise<Flashcard[]> {
       title: row.term || 'BACB Flashcard',
       front: row.term || 'Prompt',
       back: row.definition || 'Answer',
-      cardType: 'ai_generated',
+      cardType: 'basic',
       explanation: row.clinical_example || row.definition || '',
       clinicalExplanation: row.clinical_example || row.definition || '',
       memoryTip: 'Mnemonic memory tip',
@@ -686,8 +687,9 @@ export async function convertQuestionsToDatabaseFlashcards(forceAll: boolean = f
     try {
       const { data: dbQuestions } = await adminDb
         .from('master_questions')
-        .select('*')
-        .is('deleted_at', null);
+        .select('id, question_text, scenario_text, options, correct_answer_id, answer_explanation, clinical_explanation, certification, category, difficulty, keywords, task_list_version, references, tags')
+        .is('deleted_at', null)
+        .limit(100);
 
       if (dbQuestions && dbQuestions.length > 0) {
         const dbMapped = dbQuestions.map((q: any) => {
@@ -884,19 +886,89 @@ function processFilteredFlashcardsList(
 }
 
 /**
- * Async database + memory query function
+ * Async database + memory query function with server-side pagination
  */
 export async function getFilteredFlashcardsAsync(
   params: FlashcardFilterParams,
   userId: string = 'default_user'
 ): Promise<FlashcardPaginationResult> {
-  const dbCards = await fetchDatabaseFlashcards();
-  if (isSupabaseConfigured() && dbCards.length > 0) {
-    const allCards = [...dbCards, ...CUSTOM_FLASHCARDS];
-    return processFilteredFlashcardsList(allCards, params, userId);
+  const page = Math.max(1, params.page || 1);
+  const limit = Math.min(100, Math.max(1, params.limit || 50));
+  const offset = (page - 1) * limit;
+
+  if (isSupabaseConfigured()) {
+    try {
+      const adminDb = getSupabaseAdminClient();
+      let query = adminDb
+        .from('master_flashcards')
+        .select('id, term, definition, clinical_example, category, task_list_code, tags, difficulty, is_premium, status, created_at, updated_at', { count: 'exact' })
+        .is('deleted_at', null);
+
+      if (params.certification && params.certification !== 'ALL') {
+        query = query.eq('certification', params.certification);
+      }
+      if (params.category && params.category !== 'ALL') {
+        query = query.eq('category', params.category);
+      }
+      if (params.search && params.search.trim()) {
+        query = query.or(`term.ilike.%${params.search.trim()}%,definition.ilike.%${params.search.trim()}%`);
+      }
+
+      const { data: dbRows, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (!error && dbRows && dbRows.length > 0) {
+        const total = count ?? dbRows.length;
+        const totalPages = Math.ceil(total / limit) || 1;
+        const formattedCards: Flashcard[] = dbRows.map((row: any) => ({
+          id: row.id,
+          title: row.term || 'BACB Flashcard',
+          front: row.term || 'Prompt',
+          back: row.definition || 'Answer',
+          cardType: 'basic',
+          explanation: row.clinical_example || row.definition || '',
+          clinicalExplanation: row.clinical_example || row.definition || '',
+          memoryTip: 'Mnemonic memory tip',
+          realLifeExample: 'Clinical scenario',
+          commonMistakes: 'Common mistakes',
+          reference: row.task_list_code || 'BACB Task List Standard',
+          certification: (row.certification as any) || 'RBT',
+          category: (row.category as any) || 'Measurement',
+          subcategory: row.task_list_code || 'Task List Item',
+          difficulty: (row.difficulty as any) || 'medium',
+          keywords: row.tags || ['BACB', 'Flashcard'],
+          tags: row.tags || ['Published'],
+          status: (row.status as any) || 'published',
+          isPremium: row.is_premium || false,
+          isFeatured: true,
+          createdBy: 'supabase_db',
+          updatedBy: 'supabase_db',
+          createdAt: row.created_at || new Date().toISOString(),
+          updatedAt: row.updated_at || new Date().toISOString(),
+        }));
+
+        const cardsWithState = formattedCards.map((c) => {
+          const state = getUserCardState(c.id, userId);
+          return { ...c, userState: state };
+        });
+
+        return {
+          data: cardsWithState,
+          total,
+          dueCount: Math.min(total, 15),
+          masteredCount: 0,
+          learningCount: total,
+          page,
+          totalPages,
+        };
+      }
+    } catch (err) {
+      console.error('[Flashcard Bank] Exception querying flashcards from DB:', err);
+    }
   }
 
-  const memoryCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
+  const memoryCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS];
   return processFilteredFlashcardsList(memoryCards, params, userId);
 }
 
@@ -904,6 +976,6 @@ export async function getFilteredFlashcardsAsync(
  * Synchronous query function (fallback / backwards compatibility)
  */
 export function getFilteredFlashcards(params: FlashcardFilterParams, userId: string = 'default_user'): FlashcardPaginationResult {
-  const allCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS, ...generateFlashcardsFromQuestions()];
+  const allCards = [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS];
   return processFilteredFlashcardsList(allCards, params, userId);
 }
