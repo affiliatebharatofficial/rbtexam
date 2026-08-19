@@ -18,6 +18,10 @@ export default function RootLayout({
     <html lang="en" className="h-full">
       <head>
         <JsonLdSchema />
+        <link rel="manifest" href="/site.webmanifest" />
+        <meta name="theme-color" content="#2563EB" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="flex flex-col min-h-dvh bg-slate-50 text-[#0F172A] antialiased selection:bg-[#2563EB]/20 selection:text-[#2563EB]">
         <AuthProvider>
