@@ -9,8 +9,9 @@ import { createInitialCardState, calculateNextSpacedRepetition } from './spaced-
 import { MASTER_QUESTION_BANK } from './master-question-bank';
 import { getSupabaseAdminClient, isSupabaseConfigured } from '@/lib/supabase';
 
-// Master Flashcard Seed Bank
+// Master Flashcard Seed Bank with RBT, BCaBA, and BCBA items
 export const MASTER_FLASHCARDS: Flashcard[] = [
+  // --- RBT FOUNDATIONAL DECK ---
   {
     id: 'fc-rbt-001',
     title: 'Continuous Measurement: Duration',
@@ -88,6 +89,192 @@ export const MASTER_FLASHCARDS: Flashcard[] = [
     updatedBy: 'admin_sys',
     createdAt: '2026-08-02T09:00:00.000Z',
     updatedAt: '2026-08-02T09:00:00.000Z',
+  },
+
+  // --- BCBA ADVANCED MASTERY DECK ---
+  {
+    id: 'fc-bcba-001',
+    title: 'Functional Analysis: Analog Conditions (Iwata)',
+    front: 'What are the 4 standard analog conditions in an Iwata-style Functional Analysis (FA)?',
+    back: '1. Attention (Social Positive)\n2. Demand / Escape (Social Negative)\n3. Alone / No Interaction (Automatic Reinforcement)\n4. Play / Control (Enriched Environment Baseline)',
+    cardType: 'definition',
+    explanation: 'Functional analysis experimentally manipulates environmental conditions to identify the maintaining functional variable of problem behavior.',
+    clinicalExplanation: 'In the Attention condition, brief contingent verbal attention is provided. In Demand, 3-step prompting with 30s task removal contingent on target behavior. In Alone, client is in barren room without materials. In Play, continuous access to preferred items and attention is freely available with zero demands.',
+    memoryTip: 'Mnemonic: "ADAP = Attention, Demand, Alone, Play."',
+    realLifeExample: 'Observing aggression spikes exclusively in Demand sessions confirms an escape function.',
+    commonMistakes: 'Confusing descriptive ABC data collection with experimental analog FA manipulation.',
+    reference: 'BACB 5th/6th Edition Test Content Outline F-8',
+    certification: 'BCBA',
+    category: 'Behavior Assessment',
+    subcategory: 'Functional Analysis',
+    difficulty: 'hard',
+    keywords: ['Functional Analysis', 'Iwata', 'Analog Conditions', 'Escape', 'Automatic'],
+    tags: ['BCBA Core', 'Assessment', 'High Weight'],
+    status: 'published',
+    isPremium: true,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-05T10:00:00.000Z',
+    updatedAt: '2026-08-05T10:00:00.000Z',
+  },
+  {
+    id: 'fc-bcba-002',
+    title: 'Conditioned Motivating Operations: CMO-R vs CMO-T vs CMO-S',
+    front: 'Distinguish between Reflexive (CMO-R), Transitive (CMO-T), and Surrogate (CMO-S) Motivating Operations.',
+    back: '• CMO-R (Reflexive): A warning stimulus establishing its own removal/escape as reinforcing (e.g. task demands).\n• CMO-T (Transitive): Establishes another stimulus/tool as a conditioned reinforcer to access something else (e.g. locked box establishes key).\n• CMO-S (Surrogate): Paired with an unconditioned MO, taking on the same value-altering effects (e.g. clock showing 12:00 establishing lunch appetite).',
+    cardType: 'definition',
+    explanation: 'CMOs are environmental variables that alter the reinforcing effectiveness of other stimuli and alter the frequency of behavior.',
+    clinicalExplanation: 'CMO-R warning signal creates aversion; CMO-T creates a problem-solving state requiring an intermediary stimulus; CMO-S is temporal/spatial pairing.',
+    memoryTip: 'Mnemonic: "R = Run away/Removal; T = Tool/Thing needed; S = Stimulus Pairing/Substitute."',
+    realLifeExample: 'Seeing your boss with a clipboard (CMO-R) evokes avoidance behaviors.',
+    commonMistakes: 'Confusing SD with MO: SD signals availability of reinforcement, MO alters value and effectiveness.',
+    reference: 'BACB 5th/6th Edition Task List B-12',
+    certification: 'BCBA',
+    category: 'Behavior Reduction',
+    subcategory: 'Motivating Operations',
+    difficulty: 'hard',
+    keywords: ['CMO-R', 'CMO-T', 'CMO-S', 'Motivating Operations', 'Establishing Operation'],
+    tags: ['BCBA Core', 'Concepts and Principles'],
+    status: 'published',
+    isPremium: true,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-05T11:00:00.000Z',
+    updatedAt: '2026-08-05T11:00:00.000Z',
+  },
+  {
+    id: 'fc-bcba-003',
+    title: 'Single-Case Experimental Designs: Internal Validity',
+    front: 'When is an Alternating Treatments Design (Multielement) preferable over an A-B-A-B Reversal Design?',
+    back: 'Alternating Treatments is preferable when:\n1. The target behavior is IRREVERSIBLE (e.g. learned academic skills/reading).\n2. Withdrawing treatment is UNETHICAL (e.g. severe self-injurious behavior SIB).\n3. Rapidly comparing 2 or more distinct interventions without a baseline return.',
+    cardType: 'scenario',
+    explanation: 'Alternating Treatments allows rapid comparison of conditions in rapid succession, controlling for sequence effects through counterbalancing.',
+    clinicalExplanation: 'Reversal requires return to baseline to demonstrate experimental control. Alternating Treatments demonstrates control via vertical divergence between data paths.',
+    memoryTip: 'Mnemonic: "Multi = Multi-treatments without Reversing."',
+    realLifeExample: 'Comparing DRA vs DRO in morning vs afternoon sessions for aggression.',
+    commonMistakes: 'Using reversal designs for aggression with high physical injury risk.',
+    reference: 'BACB 5th/6th Edition Task List D-2',
+    certification: 'BCBA',
+    category: 'Data Collection and Graphing',
+    subcategory: 'Experimental Design',
+    difficulty: 'hard',
+    keywords: ['Alternating Treatments', 'Reversal Design', 'Internal Validity', 'Experimental Control'],
+    tags: ['BCBA Core', 'Experimental Design'],
+    status: 'published',
+    isPremium: true,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-05T12:00:00.000Z',
+    updatedAt: '2026-08-05T12:00:00.000Z',
+  },
+  {
+    id: 'fc-bcba-004',
+    title: 'Staff Training: Behavioral Skills Training (BST)',
+    front: 'What are the 4 chronological steps of Behavioral Skills Training (BST) for staff supervision?',
+    back: '1. Instructions (Clear verbal/written rationale and procedural steps)\n2. Modeling (Demonstration of the skill by supervisor/trainer)\n3. Rehearsal (Role-play or in-situ practice by trainee)\n4. Feedback (Immediate positive praise + corrective guidance)',
+    cardType: 'basic',
+    explanation: 'BST is the gold standard evidence-based training model for BCBA supervision of RBTs and clinical staff.',
+    clinicalExplanation: 'Training is not complete until the supervisee achieves 100% fidelity criterion in the rehearsal step across multiple roleplay or direct client scenarios.',
+    memoryTip: 'Mnemonic: "IMRF = Tell (Instructions), Show (Model), Try (Rehearse), Coach (Feedback)."',
+    realLifeExample: 'Training an RBT on implementing a 3-step prompt hierarchy using BST before client contact.',
+    commonMistakes: 'Relying solely on verbal instructions or manuals without live modeling and rehearsal.',
+    reference: 'BACB 5th/6th Edition Task List I-4',
+    certification: 'BCBA',
+    category: 'Ethics',
+    subcategory: 'Personnel Supervision and Management',
+    difficulty: 'medium',
+    keywords: ['BST', 'Behavioral Skills Training', 'Supervision', 'Staff Training'],
+    tags: ['BCBA Core', 'Supervision'],
+    status: 'published',
+    isPremium: false,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-05T13:00:00.000Z',
+    updatedAt: '2026-08-05T13:00:00.000Z',
+  },
+  {
+    id: 'fc-bcba-005',
+    title: 'Matching Law & Concurrent Schedules',
+    front: 'State Herrnstein’s Matching Law and its clinical application to behavior reduction.',
+    back: 'Matching Law states that the relative rate of responding matches the relative rate of reinforcement delivered by concurrent schedules:\n(B1 / (B1 + B2)) = (R1 / (R1 + R2))\n\nClinical Application: To decrease problem behavior (B1), enrich reinforcement rate, immediacy, quality, and magnitude for appropriate replacement behavior (B2).',
+    cardType: 'definition',
+    explanation: 'Organisms distribute responses proportionally to the reinforcement obtained from each alternative.',
+    clinicalExplanation: 'If biting gets reinforced 80% of the time and requesting gets reinforced 20%, the client will allocate 80% of responses to biting. Shifting the schedule density shifts responding.',
+    memoryTip: 'Mnemonic: "Matching = Behavior matches Reinforcement proportion."',
+    realLifeExample: 'Making FCT requests produce instant high-potency snacks while problem behavior is placed on extinction.',
+    commonMistakes: 'Ignoring reinforcement parameters like latency, magnitude, and response effort.',
+    reference: 'BACB 5th/6th Edition Task List B-5',
+    certification: 'BCBA',
+    category: 'Behavior Reduction',
+    subcategory: 'Concurrent Schedules',
+    difficulty: 'hard',
+    keywords: ['Matching Law', 'Herrnstein', 'Concurrent Schedules', 'Reinforcement Rate'],
+    tags: ['BCBA Core', 'Quantitative ABA'],
+    status: 'published',
+    isPremium: true,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-05T14:00:00.000Z',
+    updatedAt: '2026-08-05T14:00:00.000Z',
+  },
+
+  // --- BCaBA SUPERVISORY DECK ---
+  {
+    id: 'fc-bcaba-001',
+    title: 'Preference Assessment Protocols: MSWO vs MSW',
+    front: 'What is the primary operational difference between MSWO (Without Replacement) and MSW (With Replacement)?',
+    back: '• MSWO (Without Replacement): Chosen item is REMOVED from the array for subsequent trials, creating an efficient ranked hierarchy of all items.\n• MSW (With Replacement): Chosen item is REPLACED in the array, only identifying the single highest-preferred item without ranking unselected items.',
+    cardType: 'definition',
+    explanation: 'MSWO is faster and provides a clear ranking hierarchy, while MSW is useful when client exhibits severe problem behavior upon item removal.',
+    clinicalExplanation: 'In MSWO, 5-7 items are presented. Once an item is selected and consumed/interacted with for 30s, it is removed and remaining items are rearranged in random order.',
+    memoryTip: 'Mnemonic: "MSWO = Out! (Items taken out to rank everything)."',
+    realLifeExample: 'Running an MSWO with 5 reinforcers before starting a DTT learning block.',
+    commonMistakes: 'Not rearranging item positions between trials, causing side-bias confounds.',
+    reference: 'BACB BCaBA Task List Standard B-3',
+    certification: 'BCaBA',
+    category: 'Behavior Assessment',
+    subcategory: 'Preference Assessments',
+    difficulty: 'medium',
+    keywords: ['MSWO', 'MSW', 'Preference Assessment', 'Hierarchy'],
+    tags: ['BCaBA Core', 'Assessment'],
+    status: 'published',
+    isPremium: false,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-06T10:00:00.000Z',
+    updatedAt: '2026-08-06T10:00:00.000Z',
+  },
+  {
+    id: 'fc-bcaba-002',
+    title: 'Task Analysis: Forward vs Backward vs Total Task Chaining',
+    front: 'When is Backward Chaining clinically indicated over Forward Chaining?',
+    back: 'Backward Chaining is indicated when the learner benefits from experiencing the naturally reinforcing terminal step of the chain immediately on early trials (e.g. shoe tying, baking, hand washing final dry).',
+    cardType: 'scenario',
+    explanation: 'In backward chaining, the therapist completes steps 1 through N-1, and the learner executes the final step N to contact the reinforcer.',
+    clinicalExplanation: 'Forward chaining teaches step 1 first; Total Task trains every step of the task analysis during each trial with prompt fading as needed.',
+    memoryTip: 'Mnemonic: "Backward = Finish line First!"',
+    realLifeExample: 'Teaching putting on socks where client pulls sock over ankle (last step) and receives immediate praise.',
+    commonMistakes: 'Withholding terminal reinforcement until all steps are independent in forward chaining.',
+    reference: 'BACB BCaBA Task List Standard C-5',
+    certification: 'BCaBA',
+    category: 'Behavior Acquisition',
+    subcategory: 'Chaining',
+    difficulty: 'medium',
+    keywords: ['Backward Chaining', 'Forward Chaining', 'Total Task', 'Task Analysis'],
+    tags: ['BCaBA Core', 'Skill Acquisition'],
+    status: 'published',
+    isPremium: false,
+    isFeatured: true,
+    createdBy: 'admin_sys',
+    updatedBy: 'admin_sys',
+    createdAt: '2026-08-06T11:00:00.000Z',
+    updatedAt: '2026-08-06T11:00:00.000Z',
   },
 ];
 
@@ -928,7 +1115,8 @@ export async function getFilteredFlashcardsAsync(
         .is('deleted_at', null);
 
       if (params.certification && params.certification !== 'ALL') {
-        query = query.eq('certification', params.certification);
+        const cert = params.certification.toUpperCase();
+        query = query.in('certification', [params.certification, cert, cert.toLowerCase(), 'ALL', 'all']);
       }
       if (params.category && params.category !== 'ALL') {
         query = query.eq('category', params.category);
@@ -941,36 +1129,46 @@ export async function getFilteredFlashcardsAsync(
         .order('created_at', { ascending: false })
         .range(0, 4999);
 
-      if (!error && dbRows && dbRows.length > 0) {
-        const formattedCards: Flashcard[] = dbRows.map((row: any) => ({
-          id: row.id,
-          title: row.term || 'BACB Flashcard',
-          front: row.term || 'Prompt',
-          back: row.definition || 'Answer',
-          cardType: 'basic',
-          explanation: row.clinical_example || row.definition || '',
-          clinicalExplanation: row.clinical_example || row.definition || '',
-          memoryTip: 'Mnemonic memory tip',
-          realLifeExample: 'Clinical scenario',
-          commonMistakes: 'Common mistakes',
-          reference: row.task_list_code || 'BACB Task List Standard',
-          certification: (row.certification as any) || 'RBT',
-          category: (row.category as any) || 'Measurement',
-          subcategory: row.task_list_code || 'Task List Item',
-          difficulty: (row.difficulty as any) || 'medium',
-          keywords: row.tags || ['BACB', 'Flashcard'],
-          tags: row.tags || ['Published'],
-          status: (row.status as any) || 'published',
-          isPremium: row.is_premium || false,
-          isFeatured: true,
-          createdBy: 'supabase_db',
-          updatedBy: 'supabase_db',
-          createdAt: row.created_at || new Date().toISOString(),
-          updatedAt: row.updated_at || new Date().toISOString(),
-        }));
+      const dbMappedCards: Flashcard[] = (!error && dbRows && dbRows.length > 0)
+        ? dbRows.map((row: any) => ({
+            id: row.id,
+            title: row.term || 'BACB Flashcard',
+            front: row.term || 'Prompt',
+            back: row.definition || 'Answer',
+            cardType: 'basic',
+            explanation: row.clinical_example || row.definition || '',
+            clinicalExplanation: row.clinical_example || row.definition || '',
+            memoryTip: 'Mnemonic memory tip',
+            realLifeExample: 'Clinical scenario',
+            commonMistakes: 'Common mistakes',
+            reference: row.task_list_code || 'BACB Task List Standard',
+            certification: (row.certification as any) || 'RBT',
+            category: (row.category as any) || 'Measurement',
+            subcategory: row.task_list_code || 'Task List Item',
+            difficulty: (row.difficulty as any) || 'medium',
+            keywords: row.tags || ['BACB', 'Flashcard'],
+            tags: row.tags || ['Published'],
+            status: (row.status as any) || 'published',
+            isPremium: row.is_premium || false,
+            isFeatured: true,
+            createdBy: 'supabase_db',
+            updatedBy: 'supabase_db',
+            createdAt: row.created_at || new Date().toISOString(),
+            updatedAt: row.updated_at || new Date().toISOString(),
+          }))
+        : [];
 
-        return processFilteredFlashcardsList(formattedCards, params, userId);
-      }
+      // Combine database cards with master seed cards (avoid duplicate IDs)
+      const combinedCards = [...dbMappedCards];
+      const seenIds = new Set(combinedCards.map((c) => c.id));
+      [...CUSTOM_FLASHCARDS, ...MASTER_FLASHCARDS].forEach((mc) => {
+        if (!seenIds.has(mc.id)) {
+          combinedCards.push(mc);
+          seenIds.add(mc.id);
+        }
+      });
+
+      return processFilteredFlashcardsList(combinedCards, params, userId);
     } catch (err) {
       console.error('[Flashcard Bank] Exception querying flashcards from DB:', err);
     }
