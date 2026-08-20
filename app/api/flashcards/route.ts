@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       onlyFavorites: searchParams.get('onlyFavorites') === 'true',
       onlyWeak: searchParams.get('onlyWeak') === 'true',
       page: Math.max(1, parseInt(searchParams.get('page') || '1', 10)),
-      limit: Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10))),
+      limit: Math.min(5000, Math.max(1, parseInt(searchParams.get('limit') || '50', 10))),
     };
 
     const result = await getFilteredFlashcardsAsync(filterParams);

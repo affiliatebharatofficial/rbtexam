@@ -546,29 +546,35 @@ export async function importBulkFlashcards(cards: Partial<Flashcard>[]): Promise
     return { insertedCount: 0, insertedIds: [] };
   }
 
-  const { data, error } = await adminDb.from('master_flashcards').insert(dbRows).select();
+  const insertedIds: string[] = [];
+  const chunkSize = 100;
 
-  if (error || !data) {
-    console.error('[Flashcard Bank] Bulk import error:', error?.message);
-    throw new Error(error?.message || 'Failed to bulk import flashcards into database');
+  for (let i = 0; i < dbRows.length; i += chunkSize) {
+    const chunk = dbRows.slice(i, i + chunkSize);
+    const { data, error } = await adminDb.from('master_flashcards').insert(chunk).select();
+
+    if (error || !data) {
+      console.error('[Flashcard Bank] Bulk import chunk error:', error?.message);
+      throw new Error(error?.message || 'Failed to bulk import flashcards chunk into database');
+    }
+
+    data.forEach((r: any) => {
+      insertedIds.push(r.id);
+      addCustomFlashcard({
+        id: r.id,
+        title: r.term,
+        front: r.term,
+        back: r.definition,
+        explanation: r.clinical_example || r.definition,
+        category: r.category,
+        certification: r.certification,
+        difficulty: r.difficulty,
+        reference: r.task_list_code,
+      });
+    });
   }
 
-  const insertedIds = data.map((r: any) => r.id);
-  data.forEach((r: any) => {
-    addCustomFlashcard({
-      id: r.id,
-      title: r.term,
-      front: r.term,
-      back: r.definition,
-      explanation: r.clinical_example || r.definition,
-      category: r.category,
-      certification: r.certification,
-      difficulty: r.difficulty,
-      reference: r.task_list_code,
-    });
-  });
-
-  return { insertedCount: data.length, insertedIds };
+  return { insertedCount: insertedIds.length, insertedIds };
 }
 
 /**
@@ -689,7 +695,7 @@ export async function convertQuestionsToDatabaseFlashcards(forceAll: boolean = f
         .from('master_questions')
         .select('id, question_text, scenario_text, options, correct_answer_id, answer_explanation, clinical_explanation, certification, category, difficulty, keywords, task_list_version, references, tags')
         .is('deleted_at', null)
-        .limit(100);
+        .limit(5000);
 
       if (dbQuestions && dbQuestions.length > 0) {
         const dbMapped = dbQuestions.map((q: any) => {
@@ -910,7 +916,7 @@ export async function getFilteredFlashcardsAsync(
   userId: string = 'default_user'
 ): Promise<FlashcardPaginationResult> {
   const page = Math.max(1, params.page || 1);
-  const limit = Math.min(100, Math.max(1, params.limit || 50));
+  const limit = Math.min(5000, Math.max(1, params.limit || 50));
   const offset = (page - 1) * limit;
 
   if (isSupabaseConfigured()) {
@@ -933,7 +939,7 @@ export async function getFilteredFlashcardsAsync(
 
       const { data: dbRows, count, error } = await query
         .order('created_at', { ascending: false })
-        .range(0, 500);
+        .range(0, 4999);
 
       if (!error && dbRows && dbRows.length > 0) {
         const formattedCards: Flashcard[] = dbRows.map((row: any) => ({

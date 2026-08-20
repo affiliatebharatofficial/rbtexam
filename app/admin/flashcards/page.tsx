@@ -171,7 +171,7 @@ export default function AdminFlashcardsPage() {
 
   const fetchAllFlashcards = async () => {
     try {
-      const res = await fetch('/api/flashcards?limit=200');
+      const res = await fetch('/api/flashcards?limit=5000');
       if (res.ok) {
         const data = (await res.json()) as any;
         if (data && Array.isArray(data.data) && data.data.length > 0) {
