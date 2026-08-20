@@ -852,17 +852,34 @@ function processFilteredFlashcardsList(
   const nowISO = new Date().toISOString();
 
   if (params.learningMode === 'review' || params.onlyDue) {
-    modeFiltered = modeFiltered.filter((c) => c.userState && c.userState.nextReviewAt <= nowISO);
+    modeFiltered = modeFiltered.filter(
+      (c) => (c.userState && c.userState.nextReviewAt <= nowISO) || (c.userState && (c.userState.learningStage === 'learning' || c.userState.learningStage === 'forgotten'))
+    );
   } else if (params.learningMode === 'favorite' || params.onlyFavorites) {
     modeFiltered = modeFiltered.filter((c) => c.userState && c.userState.isFavorite);
   } else if (params.learningMode === 'weak_topics' || params.onlyWeak) {
-    modeFiltered = modeFiltered.filter((c) => c.userState && c.userState.masteryScore < 75);
+    modeFiltered = modeFiltered.filter(
+      (c) => (c.userState && (c.userState.wrongCount > 0 || c.userState.masteryScore < 60)) || c.difficulty === 'hard'
+    );
+  } else if (params.learningMode === 'ai_recommended') {
+    // AI Recommendation: Priority to high-yield BACB exam items, high difficulty, and lowest mastery
+    modeFiltered = [...modeFiltered].sort((a, b) => {
+      const scoreA = (100 - (a.userState?.masteryScore || 0)) + (a.isFeatured ? 25 : 0) + (a.difficulty === 'hard' ? 15 : 0);
+      const scoreB = (100 - (b.userState?.masteryScore || 0)) + (b.isFeatured ? 25 : 0) + (b.difficulty === 'hard' ? 15 : 0);
+      return scoreB - scoreA;
+    });
   } else if (params.learningMode === 'shuffle') {
-    modeFiltered.sort(() => Math.random() - 0.5);
+    // Fisher-Yates shuffle
+    for (let i = modeFiltered.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [modeFiltered[i], modeFiltered[j]] = [modeFiltered[j], modeFiltered[i]];
+    }
   }
 
   // Metrics
-  const dueCount = cardsWithState.filter((c) => c.userState && c.userState.nextReviewAt <= nowISO).length;
+  const dueCount = cardsWithState.filter(
+    (c) => (c.userState && c.userState.nextReviewAt <= nowISO) || (c.userState && (c.userState.learningStage === 'learning' || c.userState.learningStage === 'forgotten'))
+  ).length;
   const masteredCount = cardsWithState.filter((c) => c.userState && c.userState.learningStage === 'mastered').length;
   const learningCount = cardsWithState.filter((c) => c.userState && c.userState.learningStage === 'learning').length;
 
@@ -916,11 +933,9 @@ export async function getFilteredFlashcardsAsync(
 
       const { data: dbRows, count, error } = await query
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        .range(0, 500);
 
       if (!error && dbRows && dbRows.length > 0) {
-        const total = count ?? dbRows.length;
-        const totalPages = Math.ceil(total / limit) || 1;
         const formattedCards: Flashcard[] = dbRows.map((row: any) => ({
           id: row.id,
           title: row.term || 'BACB Flashcard',
@@ -948,20 +963,7 @@ export async function getFilteredFlashcardsAsync(
           updatedAt: row.updated_at || new Date().toISOString(),
         }));
 
-        const cardsWithState = formattedCards.map((c) => {
-          const state = getUserCardState(c.id, userId);
-          return { ...c, userState: state };
-        });
-
-        return {
-          data: cardsWithState,
-          total,
-          dueCount: Math.min(total, 15),
-          masteredCount: 0,
-          learningCount: total,
-          page,
-          totalPages,
-        };
+        return processFilteredFlashcardsList(formattedCards, params, userId);
       }
     } catch (err) {
       console.error('[Flashcard Bank] Exception querying flashcards from DB:', err);
