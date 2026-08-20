@@ -2,6 +2,25 @@
 
 ## Master Version History
 
+### [v3.5.0] - 2026-08-20 (Legal, Refund & Payment Compliance Release)
+#### Added / Enhanced
+- **Refund & Cancellation Policy Page (`/refund-policy`)**:
+  - Full subscription billing explanation (Monthly $29/mo, Annual $19/mo USD), 1-click self-service cancellation, 48-hour accidental renewal grace window, 100% Pass-or-Refund Guarantee claim instructions, failed payment dunning, and duplicate charge remedies.
+- **Educational Disclaimer & Non-Affiliation Notice (`/disclaimer`)**:
+  - Independent platform disclaimer, BACB® and Pearson VUE® trademark non-affiliation, original educational content statement, test security compliance (strict prohibition against leaked/unauthorized questions), exam performance limitations, and Socratic AI assistance disclosure.
+- **Terms of Service (`/terms`)**:
+  - Comprehensive user agreement covering account security, acceptable use, anti-scraping/anti-sharing restrictions, subscription terms, cross-links to Refund Policy and Guarantee Terms, AI-generated content disclaimer, limitation of liability, and Delaware governing law.
+- **Privacy Policy (`/privacy`)**:
+  - Complete data collection breakdown (learning progress, domain diagnostics, Leitner flashcard telemetry), payment processor PCI-DSS Level 1 compliance notice, sub-processors inventory (Cloudflare, Supabase, OpenAI, Anthropic, Stripe, Lemon Squeezy), data encryption (AES-256 / TLS 1.3), and GDPR/CCPA user rights.
+- **Support & Inquiries Desk (`/contact`)**:
+  - Added dedicated SEO layout and structured support categories for billing, refund requests, pass guarantee claims, and clinical feedback.
+- **Pre-Checkout Compliance Disclosures (`components/landing/pricing-section.tsx`)**:
+  - Explicit USD ($) currency indicators, recurring billing intervals, cancellation terms, and active links to Terms of Service, Privacy Policy, and Refund Policy.
+- **Global Footer Legal Navigation (`components/layout/footer.tsx`)**:
+  - Added visible links to Privacy Policy, Terms of Service, Refund & Cancellation Policy, Pass Guarantee Terms, Educational Disclaimer, and Contact & Support.
+- **Sitemap & SEO Synchronization (`app/sitemap.ts`)**:
+  - Integrated `/refund-policy` into static sitemap routes with proper indexing priority.
+
 ### [v3.4.0] - 2026-08-10 (Multilingual i18n & Spanish Language Engine Release)
 #### Added / Fixed
 - **Spanish (Español 🇪🇸) Multilingual Support**:

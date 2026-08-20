@@ -11,7 +11,13 @@
 | `/tutor` | Socrates AI Tutor | Authenticated | Chat Interface, Socratic Prompts |
 | `/flashcards` | Smart Flashcard Deck | Authenticated | Leitner Box Card, Flip Animation |
 | `/study-planner` | Adaptive Study Planner | Pro / Team | Calendar View, Weak Category Focus |
-| `/pricing` | SaaS Pricing & Plans | Public | Plan Selector, Checkout Trigger |
+| `/pricing` | SaaS Pricing & Plans | Public | Plan Selector, Checkout Trigger, Disclosures |
+| `/refund-policy` | Refund & Cancellation Policy | Public | Billing Transparency, Cancellation, Guarantees |
+| `/disclaimer` | Educational & Trademark Disclaimer | Public | BACB Non-Affiliation, Exam Content Notice |
+| `/terms` | Terms of Service | Public | User Agreement, Licensing, Liability |
+| `/privacy` | Privacy Policy | Public | GDPR/CCPA Compliance, Sub-processors |
+| `/guarantee-terms` | Pass-or-Refund Guarantee Terms | Public | 3-Mock 85%+ Criteria, Claim Submission |
+| `/contact` | Candidate Support & Help Desk | Public | Inquiries, Refund Claims, Feedback Form |
 | `/developer` | API Developer Portal | Authenticated | API Key Generator, Code Snippets |
 | `/rbt` | Programmatic SEO Hub | Public | SEO Landing Cards, Question Directory |
 | `/admin` | Executive Super Admin CMS | Super Admin | BI KPI Cards, Quick Navigation |

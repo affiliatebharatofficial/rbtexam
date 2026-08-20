@@ -64,8 +64,10 @@ export function Footer() {
             <ul className="space-y-2.5 text-xs">
               <li><Link href="/privacy" className="hover:text-white transition-colors">{t('footer.privacy', 'Privacy Policy')}</Link></li>
               <li><Link href="/terms" className="hover:text-white transition-colors">{t('footer.terms', 'Terms of Service')}</Link></li>
-              <li><Link href="/guarantee-terms" className="hover:text-white transition-colors">{t('footer.guarantee', 'Guarantee Terms')}</Link></li>
-              <li><Link href="/disclaimer" className="hover:text-white transition-colors">{t('footer.disclaimer', 'Disclaimer')}</Link></li>
+              <li><Link href="/refund-policy" className="hover:text-white transition-colors">{t('footer.refundPolicy', 'Refund & Cancellation Policy')}</Link></li>
+              <li><Link href="/guarantee-terms" className="hover:text-white transition-colors">{t('footer.guarantee', 'Pass Guarantee Terms')}</Link></li>
+              <li><Link href="/disclaimer" className="hover:text-white transition-colors">{t('footer.disclaimer', 'Educational Disclaimer')}</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">{t('footer.contactSupport', 'Contact & Support')}</Link></li>
             </ul>
           </div>
         </div>

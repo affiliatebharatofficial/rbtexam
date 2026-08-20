@@ -153,9 +153,17 @@ export function PricingSection() {
                       <p className="text-xs text-slate-500 mt-1 leading-relaxed">{plan.description}</p>
                     </div>
 
-                    <div className="flex items-baseline space-x-1">
-                      <span className="text-4xl font-extrabold text-[#0F172A]">${displayPrice}</span>
-                      <span className="text-xs text-slate-400 font-semibold">/ month</span>
+                    <div className="space-y-1">
+                      <div className="flex items-baseline space-x-1.5">
+                        <span className="text-4xl font-extrabold text-[#0F172A]">${displayPrice}</span>
+                        <span className="text-xs text-slate-500 font-bold uppercase">USD</span>
+                        <span className="text-xs text-slate-400 font-semibold">/ month</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        {billingCycle === 'annual'
+                          ? `Billed annually at $${displayPrice * 12} USD/yr • Renews annually`
+                          : 'Billed monthly • Renews monthly • Cancel anytime'}
+                      </p>
                     </div>
 
                     <ul className="space-y-3 text-xs text-slate-700 font-medium pt-4 border-t border-slate-100">
@@ -168,7 +176,7 @@ export function PricingSection() {
                     </ul>
                   </div>
 
-                  <div className="pt-8">
+                  <div className="pt-8 space-y-3">
                     <Button
                       variant={isPopular ? 'primary' : 'outline'}
                       size="lg"
@@ -176,15 +184,35 @@ export function PricingSection() {
                       onClick={() => handleCheckout(plan.id, plan.name)}
                       disabled={loadingVariant === plan.id}
                     >
-                      <span>{loadingVariant === plan.id ? 'Processing...' : (plan.buttonText || 'Get Started')}</span>
+                      <span>{loadingVariant === plan.id ? 'Processing...' : (plan.buttonText || 'Start 7-Day Free Trial')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </Button>
+
+                    <p className="text-[10px] text-center text-slate-400 leading-tight">
+                      Automatic renewal. Cancel anytime via Billing Portal. By continuing, you agree to our{' '}
+                      <Link href="/terms" className="underline hover:text-slate-700">Terms</Link>,{' '}
+                      <Link href="/privacy" className="underline hover:text-slate-700">Privacy</Link>{' '}
+                      & <Link href="/refund-policy" className="underline hover:text-slate-700">Refund Policy</Link>.
+                    </p>
                   </div>
                 </Card>
               );
             })}
           </div>
         )}
+
+        {/* Pre-Checkout Legal & Billing Transparency Banner */}
+        <div className="mt-8 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-600 space-y-1 max-w-4xl mx-auto">
+          <p className="font-semibold text-slate-800">
+            🔒 Transparent & Secure Checkout via PCI-DSS Compliant Processors (Stripe / Lemon Squeezy)
+          </p>
+          <p className="text-[11px] text-slate-500">
+            All prices in USD. Credit card information is never stored on our servers. For billing queries or guarantee claims, contact{' '}
+            <a href="mailto:hello@rbtpracticeai.com" className="text-[#2563EB] font-bold hover:underline">
+              hello@rbtpracticeai.com
+            </a>. Review our <Link href="/refund-policy" className="text-[#2563EB] font-bold hover:underline">Refund Policy</Link> and <Link href="/disclaimer" className="text-[#2563EB] font-bold hover:underline">Educational Disclaimer</Link>.
+          </p>
+        </div>
 
         {/* Money Back Guarantee Banner */}
         <div className="mt-16 p-8 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">

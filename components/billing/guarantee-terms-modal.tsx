@@ -261,13 +261,21 @@ export function GuaranteeTermsModal({ isOpen, onClose }: GuaranteeTermsModalProp
           </div>
 
           {/* Bottom Actions */}
-          <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
-            <Link href="/guarantee-terms">
-              <span className="text-xs font-bold text-[#2563EB] hover:underline flex items-center space-x-1">
-                <span>View Full Screen Terms</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </span>
-            </Link>
+          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center space-x-3 text-xs font-bold text-[#2563EB]">
+              <Link href="/guarantee-terms" className="hover:underline flex items-center space-x-1">
+                <span>Full Guarantee Terms</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+              <span className="text-slate-300">•</span>
+              <Link href="/refund-policy" className="hover:underline">
+                Refund Policy
+              </Link>
+              <span className="text-slate-300">•</span>
+              <Link href="/disclaimer" className="hover:underline">
+                Disclaimer
+              </Link>
+            </div>
 
             <Button
               onClick={onClose}
