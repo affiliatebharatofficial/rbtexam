@@ -1,4 +1,5 @@
 import React from 'react';
+import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/context/auth-context';
 import { LanguageProvider } from '@/context/language-context';
@@ -17,6 +18,25 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        {/* Google Site Verification & Bing Webmaster */}
+        <meta name="google-site-verification" content="uGt2RdUpAmlBKrTFijBDppyoohE_PxVJIzD5LJHRTv8" />
+        <meta name="msvalidate.01" content="2A730A2FAF8DA672C0BDBCC548BEB4FA" />
+
+        {/* Google tag (gtag.js) */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-8X65DLEGPL"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-8X65DLEGPL');
+          `}
+        </Script>
+
         <JsonLdSchema />
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#2563EB" />

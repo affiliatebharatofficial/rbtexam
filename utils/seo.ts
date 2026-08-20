@@ -108,5 +108,11 @@ export function constructMetadata({
       statusBarStyle: 'default',
       title: SITE_CONFIG.name,
     },
+    verification: {
+      google: 'uGt2RdUpAmlBKrTFijBDppyoohE_PxVJIzD5LJHRTv8',
+      other: {
+        'msvalidate.01': ['2A730A2FAF8DA672C0BDBCC548BEB4FA'],
+      },
+    },
   };
 }
