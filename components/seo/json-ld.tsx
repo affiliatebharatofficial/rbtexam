@@ -7,7 +7,14 @@ export function JsonLdSchema() {
     name: 'RBT Practice AI',
     url: 'https://rbtpracticeai.com',
     logo: 'https://rbtpracticeai.com/icon-512.png',
+    email: 'hello@rbtpracticeai.com',
     description: 'Comprehensive RBT exam preparation platform featuring realistic practice questions, 85-question mock exams, spaced repetition flashcards, and AI-powered tutoring aligned with the BACB RBT 3rd Edition Test Content Outline.',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: 'hello@rbtpracticeai.com',
+      contactType: 'customer support',
+      availableLanguage: ['English', 'Spanish'],
+    },
     sameAs: [
       'https://twitter.com/rbtpracticeai',
     ],

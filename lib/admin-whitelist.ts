@@ -2,6 +2,7 @@ export const ADMIN_EMAILS: string[] = [
   'jobpegyan@gmail.com',
   'manorhub533@gmail.com',
   'affiliatebharatofficial@gmail.com',
+  'hello@rbtpracticeai.com',
   'support@rbtpracticeai.com',
   'admin@rbtpracticeai.com',
 ];

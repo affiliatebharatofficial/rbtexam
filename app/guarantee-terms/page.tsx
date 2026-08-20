@@ -168,7 +168,7 @@ export default function GuaranteeTermsPage() {
               <span>Failed-Exam Claim Process</span>
             </h3>
             <p>
-              If a candidate meets all prerequisite mock exam criteria and subsequently does not pass their official BACB examination, they may submit a refund claim by contacting support@rbtpracticeai.com.
+              If a candidate meets all prerequisite mock exam criteria and subsequently does not pass their official BACB examination, they may submit a refund claim by contacting hello@rbtpracticeai.com.
             </p>
           </div>
 

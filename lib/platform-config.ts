@@ -11,7 +11,7 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
   primaryColor: '#2563EB',
   secondaryColor: '#0F172A',
   companyName: 'RBT Practice AI Inc.',
-  supportEmail: 'support@rbtpracticeai.com',
+  supportEmail: 'hello@rbtpracticeai.com',
   supportPhone: '+1 (800) 555-0199',
   footerCopyright: '© 2026 RBT Practice AI Inc. All rights reserved.',
   socialLinks: {
@@ -51,7 +51,7 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
     passwordMasked: 'SG.9a8f...1029',
     encryption: 'TLS' as 'TLS' | 'SSL' | 'NONE',
     senderName: 'RBT Practice AI Candidate Portal',
-    senderEmail: 'no-reply@rbtpracticeai.com',
+    senderEmail: 'hello@rbtpracticeai.com',
   },
   landing: {
     heroTitle: 'Pass Your RBT Exam With Smarter Practice',
