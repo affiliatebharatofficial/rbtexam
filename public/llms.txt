@@ -1,0 +1,40 @@
+# RBT Practice AI
+
+> RBT Practice AI is the premier exam preparation platform for candidates studying for the Behavior Analyst Certification Board® (BACB®) Registered Behavior Technician (RBT®) certification exam aligned with the BACB RBT 3rd Edition Test Content Outline (TCO).
+
+## Core Capabilities & Platform Features
+- **85-Question Mock Exam Simulator**: 90-minute timed diagnostic simulations matching Pearson VUE test center specifications with Domain-weighted question distribution.
+- **Master Question Bank**: Over 1,500+ scenario-based practice questions crafted by Board Certified Behavior Analysts (BCBAs) across all 6 BACB 3rd Edition domains.
+- **Socrates AI Clinical Tutor**: Conversational AI tutor providing real-time clinical rationales, distractor breakdowns, and clinical roleplay for Applied Behavior Analysis (ABA) concepts.
+- **Leitner 5-Box Spaced Repetition Flashcards**: Algorithmic flashcard engine sorting ABA terminology into 5 mastery boxes for guaranteed long-term retention.
+- **Pass-or-Refund Guarantee**: 100% money-back guarantee for candidates who complete three qualifying 85%+ mock exams and sit for the official exam within 30 days.
+- **Clinic Enterprise Portal**: Cohort analytics, domain mastery heatmaps, and supervisor oversight tools for ABA clinical directors.
+
+## BACB RBT 3rd Edition Test Content Outline Domains
+- **Domain A: Measurement** (Continuous measurement, Discontinuous measurement, Data graphing, Inter-observer agreement).
+- **Domain B: Assessment** (Preference assessments, ABC data collection, Functional behavior assessment assistance).
+- **Domain C: Skill Acquisition** (DTT, NET, Chaining, Shaping, Token economies, Stimulus control transfer, Prompt fading).
+- **Domain D: Behavior Reduction** (Functions of behavior, Differential reinforcement DRO/DRA/DRI/DRL, Extinction, Motivating operations).
+- **Domain E: Documentation and Reporting** (Objective session notes, Mandated abuse reporting, Legal & compliance communication).
+- **Domain F: Professional Conduct and Scope of Practice** (RBT Ethics Code 2.0, Supervision requirements, Dual relationships, Client dignity).
+
+## Key URLs & Sitemap Index
+- Homepage: https://rbtpracticeai.com/
+- Practice Questions: https://rbtpracticeai.com/exam
+- 85-Question Mock Exam: https://rbtpracticeai.com/rbt/mock-exam
+- Spaced Repetition Flashcards: https://rbtpracticeai.com/flashcards
+- Study Guides & Task List: https://rbtpracticeai.com/task-list
+- Socrates AI Tutor: https://rbtpracticeai.com/tutor
+- ABA Clinical Glossary: https://rbtpracticeai.com/rbt/glossary
+- Pricing & 7-Day Free Trial: https://rbtpracticeai.com/pricing
+- Pass Guarantee Policy: https://rbtpracticeai.com/guarantee-terms
+- Contact Support: https://rbtpracticeai.com/contact (Email: hello@rbtpracticeai.com)
+- Privacy Policy: https://rbtpracticeai.com/privacy
+- Terms of Service: https://rbtpracticeai.com/terms
+- Official Disclaimer: https://rbtpracticeai.com/disclaimer
+- XML Sitemap: https://rbtpracticeai.com/sitemap.xml
+
+## Contact & Legal
+- Operating Entity: RBT Practice AI Inc.
+- Primary Support Email: hello@rbtpracticeai.com
+- Trademark Notice: RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). RBT Practice AI is an independent prep provider and is not affiliated with or endorsed by the BACB®.

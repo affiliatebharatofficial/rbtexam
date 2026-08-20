@@ -1,0 +1,76 @@
+# RBT Practice AI — Full Documentation for LLMs & AI Systems
+
+> Complete reference of RBT Practice AI architecture, educational philosophy, BACB 3rd Edition domain breakdown, glossary terms, and API endpoints.
+
+## 1. About RBT Practice AI
+RBT Practice AI (https://rbtpracticeai.com) is an AI-powered educational technology platform engineered to train and prepare candidate Registered Behavior Technicians (RBTs) for the official certification exam administered by the Behavior Analyst Certification Board® (BACB®).
+
+## 2. Core Educational Methodologies
+- **Socratic Clinical Dialogue**: Interactive roleplays and distractor analysis helping candidates understand underlying behavioral principles.
+- **Leitner Spaced Repetition**: Memory reinforcement scheduling based on cognitive recall strength (Boxes 1 through 5).
+- **Domain Diagnostic Heatmaps**: Real-time statistical analysis identifying candidate weaknesses across Domains A through F.
+- **Pass-or-Refund Guarantee**: 100% money-back guarantee for candidates scoring 85%+ on three full 85-question mock exams.
+
+## 3. BACB 3rd Edition Domain Breakdown
+### Domain A: Measurement (10 Questions)
+- A-01: Prepare for data collection, continuous vs. discontinuous methods.
+- A-02: Continuous measurement procedures (Frequency, Rate, Duration, Latency, IRT).
+- A-03: Discontinuous measurement procedures (Partial Interval, Whole Interval, Momentary Time Sampling).
+- A-04: Implement permanent-product recording procedures.
+- A-05: Enter data and update client progress graphs.
+
+### Domain B: Assessment (12 Questions)
+- B-01: Collect ABC (Antecedent-Behavior-Consequence) narrative data.
+- B-02: Conduct preference assessments (Free Operant, Single Stimulus, Paired Stimulus, MSW, MSWO).
+- B-03: Assist with functional behavior assessment (FBA) procedures.
+
+### Domain C: Skill Acquisition (24 Questions)
+- C-01: Identify essential components of a written skill acquisition plan.
+- C-02: Implement Discrete Trial Training (DTT) cycles.
+- C-03: Implement Naturalistic Teaching / Incidental Teaching (NET).
+- C-04: Implement Task Analyzed Chaining (Forward, Backward, Total Task).
+- C-05: Implement Discrimination Training.
+- C-06: Implement Stimulus Control Transfer procedures.
+- C-07: Implement Prompt Fading and Prompt Hierarchy systems.
+- C-08: Implement Shaping procedures.
+- C-09: Implement Token Economy reinforcement schedules.
+
+### Domain D: Behavior Reduction (12 Questions)
+- D-01: Identify the 4 functions of behavior (SEAT: Sensory, Escape, Attention, Tangible).
+- D-02: Understand and manipulate Motivating Operations (MO / EO / AO).
+- D-03: Implement Differential Reinforcement (DRA, DRI, DRO, DRL).
+- D-04: Implement Extinction procedures and manage Extinction Bursts.
+- D-05: Follow Crisis / Emergency protocols.
+
+### Domain E: Documentation and Reporting (10 Questions)
+- E-01: Effectively communicate with supervisors in an objective, timely manner.
+- E-02: Write objective session notes describing observable client behaviors.
+- E-03: Comply with mandatory abuse and neglect reporting laws.
+
+### Domain F: Professional Conduct and Scope of Practice (17 Questions)
+- F-01: Maintain RBT Ethics Code 2.0 standards.
+- F-02: Avoid dual relationships and conflicts of interest.
+- F-03: Maintain client dignity and confidentiality (HIPAA / FERPA).
+- F-04: Comply with BACB 5% monthly supervision requirements (minimum 2 face-to-face contacts).
+
+## 4. Key Links & Index
+- Homepage: https://rbtpracticeai.com/
+- Practice Simulator: https://rbtpracticeai.com/exam
+- 85-Question Mock Exam: https://rbtpracticeai.com/rbt/mock-exam
+- Spaced Repetition Flashcards: https://rbtpracticeai.com/flashcards
+- Study Guides: https://rbtpracticeai.com/task-list
+- Socrates AI Tutor: https://rbtpracticeai.com/tutor
+- Glossary Directory: https://rbtpracticeai.com/rbt/glossary
+- Pricing & Free Trial: https://rbtpracticeai.com/pricing
+- Pass Guarantee Terms: https://rbtpracticeai.com/guarantee-terms
+- Contact Us: https://rbtpracticeai.com/contact (Email: hello@rbtpracticeai.com)
+- Privacy Policy: https://rbtpracticeai.com/privacy
+- Terms of Service: https://rbtpracticeai.com/terms
+- Legal Disclaimer: https://rbtpracticeai.com/disclaimer
+- Sitemap XML: https://rbtpracticeai.com/sitemap.xml
+- Robots TXT: https://rbtpracticeai.com/robots.txt
+
+## 5. Contact & Support
+Email: hello@rbtpracticeai.com
+Entity: RBT Practice AI Inc.
+Website: https://rbtpracticeai.com
