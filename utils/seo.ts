@@ -39,17 +39,19 @@ export function constructMetadata({
   image = SITE_CONFIG.ogImage,
   canonicalUrl = SITE_CONFIG.url,
   noIndex = false,
+  keywords = SITE_CONFIG.keywords,
 }: {
   title?: string;
   description?: string;
   image?: string;
   canonicalUrl?: string;
   noIndex?: boolean;
+  keywords?: string[];
 } = {}): Metadata {
   return {
     title,
     description,
-    keywords: SITE_CONFIG.keywords,
+    keywords,
     authors: [{ name: SITE_CONFIG.author }],
     creator: SITE_CONFIG.author,
     metadataBase: new URL(SITE_CONFIG.url),
