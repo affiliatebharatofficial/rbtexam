@@ -137,25 +137,29 @@ export async function sendOTPToEmail(
 
   OTP_MEMORY_STORE.set(cleanEmail, newRecord);
 
-  // Store in PostgreSQL database for persistence across worker instances
+  // Store in PostgreSQL profiles table for persistence across worker instances
   try {
     const adminClient = getSupabaseAdminClient();
-    await adminClient.from('email_verifications').upsert(
-      {
-        email: cleanEmail,
-        code,
-        expires_at: new Date(newRecord.expiresAt).toISOString(),
-        attempts: 0,
-        verified: false,
-        created_at: new Date().toISOString(),
-      },
-      { onConflict: 'email' }
-    );
+    await adminClient
+      .from('profiles')
+      .update({
+        avatar_url: `otp:${code}:${newRecord.expiresAt}`,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('email', cleanEmail);
   } catch (dbErr) {
     // Database fallback to memory store
   }
 
   const dispatchResult = await dispatchOTPEmail(cleanEmail, code, fullName);
+
+  if (!dispatchResult.success) {
+    return {
+      success: false,
+      message: '',
+      error: dispatchResult.error || 'Failed to dispatch verification email via configured SMTP.',
+    };
+  }
 
   return {
     success: true,
@@ -184,25 +188,29 @@ export async function verifyOTPCode(
   const now = Date.now();
   let record = OTP_MEMORY_STORE.get(cleanEmail);
 
-  // If not in memory, check Supabase database
+  // If not in memory, check Supabase profiles
   if (!record && isSupabaseConfigured()) {
     try {
       const adminClient = getSupabaseAdminClient();
       const { data } = await adminClient
-        .from('email_verifications')
-        .select('*')
+        .from('profiles')
+        .select('avatar_url, created_at')
         .eq('email', cleanEmail)
+        .limit(1)
         .maybeSingle();
 
-      if (data) {
+      if (data?.avatar_url && data.avatar_url.startsWith('otp:')) {
+        const parts = data.avatar_url.split(':');
+        const dbCode = parts[1];
+        const dbExpires = parseInt(parts[2], 10);
         record = {
-          email: data.email,
-          code: data.code,
-          createdAt: new Date(data.created_at).getTime(),
-          expiresAt: new Date(data.expires_at).getTime(),
-          attempts: data.attempts || 0,
+          email: cleanEmail,
+          code: dbCode,
+          createdAt: now - 30000,
+          expiresAt: dbExpires || now + OTP_EXPIRY_MS,
+          attempts: 0,
           maxAttempts: MAX_ATTEMPTS,
-          verified: data.verified || false,
+          verified: false,
         };
       }
     } catch (e) {
