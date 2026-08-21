@@ -5,7 +5,7 @@ import { isEmailAdmin } from '@/lib/admin-whitelist';
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as any;
-    const { id, email, fullName, role, targetExamDate, subscriptionTier, accountStatus, avatarUrl } = body;
+    const { id, email, fullName, role, targetExamDate, subscriptionTier, accountStatus, avatarUrl, password } = body;
 
     if (!email) {
       return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
@@ -23,22 +23,52 @@ export async function POST(request: NextRequest) {
 
     let userId = id;
 
-    // 1. Check if user already exists in auth or DB
-    try {
-      const { data: existingProfiles } = await adminSupabase
-        .from('profiles')
-        .select('*')
-        .eq('email', cleanEmail)
-        .limit(1);
+    // 1. Create or ensure user in Supabase Auth via Admin API (email_confirm: true suppresses Supabase default email)
+    if (password && adminSupabase.auth?.admin) {
+      try {
+        const { data: createdAuth, error: createAuthErr } = await adminSupabase.auth.admin.createUser({
+          email: cleanEmail,
+          password: password,
+          email_confirm: true,
+          user_metadata: { full_name: cleanName, role: assignedRole },
+        });
 
-      if (existingProfiles && existingProfiles.length > 0) {
-        userId = existingProfiles[0].id;
+        if (createdAuth?.user?.id) {
+          userId = createdAuth.user.id;
+        } else if (createAuthErr && createAuthErr.message.includes('already exists')) {
+          // If already exists, lookup or update
+          const { data: existingProfiles } = await adminSupabase
+            .from('profiles')
+            .select('id')
+            .eq('email', cleanEmail)
+            .limit(1);
+          if (existingProfiles && existingProfiles[0]?.id) {
+            userId = existingProfiles[0].id;
+          }
+        }
+      } catch (authErr) {
+        console.warn('Supabase Auth admin creation notice:', authErr);
       }
-    } catch (e) {
-      console.warn('Profile search by email failed:', e);
     }
 
-    // 2. Generate fallback UUID if still missing
+    // 2. Check existing profile if userId still not resolved
+    if (!userId) {
+      try {
+        const { data: existingProfiles } = await adminSupabase
+          .from('profiles')
+          .select('id')
+          .eq('email', cleanEmail)
+          .limit(1);
+
+        if (existingProfiles && existingProfiles.length > 0) {
+          userId = existingProfiles[0].id;
+        }
+      } catch (e) {
+        console.warn('Profile search by email failed:', e);
+      }
+    }
+
+    // 3. Generate fallback UUID if still missing
     if (!userId) {
       if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         userId = crypto.randomUUID();

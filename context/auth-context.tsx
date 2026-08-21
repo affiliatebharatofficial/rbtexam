@@ -586,7 +586,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         lastLoginAt: new Date().toISOString(),
       };
 
-      // Call central register API route to save candidate to Supabase PostgreSQL database
+      // Call central register API route to save candidate to Supabase PostgreSQL database & Auth
       try {
         const regRes = await fetch('/api/auth/register', {
           method: 'POST',
@@ -599,6 +599,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             subscriptionTier: userTier,
             targetExamDate: newUser.targetExamDate,
             accountStatus: newUser.accountStatus,
+            password: data.password,
           }),
         });
 
@@ -612,25 +613,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Central database registration sync warning:', regErr);
       }
 
-      // Also trigger Supabase native sign-up if configured
-      if (isSupabaseConfigured() && data.password) {
-        try {
-          await supabase.auth.signUp({
-            email: targetEmail,
-            password: data.password,
-            options: {
-              data: {
-                full_name: data.fullName,
-                role: newUser.role,
-              },
-            },
-          });
-        } catch (sbSignUpErr) {
-          console.warn('Supabase Auth signUp warning:', sbSignUpErr);
-        }
-      }
-
-      // Automatically dispatch real 6-digit OTP verification email to candidate
+      // Automatically dispatch real 6-digit OTP verification email via custom configured SMTP
       try {
         await fetch('/api/auth/otp/send', {
           method: 'POST',
