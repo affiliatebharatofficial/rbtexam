@@ -356,10 +356,41 @@ export default function SuperAdminCMSPage() {
     saveUserAccounts(updated);
   };
 
-  const handleDeleteUserAccount = (userId: string) => {
-    if (confirm('Are you sure you want to delete this user account from the roster?')) {
+  const handleDeleteUserAccount = async (userId: string) => {
+    const targetUser = userAccounts.find((u) => u.id === userId);
+    if (confirm(`Are you sure you want to permanently delete user ${targetUser?.email || userId}? They will be able to re-register cleanly.`)) {
       const updated = userAccounts.filter((u) => u.id !== userId);
       saveUserAccounts(updated);
+
+      // Clean local storage registered cache
+      try {
+        const storedStr = localStorage.getItem('rbt_registered_users');
+        if (storedStr) {
+          const registered = JSON.parse(storedStr);
+          const filtered = registered.filter((u: any) => u.id !== userId && u.email?.toLowerCase() !== targetUser?.email?.toLowerCase());
+          localStorage.setItem('rbt_registered_users', JSON.stringify(filtered));
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      try {
+        const res = await fetch('/api/admin/users/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, email: targetUser?.email }),
+        });
+        const data = (await res.json()) as any;
+        if (data?.success) {
+          setUserMsg(`✅ User ${targetUser?.email || userId} deleted permanently from database!`);
+        } else {
+          setUserMsg(`⚠️ Deleted locally: ${data?.error || 'Backend notice'}`);
+        }
+      } catch (err: any) {
+        console.error('Failed to delete user via API:', err);
+        setUserMsg('User removed from local roster.');
+      }
+      setTimeout(() => setUserMsg(''), 4000);
     }
   };
 

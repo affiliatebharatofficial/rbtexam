@@ -35,15 +35,25 @@ export async function POST(request: NextRequest) {
 
         if (createdAuth?.user?.id) {
           userId = createdAuth.user.id;
-        } else if (createAuthErr && createAuthErr.message.includes('already exists')) {
-          // If already exists, lookup or update
+        } else if (createAuthErr && createAuthErr.message.toLowerCase().includes('already')) {
+          // If already exists in Supabase Auth, lookup profile or update auth credentials
           const { data: existingProfiles } = await adminSupabase
             .from('profiles')
             .select('id')
             .eq('email', cleanEmail)
             .limit(1);
+
           if (existingProfiles && existingProfiles[0]?.id) {
             userId = existingProfiles[0].id;
+            try {
+              await adminSupabase.auth.admin.updateUserById(userId, {
+                password: password,
+                email_confirm: true,
+                user_metadata: { full_name: cleanName, role: assignedRole },
+              });
+            } catch (updateErr) {
+              console.warn('Update user password warning:', updateErr);
+            }
           }
         }
       } catch (authErr) {

@@ -553,15 +553,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // 4. Prevent Duplicate Profile Creation
-      const registeredUsersStr = localStorage.getItem('rbt_registered_users');
-      const registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
-      const duplicateUser = registeredUsers.find((u) => u.email.toLowerCase() === targetEmail);
-
-      if (duplicateUser) {
-        setIsLoading(false);
-        logAuditEvent('SYSTEM', 'DUPLICATE_SIGNUP_ATTEMPT', 'Registration', `Prevented duplicate signup attempt for ${targetEmail}`);
-        return { success: false, error: 'An account with this email address already exists. Please log in instead.' };
+      // 4. Clean any stale local cached record for this email
+      try {
+        const registeredUsersStr = localStorage.getItem('rbt_registered_users');
+        if (registeredUsersStr) {
+          const storedList: UserProfile[] = JSON.parse(registeredUsersStr);
+          const cleaned = storedList.filter((u) => u.email.toLowerCase() !== targetEmail);
+          localStorage.setItem('rbt_registered_users', JSON.stringify(cleaned));
+        }
+      } catch (e) {
+        // ignore
       }
 
       // 5. Create Fresh Account with Verification & Status Flags (Grant 7-Day Free Pro Access)
@@ -627,8 +628,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('OTP dispatch API warning:', otpSendErr);
       }
 
-      registeredUsers.push(newUser);
-      localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
+      try {
+        const storedStr = localStorage.getItem('rbt_registered_users');
+        const list: UserProfile[] = storedStr ? JSON.parse(storedStr) : [];
+        const filtered = list.filter((u) => u.email.toLowerCase() !== newUser.email.toLowerCase());
+        filtered.push(newUser);
+        localStorage.setItem('rbt_registered_users', JSON.stringify(filtered));
+      } catch (e) {
+        // ignore
+      }
 
       const newSession: AuthSession = {
         accessToken: `signup_token_${Math.random().toString(36).substring(2)}`,
