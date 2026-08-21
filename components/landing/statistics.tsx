@@ -1,36 +1,39 @@
 'use client';
 
 import React from 'react';
+import { useLanguage } from '@/context/language-context';
 import { Card } from '@/components/ui/card';
 import { Award, Users, CheckCircle2, Star, Clock, ShieldCheck } from 'lucide-react';
 
 export function Statistics() {
+  const { t } = useLanguage();
+
   const stats = [
     {
-      label: 'Candidates Prepared',
+      label: t('stats.candidates', 'Candidates Prepared'),
       value: '14,200+',
-      subtext: 'Across all 50 US States',
+      subtext: t('stats.candidatesSub', 'Across all 50 US States'),
       icon: Users,
       color: 'text-blue-600',
     },
     {
-      label: 'First-Time Pass Rate',
+      label: t('stats.passRate', 'First-Time Pass Rate'),
       value: '99.4%',
-      subtext: 'Vs 74% National Average',
+      subtext: t('stats.passRateSub', 'Vs 74% National Average'),
       icon: Award,
       color: 'text-emerald-600',
     },
     {
-      label: 'Questions Answered',
+      label: t('stats.questions', 'Questions Answered'),
       value: '500,000+',
-      subtext: 'BACB RBT 3rd Edition Aligned',
+      subtext: t('stats.questionsSub', 'BACB RBT 3rd Edition Aligned'),
       icon: CheckCircle2,
       color: 'text-indigo-600',
     },
     {
-      label: 'Candidate Rating',
+      label: t('stats.rating', 'Candidate Rating'),
       value: '4.9 / 5',
-      subtext: 'Based on 2,100+ verified reviews',
+      subtext: t('stats.ratingSub', 'Based on 2,100+ verified reviews'),
       icon: Star,
       color: 'text-amber-500',
     },

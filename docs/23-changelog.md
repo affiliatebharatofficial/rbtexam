@@ -2,6 +2,20 @@
 
 ## Version History
 
+### [v3.1.1] - 2026-08-21 (Landing Page Free Access Messaging & Pricing Section Visibility Toggle)
+#### Added
+- **Landing Page 100% Free Access Messaging**: Updated Hero, badges, feature checkmarks, and bottom CTA banner to announce 100% Free Complete Access for all candidates (No Credit Card Required).
+- **Super Admin Pricing Section Visibility Controls**: Added dynamic 1-click Hide/Show toggle in `/admin/plans` and `/admin` (`showPricingSection`), allowing instant removal of the pricing section and price tags from the landing page.
+- **Dynamic API Synchronization**: Public configuration (`/api/config`, `/api/plans`) provides real-time `showPricingSection` state to all clients.
+
+### [v3.1.0] - 2026-08-21 (Dynamic Free Access & Super Admin Monetization Engine Release)
+#### Added
+- **Dynamic 100% Free Open Access Mode**: All questions, answers, rationales, 85-question mock exams, flashcards, and Socrates AI tutor features are completely unlocked for all users.
+- **Super Admin Monetization Switch (Chalu / Band)**: Interactive control panel in `/admin/plans` and `/admin` to toggle Free Access Mode and Payment Gateway on/off with 1 click.
+- **Live Dynamic Pricing Page**: Automatically displays "100% Free Complete Access" banners and replaces checkout paywalls with direct free practice CTAs when free mode is on.
+- **Dynamic Feature Permission Guards & Quota Bypass**: `canUserAccessFeature`, `checkAndTrackUsageQuota`, and `getEffectiveSubscriptionTier` react to platform config in real time.
+- **Public Config API (`/api/config`)**: Delivers real-time monetization flags to candidate portals and landing pages.
+
 ### [v3.0.0] - 2026-08-07 (Production Launch, Beta Release & Go-Live Engine Release)
 #### Added
 - **Production Launch & Go-Live Engine (`lib/release-management-engine.ts`)**:

@@ -36,6 +36,7 @@ import {
   AlertTriangle,
   Lock,
   Eye,
+  EyeOff,
   CheckCircle2,
   Cpu,
   ArrowRight,
@@ -207,15 +208,9 @@ export default function SuperAdminCMSPage() {
   const [userMsg, setUserMsg] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('rbt_admin_users_roster');
-        if (saved && saved.includes('@rbtpracticeai.com')) {
-          localStorage.removeItem('rbt_admin_users_roster');
-        }
-      } catch (e) {}
+    if (activeTab === 'users' || activeTab === 'overview') {
+      loadAllRegisteredUsers();
     }
-    loadAllRegisteredUsers();
   }, [activeTab]);
 
   const loadAllRegisteredUsers = async () => {
@@ -257,31 +252,6 @@ export default function SuperAdminCMSPage() {
       }
     } catch (err) {
       console.error('Error fetching /api/admin/users:', err);
-    }
-
-    // 2. Fetch real users from Supabase Direct DB Query
-    if (isSupabaseConfigured()) {
-      try {
-        const { data: dbProfiles } = await supabase.from('profiles').select('*');
-        if (dbProfiles && Array.isArray(dbProfiles)) {
-          dbProfiles.forEach((p: any) => {
-            if (p.email && !p.email.includes('@rbtpracticeai.com')) {
-              realUsersMap.set(p.email.toLowerCase().trim(), {
-                id: p.id,
-                email: p.email,
-                fullName: p.full_name || p.email.split('@')[0],
-                role: p.email.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (p.role || 'student'),
-                subscriptionTier: p.subscription_tier || 'pro',
-                status: p.account_status || 'active',
-                joinedAt: p.created_at || new Date().toISOString(),
-                lastLoginAt: p.updated_at || new Date().toISOString(),
-              });
-            }
-          });
-        }
-      } catch (err) {
-        console.error('Error fetching Supabase profiles:', err);
-      }
     }
 
     // 3. Fetch real signed up users from LocalStorage ('rbt_registered_users')
@@ -413,8 +383,8 @@ export default function SuperAdminCMSPage() {
     setTimeout(() => setUserMsg(''), 4000);
   };
 
-  const auditLogs = getSystemAuditLogs();
-  const summary = getPlatformAnalyticsSummary();
+  const auditLogs = React.useMemo(() => getSystemAuditLogs(), []);
+  const summary = React.useMemo(() => getPlatformAnalyticsSummary(), []);
 
   const tabs: { id: AdminTab; label: string; icon: any }[] = [
     { id: 'overview', label: 'Overview', icon: Activity },
@@ -668,6 +638,158 @@ export default function SuperAdminCMSPage() {
                 className="w-full text-xs p-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
               />
               <p className="text-[9px] text-slate-400">Leave blank to allow all email domains</p>
+            </div>
+          </div>
+        </Card>
+
+        {/* DYNAMIC MONETIZATION & FREE ACCESS CONTROLLER CARD */}
+        <Card
+          glass
+          className={`p-6 rounded-2xl border transition-all shadow-xl ${
+            config.freeAccessMode !== false
+              ? 'border-emerald-500/40 bg-gradient-to-br from-emerald-950/20 via-slate-900/40 to-emerald-900/10'
+              : 'border-blue-500/40 bg-gradient-to-br from-slate-900/40 via-blue-950/20 to-slate-900/40'
+          }`}
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {config.freeAccessMode !== false ? (
+                  <Badge variant="emerald" className="text-xs font-black uppercase gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>SABKE LIYE FREE (100% UNRESTRICTED ACCESS ACTIVE)</span>
+                  </Badge>
+                ) : (
+                  <Badge variant="blue" className="text-xs font-black uppercase gap-1">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>PAID SUBSCRIPTION PAYWALL ACTIVE</span>
+                  </Badge>
+                )}
+
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                    config.monetizationEnabled
+                      ? 'bg-blue-500/20 text-blue-300 border-blue-400/30'
+                      : 'bg-amber-500/20 text-amber-300 border-amber-400/30'
+                  }`}
+                >
+                  Payment Gateway: {config.monetizationEnabled ? 'Chalu (Active)' : 'Band (Disabled)'}
+                </span>
+              </div>
+
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">
+                {config.freeAccessMode !== false
+                  ? '⚡ Free Candidate Access Mode Is Currently Active'
+                  : '🔒 Standard Paid Subscription Paywall Is Active'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-3xl">
+                {config.freeAccessMode !== false
+                  ? 'All candidates have 100% free access to all 85-question mock exams, answer rationales, flashcards, and Socrates AI tutor without needing a subscription.'
+                  : 'Paywalls and subscription tiers are enforced. Candidates must subscribe to access full mock exams and unlimited features.'}
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  const newFree = !(config.freeAccessMode !== false);
+                  updatePlatformConfig('freeAccessMode', newFree, 'Super Admin');
+                  if (newFree) {
+                    updatePlatformConfig('monetizationEnabled', false, 'Super Admin');
+                    setConfig({ ...config, freeAccessMode: newFree, monetizationEnabled: false });
+                  } else {
+                    updatePlatformConfig('monetizationEnabled', true, 'Super Admin');
+                    setConfig({ ...config, freeAccessMode: newFree, monetizationEnabled: true });
+                  }
+                }}
+                className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 ${
+                  config.freeAccessMode !== false
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/25'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                }`}
+              >
+                {config.freeAccessMode !== false ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                    <span>Free Mode: ON (Sabke Liye Free)</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Turn ON Free Mode</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const newMon = !config.monetizationEnabled;
+                  updatePlatformConfig('monetizationEnabled', newMon, 'Super Admin');
+                  setConfig({ ...config, monetizationEnabled: newMon });
+                }}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all border flex items-center justify-center gap-2 ${
+                  config.monetizationEnabled
+                    ? 'bg-blue-600/20 text-blue-300 border-blue-500/40 hover:bg-blue-600/30'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>Payment: {config.monetizationEnabled ? 'Chalu (ON)' : 'Band (OFF)'}</span>
+              </button>
+
+              <Link href="/admin/plans">
+                <Button variant="outline" size="sm" className="text-xs font-bold w-full sm:w-auto">
+                  <span>Manage Plans CMS &rarr;</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Pricing Section Hide/Show Toggle */}
+          <div className="mt-4 pt-3 border-t border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-slate-300">Landing Page Price Tag / Pricing Section:</span>
+              {config.showPricingSection !== false ? (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-1">
+                  <Eye className="w-3 h-3 text-emerald-400" />
+                  <span>VISIBLE (Shown)</span>
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-400/40 flex items-center gap-1">
+                  <EyeOff className="w-3 h-3 text-rose-400" />
+                  <span>HIDDEN (Price Tag Gayab)</span>
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const newVis = !(config.showPricingSection !== false);
+                  updatePlatformConfig('showPricingSection', newVis, 'Super Admin');
+                  setConfig({ ...config, showPricingSection: newVis });
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  config.showPricingSection !== false
+                    ? 'bg-slate-800 text-rose-300 hover:bg-rose-950/40 border border-rose-500/40'
+                    : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                }`}
+              >
+                {config.showPricingSection !== false ? (
+                  <>
+                    <EyeOff className="w-3.5 h-3.5" />
+                    <span>Hide Pricing Section (Price Tag Gayab Karein)</span>
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Show Pricing Section (Price Tag Dikhayein)</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </Card>

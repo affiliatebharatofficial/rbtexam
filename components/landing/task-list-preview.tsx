@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,8 @@ import { CheckCircle2, ChevronRight, BookOpen } from 'lucide-react';
 import { getDomainColor } from '@/utils/formatters';
 
 export function TaskListPreview() {
+  const { t, language } = useLanguage();
+  const isEs = language === 'es';
   const [activeDomainId, setActiveDomainId] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'F'>('A');
 
   const selectedDomain = BACB_TASK_LIST_3RD_EDITION.find(d => d.id === activeDomainId) || BACB_TASK_LIST_3RD_EDITION[0];
@@ -19,12 +22,14 @@ export function TaskListPreview() {
     <section className="py-24 bg-slate-50/60 border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <Badge variant="blue">100% BACB Coverage</Badge>
+          <Badge variant="blue">{isEs ? '100% Cobertura BACB' : '100% BACB Coverage'}</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Study by RBT Content Area: BACB 3rd Edition Task List
+            {isEs ? 'Estudia por Área de Contenido: Temario BACB 3ª Edición' : 'Study by RBT Content Area: BACB 3rd Edition Task List'}
           </h2>
           <p className="text-base text-slate-600">
-            Select a domain below to preview specific task list items, exam question weights, and essential concepts aligned with the current BACB RBT 3rd Edition Test Content Outline.
+            {isEs
+              ? 'Selecciona un dominio para ver las tareas específicas, el peso en el examen y los conceptos clave del temario oficial BACB RBT 3ª edición.'
+              : 'Select a domain below to preview specific task list items, exam question weights, and essential concepts aligned with the current BACB RBT 3rd Edition Test Content Outline.'}
           </p>
         </div>
 
@@ -58,7 +63,7 @@ export function TaskListPreview() {
             <div>
               <div className="flex items-center space-x-3 mb-2">
                 <span className={`px-3 py-1 rounded-lg text-sm font-extrabold ${colorStyle.badge}`}>
-                  Domain {selectedDomain.id}
+                  {isEs ? `Dominio ${selectedDomain.id}` : `Domain ${selectedDomain.id}`}
                 </span>
                 <h3 className="text-2xl font-bold text-[#0F172A]">{selectedDomain.name}</h3>
               </div>
@@ -66,19 +71,23 @@ export function TaskListPreview() {
             </div>
             <div className="text-right flex-shrink-0">
               <div className="text-2xl font-extrabold text-[#2563EB]">{selectedDomain.weightPercentage}%</div>
-              <div className="text-xs text-slate-400 font-medium">Exam Weight (~{selectedDomain.questionCountApprox} Qs)</div>
+              <div className="text-xs text-slate-400 font-medium">
+                {isEs ? `Peso en Examen (~${selectedDomain.questionCountApprox} Pregs)` : `Exam Weight (~${selectedDomain.questionCountApprox} Qs)`}
+              </div>
             </div>
           </div>
 
           {/* Sub-items list */}
           <div className="py-6 space-y-4">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Domain Task Items:</h4>
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              {isEs ? 'Tareas del Dominio:' : 'Domain Task Items:'}
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {selectedDomain.items.map((item) => (
                 <div key={item.id} className="p-4 rounded-xl border border-slate-100 bg-white hover:border-blue-200 transition-colors space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-bold">{item.id}</span>
-                    <span className="text-[10px] text-slate-400 font-semibold">{item.examWeightPercentage}% Weight</span>
+                    <span className="text-[10px] text-slate-400 font-semibold">{item.examWeightPercentage}% {isEs ? 'Peso' : 'Weight'}</span>
                   </div>
                   <h5 className="text-sm font-bold text-slate-800">{item.title}</h5>
                   <p className="text-xs text-slate-500 leading-relaxed">{item.description}</p>
@@ -98,7 +107,7 @@ export function TaskListPreview() {
             <Link href="/task-list">
               <Button variant="primary" size="md" className="gap-2 shadow-md">
                 <BookOpen className="w-4 h-4" />
-                <span>Explore Full Interactive Study Guide</span>
+                <span>{isEs ? 'Explorar Guía Completa de Temarios' : 'Explore Complete Task List Study Guide'}</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>

@@ -15,9 +15,20 @@ export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }:
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+  const [forceReady, setForceReady] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    // Safety fallback: Never keep spinning for more than 1 second on refresh
+    const timer = setTimeout(() => {
+      setForceReady(true);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading || forceReady) {
       if (!isAuthenticated) {
         router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
         return;
@@ -40,11 +51,11 @@ export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }:
         }
       }
     }
-  }, [isAuthenticated, isLoading, user, requireAdmin, allowedRoles, router, pathname]);
+  }, [isAuthenticated, isLoading, forceReady, user, requireAdmin, allowedRoles, router, pathname]);
 
-  if (isLoading) {
+  if (isLoading && !forceReady && !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center space-y-4">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4 p-8">
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#2563EB] to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-500/20 animate-pulse">
           <Brain className="w-7 h-7" />
         </div>
@@ -56,12 +67,12 @@ export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }:
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isLoading) {
     return null;
   }
 
   if (requireAdmin) {
-    const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+    const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || isEmailAdmin(user?.email);
     if (!isAdmin) {
       return null;
     }
@@ -69,7 +80,8 @@ export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }:
 
   if (allowedRoles && allowedRoles.length > 0) {
     const userRole = user?.role || 'student';
-    if (!allowedRoles.includes(userRole)) {
+    const isExemptAdmin = isEmailAdmin(user?.email);
+    if (!isExemptAdmin && !allowedRoles.includes(userRole)) {
       return null;
     }
   }

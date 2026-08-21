@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useLanguage } from '@/context/language-context';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,9 @@ import {
 } from 'lucide-react';
 
 export function SeoContentSection() {
+  const { t, language } = useLanguage();
+  const isEs = language === 'es';
+
   return (
     <section className="py-24 bg-slate-50 border-b border-slate-200/80">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -26,13 +30,17 @@ export function SeoContentSection() {
         <div className="text-center space-y-4 mb-16">
           <Badge variant="blue" className="gap-1">
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Complete Exam Prep Guide</span>
+            <span>{isEs ? 'Guía Completa de Preparación para el Examen' : 'Complete Exam Prep Guide'}</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Comprehensive Guide to RBT Practice & RBT Exam Prep (BACB 3rd Edition)
+            {isEs
+              ? 'Guía Completa para la Práctica y Preparación del Examen RBT (BACB 3ª Edición)'
+              : 'Comprehensive Guide to RBT Practice & RBT Exam Prep (BACB 3rd Edition)'}
           </h2>
           <p className="text-base text-slate-600 max-w-3xl mx-auto">
-            Everything you need to know about preparing for the Registered Behavior Technician® certification exam, active recall, mock test strategies, and our 7-day free trial.
+            {isEs
+              ? 'Todo lo que necesitas saber para prepararte para el examen de certificación Registered Behavior Technician®, recuerdo activo, simulacros y acceso 100% gratuito.'
+              : 'Everything you need to know about preparing for the Registered Behavior Technician® certification exam, active recall, mock test strategies, and our 7-day free trial.'}
           </p>
         </div>
 
@@ -42,7 +50,7 @@ export function SeoContentSection() {
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
               <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">1</span>
-              What Is RBT Practice and Why Is Structured Exam Prep Essential?
+              {isEs ? '¿Qué es la Práctica de RBT y por qué es Esencial una Preparación Estructurada?' : 'What Is RBT Practice and Why Is Structured Exam Prep Essential?'}
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
               Structured <strong>RBT practice</strong> is the systematic process of applying Applied Behavior Analysis (ABA) principles to realistic clinical scenarios before taking the official certification test. Becoming a Registered Behavior Technician® requires demonstrating competency across measurement, assessment, skill acquisition, behavior reduction, documentation, and professional ethics.

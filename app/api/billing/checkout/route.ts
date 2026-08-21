@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createLemonSqueezyCheckout } from '@/lib/lemon-squeezy';
+import { isFreeAccessActive, isMonetizationEnabled } from '@/lib/platform-config';
 
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as any;
     const { variantId, userEmail, userName, tier, billingInterval } = body;
+
+    // If Free Access Mode is active or Monetization is disabled by Admin
+    if (isFreeAccessActive() || !isMonetizationEnabled()) {
+      return NextResponse.json({
+        success: true,
+        freeMode: true,
+        message: '100% Free Access Mode is currently active! No payment required.',
+        checkoutUrl: '/exam',
+      });
+    }
 
     if (!userEmail) {
       return NextResponse.json({ error: 'User email is required for checkout' }, { status: 400 });

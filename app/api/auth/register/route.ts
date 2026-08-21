@@ -38,32 +38,13 @@ export async function POST(request: NextRequest) {
       console.warn('Profile search by email failed:', e);
     }
 
-    // 2. If no valid id provided, search or create in auth.users
-    if (!userId || !userId.includes('-')) {
-      try {
-        const { data: authUsers } = await adminSupabase.auth.admin.listUsers();
-        const foundAuth = authUsers?.users?.find((u: any) => u.email?.toLowerCase().trim() === cleanEmail);
-        if (foundAuth) {
-          userId = foundAuth.id;
-        } else {
-          // Attempt to create user in auth.users via Admin API
-          const { data: createdAuth, error: createErr } = await adminSupabase.auth.admin.createUser({
-            email: cleanEmail,
-            email_confirm: true,
-            user_metadata: { full_name: cleanName, role: assignedRole },
-          });
-          if (createdAuth?.user?.id) {
-            userId = createdAuth.user.id;
-          }
-        }
-      } catch (authErr) {
-        console.warn('Supabase Auth user creation/lookup warning:', authErr);
-      }
-    }
-
-    // Generate fallback UUID if still missing
+    // 2. Generate fallback UUID if still missing
     if (!userId) {
-      userId = `usr_${Math.random().toString(36).substring(2, 11)}`;
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        userId = crypto.randomUUID();
+      } else {
+        userId = `usr_${Math.random().toString(36).substring(2, 11)}`;
+      }
     }
 
     const now = new Date().toISOString();

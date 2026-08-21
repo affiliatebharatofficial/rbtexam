@@ -117,14 +117,24 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
 // In-Memory Usage Quotas Store (Supabase ready)
 const USAGE_QUOTA_STORE: Record<string, UsageQuota> = {};
 
+import { isFreeAccessActive } from '@/lib/platform-config';
+import { UserProfile } from '@/types/auth';
+
 /**
  * Feature Permission Guard
- * Checks if user's subscription tier permits access to a premium feature
+ * Checks if user's subscription tier permits access to a premium feature.
+ * If Free Access Mode is active, all users get unrestricted access.
  */
 export function canUserAccessFeature(
   userSub: UserSubscription | null,
-  feature: 'mockExams' | 'pdfExports' | 'advancedAnalytics' | 'unlimitedFlashcards'
+  feature: 'mockExams' | 'pdfExports' | 'advancedAnalytics' | 'unlimitedFlashcards',
+  options?: { bypassFreeCheck?: boolean }
 ): boolean {
+  // If Free Access Mode is enabled by Admin and not explicitly bypassed in unit test
+  if (!options?.bypassFreeCheck && isFreeAccessActive()) {
+    return true; // All features 100% free for all candidates
+  }
+
   if (!userSub || userSub.status !== 'active') {
     return false; // Free plan restricted
   }
@@ -135,13 +145,19 @@ export function canUserAccessFeature(
 }
 
 /**
- * Checks and increments daily resource usage quota for free plan users
+ * Checks and increments daily resource usage quota for free plan users.
+ * When Free Access Mode is active, quotas are unlimited.
  */
 export function checkAndTrackUsageQuota(
   userId: string = 'default_user',
   resourceType: 'aiMessage' | 'flashcard' | 'practiceTest',
-  tier: PlanTier = 'free'
+  tier: PlanTier = 'free',
+  options?: { bypassFreeCheck?: boolean }
 ): { allowed: boolean; remaining: number } {
+  if (!options?.bypassFreeCheck && isFreeAccessActive()) {
+    return { allowed: true, remaining: 9999 }; // Unlimited for all during free access mode
+  }
+
   if (['pro', 'team', 'enterprise', 'lifetime'].includes(tier)) {
     return { allowed: true, remaining: 9999 }; // Unlimited for paid plans
   }
@@ -182,12 +198,15 @@ export function checkAndTrackUsageQuota(
   return { allowed: true, remaining: 10 };
 }
 
-import { UserProfile } from '@/types/auth';
-
 /**
  * Calculates the effective subscription tier for a user, taking 7-day Pro free trial expiration into account.
+ * When Free Access Mode is active, all users receive Pro-level access.
  */
-export function getEffectiveSubscriptionTier(user: Partial<UserProfile> | null | undefined): PlanTier {
+export function getEffectiveSubscriptionTier(user: Partial<UserProfile> | null | undefined, options?: { bypassFreeCheck?: boolean }): PlanTier {
+  if (!options?.bypassFreeCheck && isFreeAccessActive()) {
+    return 'pro';
+  }
+
   if (!user) return 'free';
 
   // Admin & Super Admin users always have enterprise access

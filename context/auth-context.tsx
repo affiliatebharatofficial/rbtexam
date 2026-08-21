@@ -192,66 +192,84 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return profile;
   };
 
-  // Initialize session and listen for auth state changes
+  // Track in-flight profile ensures to avoid redundant parallel network calls
+  const profileSyncInFlight = React.useRef<Record<string, boolean>>({});
+
+  // Initialize session and listen for auth state changes with instant local restore
   useEffect(() => {
     let isMounted = true;
     let subscription: { unsubscribe: () => void } | null = null;
 
-    async function initAuthSession() {
-      try {
-        if (isSupabaseConfigured()) {
-          const { data: { session: sbSession } } = await supabase.auth.getSession();
-          if (sbSession?.user) {
-            const sbUser = sbSession.user;
-            const profile = await ensureDatabaseProfile(
-              sbUser.id,
-              sbUser.email || '',
-              sbUser.user_metadata?.full_name || sbUser.user_metadata?.name,
-              sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture
-            );
-            if (isMounted) {
-              const activeSession: AuthSession = {
-                accessToken: sbSession.access_token,
-                refreshToken: sbSession.refresh_token,
-                expiresAt: (sbSession.expires_at || 0) * 1000,
-                user: profile,
-              };
-              setUser(profile);
-              setSession(activeSession);
-              localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(activeSession));
-              setIsLoading(false);
-              return;
-            }
-          }
-        }
-
-        const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (stored) {
-          const parsedSession: AuthSession = JSON.parse(stored);
-          if (parsedSession.expiresAt > Date.now()) {
-            if (isMounted) {
-              setSession(parsedSession);
-              setUser(parsedSession.user);
-            }
-          } else {
-            localStorage.removeItem(AUTH_STORAGE_KEY);
-            if (isMounted) {
-              setSession(null);
-              setUser(null);
-            }
+    // 1. INSTANT LOCAL CACHE RESTORATION (0ms - zero UI freeze/hang on refresh)
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem(AUTH_STORAGE_KEY) : null;
+      if (stored) {
+        const parsedSession: AuthSession = JSON.parse(stored);
+        if (parsedSession && parsedSession.expiresAt > Date.now()) {
+          if (isMounted) {
+            setSession(parsedSession);
+            setUser(parsedSession.user);
+            setIsLoading(false);
           }
         } else {
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+        }
+      }
+    } catch (e) {
+      console.warn('Local session parse warning:', e);
+    }
+
+    // 2. SAFETY TIMER: Under no circumstances can isLoading stay true for > 800ms
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setIsLoading(false);
+      }
+    }, 800);
+
+    // 3. ASYNC BACKGROUND SUPABASE VERIFICATION (Non-blocking)
+    async function syncSupabaseSession() {
+      try {
+        if (!isSupabaseConfigured()) {
+          if (isMounted) setIsLoading(false);
+          return;
+        }
+
+        const { data: { session: sbSession } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+
+        if (sbSession?.user) {
+          const sbUser = sbSession.user;
+          const userKey = sbUser.id;
+
+          // Prevent duplicate in-flight DB queries
+          if (!profileSyncInFlight.current[userKey]) {
+            profileSyncInFlight.current[userKey] = true;
+            try {
+              const profile = await ensureDatabaseProfile(
+                sbUser.id,
+                sbUser.email || '',
+                sbUser.user_metadata?.full_name || sbUser.user_metadata?.name,
+                sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture
+              );
+
+              if (isMounted) {
+                const activeSession: AuthSession = {
+                  accessToken: sbSession.access_token,
+                  refreshToken: sbSession.refresh_token,
+                  expiresAt: (sbSession.expires_at || 0) * 1000,
+                  user: profile,
+                };
+                setUser(profile);
+                setSession(activeSession);
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(activeSession));
+              }
+            } finally {
+              profileSyncInFlight.current[userKey] = false;
+            }
           }
         }
       } catch (e) {
-        console.error('Failed to parse auth session', e);
-        if (isMounted) {
-          setSession(null);
-          setUser(null);
-        }
+        console.warn('Background Supabase auth sync warning:', e);
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -259,34 +277,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    initAuthSession();
+    syncSupabaseSession();
 
+    // 4. SUPABASE AUTH STATE LISTENER
     if (isSupabaseConfigured()) {
       const { data: authListener } = supabase.auth.onAuthStateChange(async (event, sbSession) => {
+        if (!isMounted) return;
+
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') && sbSession?.user) {
           const sbUser = sbSession.user;
-          const profile = await ensureDatabaseProfile(
-            sbUser.id,
-            sbUser.email || '',
-            sbUser.user_metadata?.full_name || sbUser.user_metadata?.name,
-            sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture
-          );
-          if (isMounted) {
-            const activeSession: AuthSession = {
-              accessToken: sbSession.access_token,
-              refreshToken: sbSession.refresh_token,
-              expiresAt: (sbSession.expires_at || 0) * 1000,
-              user: profile,
-            };
-            setUser(profile);
-            setSession(activeSession);
-            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(activeSession));
+          const userKey = sbUser.id;
+
+          if (!profileSyncInFlight.current[userKey]) {
+            profileSyncInFlight.current[userKey] = true;
+            try {
+              const profile = await ensureDatabaseProfile(
+                sbUser.id,
+                sbUser.email || '',
+                sbUser.user_metadata?.full_name || sbUser.user_metadata?.name,
+                sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture
+              );
+              if (isMounted) {
+                const activeSession: AuthSession = {
+                  accessToken: sbSession.access_token,
+                  refreshToken: sbSession.refresh_token,
+                  expiresAt: (sbSession.expires_at || 0) * 1000,
+                  user: profile,
+                };
+                setUser(profile);
+                setSession(activeSession);
+                localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(activeSession));
+                setIsLoading(false);
+              }
+            } finally {
+              profileSyncInFlight.current[userKey] = false;
+            }
           }
         } else if (event === 'SIGNED_OUT') {
           if (isMounted) {
             setUser(null);
             setSession(null);
             localStorage.removeItem(AUTH_STORAGE_KEY);
+            setIsLoading(false);
           }
         }
       });
@@ -295,6 +327,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       isMounted = false;
+      clearTimeout(safetyTimer);
       if (subscription) {
         subscription.unsubscribe();
       }
@@ -579,6 +612,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('Central database registration sync warning:', regErr);
       }
 
+      // Also trigger Supabase native sign-up if configured
+      if (isSupabaseConfigured() && data.password) {
+        try {
+          await supabase.auth.signUp({
+            email: targetEmail,
+            password: data.password,
+            options: {
+              data: {
+                full_name: data.fullName,
+                role: newUser.role,
+              },
+            },
+          });
+        } catch (sbSignUpErr) {
+          console.warn('Supabase Auth signUp warning:', sbSignUpErr);
+        }
+      }
+
+      // Automatically dispatch real 6-digit OTP verification email to candidate
+      try {
+        await fetch('/api/auth/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: targetEmail,
+            fullName: data.fullName,
+          }),
+        });
+      } catch (otpSendErr) {
+        console.warn('OTP dispatch API warning:', otpSendErr);
+      }
+
       registeredUsers.push(newUser);
       localStorage.setItem('rbt_registered_users', JSON.stringify(registeredUsers));
 
@@ -625,9 +690,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const verifyEmail = async (email: string, code: string) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const cleanEmail = (email || user?.email || '').toLowerCase().trim();
+      const cleanCode = (code || '').replace(/\D/g, '').trim();
+
+      if (!cleanCode || cleanCode.length !== 6) {
+        return { success: false, error: 'Please enter the complete 6-digit verification code.' };
+      }
+
+      // Verify OTP strictly against server API /api/auth/verify-email
+      const res = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          code: cleanCode,
+        }),
+      });
+
+      const data = (await res.json()) as any;
+
+      if (!res.ok || !data.success) {
+        return {
+          success: false,
+          error: data.error || 'Invalid verification code. Please check your email and try again.',
+        };
+      }
+
+      // Verification succeeded on server
       if (user) {
-        const verifiedUser: UserProfile = { ...user, emailVerified: true };
+        const verifiedUser: UserProfile = {
+          ...user,
+          emailVerified: true,
+          accountStatus: 'active',
+        };
         setUser(verifiedUser);
         if (session) {
           const updatedSession = { ...session, user: verifiedUser };
@@ -635,9 +730,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedSession));
         }
       }
+
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: 'Invalid verification code.' };
+      return {
+        success: false,
+        error: err.message || 'Verification failed. Please check your network connection and try again.',
+      };
     }
   };
 

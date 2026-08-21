@@ -584,11 +584,23 @@ export default function ExamPage() {
               <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
               <h3 className="text-lg font-bold text-slate-900">No Published {certification} Questions Available</h3>
               <p className="text-sm text-slate-600">
-                All questions for {certification} are currently set to Draft in the Super Admin CMS. Publish questions in the Admin panel to make them active for candidate practice exams.
+                All questions for {certification} are currently in Draft/Expanding status. The Question Bank is fully active and published for <strong>Registered Behavior Technician (RBT®)</strong>.
               </p>
-              <Button onClick={() => setPhase('setup')} variant="outline" className="mt-4">
-                Back to Setup
-              </Button>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <Button
+                  onClick={() => {
+                    setCertification('RBT');
+                    setPhase('setup');
+                  }}
+                  variant="primary"
+                  className="bg-[#2563EB] hover:bg-blue-700 text-white shadow-md"
+                >
+                  Switch to RBT Exam (100% Active)
+                </Button>
+                <Button onClick={() => setPhase('setup')} variant="outline">
+                  Back to Setup
+                </Button>
+              </div>
             </Card>
           </div>
         )}

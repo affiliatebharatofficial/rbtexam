@@ -70,6 +70,70 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'features.feat6.title': 'Clinic & Training Center B2B Portal',
     'features.feat6.desc': 'Supervisors and BCBAs can oversee trainee cohorts, track student exam readiness scores, assign practice tests, and verify 100% team pass readiness.',
 
+    // How It Works
+    'howItWorks.badge': 'Proven 4-Step Blueprint',
+    'howItWorks.heading': 'How the RBT Practice Platform Works',
+    'howItWorks.subheading': 'Follow our proven 4-step roadmap to turn complex ABA principles into second nature.',
+    'howItWorks.step1.title': 'Start Free Access & Take Diagnostic',
+    'howItWorks.step1.subtitle': 'Identify Your Baseline Skill Level across 6 BACB Domains',
+    'howItWorks.step1.desc': 'Answer targeted practice questions representing all 6 BACB RBT 3rd Edition Task List domains. Our scoring engine measures your response speed, confidence level, and conceptual accuracy.',
+    'howItWorks.step2.title': 'Get Your Personalized AI Study Roadmap',
+    'howItWorks.step2.subtitle': 'Zero Wasted Time on Concepts You Already Mastered',
+    'howItWorks.step2.desc': 'Socrates AI generates a customized daily study schedule. It prioritizes low-confidence domains like C-04 (Discrete Trial Teaching) or D-02 (Differential Reinforcement) to maximize score gain.',
+    'howItWorks.step3.title': 'Drill with Socrates AI & Spaced Flashcards',
+    'howItWorks.step3.subtitle': 'Active Recall & Conversational Scenario Roleplay',
+    'howItWorks.step3.desc': 'Engage with our Socratic AI tutor for instant rationale on ethical dilemmas and clinical scenarios. Review Leitner 5-box flashcards designed to lock ABA terminology into long-term memory.',
+    'howItWorks.step4.title': 'Pass Your RBT Exam with Guaranteed Confidence',
+    'howItWorks.step4.subtitle': '85-Question Mocks • Pass-or-Refund Guarantee',
+    'howItWorks.step4.desc': 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.',
+
+    // Why Choose Us
+    'whyUs.badge': 'The Smart Choice for RBT Candidates',
+    'whyUs.heading': 'Why Use RBT Practice AI for Your Exam Prep?',
+    'whyUs.subheading': 'Compare our next-generation adaptive AI preparation platform against legacy static video courses and PDF question banks.',
+    'whyUs.table.feature': 'Feature / Capability',
+    'whyUs.table.us': 'RBT Practice AI',
+    'whyUs.table.them': 'Traditional Courses / PDFs',
+
+    // AI Tutor Preview
+    'aiTutorPreview.badge': '24/7 Socratic AI Tutor',
+    'aiTutorPreview.heading': 'Practice Clinical Scenarios with Socrates AI',
+    'aiTutorPreview.subheading': 'Get instant clinical rationales, roleplay ethical dilemmas, and clear up difficult ABA concepts with our 24/7 AI tutor.',
+    'aiTutorPreview.askPlaceholder': 'Ask Socrates AI any RBT question...',
+    'aiTutorPreview.sendBtn': 'Ask AI Tutor',
+    'aiTutorPreview.trySample': 'Try Sample Scenario Prompts:',
+
+    // Practice Test Preview
+    'testPreview.badge': 'Interactive Exam Simulator',
+    'testPreview.heading': 'Try a Live Practice Question Sample',
+    'testPreview.subheading': 'Experience our computer-based exam simulator with instant clinical feedback and domain tagging.',
+    'testPreview.submitBtn': 'Submit Answer',
+    'testPreview.nextBtn': 'Next Question',
+    'testPreview.selectOption': 'Select an option to submit your answer',
+
+    // Statistics
+    'stats.candidates': 'Candidates Prepared',
+    'stats.candidatesSub': 'Across all 50 US States',
+    'stats.passRate': 'First-Time Pass Rate',
+    'stats.passRateSub': 'Vs 74% National Average',
+    'stats.questions': 'Questions Answered',
+    'stats.questionsSub': 'BACB RBT 3rd Edition Aligned',
+    'stats.rating': 'Candidate Rating',
+    'stats.ratingSub': 'Based on 2,100+ verified reviews',
+
+    // FAQ Section
+    'faq.badge': 'Got Questions?',
+    'faq.heading': 'Frequently Asked Questions About the RBT Exam & Practice',
+    'faq.subheading': 'Everything you need to know about preparing for the RBT certification exam with RBT Practice AI.',
+
+    // CTA Section
+    'cta.badge': '🎉 100% Free Complete Access Active • No Payment Required',
+    'cta.heading': 'Start Free Practice Today and Pass Your RBT Exam',
+    'cta.subheading': 'Get full unrestricted access to realistic RBT exam questions, full 85-question timed mock exams, Socrates AI clinical explanations, and complete 3rd Edition flashcards.',
+    'cta.startBtn': 'Start 100% Free Practice',
+    'cta.mockBtn': 'Take a Free Mock Exam',
+    'cta.standards': 'Official BACB RBT 3rd Edition Task List Standards (Domains A-F)',
+
     // Pricing Section
     'pricing.badge': 'RBT Practice AI Pass-or-Refund Guarantee',
     'pricing.heading': 'Invest in Your RBT Certification Success',
@@ -156,21 +220,21 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
 
     // Hero & General UI
     'hero.badge': 'Alineado con el Temario BACB RBT 3ª Edición',
-    'hero.titlePrefix': 'Aprueba tu',
-    'hero.titleHighlight': 'Certificación RBT',
-    'hero.titleSuffix': 'con Confianza',
-    'hero.subtitle': 'Practica miles de preguntas realistas de RBT, realiza exámenes simulados completos, aprende con el Tutor de IA, domina tarjetas y rastrea tu progreso.',
-    'hero.bullet1': 'Simulacros de 85 Preguntas y 90 Minutos BACB',
-    'hero.bullet2': 'Tutor de Ética y Preguntas de Práctica de IA',
-    'hero.bullet3': 'Cobertura Completa del Temario Dominios A-F',
-    'hero.bullet4': 'Análisis de Áreas Débiles y Métricas',
-    'hero.startPractice': 'Comenzar Práctica',
-    'hero.mockExamBtn': 'Tomar Examen Simulado',
+    'hero.titlePrefix': 'Práctica RBT y',
+    'hero.titleHighlight': 'Preparación para el Examen RBT',
+    'hero.titleSuffix': 'para 2026',
+    'hero.subtitle': 'Acceso 100% gratuito a preguntas de examen realistas de RBT, exámenes simulados cronometrados de 85 preguntas, explicaciones de Sócrates IA y tarjetas didácticas de repetición espaciada.',
+    'hero.bullet1': 'Acceso 100% Gratis — Costo Cero',
+    'hero.bullet2': 'Exámenes Simulados Completos de 85 Preguntas',
+    'hero.bullet3': 'Tutor de IA Sócrates y Razonamiento Ético',
+    'hero.bullet4': 'Cobertura Completa de Dominios A–F del Temario',
+    'hero.startPractice': 'Comenzar Práctica 100% Gratis',
+    'hero.mockExamBtn': 'Tomar Examen Simulado Gratis',
     'hero.exploreFlashcards': 'Explorar Tarjetas',
     'hero.aiTutorButton': 'Preguntar al Tutor de IA',
 
     // Footer
-    'footer.brandDescription': 'La plataforma RBT Practice AI para la preparación del examen RBT con preguntas de práctica, exámenes simulados, tarjetas y tutor de IA para candidatos a la certificación BACB.',
+    'footer.brandDescription': 'La plataforma líder RBT Practice AI para la preparación del examen RBT con preguntas de práctica, exámenes simulados de 85 preguntas, tarjetas de repetición espaciada y tutor de IA para candidatos a la certificación BACB.',
     'footer.examPrep': 'Preparación para el Examen',
     'footer.company': 'Empresa y Blog',
     'footer.blog': 'Blog',
@@ -199,6 +263,70 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'features.feat5.desc': 'Los análisis visuales identifican puntos débiles exactos antes del día del examen para que dediques el 100% de tu tiempo restante a áreas de alto impacto.',
     'features.feat6.title': 'Portal B2B para Clínicas y Centros de Capacitación',
     'features.feat6.desc': 'Los supervisores y BCBA pueden supervisar grupos de practicantes, rastrear puntajes de preparación para el examen, asignar pruebas de práctica y verificar el 100% de preparación del equipo.',
+
+    // How It Works
+    'howItWorks.badge': 'Plan Comprobado en 4 Pasos',
+    'howItWorks.heading': 'Cómo Funciona la Plataforma RBT Practice',
+    'howItWorks.subheading': 'Sigue nuestra ruta comprobada de 4 pasos para dominar los principios de ABA con naturalidad y confianza.',
+    'howItWorks.step1.title': 'Inicia tu Acceso Gratuito y Haz el Diagnóstico',
+    'howItWorks.step1.subtitle': 'Identifica tu nivel base en los 6 dominios de la BACB',
+    'howItWorks.step1.desc': 'Responde preguntas de práctica específicas que cubren los 6 dominios del temario BACB RBT 3ª edición. Nuestro motor mide velocidad, confianza y precisión conceptual.',
+    'howItWorks.step2.title': 'Obtén tu Plan de Estudio Personalizado con IA',
+    'howItWorks.step2.subtitle': 'Cero tiempo perdido en conceptos que ya dominas',
+    'howItWorks.step2.desc': 'Sócrates IA genera un calendario de estudio diario adaptado que prioriza áreas de menor confianza como C-04 (DTT) o D-02 (Refuerzo Diferencial) para maximizar tu puntaje.',
+    'howItWorks.step3.title': 'Entrena con Sócrates IA y Tarjetas Espaciadas',
+    'howItWorks.step3.subtitle': 'Recuerdo activo y simulaciones clínicas conversacionales',
+    'howItWorks.step3.desc': 'Interactúa con nuestro tutor de IA para justificaciones inmediatas en dilemas éticos. Repasa tarjetas Leitner de 5 cajas para fijar los términos de ABA en tu memoria a largo plazo.',
+    'howItWorks.step4.title': 'Aprueba tu Examen RBT con Total Confianza',
+    'howItWorks.step4.subtitle': 'Simulacros de 85 preguntas • Garantía de Aprobación o Reembolso',
+    'howItWorks.step4.desc': 'Realiza exámenes simulados cronometrados de 85 preguntas y 90 minutos en condiciones reales de computadora. Al superar el 85% de preparación, estás respaldado por nuestra garantía.',
+
+    // Why Choose Us
+    'whyUs.badge': 'La Elección Inteligente para Candidatos RBT',
+    'whyUs.heading': '¿Por qué Elegir RBT Practice AI para tu Examen?',
+    'whyUs.subheading': 'Compara nuestra plataforma de preparación con IA adaptativa frente a cursos antiguos en video y bancos estáticos de preguntas en PDF.',
+    'whyUs.table.feature': 'Característica / Capacidad',
+    'whyUs.table.us': 'RBT Practice AI',
+    'whyUs.table.them': 'Cursos Tradicionales / PDFs',
+
+    // AI Tutor Preview
+    'aiTutorPreview.badge': 'Tutor de IA Socrático 24/7',
+    'aiTutorPreview.heading': 'Practica Escenarios Clínicos con Sócrates IA',
+    'aiTutorPreview.subheading': 'Obtén justificaciones clínicas al instante, simula dilemas éticos y aclara conceptos difíciles de ABA con nuestro tutor de IA 24/7.',
+    'aiTutorPreview.askPlaceholder': 'Haz cualquier pregunta de RBT a Sócrates IA...',
+    'aiTutorPreview.sendBtn': 'Consultar al Tutor',
+    'aiTutorPreview.trySample': 'Prueba Escenarios de Muestra:',
+
+    // Practice Test Preview
+    'testPreview.badge': 'Simulador Interactivo de Examen',
+    'testPreview.heading': 'Prueba una Pregunta de Práctica en Vivo',
+    'testPreview.subheading': 'Experimenta nuestro simulador de examen en computadora con retroalimentación clínica instantánea y clasificación por dominio.',
+    'testPreview.submitBtn': 'Enviar Respuesta',
+    'testPreview.nextBtn': 'Siguiente Pregunta',
+    'testPreview.selectOption': 'Selecciona una opción para enviar tu respuesta',
+
+    // Statistics
+    'stats.candidates': 'Candidatos Preparados',
+    'stats.candidatesSub': 'En los 50 estados de EE. UU.',
+    'stats.passRate': 'Tasa de Aprobación al Primer Intento',
+    'stats.passRateSub': 'Vs 74% Promedio Nacional',
+    'stats.questions': 'Preguntas Respondidas',
+    'stats.questionsSub': 'Alineadas al Temario BACB RBT 3ª Edición',
+    'stats.rating': 'Calificación de Candidatos',
+    'stats.ratingSub': 'Basado en más de 2,100 opiniones verificadas',
+
+    // FAQ Section
+    'faq.badge': '¿Tienes Preguntas?',
+    'faq.heading': 'Preguntas Frecuentes sobre el Examen RBT y la Práctica',
+    'faq.subheading': 'Todo lo que necesitas saber sobre la preparación para el examen de certificación RBT con RBT Practice AI.',
+
+    // CTA Section
+    'cta.badge': '🎉 Acceso Completo 100% Gratis Activo • Sin Tarjeta Requerida',
+    'cta.heading': 'Comienza tu Práctica Gratuita Hoy y Aprueba tu Examen RBT',
+    'cta.subheading': 'Obtén acceso total e ilimitado a preguntas realistas de RBT, exámenes simulados cronometrados de 85 preguntas, explicaciones clínicas con Sócrates IA y tarjetas de la 3ª edición.',
+    'cta.startBtn': 'Comenzar Práctica 100% Gratis',
+    'cta.mockBtn': 'Tomar Examen Simulado Gratis',
+    'cta.standards': 'Estándares Oficiales del Temario BACB RBT 3ª Edición (Dominios A-F)',
 
     // Pricing Section
     'pricing.badge': 'Garantía RBT Practice AI Aprueba-o-Reembolso',

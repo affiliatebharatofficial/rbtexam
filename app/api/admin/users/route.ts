@@ -16,57 +16,28 @@ export async function GET(request: NextRequest) {
     const adminSupabase = getSupabaseAdminClient();
     const realUsersMap = new Map<string, any>();
 
-    // 1. Fetch users from public.users table
-    try {
-      const { data: users, error: usersErr } = await adminSupabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (!usersErr && users && Array.isArray(users)) {
-        users.forEach((u: any) => {
-          if (u.email) {
-            const emailLower = u.email.toLowerCase().trim();
-            const isAdmin = isEmailAdmin(emailLower) || u.role === 'admin' || u.role === 'super_admin';
-            realUsersMap.set(emailLower, {
-              id: u.id || `usr_${Math.random().toString(36).substring(2)}`,
-              email: emailLower,
-              fullName: u.full_name || emailLower.split('@')[0],
-              role: isAdmin ? 'super_admin' : (u.role || 'student'),
-              subscriptionTier: isAdmin ? 'enterprise' : 'pro',
-              status: 'active',
-              joinedAt: u.created_at || new Date().toISOString(),
-              lastLoginAt: u.updated_at || new Date().toISOString(),
-            });
-          }
-        });
-      }
-    } catch (err) {
-      console.error('Error fetching users table in /api/admin/users:', err);
-    }
-
-    // 2. Fetch profiles from public.profiles table (enrich profiles)
+    // 1. Fetch profiles from public.profiles table
     try {
       const { data: profiles, error: profErr } = await adminSupabase
         .from('profiles')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       if (!profErr && profiles && Array.isArray(profiles)) {
         profiles.forEach((p: any) => {
           if (p.email) {
             const emailLower = p.email.toLowerCase().trim();
-            const existing = realUsersMap.get(emailLower) || {};
             const isAdmin = isEmailAdmin(emailLower) || p.role === 'admin' || p.role === 'super_admin';
             realUsersMap.set(emailLower, {
-              id: p.id || existing.id || `usr_${Math.random().toString(36).substring(2)}`,
+              id: p.id || `usr_${Math.random().toString(36).substring(2)}`,
               email: emailLower,
-              fullName: p.full_name || existing.fullName || emailLower.split('@')[0],
-              role: isAdmin ? 'super_admin' : (p.role || existing.role || 'student'),
-              subscriptionTier: isAdmin ? 'enterprise' : (p.subscription_tier || existing.subscriptionTier || 'pro'),
-              status: p.account_status || existing.status || 'active',
-              joinedAt: p.created_at || existing.joinedAt || new Date().toISOString(),
-              lastLoginAt: p.updated_at || existing.lastLoginAt || new Date().toISOString(),
+              fullName: p.full_name || emailLower.split('@')[0],
+              role: isAdmin ? 'super_admin' : (p.role || 'student'),
+              subscriptionTier: isAdmin ? 'enterprise' : (p.subscription_tier || 'pro'),
+              status: p.account_status || 'active',
+              joinedAt: p.created_at || new Date().toISOString(),
+              lastLoginAt: p.updated_at || new Date().toISOString(),
             });
           }
         });
@@ -75,34 +46,37 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching profiles in /api/admin/users:', err);
     }
 
-    // 3. Optional: Enrich with auth.users via Admin API if available
-    try {
-      if (adminSupabase.auth?.admin) {
-        const { data: authData } = await adminSupabase.auth.admin.listUsers().catch(() => ({ data: null }));
-        if (authData?.users && Array.isArray(authData.users)) {
-          authData.users.forEach((u: any) => {
+    // 2. Fallback to public.users table if profiles was empty
+    if (realUsersMap.size === 0) {
+      try {
+        const { data: users, error: usersErr } = await adminSupabase
+          .from('users')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (!usersErr && users && Array.isArray(users)) {
+          users.forEach((u: any) => {
             if (u.email) {
               const emailLower = u.email.toLowerCase().trim();
-              const existing = realUsersMap.get(emailLower);
-              if (!existing) {
-                const fullName = u.user_metadata?.full_name || u.user_metadata?.name || emailLower.split('@')[0];
-                const isAdmin = isEmailAdmin(emailLower) || u.app_metadata?.role === 'super_admin';
-                realUsersMap.set(emailLower, {
-                  id: u.id,
-                  email: emailLower,
-                  fullName,
-                  role: isAdmin ? 'super_admin' : 'student',
-                  subscriptionTier: isAdmin ? 'enterprise' : 'free',
-                  status: 'active',
-                  joinedAt: u.created_at || new Date().toISOString(),
-                  lastLoginAt: u.last_sign_in_at || u.updated_at || new Date().toISOString(),
-                });
-              }
+              const isAdmin = isEmailAdmin(emailLower) || u.role === 'admin' || u.role === 'super_admin';
+              realUsersMap.set(emailLower, {
+                id: u.id || `usr_${Math.random().toString(36).substring(2)}`,
+                email: emailLower,
+                fullName: u.full_name || emailLower.split('@')[0],
+                role: isAdmin ? 'super_admin' : (u.role || 'student'),
+                subscriptionTier: isAdmin ? 'enterprise' : 'pro',
+                status: 'active',
+                joinedAt: u.created_at || new Date().toISOString(),
+                lastLoginAt: u.updated_at || new Date().toISOString(),
+              });
             }
           });
         }
+      } catch (err) {
+        console.error('Error fetching users table in /api/admin/users:', err);
       }
-    } catch (err) {}
+    }
 
     // Ensure all designated admins are present
     const ADMIN_ACCOUNTS = [

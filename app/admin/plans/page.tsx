@@ -21,7 +21,16 @@ import {
   ArrowRight,
   RefreshCw,
   Copy,
+  ToggleLeft,
+  ToggleRight,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  AlertCircle,
+  Save,
 } from 'lucide-react';
+import { getPlatformConfig, updatePlatformConfig } from '@/lib/platform-config';
 
 export default function AdminPlansPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -30,6 +39,18 @@ export default function AdminPlansPage() {
   const [editingPlan, setEditingPlan] = useState<SubscriptionPlan | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  // Platform Monetization & Free Access Controller State
+  const [platformConfig, setPlatformConfig] = useState(getPlatformConfig());
+  const [freeAccessMode, setFreeAccessMode] = useState<boolean>(platformConfig.freeAccessMode !== false);
+  const [monetizationEnabled, setMonetizationEnabled] = useState<boolean>(Boolean(platformConfig.monetizationEnabled));
+  const [showPricingSection, setShowPricingSection] = useState<boolean>(platformConfig.showPricingSection !== false);
+  const [bannerText, setBannerText] = useState<string>(
+    platformConfig.freeAccessBannerText ||
+      '🎉 100% Free Complete Access — All 85-question Mock Exams, Practice Questions, Answers, Rationales & Flashcards are currently unlocked for everyone!'
+  );
+  const [isConfigSaving, setIsConfigSaving] = useState(false);
+  const [configSaveSuccess, setConfigSaveSuccess] = useState(false);
 
   // Form State
   const [name, setName] = useState('');
@@ -46,6 +67,15 @@ export default function AdminPlansPage() {
   const fetchPlans = async () => {
     setIsLoading(true);
     try {
+      const currentConf = getPlatformConfig();
+      setPlatformConfig(currentConf);
+      setFreeAccessMode(currentConf.freeAccessMode !== false);
+      setMonetizationEnabled(Boolean(currentConf.monetizationEnabled));
+      setShowPricingSection(currentConf.showPricingSection !== false);
+      if (currentConf.freeAccessBannerText) {
+        setBannerText(currentConf.freeAccessBannerText);
+      }
+
       const res = await fetch('/api/admin/plans');
       if (res.ok) {
         const data = (await res.json()) as any;
@@ -58,6 +88,45 @@ export default function AdminPlansPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSaveMonetizationSettings = async () => {
+    setIsConfigSaving(true);
+    try {
+      updatePlatformConfig('freeAccessMode', freeAccessMode, 'Super Admin');
+      updatePlatformConfig('monetizationEnabled', monetizationEnabled, 'Super Admin');
+      updatePlatformConfig('showPricingSection', showPricingSection, 'Super Admin');
+      updatePlatformConfig('freeAccessBannerText', bannerText, 'Super Admin');
+      
+      setConfigSaveSuccess(true);
+      setTimeout(() => setConfigSaveSuccess(false), 3500);
+    } catch (err) {
+      console.error('Failed to update monetization settings:', err);
+    } finally {
+      setIsConfigSaving(false);
+    }
+  };
+
+  const handleTogglePricingVisibility = (visible: boolean) => {
+    setShowPricingSection(visible);
+    updatePlatformConfig('showPricingSection', visible, 'Super Admin');
+    setConfigSaveSuccess(true);
+    setTimeout(() => setConfigSaveSuccess(false), 3000);
+  };
+
+  const handleQuickToggleFreeMode = (newValue: boolean) => {
+    setFreeAccessMode(newValue);
+    updatePlatformConfig('freeAccessMode', newValue, 'Super Admin');
+    // If free mode is enabled, recommend turning monetization off
+    if (newValue) {
+      setMonetizationEnabled(false);
+      updatePlatformConfig('monetizationEnabled', false, 'Super Admin');
+    } else {
+      setMonetizationEnabled(true);
+      updatePlatformConfig('monetizationEnabled', true, 'Super Admin');
+    }
+    setConfigSaveSuccess(true);
+    setTimeout(() => setConfigSaveSuccess(false), 3000);
   };
 
   useEffect(() => {
@@ -215,6 +284,189 @@ export default function AdminPlansPage() {
             </Link>
           </div>
         </div>
+
+        {/* ========================================================================= */}
+        {/* DYNAMIC MONETIZATION & FREE ACCESS CONTROLLER (SUPER ADMIN SWITCH)        */}
+        {/* ========================================================================= */}
+        <Card
+          glass
+          className={`p-6 rounded-2xl border transition-all shadow-xl relative overflow-hidden ${
+            freeAccessMode
+              ? 'border-emerald-500/40 bg-gradient-to-br from-emerald-950/20 via-slate-900/40 to-emerald-900/10'
+              : 'border-blue-500/40 bg-gradient-to-br from-slate-900/40 via-blue-950/20 to-slate-900/40'
+          }`}
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-2xl">
+              <div className="flex items-center gap-2 flex-wrap">
+                {freeAccessMode ? (
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-500 text-slate-950 flex items-center gap-1.5 shadow-md shadow-emerald-500/20">
+                    <Unlock className="w-3.5 h-3.5" />
+                    <span>SABKE LIYE FREE (100% UNRESTRICTED ACCESS ACTIVE)</span>
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-600 text-white flex items-center gap-1.5 shadow-md shadow-blue-600/20">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>PAID SUBSCRIPTION PAYWALL ACTIVE</span>
+                  </span>
+                )}
+
+                {monetizationEnabled ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                    Payment Gateway: Chalu (ON)
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                    Payment Gateway: Band (OFF)
+                  </span>
+                )}
+              </div>
+
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                {freeAccessMode
+                  ? '⚡ Free Candidate Access Mode Is Currently Active'
+                  : '🔒 Standard Paid Subscription Paywall Is Active'}
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                {freeAccessMode
+                  ? 'All candidates can freely take 85-question mock exams, view full answer rationales, review flashcards, and use Socrates AI tutor without paying. Pricing page shows 100% Free Access CTA.'
+                  : 'Candidates must subscribe to paid plans (or use the 7-day trial) to access mock exams, unlimited flashcards, and premium AI features.'}
+              </p>
+            </div>
+
+            {/* Quick Toggle Controls */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleQuickToggleFreeMode(!freeAccessMode)}
+                className={`px-5 py-3 rounded-xl font-black text-xs transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  freeAccessMode
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30 active:scale-95'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                }`}
+              >
+                {freeAccessMode ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                    <span>Free Mode: ON (Sabke Liye Free)</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>Turn ON Free Mode for Everyone</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const newMonVal = !monetizationEnabled;
+                  setMonetizationEnabled(newMonVal);
+                  updatePlatformConfig('monetizationEnabled', newMonVal, 'Super Admin');
+                  setConfigSaveSuccess(true);
+                  setTimeout(() => setConfigSaveSuccess(false), 3000);
+                }}
+                className={`px-4 py-3 rounded-xl font-bold text-xs transition-all border flex items-center justify-center gap-2 ${
+                  monetizationEnabled
+                    ? 'bg-blue-600/20 text-blue-300 border-blue-500/40 hover:bg-blue-600/30'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
+                }`}
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>Payment: {monetizationEnabled ? 'Chalu (Active)' : 'Band (Disabled)'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Landing Page Pricing Section Visibility Controls (Hide / Show Price Tags) */}
+          <div className="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-900/60 border border-slate-700/60 shadow-inner">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black text-white uppercase tracking-wider">
+                  Landing Page Price Tag / Pricing Section:
+                </span>
+                {showPricingSection ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-1">
+                    <Eye className="w-3 h-3 text-emerald-400" />
+                    <span>VISIBLE (Show Ho Raha Hai)</span>
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-rose-500/20 text-rose-300 border border-rose-400/40 flex items-center gap-1 animate-pulse">
+                    <EyeOff className="w-3 h-3 text-rose-400" />
+                    <span>HIDDEN (Price Tag Gayab / Chhupa Hua Hai)</span>
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-300">
+                {showPricingSection
+                  ? 'Pricing section is currently VISIBLE on the landing page. Candidates see the pricing plans cards.'
+                  : 'Pricing section is currently HIDDEN from the landing page. Candidates see only the 100% Free Practice announcements.'}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+              <button
+                type="button"
+                onClick={() => handleTogglePricingVisibility(false)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shadow-md ${
+                  !showPricingSection
+                    ? 'bg-rose-600 text-white shadow-rose-600/30 border border-rose-400 ring-2 ring-rose-400/40'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                }`}
+              >
+                <EyeOff className="w-3.5 h-3.5" />
+                <span>Hide Pricing Section (Price Tag Gayab Karein)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTogglePricingVisibility(true)}
+                className={`px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 shadow-md ${
+                  showPricingSection
+                    ? 'bg-emerald-600 text-white shadow-emerald-600/30 border border-emerald-400 ring-2 ring-emerald-400/40'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Show Pricing Section (Price Tag Dikhayein)</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Banner Text Customizer */}
+          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-3 items-end sm:items-center">
+            <div className="flex-1 w-full">
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Custom Free Access Announcement Banner (Visible on Pricing & Dashboard)
+              </label>
+              <input
+                type="text"
+                value={bannerText}
+                onChange={(e) => setBannerText(e.target.value)}
+                placeholder="Announcement banner text..."
+                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <Button
+              onClick={handleSaveMonetizationSettings}
+              disabled={isConfigSaving}
+              variant="primary"
+              size="sm"
+              className="gap-1.5 text-xs font-bold shrink-0 h-10"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{isConfigSaving ? 'Saving...' : 'Save Settings'}</span>
+            </Button>
+          </div>
+
+          {configSaveSuccess && (
+            <div className="mt-3 p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Settings updated successfully! Changes take effect immediately across all candidate portals.</span>
+            </div>
+          )}
+        </Card>
 
         {/* Scorecard Stats Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

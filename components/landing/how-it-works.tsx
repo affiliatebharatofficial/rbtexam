@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLanguage } from '@/context/language-context';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Target, Brain, Repeat, ShieldCheck, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
@@ -8,14 +9,15 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export function HowItWorks() {
+  const { t } = useLanguage();
   const [activeStep, setActiveStep] = useState<number>(0);
 
   const steps = [
     {
       stepNumber: '01',
-      title: 'Start Your 7-Day Free Trial & Take the Diagnostic',
-      subtitle: 'Identify Your Baseline Skill Level across 6 BACB Domains',
-      description: 'Answer targeted practice questions representing all 6 BACB RBT 3rd Edition Task List domains. Our scoring engine measures your response speed, confidence level, and conceptual accuracy.',
+      title: t('howItWorks.step1.title', 'Start Free Access & Take Diagnostic'),
+      subtitle: t('howItWorks.step1.subtitle', 'Identify Your Baseline Skill Level across 6 BACB Domains'),
+      description: t('howItWorks.step1.desc', 'Answer targeted practice questions representing all 6 BACB RBT 3rd Edition Task List domains. Our scoring engine measures your response speed, confidence level, and conceptual accuracy.'),
       icon: Target,
       color: 'from-blue-500 to-cyan-500',
       badgeText: 'Instant Baseline',
@@ -33,9 +35,9 @@ export function HowItWorks() {
     },
     {
       stepNumber: '02',
-      title: 'Get Your Personalized AI Study Roadmap',
-      subtitle: 'Zero Wasted Time on Concepts You Already Mastered',
-      description: 'Socrates AI generates a customized daily study schedule. It prioritizes low-confidence domains like C-04 (Discrete Trial Teaching) or D-02 (Differential Reinforcement) to maximize score gain.',
+      title: t('howItWorks.step2.title', 'Get Your Personalized AI Study Roadmap'),
+      subtitle: t('howItWorks.step2.subtitle', 'Zero Wasted Time on Concepts You Already Mastered'),
+      description: t('howItWorks.step2.desc', 'Socrates AI generates a customized daily study schedule. It prioritizes low-confidence domains like C-04 (Discrete Trial Teaching) or D-02 (Differential Reinforcement) to maximize score gain.'),
       icon: Brain,
       color: 'from-indigo-500 to-purple-600',
       badgeText: 'AI Personalized Plan',
@@ -50,9 +52,9 @@ export function HowItWorks() {
     },
     {
       stepNumber: '03',
-      title: 'Drill with Socrates AI & Spaced Flashcards',
-      subtitle: 'Active Recall & Conversational Scenario Roleplay',
-      description: 'Engage with our Socratic AI tutor for instant rationale on ethical dilemmas and clinical scenarios. Review Leitner 5-box flashcards designed to lock ABA terminology into long-term memory.',
+      title: t('howItWorks.step3.title', 'Drill with Socrates AI & Spaced Flashcards'),
+      subtitle: t('howItWorks.step3.subtitle', 'Active Recall & Conversational Scenario Roleplay'),
+      description: t('howItWorks.step3.desc', 'Engage with our Socratic AI tutor for instant rationale on ethical dilemmas and clinical scenarios. Review Leitner 5-box flashcards designed to lock ABA terminology into long-term memory.'),
       icon: Repeat,
       color: 'from-purple-500 to-pink-500',
       badgeText: 'Adaptive Learning',
@@ -65,9 +67,9 @@ export function HowItWorks() {
     },
     {
       stepNumber: '04',
-      title: 'Pass Your RBT Exam with Guaranteed Confidence',
-      subtitle: '85-Question Mocks • Pass-or-Refund Guarantee',
-      description: 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.',
+      title: t('howItWorks.step4.title', 'Pass Your RBT Exam with Guaranteed Confidence'),
+      subtitle: t('howItWorks.step4.subtitle', '85-Question Mocks • Pass-or-Refund Guarantee'),
+      description: t('howItWorks.step4.desc', 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.'),
       icon: ShieldCheck,
       color: 'from-emerald-500 to-teal-600',
       badgeText: '100% Pass Guarantee',
@@ -91,13 +93,13 @@ export function HowItWorks() {
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <Badge variant="blue" className="gap-1">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Proven 4-Step Blueprint</span>
+            <span>{t('howItWorks.badge', 'Proven 4-Step Blueprint')}</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            How the RBT Practice Platform Works
+            {t('howItWorks.heading', 'How the RBT Practice Platform Works')}
           </h2>
           <p className="text-base text-slate-600">
-            Follow our proven 4-step roadmap during your 7-day free trial to turn complex ABA principles into second nature.
+            {t('howItWorks.subheading', 'Follow our proven 4-step roadmap to turn complex ABA principles into second nature.')}
           </p>
         </div>
 

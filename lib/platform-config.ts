@@ -21,6 +21,12 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
   },
   maintenanceMode: false,
   primaryCurrency: 'USD',
+  monetizationEnabled: false,
+  freeAccessMode: true,
+  showPricingSection: true,
+  freeAccessBannerText: '🎉 100% Free Complete Access — All 85-question Mock Exams, Practice Questions, Answers, Rationales & Flashcards are currently unlocked for everyone!',
+  freeAccessBadgeText: '100% Free Open Access Mode Active',
+  pricingPageCtaText: 'Start Free Practice',
   allowPublicRegistration: true,
   allowNewRegistration: true,
   inviteOnlyMode: false,
@@ -65,6 +71,30 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
     supportedLocales: ['en-US', 'es-ES'],
   },
 };
+
+/**
+ * Returns whether Free Access Mode is currently active (all questions and tools unlocked)
+ */
+export function isFreeAccessActive(): boolean {
+  const config = getPlatformConfig();
+  return config.freeAccessMode !== false;
+}
+
+/**
+ * Returns whether SaaS monetization and payment gates are enabled
+ */
+export function isMonetizationEnabled(): boolean {
+  const config = getPlatformConfig();
+  return Boolean(config.monetizationEnabled);
+}
+
+/**
+ * Returns whether the Pricing Section is visible on the Landing Page
+ */
+export function isPricingSectionVisible(): boolean {
+  const config = getPlatformConfig();
+  return config.showPricingSection !== false;
+}
 
 export const DEFAULT_AI_PROVIDERS: AIProviderConfig[] = [
   { id: 'prov-openai', name: 'OpenAI (GPT-4o / GPT-3.5)', isEnabled: true, priority: 1, apiKeyMasked: 'sk-proj-...8492', monthlyTokenLimit: 50000000, tokensConsumedThisMonth: 12400000, monthlyCostUSD: 186.40 },

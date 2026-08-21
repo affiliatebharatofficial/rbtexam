@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getEffectiveSubscriptionTier, getTrialDaysRemaining } from '../../lib/subscription-engine';
+import { updatePlatformConfig } from '../../lib/platform-config';
 import { UserProfile } from '../../types/auth';
 
 describe('7-Day Free Pro Access & Trial Expiration Engine', () => {
@@ -17,7 +18,7 @@ describe('7-Day Free Pro Access & Trial Expiration Engine', () => {
       trialEndsAt: new Date(now + 7 * 24 * 60 * 60 * 1000).toISOString(),
     };
 
-    const effectiveTier = getEffectiveSubscriptionTier(candidateUser);
+    const effectiveTier = getEffectiveSubscriptionTier(candidateUser, { bypassFreeCheck: true });
     expect(effectiveTier).toBe('pro');
 
     const trialInfo = getTrialDaysRemaining(candidateUser);
@@ -25,7 +26,7 @@ describe('7-Day Free Pro Access & Trial Expiration Engine', () => {
     expect(trialInfo.daysRemaining).toBe(7);
   });
 
-  it('should automatically revert candidate to free tier when trialEndsAt has passed', () => {
+  it('should automatically revert candidate to free tier when trialEndsAt has passed under strict paywall', () => {
     const expiredUser: Partial<UserProfile> = {
       id: 'usr_test_002',
       role: 'student',
@@ -33,7 +34,7 @@ describe('7-Day Free Pro Access & Trial Expiration Engine', () => {
       trialEndsAt: new Date(now - 1 * 24 * 60 * 60 * 1000).toISOString(), // Expired 1 day ago
     };
 
-    const effectiveTier = getEffectiveSubscriptionTier(expiredUser);
+    const effectiveTier = getEffectiveSubscriptionTier(expiredUser, { bypassFreeCheck: true });
     expect(effectiveTier).toBe('free');
 
     const trialInfo = getTrialDaysRemaining(expiredUser);
@@ -49,7 +50,7 @@ describe('7-Day Free Pro Access & Trial Expiration Engine', () => {
       trialEndsAt: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
     };
 
-    const effectiveTier = getEffectiveSubscriptionTier(adminUser);
+    const effectiveTier = getEffectiveSubscriptionTier(adminUser, { bypassFreeCheck: true });
     expect(effectiveTier).toBe('enterprise');
   });
 
@@ -60,7 +61,19 @@ describe('7-Day Free Pro Access & Trial Expiration Engine', () => {
       subscriptionTier: 'team',
     };
 
-    const effectiveTier = getEffectiveSubscriptionTier(teamUser);
+    const effectiveTier = getEffectiveSubscriptionTier(teamUser, { bypassFreeCheck: true });
     expect(effectiveTier).toBe('team');
+  });
+
+  it('should grant pro tier to all users when freeAccessMode is enabled', () => {
+    updatePlatformConfig('freeAccessMode', true, 'Test Admin');
+    const freeUser: Partial<UserProfile> = {
+      id: 'usr_free_001',
+      role: 'student',
+      subscriptionTier: 'free',
+    };
+
+    const effectiveTier = getEffectiveSubscriptionTier(freeUser);
+    expect(effectiveTier).toBe('pro');
   });
 });

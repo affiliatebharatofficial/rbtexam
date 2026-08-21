@@ -16,6 +16,7 @@
 | Security & Governance | Zero Trust + RLS | `production` | v2.8.0 | Passed |
 | DevOps & Infrastructure | Docker + GitHub CI | `production` | v2.8.0 | Passed |
 | QA & Testing Center | Vitest + Playwright | `production` | v2.8.0 | Passed |
+| Dynamic Free Access & Monetization | Admin Switch (Chalu/Band) | `production` | v3.1.0 | Passed |
 | Master Project Brain | Single Source Truth | `production` | v2.9.0 | Passed |
 | Production Launch & Go-Live Engine | Deployment Safety | `production` | v3.0.0 | Passed |
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLanguage } from '@/context/language-context';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Check, X, ShieldCheck, Zap, Sparkles, Brain, Award } from 'lucide-react';
@@ -8,55 +9,44 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export function WhyChooseUs() {
+  const { t, language } = useLanguage();
+  const isEs = language === 'es';
+
   const comparisonItems = [
     {
-      feature: 'BACB RBT 3rd Edition Task List Alignment',
-      us: true,
-      usText: '100% Updated 2026 Standards (Domains A-F)',
-      them: false,
-      themText: 'Often outdated 1st Edition content',
+      feature: isEs ? 'Alineación con el Temario BACB RBT 3ª Edición' : 'BACB RBT 3rd Edition Task List Alignment',
+      usText: isEs ? '100% Estándares 2026 Actualizados (Dominios A-F)' : '100% Updated 2026 Standards (Domains A-F)',
+      themText: isEs ? 'Contenido desactualizado de 1ª/2ª edición' : 'Often outdated 1st Edition content',
     },
     {
-      feature: '85-Question 90-Min Timed Practice Exams',
-      us: true,
-      usText: 'Computer-based simulation with review grid',
-      them: false,
-      themText: 'Static PDFs or untimed generic quizzes',
+      feature: isEs ? 'Exámenes Simulados Cronometrados de 85 Preguntas y 90 Min' : '85-Question 90-Min Timed Practice Exams',
+      usText: isEs ? 'Simulación en computadora con cuadrícula de revisión' : 'Computer-based simulation with review grid',
+      themText: isEs ? 'PDFs estáticos o cuestionarios genéricos sin tiempo' : 'Static PDFs or untimed generic quizzes',
     },
     {
-      feature: 'Real-Time Conversational AI Tutor',
-      us: true,
-      usText: 'Socrates AI explains why wrong answers are incorrect 24/7',
-      them: false,
-      themText: 'Static text explanations or none',
+      feature: isEs ? 'Tutor de IA Conversacional en Tiempo Real' : 'Real-Time Conversational AI Tutor',
+      usText: isEs ? 'Sócrates IA explica por qué las respuestas son incorrectas 24/7' : 'Socrates AI explains why wrong answers are incorrect 24/7',
+      themText: isEs ? 'Explicaciones en texto estático o sin explicaciones' : 'Static text explanations or none',
     },
     {
-      feature: 'Adaptive Domain Mastery Heatmaps',
-      us: true,
-      usText: 'Pinpoints exact sub-task weaknesses (e.g. C-04, D-02)',
-      them: false,
-      themText: 'Generic total percentage score',
+      feature: isEs ? 'Mapas de Calor de Dominio de Áreas Débiles' : 'Adaptive Domain Mastery Heatmaps',
+      usText: isEs ? 'Identifica debilidades exactas por tarea (ej. C-04, D-02)' : 'Pinpoints exact sub-task weaknesses (e.g. C-04, D-02)',
+      themText: isEs ? 'Puntaje de porcentaje total genérico sin desglose' : 'Generic total percentage score',
     },
     {
-      feature: 'Leitner Spaced Repetition Flashcards',
-      us: true,
-      usText: 'Algorithmic 5-box memory lock for ABA terms',
-      them: false,
-      themText: 'Static PDF lists or printable paper cards',
+      feature: isEs ? 'Tarjetas de Repetición Espaciada Leitner' : 'Leitner Spaced Repetition Flashcards',
+      usText: isEs ? 'Algoritmo de 5 cajas para memorización duradera de ABA' : 'Algorithmic 5-box memory lock for ABA terms',
+      themText: isEs ? 'Listas en PDF estáticas o tarjetas de papel imprimibles' : 'Static PDF lists or printable paper cards',
     },
     {
-      feature: '7-Day Free Trial with Full Pro Access',
-      us: true,
-      usText: 'Full access to mocks, AI tutor & flashcards',
-      them: false,
-      themText: 'Upfront paywalls or non-refundable purchases',
+      feature: isEs ? 'Acceso 100% Gratuito y Completo' : '100% Free Complete Access',
+      usText: isEs ? 'Acceso total a simulacros, tutor de IA y tarjetas' : 'Full access to mocks, AI tutor & flashcards',
+      themText: isEs ? 'Muros de pago iniciales o compras no reembolsables' : 'Upfront paywalls or non-refundable purchases',
     },
     {
-      feature: 'Pass-or-Refund Guarantee Protection',
-      us: true,
-      usText: 'Refund if you fail after 85% readiness (Terms apply)',
-      them: false,
-      themText: 'No guarantee or support',
+      feature: isEs ? 'Garantía de Aprobación o Reembolso' : 'Pass-or-Refund Guarantee Protection',
+      usText: isEs ? 'Reembolso si repruebas tras 85% de preparación' : 'Refund if you fail after 85% readiness (Terms apply)',
+      themText: isEs ? 'Sin garantía ni soporte de aprobación' : 'No guarantee or support',
     },
   ];
 
@@ -64,12 +54,12 @@ export function WhyChooseUs() {
     <section className="py-24 bg-slate-50/70 border-b border-slate-100 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <Badge variant="blue">The Smart Choice for RBT Candidates</Badge>
+          <Badge variant="blue">{t('whyUs.badge', 'The Smart Choice for RBT Candidates')}</Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            Why Use RBT Practice AI for Your Exam Prep?
+            {t('whyUs.heading', 'Why Use RBT Practice AI for Your Exam Prep?')}
           </h2>
           <p className="text-base text-slate-600">
-            Compare our next-generation adaptive AI preparation platform with 7-day free trial against legacy static video courses and PDF question banks.
+            {t('whyUs.subheading', 'Compare our next-generation adaptive AI preparation platform against legacy static video courses and PDF question banks.')}
           </p>
         </div>
 
@@ -80,16 +70,16 @@ export function WhyChooseUs() {
               <thead>
                 <tr className="border-b border-slate-200">
                   <th className="py-4 px-4 text-xs font-bold uppercase tracking-wider text-slate-400 w-2/5">
-                    Feature Comparison
+                    {t('whyUs.table.feature', 'Feature Comparison')}
                   </th>
                   <th className="py-4 px-4 text-sm font-extrabold text-[#2563EB] w-3/10 bg-blue-50/60 rounded-t-xl text-center">
                     <div className="flex items-center justify-center space-x-1">
                       <Sparkles className="w-4 h-4 text-[#2563EB]" />
-                      <span>RBT Practice AI</span>
+                      <span>{t('whyUs.table.us', 'RBT Practice AI')}</span>
                     </div>
                   </th>
                   <th className="py-4 px-4 text-xs font-bold text-slate-500 w-3/10 text-center">
-                    Traditional Prep Courses
+                    {t('whyUs.table.them', 'Traditional Prep Courses')}
                   </th>
                 </tr>
               </thead>
@@ -123,13 +113,17 @@ export function WhyChooseUs() {
                 <Award className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-slate-900">Pass Guarantee Backed</h4>
-                <p className="text-xs text-slate-600">If you pass our readiness exam and fail the BACB exam, get 100% refund.</p>
+                <h4 className="text-sm font-bold text-slate-900">
+                  {isEs ? 'Garantía de Aprobación Respaldada' : 'Pass Guarantee Backed'}
+                </h4>
+                <p className="text-xs text-slate-600">
+                  {isEs ? 'Si alcanzas el 85% en nuestros simulacros y no apruebas el examen BACB, obtén 100% de reembolso.' : 'If you pass our readiness exam and fail the BACB exam, get 100% refund.'}
+                </p>
               </div>
             </div>
             <Link href="/exam">
               <Button variant="primary" size="sm" className="whitespace-nowrap shadow-md">
-                Start Free Diagnostic
+                {isEs ? 'Comenzar Diagnóstico Gratis' : 'Start Free Diagnostic'}
               </Button>
             </Link>
           </div>
