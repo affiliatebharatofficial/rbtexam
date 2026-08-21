@@ -105,18 +105,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing mandatory fields: question, certification, options' }, { status: 400 });
     }
 
-    const norm = normalizeQuestionForComparison(body.question);
     const adminDb = getSupabaseAdminClient();
+    const cleanPrompt = body.question.trim();
+
+    // Fast indexed check for exact duplicate
     const { data: existingRows } = await adminDb
       .from('master_questions')
-      .select('question_text')
-      .is('deleted_at', null);
+      .select('id, question_text')
+      .eq('question_text', cleanPrompt)
+      .is('deleted_at', null)
+      .limit(1);
 
-    const isDuplicate = (existingRows || []).some(
-      (r: any) => normalizeQuestionForComparison(r.question_text || '') === norm
-    );
-
-    if (isDuplicate) {
+    if (existingRows && existingRows.length > 0) {
       return NextResponse.json({ error: 'Duplicate question prompt detected. A question with this text already exists in the master item bank.' }, { status: 409 });
     }
 

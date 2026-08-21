@@ -173,7 +173,7 @@ export async function batchCreateServerQuestionsAsync(
 
   const adminDb = getSupabaseAdminClient();
   const dbRows = questions.map(mapMasterQuestionToDbRow);
-  const BATCH_SIZE = 50;
+  const BATCH_SIZE = 25;
   const insertedQuestions: MasterQuestion[] = [];
   let lastErrorMessage: string | undefined = undefined;
 
@@ -182,7 +182,7 @@ export async function batchCreateServerQuestionsAsync(
     const { data: insertedData, error } = await adminDb
       .from('master_questions')
       .insert(chunk)
-      .select(QUESTION_COLUMNS);
+      .select('id, question_code, question_text, certification, status');
 
     if (error) {
       console.error('Batch question insert error:', error.message);
@@ -200,31 +200,24 @@ export async function batchCreateServerQuestionsAsync(
 }
 
 /**
- * Server-only: Fetch all question stems from Supabase across chunks (bypassing PostgREST 1000-row limit)
- * Used strictly for comprehensive duplicate detection.
+ * Server-only: Fetch question stems from Supabase with safe limit to avoid Worker CPU exhaustion
  */
-export async function getAllQuestionStemsAsync(): Promise<string[]> {
-  const adminDb = getSupabaseAdminClient();
-  const stems: string[] = [];
-  let from = 0;
-  const CHUNK_SIZE = 1000;
-
-  while (true) {
+export async function getAllQuestionStemsAsync(maxLimit: number = 1000): Promise<string[]> {
+  try {
+    const adminDb = getSupabaseAdminClient();
     const { data, error } = await adminDb
       .from('master_questions')
       .select('question_text')
       .is('deleted_at', null)
-      .range(from, from + CHUNK_SIZE - 1);
+      .order('created_at', { ascending: false })
+      .limit(maxLimit);
 
-    if (error || !data || data.length === 0) break;
-    for (const r of data) {
-      if (r.question_text) stems.push(r.question_text);
-    }
-    if (data.length < CHUNK_SIZE) break;
-    from += CHUNK_SIZE;
+    if (error || !data) return [];
+    return data.map((r: any) => r.question_text).filter(Boolean);
+  } catch (err) {
+    console.error('Failed to get question stems:', err);
+    return [];
   }
-
-  return stems;
 }
 
 /**

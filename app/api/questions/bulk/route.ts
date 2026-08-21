@@ -34,26 +34,37 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Array of questions required for import' }, { status: 400 });
       }
 
-      // Exhaustive fetch of all question stems across database chunks
-      const existingStems = await getAllQuestionStemsAsync();
-
-      const existingNormalizedStems = new Set<string>(
-        existingStems.map((text: string) => normalizeQuestionForComparison(text || '')).filter(Boolean)
-      );
-
-      const questionsToInsert: any[] = [];
+      // 1. In-batch deduplication
+      const seenInBatch = new Set<string>();
+      const batchUniqueQuestions: any[] = [];
       let skippedDuplicatesCount = 0;
 
       for (const q of questions) {
         const norm = normalizeQuestionForComparison(q.question || q.question_text || '');
-        if (norm && existingNormalizedStems.has(norm)) {
-          skippedDuplicatesCount++;
-          continue;
+        if (norm) {
+          if (seenInBatch.has(norm)) {
+            skippedDuplicatesCount++;
+            continue;
+          }
+          seenInBatch.add(norm);
         }
-
-        questionsToInsert.push(q);
-        if (norm) existingNormalizedStems.add(norm);
+        batchUniqueQuestions.push(q);
       }
+
+      // 2. Fetch existing stems safely with max limit to verify duplicates
+      const existingStems = await getAllQuestionStemsAsync(500);
+      const existingSet = new Set<string>(
+        existingStems.map((s) => normalizeQuestionForComparison(s)).filter(Boolean)
+      );
+
+      const questionsToInsert = batchUniqueQuestions.filter((q) => {
+        const norm = normalizeQuestionForComparison(q.question || q.question_text || '');
+        if (norm && existingSet.has(norm)) {
+          skippedDuplicatesCount++;
+          return false;
+        }
+        return true;
+      });
 
       const result = await batchCreateServerQuestionsAsync(questionsToInsert);
 
