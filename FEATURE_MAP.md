@@ -15,4 +15,5 @@
 | **Admin QA Testing Center** | `/admin/qa` | Admin | Vitest + Playwright suite results, coverage targets | `health-engine.ts` |
 | **Admin Security Center** | `/admin/security` | Admin | Security threat logs, session revocation, privacy DSR queue | `security-engine.ts` |
 | **Admin DevOps Infrastructure** | `/admin/infrastructure` | Admin | Service health checks, deployment history, deploy commands | `health-engine.ts` |
+| **Bing IndexNow Hub & Multi-Search Indexing** | `/admin?tab=indexnow` & `/api/indexnow` | Super Admin / API | 1-Click site-wide indexing push to Bing/Yandex, custom URL submission, real-time audit logs | `indexnow-engine.ts` |
 | **Production Launch & Go-Live Control** | `/admin/launch-control` | Super Admin | 20-point validation matrix, feature flags, health diagnostics, beta program, maintenance & rollbacks | `release-management-engine.ts` |

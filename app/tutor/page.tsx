@@ -325,8 +325,7 @@ function TutorContent() {
   const activeStarterChips = getStarterChipsForMode(mode, certification);
 
   return (
-    <ProtectedRoute>
-      <div className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-5rem)] flex gap-6">
+    <div className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[calc(100vh-5rem)] flex gap-6">
 
         {/* SIDEBAR: CONVERSATION HISTORY & MODES (3 Cols) */}
         <div className="hidden lg:flex flex-col w-72 flex-shrink-0 space-y-4">
@@ -574,7 +573,6 @@ function TutorContent() {
         </div>
 
       </div>
-    </ProtectedRoute>
   );
 }
 

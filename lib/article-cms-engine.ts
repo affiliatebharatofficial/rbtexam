@@ -1,4 +1,5 @@
 import { Article, ArticleCategory, ArticleStatus, CreateArticleInput, UpdateArticleInput } from '@/types/article-cms';
+import { submitToIndexNow, getIndexNowConfig } from './indexnow-engine';
 
 const STORAGE_KEY = 'rbt_article_cms_data';
 
@@ -735,6 +736,16 @@ export function createArticle(input: CreateArticleInput): Article {
 
   const updatedList = [newArticle, ...articles];
   saveArticles(updatedList);
+
+  if (newArticle.status === 'published') {
+    try {
+      const cfg = getIndexNowConfig();
+      if (cfg.enabled && cfg.autoSubmitOnPublish) {
+        submitToIndexNow(`/articles/${newArticle.slug}`, 'Article CMS (New Publish)');
+      }
+    } catch (e) { /* background non-blocking */ }
+  }
+
   return newArticle;
 }
 

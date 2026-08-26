@@ -198,8 +198,7 @@ export default function FlashcardsPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full space-y-8">
+    <div className="py-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full space-y-8">
         
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -579,9 +578,7 @@ export default function FlashcardsPage() {
           </Card>
         )}
 
-      </div>
-
-      {/* AI FLASHCARD GENERATOR MODAL */}
+        {/* AI FLASHCARD GENERATOR MODAL */}
       {isGeneratorModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-100 space-y-6">
@@ -752,6 +749,6 @@ export default function FlashcardsPage() {
           </div>
         </div>
       )}
-    </ProtectedRoute>
+    </div>
   );
 }

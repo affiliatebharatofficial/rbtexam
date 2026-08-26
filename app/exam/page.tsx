@@ -347,7 +347,6 @@ export default function ExamPage() {
   const results = phase === 'results' ? getResultsSummary() : null;
 
   return (
-    <ProtectedRoute>
       <div className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex-1 w-full">
 
         {/* PHASE 1: SETUP SCREEN */}
@@ -1059,7 +1058,6 @@ export default function ExamPage() {
         )}
 
       </div>
-    </ProtectedRoute>
   );
 }
 

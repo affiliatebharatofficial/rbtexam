@@ -50,6 +50,12 @@ const SYSTEM_CONFIG_STORE: Record<string, any> = {
     environment: 'live' as 'test' | 'live',
     currency: 'USD',
   },
+  indexNow: {
+    key: 'e39f75ba5a894762b71efc5e3d748f21',
+    host: 'www.rbtpracticeai.com',
+    enabled: true,
+    autoSubmitOnPublish: true,
+  },
   smtp: {
     host: 'smtp.sendgrid.net',
     port: 587,
@@ -117,6 +123,7 @@ export const REGISTERED_PLUGINS: PlatformPlugin[] = [
   { id: 'plug-brain', name: 'Project Brain Inventory', version: 'v2.5.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Real-time codebase component, database table & API route registry.', menuLabel: 'Project Brain', route: '/admin/project-brain' },
   { id: 'plug-plans', name: 'Subscription Plan & Pricing Engine', version: 'v2.8.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Add, edit, remove, and manage subscription pricing tiers, feature lists, and guarantee badges.', menuLabel: 'Subscription Plans', route: '/admin/plans' },
   { id: 'plug-qa', name: 'QA & Automated Testing', version: 'v2.6.0', status: 'active', isEnabled: true, category: 'Operations', description: '145-test suite execution, Playwright E2E smoke tests & health checks.', menuLabel: 'QA Hub', route: '/admin/qa' },
+  { id: 'plug-indexnow', name: 'Bing IndexNow Engine', version: 'v1.0.0', status: 'active', isEnabled: true, category: 'Operations', description: 'Instant multi-search engine indexing protocol for Bing, Yandex, Naver, and Seznam.', menuLabel: 'Bing IndexNow', route: '/admin?tab=indexnow' },
   { id: 'plug-notifications', name: 'Notification & Email Engine', version: 'v2.7.0', status: 'active', isEnabled: true, category: 'Operations', description: 'In-app notification inbox, SMTP gateway & email campaign manager.', menuLabel: 'Notifications', route: '/admin/notifications' },
 ];
 

@@ -28,15 +28,15 @@ export async function POST(request: NextRequest) {
     const saved = await saveSMTPConfig(
       {
         enabled: enabled ?? true,
-        provider: provider || 'resend',
-        host,
-        port: port ? Number(port) : 587,
-        username,
+        provider: provider || 'smtp_relay',
+        host: host || 'mailadmin.sitecountry.net',
+        port: port ? Number(port) : 465,
+        username: username || 'hello@rbtpracticeai.com',
         password,
         apiKey,
         senderName: senderName || 'RBT Practice AI',
-        senderEmail: senderEmail || 'verify@rbtpracticeai.com',
-        replyTo,
+        senderEmail: senderEmail || username || 'hello@rbtpracticeai.com',
+        replyTo: replyTo || 'hello@rbtpracticeai.com',
       },
       adminUser || 'Super Admin'
     );

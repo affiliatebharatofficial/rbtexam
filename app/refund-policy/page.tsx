@@ -24,7 +24,7 @@ export const metadata = constructMetadata({
   title: 'Refund & Cancellation Policy | RBT Practice AI',
   description:
     'Review our transparent Refund & Cancellation Policy, subscription billing details, 7-day free trial terms, self-service cancellation, and Pass-or-Refund Guarantee.',
-  canonicalUrl: 'https://rbtpracticeai.com/refund-policy',
+  path: '/refund-policy',
 });
 
 export default function RefundPolicyPage() {

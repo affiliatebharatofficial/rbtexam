@@ -6,10 +6,28 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, CheckCircle2, ArrowRight, Brain, BookOpen, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Metadata } from 'next';
+import { constructMetadata } from '@/utils/seo';
 import { MasterQuestion } from '@/types/master-question';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const found = await fetchQuestionByIdOrCodeAsync(slug);
+  const qText = found?.question || 'RBT Practice Question';
+  const desc = found?.scenarioText
+    ? `Scenario: ${found.scenarioText}. Question: ${qText}`
+    : `Practice question with detailed BACB rationale: ${qText}`;
+  const trimmedDesc = desc.length > 158 ? `${desc.slice(0, 155).trim()}...` : desc;
+
+  return constructMetadata({
+    title: `${found?.id || slug}: ${qText.slice(0, 50)}... | RBT Practice AI`,
+    description: trimmedDesc,
+    path: `/rbt/question/${found?.id || slug}`,
+  });
+}
 
 export default async function ProgrammaticQuestionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

@@ -21,7 +21,7 @@ export const metadata = constructMetadata({
   title: 'About Us | RBT Practice AI Platform & Mission',
   description:
     'Discover the mission behind RBT Practice AI: empowering Registered Behavior Technician candidates to master Applied Behavior Analysis (ABA) and pass the BACB certification exam with confidence.',
-  canonicalUrl: 'https://rbtpracticeai.com/rbt/about',
+  path: '/rbt/about',
 });
 
 export default function AboutPage() {

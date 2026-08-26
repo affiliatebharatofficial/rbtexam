@@ -22,7 +22,7 @@ export const metadata = constructMetadata({
   title: 'BACB Non-Affiliation & Educational Disclaimer | RBT Practice AI',
   description:
     'Official non-affiliation and educational disclaimer for RBT Practice AI. Independent study platform not affiliated with the Behavior Analyst Certification Board® (BACB®).',
-  canonicalUrl: 'https://rbtpracticeai.com/disclaimer',
+  path: '/disclaimer',
 });
 
 export default function DisclaimerPage() {

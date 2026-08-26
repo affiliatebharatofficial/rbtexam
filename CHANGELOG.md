@@ -2,7 +2,57 @@
 
 ## Master Version History
 
-### [v3.5.0] - 2026-08-20 (Legal, Refund & Payment Compliance Release)
+### [v3.6.1] - 2026-08-26 (Production SEO Canonical Domain & Indexability Fix)
+#### Fixed & Enhanced
+- **Canonical Domain Enforcement (`utils/seo.ts`)**:
+  - Enforced authoritative primary domain `https://www.rbtpracticeai.com` across all pages and layouts.
+  - Added automatic sanitization logic to clean Cloudflare Worker URLs (`workers.dev`), Vercel preview domains, and non-www variants to prevent crawler canonicalisation issues.
+  - Fixed `metadataBase`, `alternates.canonical`, and `openGraph.url` to guarantee self-referencing canonical tags for full indexability.
+- **Cloudflare Worker & Environment Configuration (`wrangler.jsonc`, `.env`)**:
+  - Updated `NEXT_PUBLIC_SITE_URL` and `NEXT_PUBLIC_APP_URL` to `https://www.rbtpracticeai.com`.
+  - Updated auth redirect and email template URLs in `auth-context.tsx` and `notification-engine.ts`.
+
+### [v3.6.0] - 2026-08-22 (Bing & Multi-Search-Engine IndexNow Protocol Integration)
+#### Added & Production-Ready
+- **Bing IndexNow Engine (`lib/indexnow-engine.ts`)**:
+  - Full support for standard IndexNow protocol connecting to Bing, Yandex, Naver, and Seznam search engines.
+  - Multi-endpoint fallback architecture (`api.indexnow.org`, `bing.com/indexnow`, `yandex.com/indexnow`).
+  - Automated dynamic sitemap collector aggregating static routes, BACB questions, ABA glossary terms, and published articles.
+  - Automatic chunking (up to 10,000 URLs per batch) and URL normalization.
+  - Real-time audit logging and persistent submission history.
+- **REST API Route (`app/api/indexnow/route.ts`)**:
+  - `GET /api/indexnow` diagnostics and statistics endpoint.
+  - `POST /api/indexnow` on-demand submission endpoint for single URLs, batch lists, or 1-click full site re-indexing.
+- **Super Admin CMS Integration (`app/admin/page.tsx` `tab=indexnow`)**:
+  - Dedicated "Bing IndexNow" tab in Super Admin dashboard.
+  - 1-Click Mass Push button with live HTTP status feedback.
+  - Custom URL submission box.
+  - Verification key display and direct link to verification file.
+  - Live audit log stream.
+- **Article CMS Hook (`lib/article-cms-engine.ts`)**:
+  - Automatic background notification to IndexNow whenever an article is published or updated.
+- **CLI Automation Script (`scripts/submit-indexnow.mjs`)**:
+  - CLI runner (`npm run submit:indexnow`) for manual, cron, or CI/CD deployments.
+- **Public Verification File (`public/e39f75ba5a894762b71efc5e3d748f21.txt`)**:
+  - Verification key file placed at website root.
+- **Documentation & Tests**:
+  - `docs/BING_INDEXNOW.md` architecture and integration guide.
+  - Comprehensive unit test suite `tests/unit/indexnow-engine.test.ts` (7/7 passing).
+
+### [v3.5.1] - 2026-08-21 (Super Admin User Deletion & Complete Database Sync Fix)
+#### Fixed / Enhanced
+- **Admin User Deletion Backend (`app/api/admin/users/delete/route.ts`)**:
+  - Implemented cascading deletion across all database tables (`exam_answers`, `exam_sessions`, `flashcard_progress`, `student_progress`, `subscriptions`, `study_plans`, `adaptive_learning_state`, `ai_conversations`, `notifications`, `system_audit_logs`, `profiles`, `users`).
+  - Added Supabase Auth user deletion (`adminSupabase.auth.admin.deleteUser`) matching by user UUID and email address.
+  - Added case-insensitive email cleanup (`ilike`) and whitelist protection preventing accidental deletion of super admin accounts.
+- **Admin Client Sync (`app/admin/page.tsx`)**:
+  - Attached verified `getAdminAuthHeaders()` (`Authorization: Bearer <token>` and `x-admin-email`) to delete, update, and fetch requests.
+  - Synchronized client-side state and purged deleted records from `localStorage` (`rbt_registered_users`, `rbt_admin_users_roster`).
+  - Added automatic reload from authoritative server database upon successful deletion to ensure zero ghost reappearance on page refresh.
+- **Admin User Update Route (`app/api/admin/users/update/route.ts`)**:
+  - Unified with `getSupabaseAdminClient()` and case-insensitive email matching.
+- **Unit Test Coverage (`tests/unit/admin-user-deletion.test.ts`)**:
+  - Added unit tests for admin protection and deletion validation.
 #### Added / Enhanced
 - **Refund & Cancellation Policy Page (`/refund-policy`)**:
   - Full subscription billing explanation (Monthly $29/mo, Annual $19/mo USD), 1-click self-service cancellation, 48-hour accidental renewal grace window, 100% Pass-or-Refund Guarantee claim instructions, failed payment dunning, and duplicate charge remedies.

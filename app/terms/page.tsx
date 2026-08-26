@@ -22,7 +22,7 @@ export const metadata = constructMetadata({
   title: 'Terms of Service | RBT Practice AI',
   description:
     'Read the official Terms of Service for RBT Practice AI governing candidate accounts, subscription billing, cancellations, AI usage, and intellectual property.',
-  canonicalUrl: 'https://rbtpracticeai.com/terms',
+  path: '/terms',
 });
 
 export default function TermsOfServicePage() {

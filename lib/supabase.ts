@@ -25,6 +25,10 @@ export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNTYxMzMsImV4cCI6MjEwMTYzMjEzM30.GnMw1y4htxgLJd1Kr20fWCPN7elME_uKU2EbxwudHcw';
 
+export const SUPABASE_SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjA1NjEzMywiZXhwIjoyMTAxNjMyMTMzfQ.OEKK73cH84lpMAr9ma2MMdzUeq5nI8IsLZVtBT2qHxQ';
+
 let supabaseInstance: SupabaseClient | null = null;
 
 export function getSupabaseClient(): SupabaseClient {
@@ -53,8 +57,7 @@ export function getSupabaseAdminClient(): SupabaseClient {
   const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || SUPABASE_URL;
   const serviceRoleKey =
     getRuntimeEnv('SUPABASE_SERVICE_ROLE_KEY') ||
-    getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
-    SUPABASE_ANON_KEY;
+    SUPABASE_SERVICE_ROLE_KEY;
 
   return createClient(url, serviceRoleKey, {
     auth: { persistSession: false },

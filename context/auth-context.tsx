@@ -15,7 +15,7 @@ interface AuthContextType {
   completeGoogleAuthSession: (email: string, name?: string, userId?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: SignUpData) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
-  confirmPasswordReset: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  confirmPasswordReset: (email: string, code: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
   verifyEmail: (email: string, code: string) => Promise<{ success: boolean; error?: string }>;
   updateProfile: (data: Partial<UserProfile>) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
@@ -500,7 +500,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const origin =
           typeof window !== 'undefined' && window.location.origin
             ? window.location.origin
-            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://rbtexam.manorhub533.workers.dev');
+            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
         const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
         if (typeof window !== 'undefined') {
           window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
@@ -660,22 +660,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const requestPasswordReset = async (email: string) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const cleanEmail = email.toLowerCase().trim();
+      const res = await fetch('/api/auth/password-reset/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail }),
+      });
+      const data = (await res.json()) as any;
+
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'Failed to send password reset code.' };
+      }
+
       return {
         success: true,
-        message: `Password reset instructions have been sent to ${email}. Please check your inbox.`,
+        message: data.message || `Password reset code sent to ${cleanEmail}. Please check your inbox.`,
       };
     } catch (err: any) {
-      return { success: false, error: 'Failed to send password reset email.' };
+      return { success: false, error: err.message || 'Failed to send password reset email.' };
     }
   };
 
-  const confirmPasswordReset = async (token: string, newPassword: string) => {
+  const confirmPasswordReset = async (email: string, code: string, newPassword: string) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 900));
+      const cleanEmail = email.toLowerCase().trim();
+      const cleanCode = (code || '').trim();
+
+      const res = await fetch('/api/auth/password-reset/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          code: cleanCode,
+          newPassword,
+        }),
+      });
+      const data = (await res.json()) as any;
+
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'Password reset failed.' };
+      }
+
       return { success: true };
     } catch (err: any) {
-      return { success: false, error: 'Invalid or expired password reset token.' };
+      return { success: false, error: err.message || 'Network error resetting password.' };
     }
   };
 

@@ -28,18 +28,6 @@ export default function HomePage() {
     }
   }, [isAuthenticated, isLoading, homeRoute, router]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (isAuthenticated && homeRoute && homeRoute !== '/') {
-    return null;
-  }
-
   return (
     <div className="space-y-0 selection:bg-blue-500/20 selection:text-[#2563EB]">
       {/* 1. Hero Section */}

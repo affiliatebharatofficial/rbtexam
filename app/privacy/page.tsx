@@ -25,7 +25,7 @@ export const metadata = constructMetadata({
   title: 'Privacy Policy | RBT Practice AI',
   description:
     'Learn how RBT Practice AI collects, protects, uses, and respects candidate data, practice exam performance, payment details, and personal information in compliance with GDPR and CCPA.',
-  canonicalUrl: 'https://rbtpracticeai.com/privacy',
+  path: '/privacy',
 });
 
 export default function PrivacyPolicyPage() {

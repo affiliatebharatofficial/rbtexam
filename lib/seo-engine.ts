@@ -1,7 +1,7 @@
 import { SEOMetadata, InternalLink, GlossaryTerm, SEOHealthReport } from '@/types/seo';
 import { SAMPLE_BACB_QUESTIONS } from './sample-questions';
 
-const BASE_URL = 'https://rbtpracticeai.com';
+const BASE_URL = 'https://www.rbtpracticeai.com';
 
 /**
  * Builds standard Next.js Metadata Payload
@@ -14,9 +14,12 @@ export function buildSEOMetadata(
 ): SEOMetadata {
   const canonicalUrl = `${BASE_URL}${slugPath.startsWith('/') ? slugPath : `/${slugPath}`}`;
 
+  // Optimize description length for Google SERP (max ~155-160 chars)
+  const trimmedDesc = description.length > 158 ? `${description.slice(0, 155).trim()}...` : description;
+
   return {
     title: `${title} | RBT Practice AI`,
-    description,
+    description: trimmedDesc,
     slug: slugPath,
     canonicalUrl,
     robots: 'index, follow, max-image-preview:large, max-snippet:-1',

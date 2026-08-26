@@ -13,6 +13,7 @@
 | **AI Content Engine** | `lib/ai-content-engine.ts` | Educational content generation, human-in-the-loop editorial workflow | Admin Content CMS |
 | **SEO Engine** | `lib/seo-engine.ts` | Programmatic SEO page generation, schema markup, broken link audits | Dynamic `/rbt` Routes |
 | **Health Engine** | `lib/health-engine.ts` | Aggregated service health checks, DB/OpenAI status reporting | `/api/health`, Admin Infrastructure |
+| **Bing IndexNow Engine** | `lib/indexnow-engine.ts` | Instant multi-search-engine indexing protocol (Bing, Yandex, Naver, Seznam), sitemap aggregator, automated publishing push | Article CMS, Super Admin CMS, CLI |
 | **Release Management Engine** | `lib/release-management-engine.ts` | SemVer releases, 20-point validation matrix, feature flags, beta program, rollbacks & emergency safety | Super Admin Launch Control, API Platform |
 
 ## Related Files

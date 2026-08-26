@@ -39,10 +39,13 @@ export async function generateMetadata({ params }: GlossaryTermPageProps): Promi
     });
   }
 
+  const rawDesc = `${term.term} RBT Exam Definition: ${term.definition} (${term.bacbCitation}).`;
+  const trimmedDesc = rawDesc.length > 158 ? `${rawDesc.slice(0, 155).trim()}...` : rawDesc;
+
   return constructMetadata({
-    title: `${term.term} - ABA Glossary & Clinical Definition | RBT Practice AI`,
-    description: `${term.term} definition for RBT candidates: ${term.definition} Aligned with ${term.bacbCitation}. Includes clinical examples, mnemonics, and practice questions.`,
-    canonicalUrl: `https://rbtpracticeai.com/rbt/glossary/${term.slug}`,
+    title: `${term.term} - ABA Glossary & Definition | RBT Practice AI`,
+    description: trimmedDesc,
+    path: `/rbt/glossary/${term.slug}`,
     keywords: [
       term.term,
       `${term.term} RBT definition`,

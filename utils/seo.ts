@@ -1,11 +1,13 @@
 import { Metadata } from 'next';
 
+export const PRIMARY_DOMAIN = 'https://www.rbtpracticeai.com';
+
 export const SITE_CONFIG = {
   name: 'RBT Practice AI',
   title: 'RBT Practice & Exam Prep 2026 | RBT Practice AI',
   description: 'Start your 7-day free trial for RBT practice. Master the RBT exam with realistic practice questions, 85-question mock tests, and 3rd Edition study tools.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'https://rbtpracticeai.com',
-  ogImage: 'https://rbtpracticeai.com/icon-512.png',
+  url: PRIMARY_DOMAIN,
+  ogImage: `${PRIMARY_DOMAIN}/icon-512.png`,
   keywords: [
     'rbt practice',
     'rbt exam',
@@ -37,7 +39,8 @@ export function constructMetadata({
   title = SITE_CONFIG.title,
   description = SITE_CONFIG.description,
   image = SITE_CONFIG.ogImage,
-  canonicalUrl = SITE_CONFIG.url,
+  canonicalUrl,
+  path = '',
   noIndex = false,
   keywords = SITE_CONFIG.keywords,
 }: {
@@ -45,18 +48,42 @@ export function constructMetadata({
   description?: string;
   image?: string;
   canonicalUrl?: string;
+  path?: string;
   noIndex?: boolean;
   keywords?: string[];
 } = {}): Metadata {
+  const pagePath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
+  let fullCanonical = canonicalUrl || `${PRIMARY_DOMAIN}${pagePath || '/'}`;
+  
+  // Normalize and enforce authoritative https://www.rbtpracticeai.com canonical
+  if (fullCanonical.startsWith('http://')) {
+    fullCanonical = fullCanonical.replace('http://', 'https://');
+  }
+  // Replace Cloudflare worker URLs, vercel preview URLs, or non-www domain
+  fullCanonical = fullCanonical.replace(/https:\/\/[^/]*workers\.dev/, PRIMARY_DOMAIN);
+  fullCanonical = fullCanonical.replace(/https:\/\/[^/]*vercel\.app/, PRIMARY_DOMAIN);
+  if (fullCanonical.startsWith('https://rbtpracticeai.com')) {
+    fullCanonical = fullCanonical.replace('https://rbtpracticeai.com', PRIMARY_DOMAIN);
+  }
+
+  // Remove trailing slash on subpages for strict canonical consistency
+  if (fullCanonical.length > PRIMARY_DOMAIN.length && fullCanonical.endsWith('/')) {
+    fullCanonical = fullCanonical.slice(0, -1);
+  }
+
+  const imageUrl = image.startsWith('http')
+    ? image
+    : `${PRIMARY_DOMAIN}${image.startsWith('/') ? image : `/${image}`}`;
+
   return {
     title,
     description,
     keywords,
     authors: [{ name: SITE_CONFIG.author }],
     creator: SITE_CONFIG.author,
-    metadataBase: new URL(SITE_CONFIG.url),
+    metadataBase: new URL(PRIMARY_DOMAIN),
     alternates: {
-      canonical: canonicalUrl,
+      canonical: fullCanonical,
     },
     robots: {
       index: !noIndex,
@@ -72,11 +99,11 @@ export function constructMetadata({
     openGraph: {
       title,
       description,
-      url: canonicalUrl,
+      url: fullCanonical,
       siteName: SITE_CONFIG.name,
       images: [
         {
-          url: image,
+          url: imageUrl,
           width: 1200,
           height: 630,
           alt: 'RBT Practice AI Platform',
@@ -89,7 +116,7 @@ export function constructMetadata({
       card: 'summary_large_image',
       title,
       description,
-      images: [image],
+      images: [imageUrl],
       creator: '@rbtpracticeai',
     },
     icons: {

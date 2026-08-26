@@ -27,9 +27,12 @@ export interface NotificationItem {
 export interface EmailTemplate {
   id: string;
   templateCode: string;
+  name: string;
+  description?: string;
   subject: string;
+  previewText?: string;
   bodyHTML: string;
-  category: 'onboarding' | 'study' | 'billing' | 'marketing';
+  category: 'onboarding' | 'study' | 'billing' | 'marketing' | 'security' | 'account';
   isEditable: boolean;
   updatedAt: string;
 }

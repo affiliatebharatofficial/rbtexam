@@ -57,6 +57,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
+      'cloudflare:sockets': path.resolve(__dirname, 'tests/mocks/cloudflare-sockets.ts'),
     },
   },
 });

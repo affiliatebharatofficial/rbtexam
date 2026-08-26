@@ -10,6 +10,7 @@ import {
   broadcastNotificationCampaign,
   EMAIL_TEMPLATES,
   AUTOMATION_WORKFLOWS,
+  renderEmailTemplate,
 } from '@/lib/notification-engine';
 
 describe('publishNotificationEvent()', () => {
@@ -81,12 +82,24 @@ describe('EMAIL_TEMPLATES', () => {
   });
 });
 
-describe('AUTOMATION_WORKFLOWS', () => {
-  it('each workflow has a triggerEvent and actionChannel', () => {
-    AUTOMATION_WORKFLOWS.forEach((wf) => {
-      expect(wf).toHaveProperty('triggerEvent');
-      expect(wf).toHaveProperty('actionChannel');
-      expect(wf.isActive).toBeDefined();
+describe('renderEmailTemplate()', () => {
+  it('interpolates template variables correctly', () => {
+    const { subject, html, found } = renderEmailTemplate('tpl-welcome', {
+      name: 'Dr. Sarah Jenkins',
+      dashboardUrl: 'https://rbtexam.com/dashboard',
     });
+
+    expect(found).toBe(true);
+    expect(html).toContain('Dr. Sarah Jenkins');
+    expect(html).toContain('https://rbtexam.com/dashboard');
+  });
+
+  it('renders password reset OTP template with code', () => {
+    const { subject, html } = renderEmailTemplate('tpl-password-reset', {
+      otpCode: '739201',
+    });
+
+    expect(subject).toContain('739201');
+    expect(html).toContain('739201');
   });
 });

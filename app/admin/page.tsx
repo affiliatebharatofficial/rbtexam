@@ -63,6 +63,9 @@ import { getAllArticles, createArticle, updateArticle, deleteArticle } from '@/l
 import { getAllCoupons, createCoupon, toggleCouponStatus, deleteCoupon } from '@/lib/coupon-engine';
 import { Coupon } from '@/types/subscription';
 import { AIProviderConfig } from '@/types/super-admin';
+import { isEmailAdmin } from '@/lib/admin-whitelist';
+import { getIndexNowConfig, updateIndexNowConfig, submitToIndexNow, submitAllSitemapUrls, getIndexNowSubmissionLogs, getAllSiteUrls } from '@/lib/indexnow-engine';
+import { IndexNowConfig, IndexNowLog } from '@/types/indexnow';
 import { testLemonSqueezyConnection } from '@/lib/lemon-squeezy';
 
 type AdminTab =
@@ -77,7 +80,8 @@ type AdminTab =
   | 'coupons'
   | 'media'
   | 'language'
-  | 'audit';
+  | 'audit'
+  | 'indexnow';
 
 export default function SuperAdminCMSPage() {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -101,6 +105,12 @@ export default function SuperAdminCMSPage() {
 
   // Article CMS State
   const [articles, setArticles] = useState<Article[]>([]);
+  const [indexNowConfig, setIndexNowConfig] = useState<IndexNowConfig>(getIndexNowConfig());
+  const [indexNowLogs, setIndexNowLogs] = useState<IndexNowLog[]>(getIndexNowSubmissionLogs());
+  const [isSubmittingAllIndexNow, setIsSubmittingAllIndexNow] = useState<boolean>(false);
+  const [indexNowSubmitResult, setIndexNowSubmitResult] = useState<any>(null);
+  const [customIndexNowUrl, setCustomIndexNowUrl] = useState<string>('');
+  const [isSubmittingCustomUrl, setIsSubmittingCustomUrl] = useState<boolean>(false);
   const [articleSearchQuery, setArticleSearchQuery] = useState('');
   const [articleCategoryFilter, setArticleCategoryFilter] = useState('ALL');
   const [articleStatusFilter, setArticleStatusFilter] = useState('ALL');
@@ -213,6 +223,23 @@ export default function SuperAdminCMSPage() {
     }
   }, [activeTab]);
 
+  const getAdminAuthHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (typeof window !== 'undefined') {
+      const sessStr = localStorage.getItem('rbt_ai_auth_session');
+      if (sessStr) {
+        try {
+          const parsed = JSON.parse(sessStr);
+          if (parsed?.accessToken) headers['Authorization'] = `Bearer ${parsed.accessToken}`;
+          if (parsed?.user?.email) headers['x-admin-email'] = parsed.user.email;
+        } catch {}
+      }
+    }
+    return headers;
+  };
+
   const loadAllRegisteredUsers = async () => {
     let realUsersMap = new Map<string, any>();
 
@@ -230,18 +257,9 @@ export default function SuperAdminCMSPage() {
 
     // 1. Fetch real users from Server API Route /api/admin/users
     try {
-      const headers: Record<string, string> = {};
-      if (typeof window !== 'undefined') {
-        const sessStr = localStorage.getItem('rbt_ai_auth_session');
-        if (sessStr) {
-          try {
-            const parsed = JSON.parse(sessStr);
-            if (parsed?.accessToken) headers['Authorization'] = `Bearer ${parsed.accessToken}`;
-            if (parsed?.user?.email) headers['x-admin-email'] = parsed.user.email;
-          } catch {}
-        }
-      }
-      const apiRes = await fetch('/api/admin/users', { headers });
+      const apiRes = await fetch('/api/admin/users', {
+        headers: getAdminAuthHeaders(),
+      });
       const apiData = (await apiRes.json()) as any;
       if (apiData && apiData.users && Array.isArray(apiData.users)) {
         apiData.users.forEach((u: any) => {
@@ -254,7 +272,7 @@ export default function SuperAdminCMSPage() {
       console.error('Error fetching /api/admin/users:', err);
     }
 
-    // 3. Fetch real signed up users from LocalStorage ('rbt_registered_users')
+    // 2. Fetch real signed up users from LocalStorage ('rbt_registered_users')
     if (typeof window !== 'undefined') {
       try {
         const regStr = localStorage.getItem('rbt_registered_users');
@@ -262,37 +280,21 @@ export default function SuperAdminCMSPage() {
           const regUsers: any[] = JSON.parse(regStr);
           regUsers.forEach((u: any) => {
             if (u.email && !u.email.includes('@rbtpracticeai.com')) {
-              realUsersMap.set(u.email.toLowerCase().trim(), {
-                id: u.id,
-                email: u.email,
-                fullName: u.fullName || u.email.split('@')[0],
-                role: u.email.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
-                subscriptionTier: u.subscriptionTier || 'pro',
-                status: u.accountStatus || 'active',
-                joinedAt: u.createdAt || new Date().toISOString(),
-                lastLoginAt: u.lastLoginAt || new Date().toISOString(),
-              });
+              const cleanEm = u.email.toLowerCase().trim();
+              if (!realUsersMap.has(cleanEm)) {
+                realUsersMap.set(cleanEm, {
+                  id: u.id,
+                  email: u.email,
+                  fullName: u.fullName || u.email.split('@')[0],
+                  role: cleanEm === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
+                  subscriptionTier: u.subscriptionTier || 'pro',
+                  status: u.accountStatus || 'active',
+                  joinedAt: u.createdAt || new Date().toISOString(),
+                  lastLoginAt: u.lastLoginAt || new Date().toISOString(),
+                });
+              }
             }
           });
-        }
-
-        // 4. Fetch active logged in session user ('rbt_ai_auth_session')
-        const activeSessStr = localStorage.getItem('rbt_ai_auth_session');
-        if (activeSessStr) {
-          const activeSess = JSON.parse(activeSessStr);
-          if (activeSess?.user?.email && !activeSess.user.email.includes('@rbtpracticeai.com')) {
-            const u = activeSess.user;
-            realUsersMap.set(u.email.toLowerCase().trim(), {
-              id: u.id,
-              email: u.email,
-              fullName: u.fullName || u.email.split('@')[0],
-              role: u.email.toLowerCase() === 'jobpegyan@gmail.com' ? 'super_admin' : (u.role || 'student'),
-              subscriptionTier: u.subscriptionTier || 'enterprise',
-              status: 'active',
-              joinedAt: u.createdAt || new Date().toISOString(),
-              lastLoginAt: u.lastLoginAt || new Date().toISOString(),
-            });
-          }
         }
       } catch (e) {
         console.error('Error loading local registered users:', e);
@@ -321,7 +323,7 @@ export default function SuperAdminCMSPage() {
       try {
         await fetch('/api/admin/users/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminAuthHeaders(),
           body: JSON.stringify({ email: targetUser.email, role: newRole }),
         });
       } catch (err) {
@@ -340,7 +342,7 @@ export default function SuperAdminCMSPage() {
       try {
         await fetch('/api/admin/users/update', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminAuthHeaders(),
           body: JSON.stringify({ email: targetUser.email, subscriptionTier: newTier }),
         });
       } catch (err) {
@@ -358,33 +360,54 @@ export default function SuperAdminCMSPage() {
 
   const handleDeleteUserAccount = async (userId: string) => {
     const targetUser = userAccounts.find((u) => u.id === userId);
-    if (confirm(`Are you sure you want to permanently delete user ${targetUser?.email || userId}? They will be able to re-register cleanly.`)) {
-      const updated = userAccounts.filter((u) => u.id !== userId);
+    const targetEmail = (targetUser?.email || '').toLowerCase().trim();
+
+    if (targetEmail && ['jobpegyan@gmail.com', 'manorhub533@gmail.com', 'affiliatebharatofficial@gmail.com'].includes(targetEmail)) {
+      setUserMsg('⚠️ Protected administrator accounts cannot be deleted.');
+      setTimeout(() => setUserMsg(''), 4000);
+      return;
+    }
+
+    if (confirm(`Are you sure you want to permanently delete user ${targetEmail || userId}? They will be completely removed from database and authentication.`)) {
+      // 1. Immediately remove from local state
+      const updated = userAccounts.filter((u) => u.id !== userId && (!targetEmail || u.email?.toLowerCase().trim() !== targetEmail));
       saveUserAccounts(updated);
 
-      // Clean local storage registered cache
-      try {
-        const storedStr = localStorage.getItem('rbt_registered_users');
-        if (storedStr) {
-          const registered = JSON.parse(storedStr);
-          const filtered = registered.filter((u: any) => u.id !== userId && u.email?.toLowerCase() !== targetUser?.email?.toLowerCase());
-          localStorage.setItem('rbt_registered_users', JSON.stringify(filtered));
+      // 2. Clean all local storage caches
+      if (typeof window !== 'undefined') {
+        try {
+          const storedStr = localStorage.getItem('rbt_registered_users');
+          if (storedStr) {
+            const registered = JSON.parse(storedStr);
+            const filtered = registered.filter((u: any) => u.id !== userId && (!targetEmail || u.email?.toLowerCase().trim() !== targetEmail));
+            localStorage.setItem('rbt_registered_users', JSON.stringify(filtered));
+          }
+
+          const rosterStr = localStorage.getItem('rbt_admin_users_roster');
+          if (rosterStr) {
+            const roster = JSON.parse(rosterStr);
+            const filteredRoster = roster.filter((u: any) => u.id !== userId && (!targetEmail || u.email?.toLowerCase().trim() !== targetEmail));
+            localStorage.setItem('rbt_admin_users_roster', JSON.stringify(filteredRoster));
+          }
+        } catch (e) {
+          console.warn('Local storage delete cleanup notice:', e);
         }
-      } catch (e) {
-        // ignore
       }
 
+      // 3. Send delete request to backend with admin authentication headers
       try {
         const res = await fetch('/api/admin/users/delete', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, email: targetUser?.email }),
+          headers: getAdminAuthHeaders(),
+          body: JSON.stringify({ userId, email: targetEmail }),
         });
         const data = (await res.json()) as any;
         if (data?.success) {
-          setUserMsg(`✅ User ${targetUser?.email || userId} deleted permanently from database!`);
+          setUserMsg(`✅ User ${targetEmail || userId} deleted permanently from database and authentication!`);
+          // Re-sync with database to ensure perfect consistency
+          await loadAllRegisteredUsers();
         } else {
-          setUserMsg(`⚠️ Deleted locally: ${data?.error || 'Backend notice'}`);
+          setUserMsg(`⚠️ Delete notice: ${data?.error || 'Database sync issue'}`);
         }
       } catch (err: any) {
         console.error('Failed to delete user via API:', err);
@@ -429,6 +452,7 @@ export default function SuperAdminCMSPage() {
     { id: 'coupons', label: 'Coupons', icon: Tag },
     { id: 'media', label: 'Media Assets', icon: Folder },
     { id: 'language', label: 'Language/I18n', icon: Globe2 },
+    { id: 'indexnow', label: 'Bing IndexNow', icon: Zap },
     { id: 'audit', label: 'Audit Logs', icon: ShieldCheck },
   ];
 
@@ -501,6 +525,42 @@ export default function SuperAdminCMSPage() {
     const res = clearDemoData();
     setSeedStatusState(res.status);
     setSeedMsg(res.message);
+  };
+
+  
+  const handleTriggerAllIndexNow = async () => {
+    setIsSubmittingAllIndexNow(true);
+    setIndexNowSubmitResult(null);
+    try {
+      const result = await submitAllSitemapUrls('Super Admin 1-Click');
+      setIndexNowSubmitResult(result);
+      setIndexNowLogs(getIndexNowSubmissionLogs());
+    } catch (err: any) {
+      setIndexNowSubmitResult({ success: false, message: err?.message || 'Submission failed' });
+    } finally {
+      setIsSubmittingAllIndexNow(false);
+    }
+  };
+
+  const handleCustomIndexNowSubmit = async () => {
+    if (!customIndexNowUrl.trim()) return;
+    setIsSubmittingCustomUrl(true);
+    setIndexNowSubmitResult(null);
+    try {
+      const result = await submitToIndexNow(customIndexNowUrl.trim(), 'Admin Custom URL');
+      setIndexNowSubmitResult(result);
+      setIndexNowLogs(getIndexNowSubmissionLogs());
+      setCustomIndexNowUrl('');
+    } catch (err: any) {
+      setIndexNowSubmitResult({ success: false, message: err?.message || 'Submission failed' });
+    } finally {
+      setIsSubmittingCustomUrl(false);
+    }
+  };
+
+  const handleToggleAutoIndexNow = () => {
+    const updated = updateIndexNowConfig({ autoSubmitOnPublish: !indexNowConfig.autoSubmitOnPublish });
+    setIndexNowConfig(updated);
   };
 
   return (
@@ -1102,7 +1162,7 @@ export default function SuperAdminCMSPage() {
                           </td>
 
                           <td className="p-3 text-right">
-                            {u.email !== 'jobpegyan@gmail.com' && (
+                            {!isEmailAdmin(u.email) && (
                               <button
                                 type="button"
                                 onClick={() => handleDeleteUserAccount(u.id)}
@@ -2235,6 +2295,244 @@ export default function SuperAdminCMSPage() {
               </div>
             </div>
           </Card>
+        )}
+
+        
+        {/* TAB: BING INDEXNOW ENGINE */}
+        {activeTab === 'indexnow' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Header & Status Banner */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-[#0F172A] to-blue-950 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400">
+                    <Zap className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-extrabold flex items-center gap-2">
+                      <span>Bing & Multi-Search-Engine IndexNow Hub</span>
+                    </h3>
+                    <p className="text-xs text-slate-300">
+                      Instantly notify Bing, Yandex, Naver, and Seznam crawlers within seconds of page creation or updates.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-extrabold flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span>Protocol Active (Bing / IndexNow API)</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Quick Actions & Submission Status */}
+            {indexNowSubmitResult && (
+              <div
+                className={`p-4 rounded-2xl border flex items-center justify-between gap-4 text-xs ${
+                  indexNowSubmitResult.success
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                    : 'bg-rose-50 border-rose-200 text-rose-800'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  {indexNowSubmitResult.success ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+                  )}
+                  <div>
+                    <span className="font-extrabold block">{indexNowSubmitResult.message}</span>
+                    <span className="text-[11px] opacity-80">
+                      {indexNowSubmitResult.submittedCount
+                        ? `Submitted ${indexNowSubmitResult.submittedCount} URLs to IndexNow Endpoint`
+                        : indexNowSubmitResult.error}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIndexNowSubmitResult(null)}
+                  className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Card 1: 1-Click Mass Sitemap Push */}
+              <Card glass className="p-6 shadow-xl border-white/90 space-y-4 lg:col-span-2">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div>
+                    <h4 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-[#2563EB]" />
+                      <span>One-Click Full Platform Indexing</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Pushes all static routes, 85+ BACB questions, glossary definitions, and published articles ({getAllSiteUrls().length} URLs).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-bold text-slate-800">Total Indexable Sitemaps Discovered</div>
+                    <div className="text-2xl font-extrabold text-[#2563EB]">{getAllSiteUrls().length} URLs Ready</div>
+                    <div className="text-[11px] text-slate-500">Includes /rbt, /task-list, /articles/*, /rbt/question/*, /rbt/glossary/*</div>
+                  </div>
+
+                  <Button
+                    onClick={handleTriggerAllIndexNow}
+                    disabled={isSubmittingAllIndexNow}
+                    className="bg-[#2563EB] hover:bg-blue-700 text-white font-extrabold text-xs px-5 py-3 rounded-xl shadow-lg shadow-blue-500/20 flex items-center gap-2"
+                  >
+                    {isSubmittingAllIndexNow ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        <span>Submitting to Bing...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        <span>Push All URLs to Bing IndexNow</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Custom URL On-Demand Push */}
+                <div className="pt-2 space-y-2">
+                  <label className="text-xs font-bold text-slate-700 block">Submit Specific URL or Path</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. /rbt/mock-exam or https://www.rbtpracticeai.com/about"
+                      value={customIndexNowUrl}
+                      onChange={(e) => setCustomIndexNowUrl(e.target.value)}
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    />
+                    <Button
+                      onClick={handleCustomIndexNowSubmit}
+                      disabled={isSubmittingCustomUrl || !customIndexNowUrl.trim()}
+                      variant="outline"
+                      className="text-xs font-bold text-[#0F172A] border-slate-300 hover:bg-slate-50"
+                    >
+                      {isSubmittingCustomUrl ? 'Pushing...' : 'Submit URL'}
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Card 2: Key & Protocol Verification */}
+              <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
+                <h4 className="text-base font-bold text-[#0F172A] flex items-center gap-2 border-b border-slate-100 pb-3">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>IndexNow Credentials</span>
+                </h4>
+
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">API Key</span>
+                    <div className="p-2.5 rounded-xl bg-slate-100 font-mono text-[11px] text-slate-800 break-all select-all font-semibold">
+                      {indexNowConfig.key}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Key Verification File</span>
+                    <a
+                      href={indexNowConfig.keyLocation}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#2563EB] hover:underline font-mono text-[11px] flex items-center gap-1 mt-1 break-all"
+                    >
+                      <Globe className="w-3.5 h-3.5 shrink-0" />
+                      <span>{indexNowConfig.keyLocation}</span>
+                    </a>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-slate-800 block">Auto-Submit on Publish</span>
+                      <span className="text-[10px] text-slate-500">Auto push articles & questions</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={indexNowConfig.autoSubmitOnPublish}
+                      onChange={handleToggleAutoIndexNow}
+                      className="w-5 h-5 text-blue-600 rounded cursor-pointer"
+                    />
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 space-y-1">
+                    <div className="font-bold text-slate-800">Supported Engines:</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="slate" className="text-[10px] bg-white font-medium">Microsoft Bing</Badge>
+                      <Badge variant="slate" className="text-[10px] bg-white font-medium">Yandex</Badge>
+                      <Badge variant="slate" className="text-[10px] bg-white font-medium">Naver</Badge>
+                      <Badge variant="slate" className="text-[10px] bg-white font-medium">Seznam.cz</Badge>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Submission Log Stream */}
+            <Card glass className="p-6 shadow-xl border-white/90 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h4 className="text-base font-bold text-[#0F172A] flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-indigo-500" />
+                  <span>IndexNow Live Submissions Audit Log</span>
+                </h4>
+                <span className="text-xs text-slate-400 font-mono">
+                  {indexNowLogs.length} events logged
+                </span>
+              </div>
+
+              {indexNowLogs.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-500">
+                  No IndexNow submissions logged yet. Click "Push All URLs to Bing IndexNow" above to trigger initial crawl notification.
+                </div>
+              ) : (
+                <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                  {indexNowLogs.map((log) => (
+                    <div
+                      key={log.id}
+                      className="p-3.5 rounded-2xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                              log.success || log.status === 200 || log.status === 202
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            HTTP {log.status || (log.success ? '202' : '400')}
+                          </span>
+                          <span className="font-extrabold text-slate-900">
+                            {log.urlsCount} URLs Submitted
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] font-mono text-[10px]">
+                            {log.triggeredBy}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate max-w-lg">
+                          Sample: {log.sampleUrls?.join(', ')}
+                        </div>
+                      </div>
+
+                      <div className="text-right text-[11px] text-slate-400 font-mono shrink-0">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </div>
         )}
 
         {/* TAB 6: SECURITY AUDIT LOGS */}

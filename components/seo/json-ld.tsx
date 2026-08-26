@@ -5,8 +5,8 @@ export function JsonLdSchema() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'RBT Practice AI',
-    url: 'https://rbtpracticeai.com',
-    logo: 'https://rbtpracticeai.com/icon-512.png',
+    url: 'https://www.rbtpracticeai.com',
+    logo: 'https://www.rbtpracticeai.com/icon-512.png',
     email: 'hello@rbtpracticeai.com',
     description: 'Comprehensive RBT exam preparation platform featuring realistic practice questions, 85-question mock exams, spaced repetition flashcards, and AI-powered tutoring aligned with the BACB RBT 3rd Edition Test Content Outline.',
     contactPoint: {
@@ -24,11 +24,11 @@ export function JsonLdSchema() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'RBT Practice AI',
-    url: 'https://rbtpracticeai.com',
+    url: 'https://www.rbtpracticeai.com',
     description: 'RBT Practice & Exam Prep 2026 — Realistic RBT practice questions, 85-question mock exams, and Socrates AI tutor.',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://rbtpracticeai.com/rbt/questions?q={search_term_string}',
+      target: 'https://www.rbtpracticeai.com/rbt/questions?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   };
@@ -37,13 +37,13 @@ export function JsonLdSchema() {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: 'RBT Practice & Exam Prep 2026 | RBT Practice AI',
-    url: 'https://rbtpracticeai.com',
+    url: 'https://www.rbtpracticeai.com',
     description: 'Start your 7-day free trial for RBT practice. Master the RBT exam with realistic practice questions, 85-question mock tests, and 3rd Edition study tools.',
     inLanguage: 'en-US',
     isPartOf: {
       '@type': 'WebSite',
       name: 'RBT Practice AI',
-      url: 'https://rbtpracticeai.com',
+      url: 'https://www.rbtpracticeai.com',
     },
   };
 
@@ -55,7 +55,7 @@ export function JsonLdSchema() {
     provider: {
       '@type': 'Organization',
       name: 'RBT Practice AI',
-      sameAs: 'https://rbtpracticeai.com',
+      sameAs: 'https://www.rbtpracticeai.com',
     },
     educationalCredentialAwarded: 'Registered Behavior Technician (RBT) Exam Readiness',
     hasCourseInstance: {

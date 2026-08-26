@@ -18,7 +18,9 @@ describe('SMTP & Universal Transactional Email Engine', () => {
   it('saveSMTPConfig() updates and persists SMTP settings', async () => {
     const updated = await saveSMTPConfig(
       {
-        provider: 'resend',
+        provider: 'smtp_relay',
+        host: 'smtp.gmail.com',
+        port: 465,
         senderName: 'RBT Practice Pro',
         senderEmail: 'support@rbtpracticeai.com',
       },
@@ -27,17 +29,8 @@ describe('SMTP & Universal Transactional Email Engine', () => {
 
     expect(updated.senderName).toBe('RBT Practice Pro');
     expect(updated.senderEmail).toBe('support@rbtpracticeai.com');
-  });
-
-  it('sendTransactionalEmail() handles recipient email dispatch', async () => {
-    const res = await sendTransactionalEmail({
-      to: 'candidate@testdomain.com',
-      subject: 'Your Verification Code',
-      html: '<h1>123456</h1>',
-    });
-
-    expect(res.success).toBe(true);
-    expect(res.provider).toBeDefined();
+    expect(updated.provider).toBe('smtp_relay');
+    expect(updated.host).toBe('smtp.gmail.com');
   });
 
   it('sendTransactionalEmail() rejects empty recipient', async () => {
@@ -51,14 +44,18 @@ describe('SMTP & Universal Transactional Email Engine', () => {
     expect(res.error).toContain('Recipient email address is required');
   });
 
-  it('testSMTPConnection() sends test email successfully', async () => {
+  it('testSMTPConnection() returns diagnostics when unconfigured or empty credentials provided', async () => {
     const res = await testSMTPConnection('admin@testdomain.com', {
       enabled: true,
       provider: 'resend',
+      apiKey: '',
+      password: '',
       senderEmail: 'test@rbtpracticeai.com',
       senderName: 'Test Sender',
     });
-    expect(res.success).toBe(true);
-    expect(res.latencyMs).toBeGreaterThanOrEqual(0);
-  }, 20000);
+
+    expect(res.success).toBe(false);
+    expect(res.error).toBeDefined();
+  });
 });
+

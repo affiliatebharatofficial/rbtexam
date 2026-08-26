@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseAdminClient } from '@/lib/supabase';
 import { requireAdminAuth } from '@/lib/server-auth';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   const auth = await requireAdminAuth(request);
@@ -15,13 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-    const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false },
-    });
-
+    const adminSupabase = getSupabaseAdminClient();
     const targetEmail = email.toLowerCase().trim();
 
     // 1. Update public.profiles table
@@ -33,7 +29,7 @@ export async function POST(request: NextRequest) {
           ...(status && { account_status: status }),
           updated_at: new Date().toISOString(),
         })
-        .eq('email', targetEmail);
+        .ilike('email', targetEmail);
     }
 
     // 2. Update public.users table
@@ -44,7 +40,7 @@ export async function POST(request: NextRequest) {
           role: role,
           updated_at: new Date().toISOString(),
         })
-        .eq('email', targetEmail);
+        .ilike('email', targetEmail);
     }
 
     return NextResponse.json({
