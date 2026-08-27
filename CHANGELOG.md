@@ -2,6 +2,20 @@
 
 ## Master Version History
 
+### [v3.6.2] - 2026-08-27 (Enterprise SEO Audit Resolution: robots.txt, Title Lengths & H1 Optimization)
+#### Fixed & Enhanced
+- **Title Length SERP Optimization (`utils/seo.ts`, `lib/seo-engine.ts`, layouts & programmatic routes)**:
+  - Shortened all page and layout metadata titles to stay strictly within Google's 60-character SERP limit.
+  - Formatted programmatic question routes (`/rbt/question/[slug]`) and glossary term routes (`/rbt/glossary/[slug]`) with intelligent character clamping (<= 58 chars).
+  - Enforced a 60-character safeguard clamp inside `constructMetadata` and `buildSEOMetadata`.
+- **Missing H1 Tag Elimination (68+ routes)**:
+  - Converted client-only re-export pages (`/rbt/mock-exam`, `/rbt/practice-test`, `/rbt/flashcards`, `/articles`, `/articles/[slug]`) to Server Components with dedicated SSR `<h1 className="...">` headers.
+  - Converted Socrates AI Tutor (`/tutor`) main header from `<h2>` to `<h1>`.
+  - Added screen-reader accessible and visible semantic `<h1>` tags across all tool, educational, and auth callback pages.
+- **Robots.txt & Sitemap Integrity (`app/robots.ts`, `app/sitemap.ts`)**:
+  - Refined `robots.ts` disallow rules to cover `/admin/`, `/admin`, `/profile/`, `/profile`, `/dashboard/`, `/dashboard`, `/auth/`, `/study-planner/`.
+  - Cleaned `sitemap.ts` to include exclusively 200 OK canonical URLs (replaced `/about` redirect with canonical `/rbt/about` and added `/articles` & `/tutor`).
+
 ### [v3.6.1] - 2026-08-26 (Production SEO Canonical Domain & Indexability Fix)
 #### Fixed & Enhanced
 - **Canonical Domain Enforcement (`utils/seo.ts`)**:

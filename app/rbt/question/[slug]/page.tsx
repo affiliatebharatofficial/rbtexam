@@ -22,8 +22,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     : `Practice question with detailed BACB rationale: ${qText}`;
   const trimmedDesc = desc.length > 158 ? `${desc.slice(0, 155).trim()}...` : desc;
 
+  // Format title to stay strictly under 60 characters for Google SERP
+  const suffix = ' | RBT Practice AI'; // 20 chars
+  const availableLen = 58 - suffix.length; // 38 chars
+  const cleanQ = qText.length > availableLen ? `${qText.slice(0, availableLen - 3).trim()}...` : qText;
+  const pageTitle = `${cleanQ}${suffix}`;
+
   return constructMetadata({
-    title: `${found?.id || slug}: ${qText.slice(0, 50)}... | RBT Practice AI`,
+    title: pageTitle,
     description: trimmedDesc,
     path: `/rbt/question/${found?.id || slug}`,
   });

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = constructMetadata({
-  title: 'BACB Non-Affiliation & Educational Disclaimer | RBT Practice AI',
+  title: 'BACB Disclaimer & Policies | RBT Practice AI',
   description:
     'Official non-affiliation and educational disclaimer for RBT Practice AI. Independent study platform not affiliated with the Behavior Analyst Certification Board® (BACB®).',
   path: '/disclaimer',

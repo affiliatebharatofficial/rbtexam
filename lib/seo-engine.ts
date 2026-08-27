@@ -17,8 +17,12 @@ export function buildSEOMetadata(
   // Optimize description length for Google SERP (max ~155-160 chars)
   const trimmedDesc = description.length > 158 ? `${description.slice(0, 155).trim()}...` : description;
 
+  // Optimize title length for Google SERP (strictly <= 60 chars)
+  const fullTitle = `${title} | RBT Practice AI`;
+  const cleanTitle = fullTitle.length > 60 ? `${title.slice(0, 57 - 21).trim()}... | RBT Practice AI` : fullTitle;
+
   return {
-    title: `${title} | RBT Practice AI`,
+    title: cleanTitle,
     description: trimmedDesc,
     slug: slugPath,
     canonicalUrl,

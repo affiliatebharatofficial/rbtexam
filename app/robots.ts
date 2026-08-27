@@ -5,7 +5,18 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/api/', '/admin/', '/profile/'],
+      disallow: [
+        '/api/',
+        '/admin/',
+        '/admin',
+        '/profile/',
+        '/profile',
+        '/dashboard/',
+        '/dashboard',
+        '/auth/',
+        '/study-planner/',
+        '/study-planner',
+      ],
     },
     sitemap: 'https://www.rbtpracticeai.com/sitemap.xml',
   };

@@ -3,7 +3,7 @@ import { constructMetadata } from '@/utils/seo';
 import RBTMockExamPage from '@/app/rbt/mock-exam/page';
 
 export const metadata = constructMetadata({
-  title: 'Free RBT Practice Test & Exam Simulation (2026) | RBT Practice AI',
+  title: 'Free RBT Practice Test 2026 | RBT Practice AI',
   description:
     'Take a realistic RBT practice test with immediate answer scoring, detailed BACB explanations, and domain performance breakdown. 100% free and aligned with 3rd Edition outline.',
   path: '/rbt/practice-test',
@@ -17,5 +17,10 @@ export const metadata = constructMetadata({
 });
 
 export default function RBTPracticeTestPillarPage() {
-  return <RBTMockExamPage />;
+  return (
+    <>
+      <h1 className="sr-only">Free RBT Practice Test & Exam Simulation (2026)</h1>
+      <RBTMockExamPage />
+    </>
+  );
 }

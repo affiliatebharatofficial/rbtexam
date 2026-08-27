@@ -1,7 +1,7 @@
 import { constructMetadata } from '@/utils/seo';
 
 export const metadata = constructMetadata({
-  title: 'Socrates AI Tutor & ABA Clinical Study Mentor | RBT Practice AI',
+  title: 'Socrates AI RBT Tutor | RBT Practice AI',
   description:
     'Chat with Socrates, your 24/7 AI-powered RBT exam tutor. Ask questions about challenging ABA concepts, task list items, scenario analysis, and test-taking strategies.',
   path: '/tutor',

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = constructMetadata({
-  title: 'Official RBT Exam Study Guide & 3rd Edition Task Breakdown | RBT Practice AI',
+  title: 'RBT Exam Study Guide 2026 | RBT Practice AI',
   description:
     'Comprehensive BACB RBT 3rd Edition Exam Study Guide. Master all 6 task list domains: Measurement, Assessment, Skill Acquisition, Behavior Reduction, Documentation, and Ethics.',
   path: '/rbt/study-guide',

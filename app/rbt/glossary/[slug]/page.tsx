@@ -42,8 +42,14 @@ export async function generateMetadata({ params }: GlossaryTermPageProps): Promi
   const rawDesc = `${term.term} RBT Exam Definition: ${term.definition} (${term.bacbCitation}).`;
   const trimmedDesc = rawDesc.length > 158 ? `${rawDesc.slice(0, 155).trim()}...` : rawDesc;
 
+  // Format title to stay strictly under 60 characters for Google SERP
+  const suffix = ' - ABA Glossary | RBT Practice AI'; // 34 chars
+  const availableLen = 58 - suffix.length; // 24 chars
+  const cleanTerm = term.term.length > availableLen ? `${term.term.slice(0, availableLen - 3).trim()}...` : term.term;
+  const pageTitle = `${cleanTerm}${suffix}`;
+
   return constructMetadata({
-    title: `${term.term} - ABA Glossary & Definition | RBT Practice AI`,
+    title: pageTitle,
     description: trimmedDesc,
     path: `/rbt/glossary/${term.slug}`,
     keywords: [

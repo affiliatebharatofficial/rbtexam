@@ -423,13 +423,13 @@ function TutorContent() {
                 <currentModeInfo.icon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-[#0F172A] flex items-center space-x-2">
+                <h1 className="text-base font-extrabold text-[#0F172A] flex items-center space-x-2">
                   <span>{currentModeInfo.title}</span>
                   <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center space-x-1 ${currentModeInfo.color}`}>
                     <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${currentModeInfo.dotColor}`}></span>
                     <span>{currentModeInfo.badge}</span>
                   </span>
-                </h2>
+                </h1>
                 <p className="text-xs text-slate-500">
                   Target: {certification} Exam • Active Mode: {mode.replace('_', ' ').toUpperCase()}
                 </p>

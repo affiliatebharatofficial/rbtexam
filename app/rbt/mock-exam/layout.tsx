@@ -1,7 +1,7 @@
 import { constructMetadata } from '@/utils/seo';
 
 export const metadata = constructMetadata({
-  title: '85-Question RBT Mock Exam Simulator (Timed & Scored) | RBT Practice AI',
+  title: '85-Question RBT Mock Exam | RBT Practice AI',
   description:
     'Take a timed 85-question RBT mock exam simulating the real Pearson VUE testing experience. Immediate scoring, BACB rationales, and domain readiness analytics.',
   path: '/rbt/mock-exam',

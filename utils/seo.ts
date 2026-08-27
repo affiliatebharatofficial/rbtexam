@@ -75,8 +75,14 @@ export function constructMetadata({
     ? image
     : `${PRIMARY_DOMAIN}${image.startsWith('/') ? image : `/${image}`}`;
 
+  // Ensure title length is strictly <= 60 characters for Google SERP optimization
+  let finalTitle = title;
+  if (finalTitle.length > 60) {
+    finalTitle = `${finalTitle.slice(0, 57).trim()}...`;
+  }
+
   return {
-    title,
+    title: finalTitle,
     description,
     keywords,
     authors: [{ name: SITE_CONFIG.author }],

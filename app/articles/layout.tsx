@@ -1,7 +1,7 @@
 import { constructMetadata } from '@/utils/seo';
 
 export const metadata = constructMetadata({
-  title: 'RBT & ABA Exam Articles, Study Guides & Clinical Insights | RBT Practice AI',
+  title: 'RBT Exam Articles & Guides | RBT Practice AI',
   description:
     'Explore in-depth articles, BACB study blueprints, ABA clinical scenarios, exam passing strategies, and Registered Behavior Technician career advice.',
   path: '/articles',

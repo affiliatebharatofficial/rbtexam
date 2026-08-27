@@ -1,77 +1,64 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { Metadata } from 'next';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
-import { Article } from '@/types/article-cms';
 import { getArticleBySlug } from '@/lib/article-cms-engine';
+import { constructMetadata } from '@/utils/seo';
 import {
   BookOpen,
   Clock,
   Eye,
   ArrowLeft,
-  Share2,
-  Bookmark,
   User,
   Calendar,
   CheckCircle2,
   Sparkles,
 } from 'lucide-react';
 
-export default function PublicArticleDetailPage() {
-  const params = useParams();
-  const slugParam = typeof params?.slug === 'string' ? params.slug : '';
+interface ArticlePageProps {
+  params: Promise<{ slug: string }>;
+}
 
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getArticleBySlug(slug);
 
-  useEffect(() => {
-    if (slugParam) {
-      fetchArticle();
-    }
-  }, [slugParam]);
-
-  const fetchArticle = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/articles?slug=${encodeURIComponent(slugParam)}`);
-      const data = (await res.json()) as any;
-      if (data && data.article) {
-        setArticle(data.article);
-      } else {
-        const local = getArticleBySlug(slugParam);
-        setArticle(local);
-      }
-    } catch (e) {
-      const local = getArticleBySlug(slugParam);
-      setArticle(local);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-4 border-[#2563EB] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-xs font-bold text-slate-600">Loading Article & Study Guide...</p>
-        </div>
-      </div>
-    );
+  if (!article) {
+    return constructMetadata({
+      title: 'Article Not Found | RBT Practice AI',
+      description: 'The requested RBT examination article or study guide could not be found.',
+    });
   }
+
+  const suffix = ' | RBT Practice AI';
+  const maxTitleLen = 58 - suffix.length;
+  const cleanTitle =
+    article.title.length > maxTitleLen
+      ? `${article.title.slice(0, maxTitleLen - 3).trim()}...`
+      : article.title;
+
+  return constructMetadata({
+    title: `${cleanTitle}${suffix}`,
+    description: article.summary,
+    path: `/articles/${article.slug}`,
+    keywords: article.tags || ['RBT Practice AI', 'RBT Exam Study Guide'],
+  });
+}
+
+export default async function PublicArticleDetailPage({ params }: ArticlePageProps) {
+  const { slug } = await params;
+  const article = getArticleBySlug(slug);
 
   if (!article) {
     return (
       <div className="min-h-screen bg-slate-50 py-16 px-4 text-center space-y-6">
         <div className="max-w-md mx-auto space-y-4">
-          <h2 className="text-2xl font-black text-slate-900">Article Not Found</h2>
+          <h1 className="text-2xl font-black text-slate-900">Article Not Found</h1>
           <p className="text-xs text-slate-600">
-            The requested article slug &quot;{slugParam}&quot; could not be found or is not currently published.
+            The requested article slug &quot;{slug}&quot; could not be found or is not currently published.
           </p>
           <Link href="/articles">
             <Button variant="primary" size="md" className="gap-2">

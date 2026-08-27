@@ -1,7 +1,7 @@
 import { constructMetadata } from '@/utils/seo';
 
 export const metadata = constructMetadata({
-  title: 'BACB RBT 3rd Edition Task List Study Hub & Domain Breakdown | RBT Practice AI',
+  title: 'BACB RBT 3rd Edition Task List | RBT Practice AI',
   description:
     'Complete breakdown of the BACB RBT 3rd Edition Task List (TCO). Master all 6 domains: Measurement, Assessment, Skill Acquisition, Behavior Reduction, Documentation, and Ethics.',
   path: '/task-list',
