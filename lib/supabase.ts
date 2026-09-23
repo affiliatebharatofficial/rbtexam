@@ -53,15 +53,21 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
+let supabaseAdminInstance: SupabaseClient | null = null;
+
 export function getSupabaseAdminClient(): SupabaseClient {
+  if (supabaseAdminInstance) {
+    return supabaseAdminInstance;
+  }
   const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || SUPABASE_URL;
   const serviceRoleKey =
     getRuntimeEnv('SUPABASE_SERVICE_ROLE_KEY') ||
     SUPABASE_SERVICE_ROLE_KEY;
 
-  return createClient(url, serviceRoleKey, {
+  supabaseAdminInstance = createClient(url, serviceRoleKey, {
     auth: { persistSession: false },
   });
+  return supabaseAdminInstance;
 }
 
 export async function fetchMockOrRealUserProgress() {

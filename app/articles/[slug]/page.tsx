@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MarkdownRenderer } from '@/components/ui/markdown-renderer';
-import { getArticleBySlug } from '@/lib/article-cms-engine';
+import { getArticleBySlug, getAllArticles } from '@/lib/article-cms-engine';
 import { constructMetadata } from '@/utils/seo';
 import {
   BookOpen,
@@ -20,6 +20,14 @@ import {
 
 import { ContentMeta } from '@/components/eeat/content-meta';
 import { ClinicalBoundaryBanner } from '@/components/eeat/clinical-boundary-banner';
+
+export const revalidate = 86400;
+
+export async function generateStaticParams() {
+  return getAllArticles().map((article) => ({
+    slug: article.slug,
+  }));
+}
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;

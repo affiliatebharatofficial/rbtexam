@@ -10,9 +10,15 @@ import { Metadata } from 'next';
 import { constructMetadata } from '@/utils/seo';
 import { MasterQuestion } from '@/types/master-question';
 import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
+import { FULL_BACB_SEED_QUESTIONS } from '@/lib/seed-questions-bank';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 86400;
+
+export async function generateStaticParams() {
+  return FULL_BACB_SEED_QUESTIONS.map((q) => ({
+    slug: q.id,
+  }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;

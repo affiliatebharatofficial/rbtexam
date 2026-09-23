@@ -21,8 +21,13 @@ import {
   FileQuestion,
 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 86400;
+
+export async function generateStaticParams() {
+  return ABA_GLOSSARY_TERMS.map((term) => ({
+    slug: term.slug,
+  }));
+}
 
 interface GlossaryTermPageProps {
   params: Promise<{ slug: string }>;

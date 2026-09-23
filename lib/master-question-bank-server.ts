@@ -72,6 +72,15 @@ const QUESTION_COLUMNS =
  * Server-only: Single question direct indexed lookup
  */
 export async function fetchQuestionByIdOrCodeAsync(idOrCode: string): Promise<MasterQuestion | null> {
+  // 1. Fast in-memory lookup from canonical questions (0ms CPU / no network)
+  const canonicalMatch = FULL_BACB_SEED_QUESTIONS.find(
+    (q) => q.id === idOrCode || (q as any).question_code === idOrCode
+  );
+  if (canonicalMatch) {
+    return canonicalMatch;
+  }
+
+  // 2. Query Supabase for dynamic/custom admin questions
   try {
     const adminDb = getSupabaseAdminClient();
     const { data, error } = await adminDb
@@ -89,11 +98,7 @@ export async function fetchQuestionByIdOrCodeAsync(idOrCode: string): Promise<Ma
     console.error('Failed to fetch question by ID/code from Supabase:', err);
   }
 
-  // Fallback to canonical seed questions bank
-  const fallback = FULL_BACB_SEED_QUESTIONS.find(
-    (q) => q.id === idOrCode || (q as any).question_code === idOrCode
-  );
-  return fallback || null;
+  return null;
 }
 
 /**
