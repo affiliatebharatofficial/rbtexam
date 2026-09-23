@@ -99,20 +99,15 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* Social Proof Stats */}
-            <div className="pt-6 border-t border-slate-200/60 flex items-center justify-center lg:justify-start space-x-6 text-xs text-slate-500">
-              <div className="flex items-center space-x-1.5">
-                <div className="flex -space-x-2">
-                  <div className="w-7 h-7 rounded-full bg-blue-500 text-white font-bold text-[10px] flex items-center justify-center border-2 border-white">JD</div>
-                  <div className="w-7 h-7 rounded-full bg-emerald-500 text-white font-bold text-[10px] flex items-center justify-center border-2 border-white">SK</div>
-                  <div className="w-7 h-7 rounded-full bg-indigo-500 text-white font-bold text-[10px] flex items-center justify-center border-2 border-white">AM</div>
-                </div>
-                <span className="font-semibold text-slate-800">{t('stats.candidates', '14,200+ RBTs Prepared')}</span>
+            {/* Platform Highlights */}
+            <div className="pt-6 border-t border-slate-200/60 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-600">
+              <div className="flex items-center space-x-1.5 font-semibold text-slate-800">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>85-Question Realistic Mock Exams</span>
               </div>
-              <div className="flex items-center space-x-1 text-amber-500">
-                <Star className="w-4 h-4 fill-amber-400" />
-                <span className="font-bold text-slate-800">4.9/5</span>
-                <span className="text-slate-400">({t('stats.ratingSub', '2,100+ Reviews')})</span>
+              <div className="flex items-center space-x-1.5 font-semibold text-slate-800">
+                <ShieldCheck className="w-4 h-4 text-blue-600" />
+                <span>43 Tasks Mapped to BACB 3rd Edition TCO</span>
               </div>
             </div>
           </div>

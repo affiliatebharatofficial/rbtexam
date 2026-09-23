@@ -81,7 +81,7 @@ export default function DisclaimerPage() {
               <span>Original Educational Content — No Unauthorized Exam Content</span>
             </h2>
             <p>
-              The Behavior Analyst Certification Board (BACB) does not publish, license, or disclose actual examination questions. All practice questions, mock exam scenarios, answer rationales, and flashcards provided on RBT Practice AI are <strong>original educational materials</strong> created independently by Board Certified Behavior Analysts (BCBAs) and behavioral educational specialists.
+              The Behavior Analyst Certification Board (BACB) does not publish, license, or disclose actual examination questions. All practice questions, mock exam scenarios, answer rationales, and flashcards provided on RBT Practice AI are <strong>original educational materials</strong> created independently by behavioral science educators and learning specialists.
             </p>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-slate-700">
               <div className="flex items-center gap-2 font-bold text-slate-900">
@@ -147,7 +147,7 @@ export default function DisclaimerPage() {
               <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600">
                 <li>AI-generated educational content is intended solely for supplementary study assistance and may occasionally contain approximations or errors.</li>
                 <li>AI-generated rationales do not constitute official BACB commentary, clinical behavior intervention plans, or legal advice.</li>
-                <li>Candidates should cross-reference complex regulatory or clinical ethics questions with the official BACB RBT Ethics Code 2.0 and current BACB Task List documentation.</li>
+                <li>Candidates should cross-reference complex regulatory or clinical ethics questions with the official BACB RBT Ethics Code 2.0 and current BACB Test Content Outline (TCO).</li>
               </ul>
             </div>
           </section>

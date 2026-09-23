@@ -155,7 +155,7 @@ export function AiTutorPreview() {
                     <span className="text-sm font-extrabold text-[#0F172A]">Socrates AI RBT Tutor</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <span className="text-[11px] text-slate-500">Trained on RBT Ethics Code 2.0 & Clinical TCO</span>
+                  <span className="text-[11px] text-slate-500">Guided by RBT Ethics Code 2.0 & Clinical TCO</span>
                 </div>
               </div>
 

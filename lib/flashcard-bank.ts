@@ -1056,14 +1056,14 @@ export function generateFlashcardsFromQuestions(): Flashcard[] {
     category: mq.category as any,
     difficulty: mq.difficulty,
     keywords: mq.keywords,
-    tags: mq.tags,
+    tags: mq.tags || [],
     status: 'published',
     isPremium: mq.isPremium,
     isFeatured: mq.isFeatured,
     createdBy: 'ai_engine',
     updatedBy: 'ai_engine',
-    createdAt: mq.createdAt,
-    updatedAt: mq.updatedAt,
+    createdAt: mq.createdAt || new Date().toISOString(),
+    updatedAt: mq.updatedAt || new Date().toISOString(),
   }));
 
   return generated;

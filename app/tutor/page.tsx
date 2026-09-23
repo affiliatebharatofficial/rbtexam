@@ -80,13 +80,13 @@ function TutorContent() {
       {
         id: 'msg-welcome',
         sender: 'assistant',
-        content: `Welcome, **${candidateName}**! I am **Socrates AI**, your Board Certified Behavior Analyst (BCBA) clinical mentor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
+        content: `Welcome, **${candidateName}**! I am **Socrates AI**, your interactive Applied Behavior Analysis (ABA) study tutor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
         timestamp: new Date().toISOString(),
         clinicalInsight: {
           concept: 'Candidate Focus Recommendation',
           simpleExplanation: `Your current top weakness target is ${candidateContext.weakTopics[0]}.`,
           clinicalExample: 'Ask me: "Explain DRO vs DRA with a clinical scenario" or "Deconstruct a transition tantrum scenario".',
-          examTip: 'Mastering Differential Reinforcement (Domain D) accounts for ~24% of your official BACB exam grade.',
+          examTip: 'Mastering Behavior Reduction (Domain D) accounts for ~19% (14 questions) of your scored exam content.',
           mnemonicTip: 'DRO = ZERO occurrences. DRA = Alternative Card.',
         },
       },

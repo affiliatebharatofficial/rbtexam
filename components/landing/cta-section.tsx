@@ -77,7 +77,7 @@ export function CtaSection() {
 
         <div className="pt-6 text-xs text-slate-400 flex items-center justify-center space-x-2">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>{t('cta.standards', 'Official BACB RBT 3rd Edition Task List Standards (Domains A-F)')}</span>
+          <span>{t('cta.standards', 'Aligned with BACB RBT 3rd Edition Test Content Outline (Domains A-F)')}</span>
         </div>
       </div>
     </section>

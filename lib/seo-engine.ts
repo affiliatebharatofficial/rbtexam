@@ -33,7 +33,7 @@ export function buildSEOMetadata(
     certification: 'RBT',
     lastUpdated: new Date().toISOString(),
     readingTimeMinutes: 5,
-    author: 'RBT Practice AI BCBA Editorial Team',
+    author: 'RBT Practice AI Editorial Team',
   };
 }
 
@@ -68,18 +68,18 @@ export function generateCourseJSONLD(certification: string = 'RBT') {
   return {
     '@context': 'https://schema.org',
     '@type': 'Course',
-    name: `Official ${certification} Exam Preparation & Practice Simulator`,
+    name: `${certification} Exam Preparation & Practice Simulator`,
     description: `Complete ${certification} certification preparation platform with 85-question mock exams, Leitner flashcards, and Socrates AI Tutor mentorship.`,
     provider: {
       '@type': 'EducationalOrganization',
       name: 'RBT Practice AI',
       sameAs: BASE_URL,
     },
-    educationalCredentialAwarded: `${certification} Exam Pass Readiness Certification`,
+    educationalCredentialAwarded: `${certification} Exam Pass Readiness Preparation`,
     hasPart: [
       {
         '@type': 'LearningResource',
-        name: '85-Question Official BACB Mock Exam Simulator',
+        name: '85-Question RBT Mock Exam Simulator',
         learningResourceType: 'Assessment',
       },
       {

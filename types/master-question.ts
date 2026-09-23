@@ -71,16 +71,16 @@ export interface MasterQuestion {
   subCategory?: string;
   keywords: string[];
   taskListVersion: '3rd_edition' | '2nd_edition' | '5th_edition' | '6th_edition' | 'current' | string;
-  estimatedTimeSeconds: number;
-  tags: string[];
+  estimatedTimeSeconds?: number;
+  tags?: string[];
   status: QuestionStatus;
   isPremium: boolean;
   isFeatured: boolean;
   version: number; // Audited version
-  createdBy: string;
-  updatedBy: string;
-  createdAt: string;
-  updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
   internalNotes?: string; // Reviewer/editor private notes
 }
 

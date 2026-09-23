@@ -48,6 +48,7 @@ scratch/
 
 # opennext & cloudflare
 .open-next/
+tco_3rd_edition.*
 .wrangler/
 worker-configuration.d.ts
 

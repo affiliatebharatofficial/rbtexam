@@ -9,8 +9,10 @@ import {
   QuestionType,
 } from '@/types/master-question';
 
-// Persistent Master Question Store (Populated dynamically from Database)
-export const MASTER_QUESTION_BANK: MasterQuestion[] = [];
+import { FULL_BACB_SEED_QUESTIONS } from './seed-questions-bank';
+
+// Persistent Master Question Store (Populated dynamically from Database or canonical seed bank)
+export const MASTER_QUESTION_BANK: MasterQuestion[] = [...FULL_BACB_SEED_QUESTIONS];
 
 const LOCAL_STORAGE_KEY = 'rbt_master_questions_v7';
 
@@ -18,6 +20,9 @@ const LOCAL_STORAGE_KEY = 'rbt_master_questions_v7';
  * Load Persistent Questions (returns live memory bank initialized from database)
  */
 export function loadPersistentQuestions(): MasterQuestion[] {
+  if (MASTER_QUESTION_BANK.length === 0 && FULL_BACB_SEED_QUESTIONS.length > 0) {
+    MASTER_QUESTION_BANK.push(...FULL_BACB_SEED_QUESTIONS);
+  }
   return MASTER_QUESTION_BANK;
 }
 

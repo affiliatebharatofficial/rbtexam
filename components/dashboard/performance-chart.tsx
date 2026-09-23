@@ -14,9 +14,9 @@ export function PerformanceChart() {
     { label: 'Week 4 (Current)', score: 0 },
   ]);
   const [domainData, setDomainData] = useState([
-    { code: 'A', name: 'Measurement', score: 0, color: 'bg-emerald-500' },
-    { code: 'B', name: 'Assessment', score: 0, color: 'bg-blue-500' },
-    { code: 'C', name: 'Skill Acq', score: 0, color: 'bg-indigo-500' },
+    { code: 'A', name: 'Data Collection', score: 0, color: 'bg-emerald-500' },
+    { code: 'B', name: 'Behavior Assessment', score: 0, color: 'bg-blue-500' },
+    { code: 'C', name: 'Behavior Acq', score: 0, color: 'bg-indigo-500' },
     { code: 'D', name: 'Behavior Red', score: 0, color: 'bg-amber-500' },
     { code: 'E', name: 'Documentation', score: 0, color: 'bg-teal-500' },
     { code: 'F', name: 'Ethics', score: 0, color: 'bg-purple-500' },
@@ -50,9 +50,9 @@ export function PerformanceChart() {
           });
 
           setDomainData([
-            { code: 'A', name: 'Measurement', score: domainTotals.A?.total ? Math.round((domainTotals.A.correct / domainTotals.A.total) * 100) : latestScore, color: 'bg-emerald-500' },
-            { code: 'B', name: 'Assessment', score: domainTotals.B?.total ? Math.round((domainTotals.B.correct / domainTotals.B.total) * 100) : latestScore, color: 'bg-blue-500' },
-            { code: 'C', name: 'Skill Acq', score: domainTotals.C?.total ? Math.round((domainTotals.C.correct / domainTotals.C.total) * 100) : latestScore, color: 'bg-indigo-500' },
+            { code: 'A', name: 'Data Collection', score: domainTotals.A?.total ? Math.round((domainTotals.A.correct / domainTotals.A.total) * 100) : latestScore, color: 'bg-emerald-500' },
+            { code: 'B', name: 'Behavior Assessment', score: domainTotals.B?.total ? Math.round((domainTotals.B.correct / domainTotals.B.total) * 100) : latestScore, color: 'bg-blue-500' },
+            { code: 'C', name: 'Behavior Acq', score: domainTotals.C?.total ? Math.round((domainTotals.C.correct / domainTotals.C.total) * 100) : latestScore, color: 'bg-indigo-500' },
             { code: 'D', name: 'Behavior Red', score: domainTotals.D?.total ? Math.round((domainTotals.D.correct / domainTotals.D.total) * 100) : latestScore, color: 'bg-amber-500' },
             { code: 'E', name: 'Documentation', score: domainTotals.E?.total ? Math.round((domainTotals.E.correct / domainTotals.E.total) * 100) : latestScore, color: 'bg-teal-500' },
             { code: 'F', name: 'Ethics', score: domainTotals.F?.total ? Math.round((domainTotals.F.correct / domainTotals.F.total) * 100) : latestScore, color: 'bg-purple-500' },
@@ -154,7 +154,7 @@ export function PerformanceChart() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="text-xs text-slate-500 font-medium">Domain Scores vs Official BACB Pass Weight Benchmark</div>
+            <div className="text-xs text-slate-500 font-medium">Domain Scores Across 6 TCO Categories</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {domainData.map((dm) => (
                 <div key={dm.code} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 space-y-1">

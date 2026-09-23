@@ -59,7 +59,7 @@ export function convertMasterQuestionsToExamQuestions(
     'Prompting': 'C',
     'Chaining': 'C',
     'Token Economy': 'C',
-    'Reinforcement': 'D',
+    'Reinforcement': 'C',
     'Punishment': 'D',
     'Replacement Behaviors': 'D',
     'Behavior Intervention Plans': 'D',

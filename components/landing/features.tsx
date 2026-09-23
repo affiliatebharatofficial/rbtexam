@@ -16,7 +16,7 @@ export function Features() {
     {
       icon: Brain,
       title: 'Socrates AI Ethics & Scenario Tutor',
-      description: 'Interact with our conversational AI tutor trained on the RBT Ethics Code 2.0. Receive immediate, detailed explanations on why right answers are correct and why distractors are wrong.',
+      description: 'Interact with our conversational AI tutor guided by the RBT Ethics Code 2.0. Receive immediate, detailed explanations on why right answers are correct and why distractors are wrong.',
       color: 'from-emerald-500 to-teal-600',
     },
     {
@@ -27,20 +27,20 @@ export function Features() {
     },
     {
       icon: ShieldCheck,
-      title: 'BACB RBT 3rd Edition Task List Mastery',
-      description: 'Complete coverage of all 6 Task List Domains (A through F). Drill targeted questions by domain, from Data Collection and Graphing (A) to Ethics and Professional Conduct (F).',
+      title: 'BACB RBT 3rd Edition TCO Mastery',
+      description: 'Complete coverage of all 6 Test Content Outline Domains (A through F). Drill targeted questions across all 43 tasks, from Data Collection and Graphing (A) to Ethics (F).',
       color: 'from-amber-500 to-orange-600',
     },
     {
       icon: BarChart3,
       title: 'Domain Diagnostic Weakness Heatmaps',
-      description: 'Visual analytics pinpoint exact weak spots across sub-tasks so you spend your 7-day free trial on high-impact areas that directly elevate your pass readiness score.',
+      description: 'Visual analytics pinpoint exact weak spots across sub-tasks so you spend your practice time on high-impact areas that directly elevate your pass readiness score.',
       color: 'from-rose-500 to-pink-600',
     },
     {
       icon: Users,
       title: 'Clinic & Training Center B2B Portal',
-      description: 'Supervisors and BCBAs can oversee trainee cohorts, track student exam readiness scores, assign practice tests, and verify 100% team pass readiness.',
+      description: 'Supervisors and BCBAs can oversee trainee cohorts, track student exam readiness scores, assign practice tests, and verify team pass readiness.',
       color: 'from-blue-600 to-cyan-600',
     },
   ];

@@ -4,143 +4,134 @@ import React from 'react';
 import { useLanguage } from '@/context/language-context';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Star, ShieldCheck, Quote, CheckCircle2 } from 'lucide-react';
+import { Brain, Layers, BarChart3, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 
 export function Testimonials() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const isEs = language === 'es';
 
-  const testimonials = isEs
+  const methodologyPillars = isEs
     ? [
         {
-          name: 'Jessica Davis, RBT',
-          role: 'Técnica de Conducta @ Hope Autism Center (Dallas, TX)',
-          avatar: 'JD',
-          bgColor: 'bg-blue-600',
-          rating: 5,
-          scoreBefore: '64%',
-          scoreAfter: '94%',
-          quote: 'Reprobé en mi primer intento usando un banco de pruebas en PDF. El tutor Sócrates de RBT Practice AI identificó exactamente mi debilidad en el Dominio C (DTT vs NET) en 15 minutos. ¡Aprobé mi examen BACB con honores!',
-          verified: true,
+          title: 'Práctica de Recuperación Activa',
+          icon: Brain,
+          iconBg: 'bg-blue-50 text-blue-600',
+          badge: 'Ciencia Cognitiva',
+          desc: 'La ciencia del aprendizaje demuestra que resolver preguntas clínicas basadas en escenarios produce una retención significativamente mayor que la lectura pasiva de manuales en PDF.',
+          benefits: [
+            'Distingue contingencias sutiles (DTT vs NET, DRA vs DRI)',
+            'Construye velocidad y resistencia para 85 preguntas',
+            'Explicaciones clínicas inmediatas tras cada respuesta',
+          ],
         },
         {
-          name: 'Marcus Vance, BCBA',
-          role: 'Director Clínico @ Apex Behavioral Solutions (Atlanta, GA)',
-          avatar: 'MV',
-          bgColor: 'bg-emerald-600',
-          rating: 5,
-          scoreBefore: 'Promedio 72%',
-          scoreAfter: 'Promedio 98%',
-          quote: 'Capacitamos a 24 nuevos técnicos de conducta con el portal B2B para clínicas de RBT Practice AI. Todos y cada uno de los candidatos aprobaron en su primer intento en 3 semanas.',
-          verified: true,
+          title: 'Repetición Espaciada Leitner',
+          icon: Layers,
+          iconBg: 'bg-emerald-50 text-emerald-600',
+          badge: 'Algoritmo de 5 Cajas',
+          desc: 'Las tarjetas de vocabulario ABA se distribuyen automáticamente en cajas según tu precisión, reforzando términos difíciles a intervalos crecientes para fijarlos en la memoria a largo plazo.',
+          benefits: [
+            'Domina más de 200 definiciones y abreviaturas operacionales',
+            'Enfoca el tiempo de estudio en tus áreas de mayor debilidad',
+            'Previene la curva de olvido antes del día del examen',
+          ],
         },
         {
-          name: 'Samantha K., RBT',
-          role: 'Técnica Líder @ Spectrum Care (San Diego, CA)',
-          avatar: 'SK',
-          bgColor: 'bg-purple-600',
-          rating: 5,
-          scoreBefore: '71%',
-          scoreAfter: '96%',
-          quote: 'Las tarjetas de repetición espaciada Leitner y las simulaciones de ética son increíbles. Me sentí 100% preparada para el formato Pearson VUE.',
-          verified: true,
+          title: 'Mapas de Diagnóstico por Dominio',
+          icon: BarChart3,
+          iconBg: 'bg-indigo-50 text-indigo-600',
+          badge: 'BACB 3ª Edición TCO',
+          desc: 'Los simulacros desglosan tu desempeño en los 6 dominios oficiales y 43 tareas, permitiéndote identificar con precisión quirúrgica dónde enfocar tus sesiones de repaso.',
+          benefits: [
+            'Ponderación exacta (A: 17%, B: 11%, C: 25%, D: 19%, E: 13%, F: 15%)',
+            'Puntaje de preparación general con umbral del 80%+',
+            'Simulación con interfaz idéntica a Pearson VUE',
+          ],
         },
       ]
     : [
         {
-          name: 'Jessica Davis, RBT',
-          role: 'Behavior Technician @ Hope Autism Center (Dallas, TX)',
-          avatar: 'JD',
-          bgColor: 'bg-blue-600',
-          rating: 5,
-          scoreBefore: '64%',
-          scoreAfter: '94%',
-          quote: 'I failed my first attempt using a basic PDF test bank. RBT Practice AI’s Socrates tutor pinpointed my exact weak spot in Domain C (DTT vs NET) within 15 minutes. Passed my BACB retake with flying colors!',
-          verified: true,
+          title: 'Active Retrieval Practice',
+          icon: Brain,
+          iconBg: 'bg-blue-50 text-blue-600',
+          badge: 'Cognitive Science',
+          desc: 'Research in cognitive psychology shows that answering scenario-based questions produces far higher conceptual retention and exam readiness than passively reading static PDF study guides.',
+          benefits: [
+            'Discriminate subtle contingencies (DTT vs NET, DRA vs DRI)',
+            'Build pacing and cognitive stamina for 85 exam questions',
+            'Immediate step-by-step clinical explanations for every option',
+          ],
         },
         {
-          name: 'Marcus Vance, BCBA',
-          role: 'Clinical Director @ Apex Behavioral Solutions (Atlanta, GA)',
-          avatar: 'MV',
-          bgColor: 'bg-emerald-600',
-          rating: 5,
-          scoreBefore: 'Clinic Avg 72%',
-          scoreAfter: 'Clinic Avg 98%',
-          quote: 'We onboarded 24 new behavior technicians using the RBT Practice AI B2B Clinic Portal. Every single candidate passed on their first try within 3 weeks. It saves our BCBA supervisors dozens of hours.',
-          verified: true,
+          title: 'Leitner Spaced Repetition',
+          icon: Layers,
+          iconBg: 'bg-emerald-50 text-emerald-600',
+          badge: '5-Box Memory Engine',
+          desc: 'Our flashcard system sorts Applied Behavior Analysis terminology into 5 distinct mastery boxes, prioritizing difficult concepts at expanding intervals to lock them into long-term recall.',
+          benefits: [
+            'Master key ABA definitions and operational criteria',
+            'Focus your daily study time where your memory needs it most',
+            'Counteract the forgetting curve prior to test day',
+          ],
         },
         {
-          name: 'Samantha K., RBT',
-          role: 'Lead Technician @ Spectrum Care (San Diego, CA)',
-          avatar: 'SK',
-          bgColor: 'bg-purple-600',
-          rating: 5,
-          scoreBefore: '71%',
-          scoreAfter: '96%',
-          quote: 'The Leitner flashcards and ethics roleplay scenarios are unbelievable. I felt 100% prepared for Pearson VUE testing conditions. Worth 10x the price!',
-          verified: true,
+          title: 'Diagnostic Domain Analytics',
+          icon: BarChart3,
+          iconBg: 'bg-indigo-50 text-indigo-600',
+          badge: 'BACB 3rd Edition TCO',
+          desc: 'Every practice session and mock exam breaks down your accuracy across all 6 official domains and 43 task outlines, showing you exactly where to focus your review.',
+          benefits: [
+            'Exact TCO weighting (A: 17%, B: 11%, C: 25%, D: 19%, E: 13%, F: 15%)',
+            'Objective 80%+ readiness benchmarks per task outline',
+            'Familiarity with Pearson VUE computer-based test formats',
+          ],
         },
       ];
 
   return (
-    <section id="testimonials" className="py-24 bg-slate-50/70 border-b border-slate-100 relative">
+    <section id="methodology" className="py-24 bg-slate-50/70 border-b border-slate-100 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
           <Badge variant="blue" className="gap-1">
-            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span>{isEs ? 'Opiniones Verificadas de Estudiantes' : 'Verified Student Reviews'}</span>
+            <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+            <span>{isEs ? 'Metodología de Estudio Basada en Evidencia' : 'Evidence-Based Learning Architecture'}</span>
           </Badge>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight">
-            {isEs ? 'Más de 14,200 Candidatos a RBT y Clínicas de ABA Confían en Nosotros' : 'Trusted by 14,200+ RBT Candidates & Top ABA Clinics'}
+            {isEs ? 'Cómo Nuestra Plataforma Desarrolla Competencia Clínica Real' : 'How Candidates Build Authentic Clinical Competency'}
           </h2>
           <p className="text-base text-slate-600">
             {isEs
-              ? 'Descubre cómo terapeutas y supervisores clínicos aprobaron su examen BACB RBT al primer intento con RBT Practice AI.'
-              : 'See how therapists and clinical supervisors passed their BACB RBT exam on the first attempt with RBT Practice AI.'}
+              ? 'Combinamos ciencia cognitiva, el temario oficial BACB 3ª edición y tutoría socrática para transformar la teoría en preparación para el examen.'
+              : 'Combining cognitive science, the official BACB 3rd Edition Test Content Outline, and Socratic clinical guidance to prepare candidates for exam day.'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((t, idx) => (
-            <Card key={idx} glass className="p-8 flex flex-col justify-between shadow-lg hover:shadow-2xl transition-all duration-300 border-white/80">
+          {methodologyPillars.map((pillar, idx) => (
+            <Card key={idx} glass className="p-8 flex flex-col justify-between shadow-lg hover:shadow-xl transition-all duration-300 border-white/80">
               <div className="space-y-6">
-                {/* Rating & Verified Badge */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
+                  <div className={`w-12 h-12 rounded-2xl ${pillar.iconBg} flex items-center justify-center font-bold shadow-sm`}>
+                    <pillar.icon className="w-6 h-6" />
                   </div>
-                  <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                    <span>{isEs ? 'Aprobado Verificado' : 'Verified Pass'}</span>
-                  </span>
+                  <Badge variant="slate" className="text-xs font-semibold">
+                    {pillar.badge}
+                  </Badge>
                 </div>
 
-                {/* Quote */}
-                <p className="text-sm text-slate-700 leading-relaxed font-normal italic">
-                  "{t.quote}"
-                </p>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-[#0F172A] tracking-tight">{pillar.title}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{pillar.desc}</p>
+                </div>
 
-                {/* Score improvement tag */}
-                <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 flex items-center justify-between text-xs">
-                  <span className="text-slate-500 font-medium">{isEs ? 'Mejora Diagnóstica:' : 'Diagnostic Boost:'}</span>
-                  <div className="font-extrabold space-x-1">
-                    <span className="text-slate-400 line-through">{t.scoreBefore}</span>
-                    <span className="text-[#2563EB]">&rarr; {t.scoreAfter}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Author Info */}
-              <div className="pt-6 border-t border-slate-100 flex items-center space-x-3 mt-6">
-                <div className={`w-10 h-10 rounded-full ${t.bgColor} text-white font-bold text-xs flex items-center justify-center shadow-md`}>
-                  {t.avatar}
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-[#0F172A]">{t.name}</h4>
-                  <p className="text-[11px] text-slate-500">{t.role}</p>
-                </div>
+                <ul className="space-y-2.5 pt-2 border-t border-slate-100 text-xs text-slate-700">
+                  {pillar.benefits.map((b, i) => (
+                    <li key={i} className="flex items-start space-x-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             </Card>
           ))}

@@ -38,7 +38,7 @@ export interface StudentAnalytics {
   activeStudentsMAU: number;
   retentionRatePercentage: number;
   averageReadinessScore: number; // e.g. 88%
-  predictedPassRatePercentage: number; // e.g. 99.4%
+  predictedPassRatePercentage: number; // e.g. 88.5%
   totalStudyHours: number;
   averageSessionLengthMinutes: number;
   certificationDistribution: {

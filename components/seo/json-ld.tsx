@@ -90,7 +90,7 @@ export function JsonLdSchema() {
         name: 'Is the platform aligned with the BACB RBT 3rd Edition Test Content Outline?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes. 100% of our practice questions, flashcards, and study modules are mapped directly to the current BACB RBT 3rd Edition Test Content Outline across Domains A through F: Data Collection and Graphing, Behavior Assessment, Behavior Acquisition, Behavior Reduction, Documentation and Reporting, and Professional Conduct.',
+          text: 'Yes. 100% of our practice questions, flashcards, and study modules are mapped directly to the current BACB RBT 3rd Edition Test Content Outline across Domains A through F: Data Collection and Graphing, Behavior Assessment, Behavior Acquisition, Behavior Reduction, Documentation and Reporting, and Ethics.',
         },
       },
       {
@@ -98,7 +98,7 @@ export function JsonLdSchema() {
         name: 'Are RBT Practice AI questions official BACB exam questions?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'No. The BACB does not publish or license official exam questions. All questions on RBT Practice AI are original practice questions crafted by BCBA clinical experts to mirror the difficulty, structure, clinical scenarios, and cognitive levels of the actual certification exam.',
+          text: 'No. The BACB does not publish or license official exam questions. All questions on RBT Practice AI are original practice questions developed independently to reflect the difficulty, structure, clinical scenarios, and cognitive levels of the actual certification exam.',
         },
       },
       {
@@ -114,7 +114,7 @@ export function JsonLdSchema() {
         name: 'How does the Socrates AI Tutor work?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Socrates AI is a specialized conversational assistant trained on ABA principles and the RBT Ethics Code 2.0. It provides instant step-by-step rationales for why correct options are right and why distractors are incorrect, helps you practice clinical roleplay, and clears up difficult concepts in real time.',
+          text: 'Socrates AI is a specialized conversational study assistant powered by advanced language models and guided by verified ABA principles and the RBT Ethics Code 2.0. It provides instant step-by-step rationales for why correct options are right and why distractors are incorrect, helps you practice clinical roleplay, and clears up difficult concepts in real time.',
         },
       },
       {

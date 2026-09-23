@@ -86,15 +86,15 @@ export interface Flashcard {
   subcategory?: string;
   difficulty: 'easy' | 'medium' | 'hard';
   keywords: string[];
-  tags: string[];
+  tags?: string[];
   imageUrl?: string;
   status: 'published' | 'draft' | 'archived';
   isPremium: boolean;
   isFeatured: boolean;
-  createdBy: string;
-  updatedBy: string;
-  createdAt: string;
-  updatedAt: string;
+  createdBy?: string;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
   // Attached user progress (if loaded for active user session)
   userState?: SpacedRepetitionState;
 }

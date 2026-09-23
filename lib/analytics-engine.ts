@@ -64,7 +64,7 @@ export function getPlatformAnalyticsSummary(): ExecutiveSummary {
         activeStudentsMAU: 12400,
         retentionRatePercentage: 89.4,
         averageReadinessScore: 88,
-        predictedPassRatePercentage: 99.4,
+        predictedPassRatePercentage: 88.5,
         totalStudyHours: 48200,
         averageSessionLengthMinutes: 28,
         certificationDistribution: {

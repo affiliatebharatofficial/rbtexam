@@ -114,27 +114,27 @@ export function SeoContentSection() {
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-slate-700 font-medium">
               <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Domain A: Data Collection & Graphing (14%)</strong> — Continuous/discontinuous measurement and line graphs.</span>
+                <span><strong>Domain A: Data Collection & Graphing (17% / 13 Questions)</strong> — Continuous/discontinuous measurement, rate calculation, and line graphs.</span>
               </li>
               <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Domain B: Behavior Assessment (12%)</strong> — Preference assessments and ABC functional data collection.</span>
+                <span><strong>Domain B: Behavior Assessment (11% / 8 Questions)</strong> — Preference assessments, skill probing, and ABC functional assessment.</span>
               </li>
               <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Domain C: Behavior Acquisition (28%)</strong> — DTT, NET, task analysis, prompt hierarchies, and token economies.</span>
+                <span><strong>Domain C: Behavior Acquisition (25% / 19 Questions)</strong> — DTT, NET, task analysis, prompt hierarchies, shaping, and token economies.</span>
               </li>
               <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Domain D: Behavior Reduction (18%)</strong> — Antecedent strategies, differential reinforcement (DRA/DRO), and extinction.</span>
+                <span><strong>Domain D: Behavior Reduction (19% / 14 Questions)</strong> — Antecedent interventions, differential reinforcement (DRA/DRO), and extinction.</span>
               </li>
               <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Domain E: Documentation & Reporting (12%)</strong> — Objective session notes, legal requirements, and crisis reporting.</span>
+                <span><strong>Domain E: Documentation & Reporting (13% / 10 Questions)</strong> — Objective session notes, legal requirements, and supervisor escalation.</span>
               </li>
               <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span><strong>Domain F: Professional Conduct & Ethics (16%)</strong> — RBT Ethics Code 2.0, dual relationships, and supervision compliance.</span>
+                <span><strong>Domain F: Ethics (15% / 11 Questions)</strong> — RBT Ethics Code 2.0, dual relationships, 5% monthly supervision, and cultural humility.</span>
               </li>
             </ul>
           </Card>

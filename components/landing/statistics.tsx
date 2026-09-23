@@ -10,32 +10,32 @@ export function Statistics() {
 
   const stats = [
     {
-      label: t('stats.candidates', 'Candidates Prepared'),
-      value: '14,200+',
-      subtext: t('stats.candidatesSub', 'Across all 50 US States'),
-      icon: Users,
-      color: 'text-blue-600',
-    },
-    {
-      label: t('stats.passRate', 'First-Time Pass Rate'),
-      value: '99.4%',
-      subtext: t('stats.passRateSub', 'Vs 74% National Average'),
-      icon: Award,
-      color: 'text-emerald-600',
-    },
-    {
-      label: t('stats.questions', 'Questions Answered'),
-      value: '500,000+',
-      subtext: t('stats.questionsSub', 'BACB RBT 3rd Edition Aligned'),
+      label: t('stats.mockQuestions', 'Mock Exam Questions'),
+      value: '85',
+      subtext: t('stats.mockQuestionsSub', '75 Scored + 10 Pilot Questions'),
       icon: CheckCircle2,
-      color: 'text-indigo-600',
+      color: 'text-blue-500',
     },
     {
-      label: t('stats.rating', 'Candidate Rating'),
-      value: '4.9 / 5',
-      subtext: t('stats.ratingSub', 'Based on 2,100+ verified reviews'),
-      icon: Star,
-      color: 'text-amber-500',
+      label: t('stats.examDomains', 'TCO Domains'),
+      value: '6',
+      subtext: t('stats.examDomainsSub', '100% 3rd Edition Syllabus'),
+      icon: ShieldCheck,
+      color: 'text-emerald-500',
+    },
+    {
+      label: t('stats.tcoTasks', 'Clinical Tasks'),
+      value: '43',
+      subtext: t('stats.tcoTasksSub', 'Comprehensive RBT Competencies'),
+      icon: Award,
+      color: 'text-indigo-400',
+    },
+    {
+      label: t('stats.examDuration', 'Exam Simulation Duration'),
+      value: '90 Min',
+      subtext: t('stats.examDurationSub', 'Authentic Test Center Pacing'),
+      icon: Clock,
+      color: 'text-amber-400',
     },
   ];
 

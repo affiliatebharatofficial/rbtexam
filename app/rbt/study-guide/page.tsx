@@ -36,50 +36,50 @@ export default function RBTStudyGuidePage() {
   const domains = [
     {
       code: 'A',
-      title: 'Measurement & Data Collection',
-      weight: '12 Questions (14%)',
+      title: 'Data Collection and Graphing',
+      weight: '13 Questions (17%)',
       desc: 'Master continuous measurement (frequency, rate, duration, latency, IRT), discontinuous measurement (partial/whole interval, momentary time sampling), permanent product recording, and graphing.',
-      keyConcepts: ['Frequency & Rate', 'Duration & Latency', 'Inter-Response Time (IRT)', 'Interval Recording', 'Cumulative Records'],
+      keyConcepts: ['Continuous Measurement', 'Discontinuous Measurement', 'Permanent Product', 'Behavior Graphing', 'Data Integrity'],
       link: '/rbt/questions?domain=A',
     },
     {
       code: 'B',
-      title: 'Assessment',
-      weight: '8 Questions (9%)',
+      title: 'Behavior Assessment',
+      weight: '8 Questions (11%)',
       desc: 'Conduct preference assessments (free operant, MSW, MSWO, paired stimulus), assist with functional behavior assessments (FBA, ABC data collection), and descriptive assessments.',
-      keyConcepts: ['ABC Data Collection', 'Preference Assessments', 'FBA Assistance', 'Direct Observation'],
+      keyConcepts: ['Preference Assessments', 'Functional Behavior Assessment (FBA)', 'ABC Data Collection', 'Direct Observation'],
       link: '/rbt/questions?domain=B',
     },
     {
       code: 'C',
-      title: 'Skill Acquisition',
-      weight: '24 Questions (28%)',
-      desc: 'Implement discrete trial training (DTT), naturalistic teaching (NET), forward/backward task chaining, shaping, stimulus control transfer, prompt fading hierarchies, and token economies.',
-      keyConcepts: ['Discrete Trial Training (DTT)', 'Naturalistic Teaching (NET)', 'Task Chaining', 'Prompt Fading', 'Token Economy'],
+      title: 'Behavior Acquisition',
+      weight: '19 Questions (25%)',
+      desc: 'Implement discrete trial training (DTT), naturalistic teaching procedures, forward/backward task chaining, shaping, stimulus control transfer, prompt fading hierarchies, and token economies.',
+      keyConcepts: ['Discrete Trial Training (DTT)', 'Naturalistic Teaching (NET)', 'Task Analysis & Chaining', 'Prompt Hierarchy & Fading', 'Conditioned Reinforcers'],
       link: '/rbt/questions?domain=C',
     },
     {
       code: 'D',
       title: 'Behavior Reduction',
-      weight: '12 Questions (14%)',
-      desc: 'Implement behavior intervention plans (BIP), antecedent strategies, motivating operations (EO/AO), differential reinforcement (DRA, DRI, DRO), extinction bursts, and crisis/emergency protocols.',
-      keyConcepts: ['Motivating Operations (MO)', 'DRA / DRI / DRO', 'Extinction & Extinction Burst', 'Antecedent Manipulations'],
+      weight: '14 Questions (19%)',
+      desc: 'Implement behavior intervention plans (BIP), antecedent strategies, motivating operations (EO/AO), differential reinforcement (DRA, DRI, DRO), extinction, and crisis/emergency protocols.',
+      keyConcepts: ['Functions of Behavior', 'Differential Reinforcement (DRA/DRI/DRO)', 'Extinction Procedures', 'Antecedent Modifications', 'Crisis Protocols'],
       link: '/rbt/questions?domain=D',
     },
     {
       code: 'E',
-      title: 'Documentation & Reporting',
-      weight: '10 Questions (12%)',
+      title: 'Documentation and Reporting',
+      weight: '10 Questions (13%)',
       desc: 'Write objective, measurable session notes, report variable factors affecting clients, comply with legal and regulatory mandates, and follow mandatory abuse reporting protocols.',
-      keyConcepts: ['Objective Session Notes', 'Mandatory Abuse Reporting', 'Data Archiving (7 Years)', 'Incident Reporting'],
+      keyConcepts: ['Objective Clinical Notes', 'Mandatory Reporting Requirements', 'Variable Clinical Factors', 'Communication with Supervisor'],
       link: '/rbt/questions?domain=E',
     },
     {
       code: 'F',
-      title: 'Professional Conduct & Scope of Practice',
-      weight: '9 Questions (11%)',
-      desc: 'Adhere to the BACB RBT Ethics Code 2.0, maintain professional boundaries (avoid dual relationships & gifts), meet 5% monthly supervision requirements, and practice within RBT scope.',
-      keyConcepts: ['5% Monthly Supervision', '2 Synchronous Meetings', 'Zero Gift Policy', 'Role Boundaries'],
+      title: 'Ethics',
+      weight: '11 Questions (15%)',
+      desc: 'Adhere to the BACB RBT Ethics Code 2.0, maintain professional boundaries (avoid dual relationships & gifts), meet supervision requirements, and practice strictly within the RBT scope.',
+      keyConcepts: ['RBT Ethics Code 2.0', 'Professional Boundaries & No Gifts', '5% Monthly Supervision Rule', 'Scope of Practice Limits'],
       link: '/rbt/questions?domain=F',
     },
   ];
@@ -100,10 +100,10 @@ export default function RBTStudyGuidePage() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <Badge variant="blue" className="px-3.5 py-1.5 text-xs">
             <Sparkles className="w-3.5 h-3.5 mr-1 text-blue-600" />
-            BACB RBT 3rd Edition Test Outline Aligned
+            BACB RBT 3rd Edition Test Content Outline Aligned
           </Badge>
           <h1 className="text-3xl sm:text-5xl font-black text-[#0F172A] tracking-tight leading-tight">
-            Official RBT Exam Study Guide & Blueprint
+            Comprehensive RBT Exam Study Guide & Blueprint
           </h1>
           <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
             Everything you need to master the Registered Behavior Technician® examination.

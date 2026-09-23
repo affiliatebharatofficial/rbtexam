@@ -39,7 +39,7 @@ export default function AboutPage() {
             Empowering the Next Generation of Behavior Technicians
           </h1>
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
-            RBT Practice AI was founded by Board Certified Behavior Analysts (BCBAs) and clinical educators with a simple mission: to make high-quality, realistic RBT exam preparation accessible, adaptive, and stress-free for every candidate.
+            RBT Practice AI is an independent educational platform built with a singular mission: to make high-quality, realistic RBT exam preparation accessible, adaptive, and effective for every candidate.
           </p>
         </div>
 
@@ -51,7 +51,7 @@ export default function AboutPage() {
             </div>
             <h3 className="text-base font-extrabold text-[#0F172A]">Clinical Precision</h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Every question is rigorously aligned with the <strong>BACB RBT 3rd Edition Test Content Outline</strong> across Domains A through F, mirroring the exact phrasing and cognitive complexity of the real exam.
+              Every question is carefully aligned with the <strong>BACB RBT 3rd Edition Test Content Outline</strong> across Domains A through F, mirroring the scenario style and cognitive complexity of the certification exam.
             </p>
           </Card>
 
@@ -103,6 +103,17 @@ export default function AboutPage() {
             </Link>
           </div>
         </Card>
+
+        {/* Legal Disclaimer Box */}
+        <div className="p-6 rounded-2xl bg-slate-100/80 border border-slate-200 text-xs text-slate-500 leading-relaxed space-y-2">
+          <p className="font-bold text-slate-700">Official Non-Affiliation Disclaimer</p>
+          <p>
+            Registered Behavior Technician® (RBT®) and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). Pearson VUE is a registered trademark of Pearson Education, Inc.
+          </p>
+          <p>
+            RBT Practice AI is an independent exam-preparation resource developed independently and is not affiliated with, endorsed by, sponsored by, or associated in any way with the BACB® or Pearson VUE.
+          </p>
+        </div>
 
       </div>
     </div>

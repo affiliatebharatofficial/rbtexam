@@ -23,11 +23,11 @@ export default function TaskListPage() {
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-[#0F172A] via-slate-900 to-blue-950 text-white p-8 rounded-3xl shadow-xl space-y-3">
         <Badge variant="blue" className="bg-blue-500/20 text-blue-300 border-blue-400/30">
-          Official Syllabus Reference
+          Based on BACB RBT 3rd Edition TCO
         </Badge>
-        <h1 className="text-3xl font-extrabold tracking-tight">BACB RBT 3rd Edition Task List Study Hub</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">BACB RBT 3rd Edition Test Content Outline Study Hub</h1>
         <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-          Master all 6 domains and individual task items required for the Registered Behavior Technician certification exam.
+          Master all 6 domains and all 43 individual task items required for the Registered Behavior Technician certification exam.
         </p>
       </div>
 
