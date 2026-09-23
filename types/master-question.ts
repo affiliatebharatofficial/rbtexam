@@ -6,7 +6,16 @@ export type QuestionType = 'multiple_choice' | 'true_false' | 'scenario_based' |
 
 export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
 
-export type QuestionStatus = 'draft' | 'published' | 'archived' | 'featured' | 'premium';
+export type QuestionStatus =
+  | 'draft'
+  | 'ai_review'
+  | 'human_review'
+  | 'approved'
+  | 'published'
+  | 'needs_revision'
+  | 'archived'
+  | 'featured'
+  | 'premium';
 
 export type QuestionCategory =
   | 'Data Collection and Graphing'

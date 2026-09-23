@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   HelpCircle,
+  Sparkles,
 } from 'lucide-react';
 import { ContentMeta } from '@/components/eeat/content-meta';
 import { ClinicalBoundaryBanner } from '@/components/eeat/clinical-boundary-banner';
@@ -170,6 +171,60 @@ export default function QuestionMethodologyPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Question Difficulty Calibration Methodology */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-[#2563EB]" />
+              <span>Cognitive Complexity & Difficulty Calibration</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
+                  Easy
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">Bloom: Recall & Recognition</span>
+              </div>
+              <h3 className="font-bold text-sm text-slate-900">Direct Definition & Terminology</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Direct operational recall of standard ABA concepts, foundational definitions (e.g., Frequency count, Mand characteristics), and primary administrative rules (e.g., 5% monthly supervision minimum).
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-100 text-blue-800">
+                  Medium
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">Bloom: Application & Analysis</span>
+              </div>
+              <h3 className="font-bold text-sm text-slate-900">Scenario Application & Calculation</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Applying procedures to practical therapy sessions, calculating behavior rates (count/time) or trial percentages, differentiating DRA from DRI, and implementing prompting hierarchies correctly.
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-purple-100 text-purple-800">
+                  Hard
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">Bloom: Evaluation & Discrimination</span>
+              </div>
+              <h3 className="font-bold text-sm text-slate-900">Multi-Variable & Ethical Boundaries</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Navigating nuanced clinical scenarios with competing variables, directional over/underestimation in time sampling, and complex ethical boundaries (dual relationships, gifts, mandatory reporting).
+              </p>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-500 italic pl-1">
+            *Difficulty ratings reflect pedagogical cognitive complexity analysis. RBTPracticeAI does not manufacture or publish unverified statistical pass rates.
+          </p>
         </div>
 
         {/* Clinical Boundary Banner */}

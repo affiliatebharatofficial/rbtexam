@@ -13,6 +13,7 @@ import { CertificationLevel } from '@/types/certification';
 import { getCertificationConfig, CERTIFICATION_CONFIGS } from '@/lib/certifications-config';
 import { generateExamQuestions, convertMasterQuestionsToExamQuestions } from '@/lib/sample-questions';
 import { awardCandidateXP } from '@/lib/candidate-performance-engine';
+import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
 import confetti from 'canvas-confetti';
 import {
   Sparkles,
@@ -58,7 +59,7 @@ export default function ExamPage() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState<number>(5400); // in seconds
+  const [timeRemaining, setTimeRemaining] = useState<number>(7200); // 120 minutes (2 hours) in seconds
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [hasSavedSession, setHasSavedSession] = useState<boolean>(false);
 
@@ -160,7 +161,7 @@ export default function ExamPage() {
             setCurrentIndex(Math.min(parsed.currentIndex || 0, validQuestions.length - 1));
             setUserAnswers(parsed.userAnswers || {});
             setBookmarkedIds(parsed.bookmarkedIds || []);
-            setTimeRemaining(parsed.timeRemaining || 5400);
+            setTimeRemaining(parsed.timeRemaining || 7200);
             setMode(parsed.mode || 'timed');
             setQuestionCount(parsed.questionCount || 85);
             setPhase('active');
@@ -562,10 +563,10 @@ export default function ExamPage() {
               </div>
 
               {/* Launch Exam CTA */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center space-x-2 text-xs text-slate-500 font-medium">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Backed by 100% Money-Back Pass Guarantee</span>
+                  <span>Backed by Pass-or-Refund Guarantee (Terms Apply)</span>
                 </div>
                 <Button onClick={handleStartExam} variant="primary" size="lg" className="gap-2 shadow-xl shadow-blue-500/25 px-8">
                   <span>Start {certification} Practice Exam</span>
@@ -573,6 +574,8 @@ export default function ExamPage() {
                 </Button>
               </div>
             </Card>
+
+            <QuestionSourceDisclosure />
           </div>
         )}
 
@@ -891,7 +894,7 @@ export default function ExamPage() {
             }`}>
               <div className="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/10 text-xs font-bold border border-white/20">
                 <Award className="w-4 h-4 text-amber-400" />
-                <span>{certification} Instant Score Report</span>
+                <span>{certification} Practice Exam Score Report (RBTPracticeAI Benchmark)</span>
               </div>
 
               <div className="space-y-1">
@@ -905,15 +908,19 @@ export default function ExamPage() {
                 {results.isPassed ? (
                   <span className="inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-emerald-500 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30">
                     <ShieldCheck className="w-5 h-5" />
-                    <span>BACB PASS READY GUARANTEED</span>
+                    <span>RBTPracticeAI TARGET BENCHMARK ACHIEVED (80%+)</span>
                   </span>
                 ) : (
                   <span className="inline-flex items-center space-x-1.5 px-4 py-1.5 rounded-full bg-amber-500 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/30">
                     <AlertCircle className="w-5 h-5" />
-                    <span>TARGET PASS THRESHOLD: {certConfig.passingScorePercentage}%</span>
+                    <span>TARGET BENCHMARK THRESHOLD: {certConfig.passingScorePercentage}%</span>
                   </span>
                 )}
               </div>
+
+              <p className="text-xs text-slate-400 pt-2 max-w-xl mx-auto leading-relaxed">
+                RBTPracticeAI mock exam scores are internal educational self-assessment metrics and do not predict, calculate, or guarantee official BACB® examination outcomes.
+              </p>
             </Card>
 
             {/* Domain Performance Sub-Scores */}

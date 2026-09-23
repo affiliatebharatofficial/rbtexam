@@ -167,7 +167,7 @@ export function SeoContentSection() {
               <li><strong>Isolate Weak Domains:</strong> Review your visual diagnostic heatmap to focus study hours on low-scoring sub-tasks (such as C-04 Discrete Trial Teaching or D-02 Differential Reinforcement).</li>
               <li><strong>Drill Terminology with Spaced Flashcards:</strong> Review our <Link href="/rbt/glossary" className="text-[#2563EB] font-semibold underline hover:text-blue-700">RBT glossary definitions</Link> and Leitner flashcards for 15 minutes daily.</li>
               <li><strong>Engage with Socrates AI:</strong> Ask questions on ethical dilemmas and request clinical scenario roleplays to solidify your reasoning.</li>
-              <li><strong>Complete Timed 85-Question Mock Exams:</strong> Take full-length 90-minute simulations to confirm your pass readiness before test day.</li>
+              <li><strong>Complete Timed 85-Question Mock Exams:</strong> Take full-length 120-minute simulations (2 hours) to confirm your benchmark readiness before test day.</li>
             </ol>
           </Card>
 

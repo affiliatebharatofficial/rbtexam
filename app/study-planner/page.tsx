@@ -137,7 +137,7 @@ export default function StudyPlannerPage() {
 
           <Card glass className="p-5 space-y-2 border-white/90 shadow-lg">
             <div className="flex items-center justify-between text-xs text-slate-500 font-bold">
-              <span>Predicted Pass Probability</span>
+              <span>Practice Mastery Indicator (Internal Metric)</span>
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
             </div>
             <div className="text-3xl font-black text-emerald-600">

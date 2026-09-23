@@ -64,7 +64,7 @@ export function ReadinessRing({ score, targetScore = 90, passLikelihood = 0 }: R
               : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800/60'
           }`}>
             <ShieldCheck className="w-3 h-3" />
-            <span>{score >= 80 ? 'Pass Guaranteed' : 'Diagnostic Needed'}</span>
+            <span>{score >= 80 ? 'Target Benchmark Met' : 'Diagnostic Progress'}</span>
           </div>
         </div>
       </div>
@@ -76,9 +76,12 @@ export function ReadinessRing({ score, targetScore = 90, passLikelihood = 0 }: R
           <div className="font-extrabold text-slate-800 dark:text-slate-200 text-sm">{targetScore}%</div>
         </div>
         <div>
-          <div className="text-slate-400 dark:text-slate-500 font-medium">Pass Probability</div>
+          <div className="text-slate-400 dark:text-slate-500 font-medium">Practice Mastery Index</div>
           <div className="font-extrabold text-emerald-600 dark:text-emerald-400 text-sm">{passLikelihood}%</div>
         </div>
+      </div>
+      <div className="text-[9px] text-slate-400 dark:text-slate-500 text-center mt-2">
+        Internal educational self-assessment metric
       </div>
     </div>
   );

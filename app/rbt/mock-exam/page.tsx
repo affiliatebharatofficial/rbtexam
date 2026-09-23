@@ -5,7 +5,7 @@ import ExamPage from '@/app/exam/page';
 export const metadata = constructMetadata({
   title: '85-Question RBT Mock Exam | RBT Practice AI',
   description:
-    'Take a timed 85-question official-style RBT Mock Exam aligned with the BACB 3rd Edition Task List. Full instant scoring and detailed clinical rationales.',
+    'Take a timed 85-question full-length RBT Mock Exam aligned with the BACB 3rd Edition Task Content Outline. Full instant scoring and detailed behavioral rationales.',
   path: '/rbt/mock-exam',
   keywords: [
     'rbt mock exam',
@@ -19,7 +19,7 @@ export const metadata = constructMetadata({
 export default function RBTMockExamPage() {
   return (
     <>
-      <h1 className="sr-only">85-Question Official RBT Mock Exam Simulator (2026)</h1>
+      <h1 className="sr-only">85-Question Full-Length RBT Mock Exam Simulator (2026)</h1>
       <ExamPage />
     </>
   );

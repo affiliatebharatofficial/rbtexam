@@ -9,6 +9,7 @@ import { Sparkles, CheckCircle2, ArrowRight, Brain, BookOpen, ShieldCheck, Arrow
 import { Metadata } from 'next';
 import { constructMetadata } from '@/utils/seo';
 import { MasterQuestion } from '@/types/master-question';
+import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -195,6 +196,8 @@ export default async function ProgrammaticQuestionPage({ params }: { params: Pro
           </Link>
         </div>
       </Card>
+
+      <QuestionSourceDisclosure />
 
       {/* Programmatic Internal Links */}
       <Card glass className="p-6 space-y-3">

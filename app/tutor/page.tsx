@@ -80,7 +80,7 @@ function TutorContent() {
       {
         id: 'msg-welcome',
         sender: 'assistant',
-        content: `Welcome, **${candidateName}**! I am **Socrates AI**, your interactive Applied Behavior Analysis (ABA) study tutor. I'm here to help you master the **${certification} Exam** with Socratic guidance, clinical scenario deconstructions, and exam strategies.\n\nI see your current exam readiness rating is **${candidateContext.readinessScore}%**. Let me help you turn your weak topics into strengths!`,
+        content: `Welcome, **${candidateName}**! I am **Socrates AI**, your interactive Applied Behavior Analysis (ABA) study assistant. I'm here to help you study for the **${certification} Exam** aligned with the BACB 3rd Edition Test Content Outline using Socratic guidance, practice scenarios, and concept breakdowns. What topic would you like to review today?`,
         timestamp: new Date().toISOString(),
         clinicalInsight: {
           concept: 'Candidate Focus Recommendation',

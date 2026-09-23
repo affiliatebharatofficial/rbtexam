@@ -1,5 +1,6 @@
 import { MasterQuestion, QuestionStatus } from '@/types/master-question';
 import { getSupabaseAdminClient } from './supabase';
+import { FULL_BACB_SEED_QUESTIONS } from './seed-questions-bank';
 
 export function mapDbRowToMasterQuestion(row: any): MasterQuestion {
   return {
@@ -81,12 +82,18 @@ export async function fetchQuestionByIdOrCodeAsync(idOrCode: string): Promise<Ma
       .limit(1)
       .maybeSingle();
 
-    if (error || !data) return null;
-    return mapDbRowToMasterQuestion(data);
+    if (!error && data) {
+      return mapDbRowToMasterQuestion(data);
+    }
   } catch (err) {
     console.error('Failed to fetch question by ID/code from Supabase:', err);
-    return null;
   }
+
+  // Fallback to canonical seed questions bank
+  const fallback = FULL_BACB_SEED_QUESTIONS.find(
+    (q) => q.id === idOrCode || (q as any).question_code === idOrCode
+  );
+  return fallback || null;
 }
 
 /**
@@ -102,14 +109,15 @@ export async function loadServerPersistentQuestionsAsync(limit: number = 200): P
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (!error && Array.isArray(dbRows)) {
+    if (!error && Array.isArray(dbRows) && dbRows.length > 0) {
       return dbRows.map(mapDbRowToMasterQuestion);
     }
   } catch (err) {
     console.error('Failed to load questions from Supabase DB:', err);
   }
 
-  return [];
+  // Fallback to canonical seed questions
+  return FULL_BACB_SEED_QUESTIONS.slice(0, limit);
 }
 
 /**

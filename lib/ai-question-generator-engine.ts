@@ -252,11 +252,11 @@ export function validateQuestionItem(rawItem: any, params: GenerationInputParams
     taskListVersion: '3rd_edition',
     estimatedTimeSeconds: 60,
     tags: ['AI Generated', 'BACB Item', params.certification],
-    status: 'published',
+    status: 'ai_review',
     isPremium: params.isPremium || false,
-    isFeatured: true,
-    createdBy: `AI Generator`,
-    updatedBy: 'Super Admin System',
+    isFeatured: false,
+    createdBy: 'AI Generator',
+    updatedBy: 'Editorial Queue',
   };
 
   return { isValid: true, errors: [], question: parsedQuestion };

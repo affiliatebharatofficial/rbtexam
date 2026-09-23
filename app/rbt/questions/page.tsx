@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MasterQuestion } from '@/types/master-question';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
+import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
 import {
   Sparkles,
   BookOpen,
@@ -117,6 +118,8 @@ function QuestionsListContent() {
           </Link>
         </div>
       </div>
+
+      <QuestionSourceDisclosure />
 
       {/* Filter Tabs & Search Bar */}
       <Card glass className="p-4 space-y-4 shadow-lg border-white/90">

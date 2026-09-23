@@ -133,7 +133,7 @@ export function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
               </div>
               <div className="text-right">
                 <div className="text-xl font-extrabold text-emerald-600">{user.readinessScore}% Ready</div>
-                <div className="text-[10px] text-slate-400 font-bold">100% Pass Guaranteed</div>
+                <div className="text-[10px] text-slate-400 font-bold">Pass-or-Refund Guarantee (Terms Apply)</div>
               </div>
             </div>
 

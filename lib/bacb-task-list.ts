@@ -6,7 +6,7 @@ import { BACBDomain } from '@/types/bacb';
  * https://www.bacb.com/wp-content/uploads/2023/12/RBT-3rd-Edition-Test-Content-Outline-240903-a.pdf
  * 
  * Total Examination: 85 Questions (75 Scored + 10 Unscored Pilot Questions)
- * Examination Duration: 90 Minutes
+ * Examination Duration: 120 Minutes (2 Hours)
  * Total Tasks: 43 Tasks across 6 Domains
  */
 export const BACB_TASK_LIST_3RD_EDITION: BACBDomain[] = [

@@ -85,7 +85,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'howItWorks.step3.desc': 'Engage with our Socratic AI tutor for instant rationale on ethical dilemmas and clinical scenarios. Review Leitner 5-box flashcards designed to lock ABA terminology into long-term memory.',
     'howItWorks.step4.title': 'Pass Your RBT Exam with Guaranteed Confidence',
     'howItWorks.step4.subtitle': '85-Question Mocks • Pass-or-Refund Guarantee',
-    'howItWorks.step4.desc': 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.',
+    'howItWorks.step4.desc': 'Take simulated 85-question 120-minute (2 hours) timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.',
 
     // Why Choose Us
     'whyUs.badge': 'The Smart Choice for RBT Candidates',

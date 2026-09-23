@@ -91,11 +91,11 @@ export default function ProfilePage() {
 
                 <div className="pt-4 border-t border-slate-100 space-y-3 text-left text-xs">
                   <div className="flex justify-between items-center text-slate-600">
-                    <span>BACB Readiness Score:</span>
+                    <span>RBTPracticeAI Readiness Index:</span>
                     <span className="font-extrabold text-emerald-600 text-sm">{user.readinessScore}%</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600">
-                    <span>Estimated Pass Probability:</span>
+                    <span>Practice Mastery Metric:</span>
                     <span className="font-bold text-slate-900">{user.estimatedPassLikelihood}%</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600">
