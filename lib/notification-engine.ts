@@ -586,7 +586,7 @@ export const EMAIL_TEMPLATES: EmailTemplate[] = [
                 Outstanding work, <strong>{{name}}</strong>!
               </p>
               <p style="font-size: 14px; color: #475569; line-height: 1.6;">
-                You scored <strong>{{scorePercentage}}%</strong> on your latest full-length simulation. According to our historical candidate data, candidates scoring above 85% on RBT Practice AI have a <strong>98.7% first-time pass rate</strong> at Pearson VUE testing centers.
+                You scored <strong>{{scorePercentage}}%</strong> on your latest full-length practice simulation, successfully achieving our recommended 80%+ practice benchmark across the 6 TCO domains.
               </p>
 
               <div style="margin: 24px 0; padding: 20px; background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 12px; text-align: left;">

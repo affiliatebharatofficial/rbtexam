@@ -54,7 +54,6 @@ export function generateQuestionJSONLD(question: any) {
       acceptedAnswer: {
         '@type': 'Answer',
         text: `${correctOpt?.text || ''}. ${question.aiExplanationDetail || question.answerExplanation || ''}`,
-        upvoteCount: 42,
         url: `${BASE_URL}/rbt/question/${question.id}`,
       },
     },
@@ -69,17 +68,17 @@ export function generateCourseJSONLD(certification: string = 'RBT') {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: `${certification} Exam Preparation & Practice Simulator`,
-    description: `Complete ${certification} certification preparation platform with 85-question mock exams, Leitner flashcards, and Socrates AI Tutor mentorship.`,
+    description: `Complete ${certification} certification preparation platform with 85-question 120-minute mock exams, Leitner flashcards, and Socrates AI Tutor mentorship.`,
     provider: {
       '@type': 'EducationalOrganization',
       name: 'RBT Practice AI',
       sameAs: BASE_URL,
     },
-    educationalCredentialAwarded: `${certification} Exam Pass Readiness Preparation`,
+    educationalUse: 'Exam Preparation & Practice Simulator',
     hasPart: [
       {
         '@type': 'LearningResource',
-        name: '85-Question RBT Mock Exam Simulator',
+        name: '85-Question 120-Minute RBT Mock Exam Simulator',
         learningResourceType: 'Assessment',
       },
       {
