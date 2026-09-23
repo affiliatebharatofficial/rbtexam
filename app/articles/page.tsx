@@ -34,7 +34,7 @@ export default function PublicArticlesPage() {
           RBT Exam Articles, Study Guides & ABA Techniques
         </h1>
         <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Expert clinical guides, differential reinforcement breakdowns, ethics code compliance, and strategy tips written by BCBA clinical mentors.
+          Detailed study guides, differential reinforcement breakdowns, ethics code compliance reviews, and exam preparation tips published by the RBT Practice AI Editorial Team.
         </p>
       </div>
 

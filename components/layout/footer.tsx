@@ -26,7 +26,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed">
-              {t('footer.brandDescription', 'The premier RBT exam preparation platform with thousands of practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.')}
+              {t('footer.brandDescription', 'An adaptive RBT exam preparation platform with scenario-based practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.')}
             </p>
             <div className="flex items-center space-x-2 text-xs text-emerald-400 font-medium pt-2">
               <ShieldCheck className="w-4 h-4" />
@@ -46,15 +46,16 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Resources & Info */}
+          {/* Resources & Transparency */}
           <div>
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">{t('footer.company', 'Company & Blog')}</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-4">About & Standards</h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link href="/rbt" className="hover:text-white transition-colors">{t('footer.blog', 'Blog')}</Link></li>
-              <li><Link href="/rbt/about" className="hover:text-white transition-colors">{t('footer.about', 'About')}</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">{t('footer.contact', 'Contact')}</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">{t('nav.pricing', 'Pricing')}</Link></li>
-              <li><Link href={homeRoute} className="hover:text-white transition-colors">{isAdmin ? t('nav.adminCms', 'Admin Panel') : t('nav.dashboard', 'Dashboard')}</Link></li>
+              <li><Link href="/rbt/about" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/editorial-team" className="hover:text-white transition-colors">Editorial Team</Link></li>
+              <li><Link href="/question-methodology" className="hover:text-white transition-colors">Question Methodology</Link></li>
+              <li><Link href="/content-review" className="hover:text-white transition-colors">Review Process</Link></li>
+              <li><Link href="/updates" className="hover:text-white transition-colors">Curriculum Updates</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact & Feedback</Link></li>
             </ul>
           </div>
 

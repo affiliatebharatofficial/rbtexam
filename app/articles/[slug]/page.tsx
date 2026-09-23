@@ -18,6 +18,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+import { ContentMeta } from '@/components/eeat/content-meta';
+import { ClinicalBoundaryBanner } from '@/components/eeat/clinical-boundary-banner';
+
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
@@ -104,7 +107,7 @@ export default async function PublicArticleDetailPage({ params }: ArticlePagePro
 
             <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500 pt-2">
               <div className="flex items-center space-x-3">
-                <span className="font-extrabold text-slate-900">{article.authorName}</span>
+                <span className="font-extrabold text-slate-900">{article.authorName || 'RBT Practice AI Editorial Team'}</span>
                 <span>•</span>
                 <span>{new Date(article.publishedAt || article.createdAt).toLocaleDateString()}</span>
                 <span>•</span>
@@ -122,6 +125,18 @@ export default async function PublicArticleDetailPage({ params }: ArticlePagePro
           <div className="py-2">
             <MarkdownRenderer content={article.content} />
           </div>
+
+          {/* E-E-A-T Content Meta */}
+          <ContentMeta
+            author={article.authorName || 'RBT Practice AI Editorial Team'}
+            pageTitle={article.title}
+            topicId={article.slug}
+            publishedDate={article.publishedAt?.split('T')[0] || '2025-01-15'}
+            lastReviewedDate="2026-09-23"
+          />
+
+          {/* Clinical Boundary Banner */}
+          <ClinicalBoundaryBanner compact />
 
           {/* Article Tags & Footer */}
           {article.tags && article.tags.length > 0 && (

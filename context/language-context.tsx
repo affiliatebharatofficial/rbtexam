@@ -42,7 +42,7 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'hero.aiTutorButton': 'Ask Socrates AI Tutor',
 
     // Footer
-    'footer.brandDescription': 'The premier RBT Practice AI platform with scenario-based practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.',
+    'footer.brandDescription': 'An adaptive RBT Practice AI platform with scenario-based practice questions, realistic mock exams, flashcards, and AI tutor support for BACB certification candidates.',
     'footer.examPrep': 'Exam Prep',
     'footer.company': 'Company & Blog',
     'footer.blog': 'Blog',

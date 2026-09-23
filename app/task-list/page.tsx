@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getDomainColor } from '@/utils/formatters';
 import { BookOpen, Search, Sparkles, ChevronRight, CheckCircle2, FileText } from 'lucide-react';
+import { ContentMeta } from '@/components/eeat/content-meta';
+import { ClinicalBoundaryBanner } from '@/components/eeat/clinical-boundary-banner';
 
 export default function TaskListPage() {
   const [selectedDomainId, setSelectedDomainId] = useState<string>('ALL');
@@ -30,6 +32,16 @@ export default function TaskListPage() {
           Master all 6 domains and all 43 individual task items required for the Registered Behavior Technician certification exam.
         </p>
       </div>
+
+      {/* E-E-A-T Content Meta */}
+      <ContentMeta
+        pageTitle="BACB RBT 3rd Edition Test Content Outline Study Hub"
+        topicId="TCO 43 Tasks Hub"
+        publishedDate="2025-01-15"
+        lastReviewedDate="2026-09-23"
+      />
+
+      <ClinicalBoundaryBanner compact />
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">

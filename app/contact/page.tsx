@@ -26,11 +26,12 @@ import {
 
 const INQUIRY_TOPICS = [
   { id: 'general', label: 'General Inquiry', icon: MessageSquare },
-  { id: 'exam_help', label: 'Exam & Study Help', icon: FileQuestion },
+  { id: 'errata', label: 'Report Content Error / Errata', icon: BookOpen },
+  { id: 'tco_inquiry', label: 'TCO Curriculum & Alignment Inquiry', icon: FileQuestion },
   { id: 'guarantee', label: 'Pass Guarantee / Refund Claim', icon: ShieldCheck },
   { id: 'clinic', label: 'Clinic & Team Accounts', icon: Building2 },
   { id: 'billing', label: 'Subscription & Billing', icon: FileCheck },
-  { id: 'feedback', label: 'Question / Content Feedback', icon: BookOpen },
+  { id: 'privacy', label: 'Privacy / Data Request', icon: HelpCircle },
 ];
 
 const FAQS = [
@@ -52,7 +53,7 @@ const FAQS = [
   {
     question: 'What if I find a discrepancy in a practice question rationale?',
     answer:
-      'Our questions are reviewed by Board Certified Behavior Analysts (BCBAs). If you have question feedback, email hello@rbtpracticeai.com with the Question ID and our clinical team will review and update the item within 24 hours.',
+      'We maintain an active errata and review workflow. If you notice an inaccurate question answer, confusing clinical rationale, or outdated TCO reference, email hello@rbtpracticeai.com with the Question ID or click "Report Content Issue" on any page. Our editorial team investigates every report against primary ABA literature and official BACB standards within 24 to 48 business hours.',
   },
 ];
 

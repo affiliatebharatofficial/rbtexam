@@ -17,20 +17,20 @@ Preparing for your **Registered Behavior Technician (RBT)** examination requires
 
 ## BACB RBT Exam Domain Weightage
 
-| Domain Code | BACB Task List Domain Name | Exam Questions % | Priority Level |
+| Domain Code | BACB 3rd Edition TCO Domain Name | Scored Questions % | Priority Level |
 | :--- | :--- | :--- | :--- |
-| **Domain A** | Measurement & Data Collection | 12 Questions (14%) | High |
-| **Domain B** | Assessment Procedures | 8 Questions (9%) | Medium |
-| **Domain C** | Skill Acquisition Procedures | 24 Questions (28%) | Critical |
-| **Domain D** | Behavior Reduction Procedures | 20 Questions (24%) | Critical |
-| **Domain E** | Documentation & Reporting | 10 Questions (12%) | High |
-| **Domain F** | Professional Conduct & Ethics Scope | 11 Questions (13%) | High |
+| **Domain A** | Data Collection and Graphing | 13 Questions (17%) | High |
+| **Domain B** | Behavior Assessment | 8 Questions (11%) | Medium |
+| **Domain C** | Behavior Acquisition | 19 Questions (25%) | Critical |
+| **Domain D** | Behavior Reduction | 14 Questions (19%) | Critical |
+| **Domain E** | Documentation and Reporting | 10 Questions (13%) | High |
+| **Domain F** | Ethics | 11 Questions (15%) | High |
 
 ---
 
-## 1. Domain C: Skill Acquisition Breakdown
+## 1. Domain C: Behavior Acquisition Breakdown
 
-Skill Acquisition forms the largest portion of your official exam (**28%**). Focus heavily on Discrete Trial Teaching (DTT), Task Analysis, and Prompting Hierarchies.
+Behavior Acquisition forms the largest portion of your scored exam (**25% / 19 questions**). Focus heavily on Discrete Trial Teaching (DTT), Task Analysis, and Prompting Hierarchies.
 
 ### Least-to-Most Prompt Hierarchy Table
 
@@ -53,7 +53,7 @@ Skill Acquisition forms the largest portion of your official exam (**28%**). Foc
     category: 'RBT Exam Guide',
     tags: ['RBT Study Guide', 'BACB Exam', 'Skill Acquisition', 'Ethics'],
     coverImageUrl: '/banner-rbt-hero.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 7,
     status: 'published',
     viewsCount: 310,
@@ -134,7 +134,7 @@ Practice over 1,000+ realistic, scenario-based questions with instant clinical e
     category: 'RBT Exam Guide',
     tags: ['RBT Practice Questions', 'BACB 3rd Edition', 'Free Exam Questions', 'Domain A-F'],
     coverImageUrl: '/banner-rbt-hero.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 8,
     status: 'published',
     viewsCount: 290,
@@ -205,7 +205,7 @@ Ready to advance? Try our [Topic-by-Topic Practice Questions](/rbt/questions/pra
     category: 'Study Strategies',
     tags: ['Beginner RBT', 'Introductory ABA', 'ABC Data', 'Reinforcement'],
     coverImageUrl: '/cert-badge-bacb.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 6,
     status: 'published',
     viewsCount: 275,
@@ -265,7 +265,7 @@ Test your clinical judgment on our [Full 85-Question RBT Mock Exam Simulator](/r
     category: 'RBT Exam Guide',
     tags: ['Exam Questions', 'Test Strategies', 'DRL', 'Whole Interval'],
     coverImageUrl: '/banner-rbt-hero.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 7,
     status: 'published',
     viewsCount: 260,
@@ -330,7 +330,7 @@ An RBT places their hands between a client's hand and the client's forehead to p
     category: 'RBT Exam Guide',
     tags: ['Practice Test', 'Mini Test', 'Score Analyzer', 'Chaining'],
     coverImageUrl: '/cert-badge-bacb.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 7,
     status: 'published',
     viewsCount: 340,
@@ -385,7 +385,7 @@ Take our timed [85-Question Realistic Mock Exam Simulator](/rbt/mock-exam) with 
     category: 'Clinical Scenarios',
     tags: ['Mock Exam', 'Full Simulation', 'Free Operant', 'Graphing'],
     coverImageUrl: '/banner-rbt-hero.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 8,
     status: 'published',
     viewsCount: 380,
@@ -440,7 +440,7 @@ A client's grandmother gives the RBT a handmade drawing that the client created 
     category: 'RBT Exam Guide',
     tags: ['Domains A-F', 'Topic Breakdown', 'Task List', 'MTS'],
     coverImageUrl: '/cert-badge-bacb.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 7,
     status: 'published',
     viewsCount: 310,
@@ -481,7 +481,7 @@ Have questions about ABA concepts? Chat with [Socrates AI Tutor](/tutor) for ins
     category: 'ABA Techniques',
     tags: ['Explanations', 'Rationales', 'Distractor Elimination', 'Partial Interval'],
     coverImageUrl: '/banner-rbt-hero.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 6,
     status: 'published',
     viewsCount: 295,
@@ -532,7 +532,7 @@ Explore our [Scenario Bank on RBTPracticeAI](/exam)!
     category: 'Clinical Scenarios',
     tags: ['Scenarios', 'Ethics', 'DRI', 'Dual Relationships'],
     coverImageUrl: '/cert-badge-bacb.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 7,
     status: 'published',
     viewsCount: 320,
@@ -593,7 +593,7 @@ Advance to [Hard RBT Practice Questions](/rbt/questions/hard-rbt-practice-questi
     category: 'Study Strategies',
     tags: ['Easy Questions', 'Glossary', 'Mand', 'Antecedent'],
     coverImageUrl: '/banner-rbt-hero.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 5,
     status: 'published',
     viewsCount: 280,
@@ -648,7 +648,7 @@ Simulate the real exam on our [Full 85-Question RBT Mock Exam Simulator](/rbt/mo
     category: 'Clinical Scenarios',
     tags: ['Hard Questions', 'Advanced Scenarios', 'Response Generalization', 'Ethics'],
     coverImageUrl: '/cert-badge-bacb.png',
-    authorName: 'Jobpe gyan (Senior BCBA)',
+    authorName: 'RBT Practice AI Editorial Team',
     readTimeMinutes: 7,
     status: 'published',
     viewsCount: 360,
@@ -725,7 +725,7 @@ export function createArticle(input: CreateArticleInput): Article {
     category: input.category || 'RBT Exam Guide',
     tags: input.tags || ['RBT'],
     coverImageUrl: input.coverImageUrl || '/banner-rbt-hero.png',
-    authorName: input.authorName || 'Jobpe gyan',
+    authorName: input.authorName || 'RBT Practice AI Editorial Team',
     readTimeMinutes: calculateReadTime(input.content),
     status: input.status || 'draft',
     viewsCount: 0,

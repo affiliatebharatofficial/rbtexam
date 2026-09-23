@@ -403,13 +403,18 @@ function TutorContent() {
               </div>
             </div>
 
-            {/* Bottom Safety Disclaimer */}
-            <div className="pt-3 border-t border-slate-100 text-[10px] text-slate-400 space-y-1">
-              <div className="flex items-center space-x-1 font-bold text-slate-500">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Educational Purpose Only</span>
+            {/* Bottom Safety Disclaimer & Error Warning */}
+            <div className="pt-3 border-t border-slate-100 text-[10px] text-slate-500 space-y-1.5 leading-tight">
+              <div className="flex items-center space-x-1 font-bold text-slate-700">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                <span>Educational Study Assistant Only</span>
               </div>
-              <p>Does not constitute medical advice or official BACB affiliation.</p>
+              <p>
+                Socrates AI is an automated study aid and not a certified behavior analyst. It does not provide clinical supervision, patient diagnosis, or therapy.
+              </p>
+              <p className="text-amber-700 font-medium">
+                AI-generated explanations may occasionally contain errors. Verify important exam or professional information against current BACB resources.
+              </p>
             </div>
           </Card>
         </div>
@@ -569,6 +574,9 @@ function TutorContent() {
                 <Send className="w-4 h-4" />
               </Button>
             </form>
+            <p className="text-[10px] text-center text-slate-400 pt-1">
+              AI-generated explanations may occasionally contain errors. Verify critical exam and ethical guidance with official BACB materials.
+            </p>
           </Card>
         </div>
 

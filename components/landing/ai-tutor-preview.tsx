@@ -226,6 +226,9 @@ export function AiTutorPreview() {
                 <Send className="w-3.5 h-3.5" />
               </Button>
             </form>
+            <p className="text-[10px] text-center text-slate-400 pt-2">
+              AI-generated explanations may occasionally contain errors. Verify important exam concepts against current official BACB resources.
+            </p>
           </Card>
         </div>
       </div>

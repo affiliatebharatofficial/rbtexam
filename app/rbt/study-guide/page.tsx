@@ -17,6 +17,9 @@ import {
   Award,
 } from 'lucide-react';
 
+import { ContentMeta } from '@/components/eeat/content-meta';
+import { ClinicalBoundaryBanner } from '@/components/eeat/clinical-boundary-banner';
+
 export const metadata = constructMetadata({
   title: 'RBT Exam Study Guide 2026 | RBT Practice AI',
   description:
@@ -124,6 +127,16 @@ export default function RBTStudyGuidePage() {
             </Link>
           </div>
         </div>
+
+        {/* E-E-A-T Content Meta */}
+        <ContentMeta
+          pageTitle="RBT Exam Study Guide & Blueprint"
+          topicId="Comprehensive Study Guide"
+          publishedDate="2025-01-15"
+          lastReviewedDate="2026-09-23"
+        />
+
+        <ClinicalBoundaryBanner compact />
 
         {/* 6 Domains Grid */}
         <div className="space-y-6">

@@ -15,9 +15,8 @@ export function JsonLdSchema() {
       contactType: 'customer support',
       availableLanguage: ['English', 'Spanish'],
     },
-    sameAs: [
-      'https://twitter.com/rbtpracticeai',
-    ],
+    publishingPrinciples: 'https://www.rbtpracticeai.com/content-review',
+    correctionsPolicy: 'https://www.rbtpracticeai.com/question-methodology',
   };
 
   const webSiteSchema = {

@@ -234,7 +234,7 @@ export default function RefundPolicyPage() {
               <span>Payment Security & PCI-DSS Compliance</span>
             </h2>
             <p>
-              All payment transactions are handled by industry-leading, PCI-DSS Level 1 certified third-party payment processors (Stripe / Lemon Squeezy). <strong>RBT Practice AI does not collect, process, or store raw credit card numbers or CVV codes on our servers.</strong>
+              All payment transactions are handled securely by PCI-DSS Level 1 certified third-party payment processors (Stripe / Lemon Squeezy). <strong>RBT Practice AI does not collect, process, or store raw credit card numbers or CVV codes on our servers.</strong>
             </p>
           </section>
 

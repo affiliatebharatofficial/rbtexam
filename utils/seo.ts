@@ -123,7 +123,6 @@ export function constructMetadata({
       title,
       description,
       images: [imageUrl],
-      creator: '@rbtpracticeai',
     },
     icons: {
       icon: [
