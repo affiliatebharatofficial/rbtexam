@@ -27,7 +27,7 @@
   "vars": {
     "DATABASE_ENGINE": "cloudflare_d1",
     "D1_DATABASE_NAME": "rbtexam-db",
-    "NEXT_PUBLIC_GOOGLE_CLIENT_ID": "1020517148526-5a5f4jrr63v0u99vfalamqdrb7blm0ob.apps.googleusercontent.com",
+    "NEXT_PUBLIC_GOOGLE_CALLBACK_URL": "https://www.rbtpracticeai.com/api/auth/callback/google",
     "NEXT_PUBLIC_SITE_URL": "https://www.rbtpracticeai.com"
   }
 }

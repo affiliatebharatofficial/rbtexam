@@ -461,12 +461,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const loginWithGoogle = async () => {
     setIsLoading(true);
     try {
-      // 1. SUPABASE AUTH GOOGLE SSO (Primary Authentication Provider)
+      // 1. Direct Official Google Cloud OAuth (Primary Edge Provider)
+      const googleClientId =
+        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+        '';
+
+      if (googleClientId && !googleClientId.includes('mock-')) {
+        const origin =
+          typeof window !== 'undefined' && window.location.origin
+            ? window.location.origin
+            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
+        const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
+        if (typeof window !== 'undefined') {
+          window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account&access_type=offline`;
+        }
+        return { success: true };
+      }
+
+      // 2. Supabase Auth Google SSO (Legacy fallback if configured)
       if (isSupabaseConfigured()) {
         const origin =
           typeof window !== 'undefined' && window.location.origin
             ? window.location.origin
-            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://rbtexam.manorhub533.workers.dev');
+            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
         const redirectUrl = `${origin}/auth/callback`;
 
         const { data, error } = await supabase.auth.signInWithOAuth({
@@ -491,20 +508,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         logAuditEvent('SYSTEM', 'GOOGLE_OAUTH_INITIATED', 'Supabase Auth', `Initiated Supabase Google OAuth redirect to ${redirectUrl}`);
-        return { success: true };
-      }
-
-      // 2. Direct Official Google Cloud OAuth (Fallback if Supabase is unconfigured)
-      const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
-      if (googleClientId && !googleClientId.includes('mock-')) {
-        const origin =
-          typeof window !== 'undefined' && window.location.origin
-            ? window.location.origin
-            : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
-        const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
-        if (typeof window !== 'undefined') {
-          window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account`;
-        }
         return { success: true };
       }
 
