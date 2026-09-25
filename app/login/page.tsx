@@ -23,11 +23,11 @@ function LoginForm() {
   const performRedirect = () => {
     const customRedirect = searchParams.get('redirect');
     if (customRedirect) {
-      router.push(customRedirect);
+      window.location.href = customRedirect;
     } else if (isEmailAdmin(email) || (user && (user.role === 'admin' || user.role === 'super_admin'))) {
-      router.push('/admin');
+      window.location.href = '/admin';
     } else {
-      router.push('/dashboard');
+      window.location.href = '/dashboard';
     }
   };
 

@@ -19,18 +19,22 @@ export function FlashcardsSummary() {
       const stored = localStorage.getItem('rbt_flashcard_progress');
       if (stored) {
         const parsed = JSON.parse(stored);
-        const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-        Object.values(parsed).forEach((card: any) => {
-          const box = card.leitnerBox || 1;
-          counts[box] = (counts[box] || 0) + 1;
-        });
-        setBoxes([
-          { box: 1, count: counts[1], label: 'Unfamiliar', color: 'bg-rose-500' },
-          { box: 2, count: counts[2], label: 'Reviewing', color: 'bg-amber-500' },
-          { box: 3, count: counts[3], label: 'Familiar', color: 'bg-blue-500' },
-          { box: 4, count: counts[4], label: 'Strong', color: 'bg-indigo-500' },
-          { box: 5, count: counts[5], label: 'Mastered', color: 'bg-emerald-500' },
-        ]);
+        if (parsed && typeof parsed === 'object') {
+          const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          Object.values(parsed).forEach((card: any) => {
+            if (card && typeof card === 'object') {
+              const box = card.leitnerBox || 1;
+              counts[box] = (counts[box] || 0) + 1;
+            }
+          });
+          setBoxes([
+            { box: 1, count: counts[1], label: 'Unfamiliar', color: 'bg-rose-500' },
+            { box: 2, count: counts[2], label: 'Reviewing', color: 'bg-amber-500' },
+            { box: 3, count: counts[3], label: 'Familiar', color: 'bg-blue-500' },
+            { box: 4, count: counts[4], label: 'Strong', color: 'bg-indigo-500' },
+            { box: 5, count: counts[5], label: 'Mastered', color: 'bg-emerald-500' },
+          ]);
+        }
       }
     } catch (e) {
       console.error('Failed to load flashcard progress', e);

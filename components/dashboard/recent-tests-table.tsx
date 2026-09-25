@@ -80,15 +80,15 @@ export function RecentTestsTable() {
               <tr key={item.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition-colors">
                 <td className="py-3.5 px-3 font-bold text-slate-800 dark:text-slate-200 flex items-center space-x-2">
                   <FileText className="w-4 h-4 text-[#2563EB]" />
-                  <span>{item.mode}</span>
+                  <span>{item.mode || 'Practice Exam'}</span>
                 </td>
                 <td className="py-3.5 px-3">
-                  <span className={`font-black text-sm ${item.score >= 85 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                    {item.score}%
+                  <span className={`font-black text-sm ${(item.score ?? 0) >= 80 ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                    {item.score ?? 0}%
                   </span>
                 </td>
                 <td className="py-3.5 px-3">
-                  {item.passed ? (
+                  {item.passed || (item.score ?? 0) >= 80 ? (
                     <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                       <span>PASS READY</span>
@@ -103,11 +103,13 @@ export function RecentTestsTable() {
                 <td className="py-3.5 px-3 text-slate-500 font-mono">
                   <div className="flex items-center space-x-1">
                     <Clock className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{item.duration}</span>
+                    <span>
+                      {item.duration || (item.timeSpentSeconds ? `${Math.floor(item.timeSpentSeconds / 60)}m ${item.timeSpentSeconds % 60}s` : 'Timed')}
+                    </span>
                   </div>
                 </td>
                 <td className="py-3.5 px-3 text-right text-slate-400 font-mono text-[11px]">
-                  {item.date}
+                  {item.date || (item.timestamp ? new Date(item.timestamp).toISOString().split('T')[0] : 'Recent')}
                 </td>
               </tr>
             ))}

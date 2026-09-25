@@ -36,7 +36,7 @@ function AuthCallbackContent() {
           const avatarUrlParam = searchParams.get('avatarUrl') || undefined;
           await completeGoogleAuthSession(emailParam, nameParam, userIdParam, avatarUrlParam);
           const target = isEmailAdmin(emailParam) ? '/admin' : '/dashboard';
-          router.push(target);
+          window.location.href = target;
           return;
         }
 
@@ -63,18 +63,18 @@ function AuthCallbackContent() {
                 const target = isEmailAdmin(data.user.email) || data.user.role === 'admin' || data.user.role === 'super_admin'
                   ? '/admin'
                   : '/dashboard';
-                router.push(target);
+                window.location.href = target;
                 return;
               }
             } else {
               const errBody = (await res.json().catch(() => ({}))) as any;
               console.error('OAuth exchange error:', errBody);
-              router.push(`/login?error=${encodeURIComponent(errBody?.error || 'google_exchange_failed')}`);
+              window.location.href = `/login?error=${encodeURIComponent(errBody?.error || 'google_exchange_failed')}`;
               return;
             }
           } catch (exchangeErr) {
             console.error('Failed to exchange code:', exchangeErr);
-            router.push('/login?error=exchange_network_error');
+            window.location.href = '/login?error=exchange_network_error';
             return;
           }
         }
@@ -89,7 +89,7 @@ function AuthCallbackContent() {
             const userAvatar = data.session.user.user_metadata?.avatar_url || data.session.user.user_metadata?.picture;
             await completeGoogleAuthSession(userEmail, userName || undefined, userId, userAvatar || undefined);
             const target = isEmailAdmin(userEmail) ? '/admin' : '/dashboard';
-            router.push(target);
+            window.location.href = target;
             return;
           }
 
@@ -101,7 +101,7 @@ function AuthCallbackContent() {
               const userAvatar = session.user.user_metadata?.avatar_url || session.user.user_metadata?.picture;
               await completeGoogleAuthSession(userEmail, userName || undefined, userId, userAvatar || undefined);
               const target = isEmailAdmin(userEmail) ? '/admin' : '/dashboard';
-              router.push(target);
+              window.location.href = target;
             }
           });
 
