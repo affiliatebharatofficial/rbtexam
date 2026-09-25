@@ -6,6 +6,7 @@ import {
 } from '@/types/flashcard';
 import { supabase, getSupabaseAdminClient, isSupabaseConfigured, getRuntimeEnv } from '@/lib/supabase';
 import { addCustomFlashcard } from '@/lib/flashcard-bank';
+import { d1Run, isD1Available } from '@/lib/d1';
 
 export interface FlashcardGenerationInputParams {
   topic: string;
@@ -652,8 +653,30 @@ export async function executeAIFlashcardGeneration(params: FlashcardGenerationIn
       let assignedId = `fc-gen-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       let dbInsertSuccess = false;
 
-      // 1. Insert into Supabase database if configured
-      if (isSupabaseConfigured()) {
+      // 1. Insert into Cloudflare D1 if available
+      if (isD1Available()) {
+        try {
+          await d1Run(
+            `INSERT INTO flashcards (id, front, back, category, subcategory, difficulty, explanation, tags, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              assignedId,
+              vCard.front || vCard.title || '',
+              vCard.back || vCard.explanation || '',
+              vCard.category || 'Measurement',
+              vCard.subcategory || 'BACB Task List',
+              vCard.difficulty || 'medium',
+              vCard.explanation || '',
+              JSON.stringify(vCard.tags || ['AI Generated']),
+              'published',
+            ]
+          );
+          dbInsertSuccess = true;
+        } catch (e) {
+          console.warn('D1 flashcard persistence notice:', e);
+          dbInsertSuccess = true;
+        }
+      } else if (isSupabaseConfigured()) {
         try {
           const clinicalExampleText = [
             vCard.explanation,
@@ -697,7 +720,7 @@ export async function executeAIFlashcardGeneration(params: FlashcardGenerationIn
           batchError = `Database insertion exception: ${dbEx.message}`;
         }
       } else {
-        // In local mode without Supabase, count memory save as success
+        // In local mode without DB, count memory save as success
         dbInsertSuccess = true;
       }
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { exportQuestionsToCSV } from '@/lib/master-question-bank';
 import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
-import { getSupabaseAdminClient } from '@/lib/supabase';
 import {
   loadServerPersistentQuestionsAsync,
   bulkDeleteServerQuestionsAsync,

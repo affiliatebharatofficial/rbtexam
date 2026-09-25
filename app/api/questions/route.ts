@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdminClient } from '@/lib/supabase';
+import { d1Query, d1QueryFirst, isD1Available } from '@/lib/d1';
 import { mapDbRowToMasterQuestion, createServerQuestionAsync } from '@/lib/master-question-bank-server';
-import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
 import { QuestionFilterParams, MasterQuestion } from '@/types/master-question';
 import { isValidCertification } from '@/lib/certifications-config';
 import { MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
@@ -21,69 +20,79 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'ALL';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const rawLimit = parseInt(searchParams.get('limit') || '10', 10);
-    // Cap page limit to 200 items max to prevent Worker CPU & memory exhaustion
     const limit = Math.min(Math.max(rawLimit, 1), 200);
     const sortBy = searchParams.get('sortBy') || 'created_at';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
-
-    const adminDb = getSupabaseAdminClient();
-    let query = adminDb
-      .from('master_questions')
-      .select('*', { count: 'exact' })
-      .is('deleted_at', null);
-
-    if (certification !== 'ALL') {
-      query = query.eq('certification', certification);
-    }
-
-    if (category !== 'ALL') {
-      const cleanCat = category.trim().toLowerCase();
-      if (cleanCat.includes('assessment') || cleanCat.includes('domain b')) {
-        query = query.or('category.ilike.%Assessment%,category.ilike.%Domain B%');
-      } else if (cleanCat.includes('measurement') || cleanCat.includes('domain a')) {
-        query = query.or('category.ilike.%Measurement%,category.ilike.%Domain A%');
-      } else if (cleanCat.includes('acquisition') || cleanCat.includes('domain c')) {
-        query = query.or('category.ilike.%Acquisition%,category.ilike.%Domain C%');
-      } else if (cleanCat.includes('reduction') || cleanCat.includes('domain d')) {
-        query = query.or('category.ilike.%Reduction%,category.ilike.%Domain D%');
-      } else if (cleanCat.includes('documentation') || cleanCat.includes('domain e')) {
-        query = query.or('category.ilike.%Documentation%,category.ilike.%Domain E%');
-      } else if (cleanCat.includes('ethics') || cleanCat.includes('domain f')) {
-        query = query.or('category.ilike.%Ethics%,category.ilike.%Domain F%');
-      } else {
-        query = query.eq('category', category);
-      }
-    }
-
-    if (difficulty !== 'ALL') {
-      query = query.eq('difficulty', difficulty);
-    }
-
-    if (status !== 'ALL') {
-      query = query.eq('status', status);
-    }
-
-    if (search && search.trim() !== '') {
-      const term = `%${search.trim().toLowerCase()}%`;
-      query = query.or(`question_text.ilike.${term},scenario_text.ilike.${term},question_code.ilike.${term},category.ilike.${term}`);
-    }
-
-    const sortColumn = sortBy === 'createdAt' ? 'created_at' : sortBy === 'question' ? 'question_text' : sortBy;
     const startIndex = (page - 1) * limit;
-
-    query = query.order(sortColumn, { ascending: sortOrder === 'asc' });
-    query = query.range(startIndex, startIndex + limit - 1);
-
-    const { data: dbRows, count, error } = await query;
 
     let questions: MasterQuestion[] = [];
     let total = 0;
 
-    if (!error && Array.isArray(dbRows) && dbRows.length > 0) {
-      questions = (dbRows || []).map(mapDbRowToMasterQuestion);
-      total = count ?? questions.length;
-    } else {
-      // Graceful fallback to canonical master question bank (e.g. Supabase cold start, paused, or unseeded)
+    // 1. Query Cloudflare D1 Native Database
+    if (isD1Available()) {
+      try {
+        let sql = 'SELECT * FROM master_questions WHERE deleted_at IS NULL';
+        let countSql = 'SELECT COUNT(*) as cnt FROM master_questions WHERE deleted_at IS NULL';
+        const params: any[] = [];
+        const countParams: any[] = [];
+
+        if (certification !== 'ALL') {
+          sql += ' AND certification = ?';
+          countSql += ' AND certification = ?';
+          params.push(certification);
+          countParams.push(certification);
+        }
+
+        if (category !== 'ALL') {
+          sql += ' AND category LIKE ?';
+          countSql += ' AND category LIKE ?';
+          const catPattern = `%${category.trim()}%`;
+          params.push(catPattern);
+          countParams.push(catPattern);
+        }
+
+        if (difficulty !== 'ALL') {
+          sql += ' AND difficulty = ?';
+          countSql += ' AND difficulty = ?';
+          params.push(difficulty);
+          countParams.push(difficulty);
+        }
+
+        if (status !== 'ALL') {
+          sql += ' AND status = ?';
+          countSql += ' AND status = ?';
+          params.push(status);
+          countParams.push(status);
+        }
+
+        if (search && search.trim() !== '') {
+          const term = `%${search.trim().toLowerCase()}%`;
+          sql += ' AND (question_text LIKE ? OR scenario_text LIKE ? OR question_code LIKE ? OR category LIKE ?)';
+          countSql += ' AND (question_text LIKE ? OR scenario_text LIKE ? OR question_code LIKE ? OR category LIKE ?)';
+          params.push(term, term, term, term);
+          countParams.push(term, term, term, term);
+        }
+
+        const validSortCol = sortBy === 'question' ? 'question_text' : 'created_at';
+        sql += ` ORDER BY ${validSortCol} ${sortOrder === 'asc' ? 'ASC' : 'DESC'} LIMIT ? OFFSET ?`;
+        params.push(limit, startIndex);
+
+        const [dbRows, countResult] = await Promise.all([
+          d1Query(sql, params),
+          d1QueryFirst<{ cnt: number }>(countSql, countParams),
+        ]);
+
+        if (Array.isArray(dbRows) && dbRows.length > 0) {
+          questions = dbRows.map(mapDbRowToMasterQuestion);
+          total = countResult?.cnt ?? questions.length;
+        }
+      } catch (d1Err) {
+        console.error('Error querying Cloudflare D1:', d1Err);
+      }
+    }
+
+    // 2. High-Availability Fallback: Canonical In-Memory Bank
+    if (questions.length === 0) {
       let fallbackPool = [...MASTER_QUESTION_BANK];
 
       if (certification !== 'ALL') {
@@ -136,19 +145,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing mandatory fields: question, certification, options' }, { status: 400 });
     }
 
-    const adminDb = getSupabaseAdminClient();
     const cleanPrompt = body.question.trim();
 
-    // Fast indexed check for exact duplicate
-    const { data: existingRows } = await adminDb
-      .from('master_questions')
-      .select('id, question_text')
-      .eq('question_text', cleanPrompt)
-      .is('deleted_at', null)
-      .limit(1);
-
-    if (existingRows && existingRows.length > 0) {
-      return NextResponse.json({ error: 'Duplicate question prompt detected. A question with this text already exists in the master item bank.' }, { status: 409 });
+    // Check for exact duplicate in D1
+    if (isD1Available()) {
+      const existing = await d1QueryFirst(
+        'SELECT id FROM master_questions WHERE question_text = ? AND deleted_at IS NULL LIMIT 1',
+        [cleanPrompt]
+      );
+      if (existing) {
+        return NextResponse.json({ error: 'Duplicate question prompt detected. A question with this text already exists in the master item bank.' }, { status: 409 });
+      }
     }
 
     const created = await createServerQuestionAsync(body);

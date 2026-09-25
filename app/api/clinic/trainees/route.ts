@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { d1QueryFirst, d1Query, isD1Available } from '@/lib/d1';
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,46 +7,37 @@ export async function GET(request: NextRequest) {
     const inviterEmail = searchParams.get('inviterEmail')?.toLowerCase().trim();
     const inviterId = searchParams.get('inviterId')?.trim();
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-    const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false },
-    });
-
     let targetClinicId = inviterId;
-
-    if (!targetClinicId && inviterEmail) {
-      const { data: inviterUser } = await adminSupabase
-        .from('users')
-        .select('id')
-        .eq('email', inviterEmail)
-        .maybeSingle();
-
-      if (inviterUser?.id) {
-        targetClinicId = inviterUser.id;
-      }
-    }
-
     let trainees: any[] = [];
 
-    if (targetClinicId) {
-      const { data: usersData } = await adminSupabase
-        .from('users')
-        .select('*')
-        .eq('clinic_id', targetClinicId)
-        .order('created_at', { ascending: false });
+    if (isD1Available()) {
+      if (!targetClinicId && inviterEmail) {
+        const inviterUser = await d1QueryFirst<{ id: string }>(
+          'SELECT id FROM users WHERE LOWER(email) = ? LIMIT 1',
+          [inviterEmail]
+        );
+        if (inviterUser?.id) {
+          targetClinicId = inviterUser.id;
+        }
+      }
 
-      if (usersData && Array.isArray(usersData)) {
-        trainees = usersData.map((u) => ({
-          id: u.id,
-          fullName: u.full_name || u.email?.split('@')[0] || 'Candidate',
-          email: u.email,
-          targetScore: u.target_score || 90,
-          readinessScore: 97,
-          status: 'On Track',
-          clinicId: u.clinic_id,
-        }));
+      if (targetClinicId) {
+        const usersData = await d1Query(
+          'SELECT * FROM users WHERE clinic_id = ? ORDER BY created_at DESC',
+          [targetClinicId]
+        );
+
+        if (usersData && Array.isArray(usersData)) {
+          trainees = usersData.map((u) => ({
+            id: u.id,
+            fullName: u.full_name || u.email?.split('@')[0] || 'Candidate',
+            email: u.email,
+            targetScore: u.target_score || 90,
+            readinessScore: 97,
+            status: 'On Track',
+            clinicId: u.clinic_id,
+          }));
+        }
       }
     }
 

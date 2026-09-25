@@ -1,5 +1,6 @@
 import { getRuntimeEnv, getSupabaseAdminClient, isSupabaseConfigured } from './supabase';
 import { getPlatformConfig, updatePlatformConfig, logAuditEvent } from './platform-config';
+import { isD1Available, d1QueryFirst, d1Run } from './d1';
 
 export interface SMTPConfiguration {
   enabled: boolean;
@@ -81,7 +82,26 @@ export async function getActiveSMTPConfig(): Promise<SMTPConfiguration> {
     };
   }
 
-  // 1. Try to load from Supabase persistent storage
+  // 1. Try to load from Cloudflare D1 persistent storage
+  if (isD1Available()) {
+    try {
+      const u = await d1QueryFirst<{ full_name: string }>(
+        'SELECT full_name FROM users WHERE email = ? LIMIT 1',
+        [SYSTEM_CONFIG_PROFILE_EMAIL]
+      );
+      if (u?.full_name && u.full_name.startsWith('{')) {
+        const stored = JSON.parse(u.full_name);
+        return {
+          ...DEFAULT_SMTP_CONFIG,
+          ...stored,
+          apiKey: stored.apiKey || envResendKey,
+          senderEmail: stored.senderEmail || envFromEmail || DEFAULT_SMTP_CONFIG.senderEmail,
+        };
+      }
+    } catch {}
+  }
+
+  // 2. Try to load from Supabase persistent storage if configured
   if (isSupabaseConfigured()) {
     try {
       const adminClient = getSupabaseAdminClient();
@@ -175,7 +195,18 @@ export async function saveSMTPConfig(
     return updated;
   }
 
-  if (isSupabaseConfigured()) {
+  if (isD1Available()) {
+    try {
+      await d1Run(
+        `INSERT INTO users (id, email, full_name, role, updated_at)
+         VALUES ('00000000-0000-0000-0000-000000000001', ?, ?, 'admin', ?)
+         ON CONFLICT(email) DO UPDATE SET full_name = excluded.full_name, updated_at = excluded.updated_at`,
+        [SYSTEM_CONFIG_PROFILE_EMAIL, JSON.stringify(updated), new Date().toISOString()]
+      );
+    } catch (e) {
+      console.warn('Failed to save SMTP config to D1:', e);
+    }
+  } else if (isSupabaseConfigured()) {
     try {
       const adminClient = getSupabaseAdminClient();
 

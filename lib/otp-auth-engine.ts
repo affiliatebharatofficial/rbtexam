@@ -1,5 +1,6 @@
 import { getSupabaseAdminClient, getRuntimeEnv, isSupabaseConfigured } from './supabase';
 import { logAuditEvent } from './platform-config';
+import { isD1Available, d1Run, d1QueryFirst } from './d1';
 
 export interface OTPRecord {
   email: string;
@@ -144,18 +145,29 @@ export async function sendOTPToEmail(
 
   OTP_MEMORY_STORE.set(cleanEmail, newRecord);
 
-  // Store in PostgreSQL profiles table for persistence across worker instances
-  try {
-    const adminClient = getSupabaseAdminClient();
-    await adminClient
-      .from('profiles')
-      .update({
-        avatar_url: `otp:${code}:${newRecord.expiresAt}`,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('email', cleanEmail);
-  } catch (dbErr) {
-    // Database fallback to memory store
+  // Store in D1 profiles table for persistence across worker instances
+  if (isD1Available()) {
+    try {
+      await d1Run(
+        'UPDATE profiles SET avatar_url = ?, updated_at = ? WHERE LOWER(email) = ?',
+        [`otp:${code}:${newRecord.expiresAt}`, new Date().toISOString(), cleanEmail]
+      );
+    } catch (e) {
+      // Memory fallback
+    }
+  } else if (isSupabaseConfigured()) {
+    try {
+      const adminClient = getSupabaseAdminClient();
+      await adminClient
+        .from('profiles')
+        .update({
+          avatar_url: `otp:${code}:${newRecord.expiresAt}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('email', cleanEmail);
+    } catch (dbErr) {
+      // Database fallback to memory store
+    }
   }
 
   const dispatchResult = await dispatchOTPEmail(cleanEmail, code, fullName);
@@ -195,7 +207,33 @@ export async function verifyOTPCode(
   const now = Date.now();
   let record = OTP_MEMORY_STORE.get(cleanEmail);
 
-  // If not in memory, check Supabase profiles
+  // If not in memory, check D1 edge SQLite
+  if (!record && isD1Available()) {
+    try {
+      const p = await d1QueryFirst<{ avatar_url: string }>(
+        'SELECT avatar_url FROM profiles WHERE LOWER(email) = ? LIMIT 1',
+        [cleanEmail]
+      );
+      if (p?.avatar_url && p.avatar_url.startsWith('otp:')) {
+        const parts = p.avatar_url.split(':');
+        const dbCode = parts[1];
+        const dbExpires = parseInt(parts[2], 10);
+        record = {
+          email: cleanEmail,
+          code: dbCode,
+          createdAt: now - 30000,
+          expiresAt: dbExpires || now + OTP_EXPIRY_MS,
+          attempts: 0,
+          maxAttempts: MAX_ATTEMPTS,
+          verified: false,
+        };
+      }
+    } catch (e) {
+      console.warn('D1 OTP lookup error:', e);
+    }
+  }
+
+  // Fallback to Supabase profiles if configured
   if (!record && isSupabaseConfigured() && process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
     try {
       const adminClient = getSupabaseAdminClient();
@@ -267,7 +305,15 @@ export async function verifyOTPCode(
   OTP_MEMORY_STORE.delete(cleanEmail); // Consume single-use token
 
   // Update profile and users table in database to email_verified = true
-  if (isSupabaseConfigured()) {
+  if (isD1Available()) {
+    try {
+      const nowIso = new Date().toISOString();
+      await d1Run('UPDATE profiles SET account_status = "active", updated_at = ? WHERE LOWER(email) = ?', [nowIso, cleanEmail]);
+      await d1Run('UPDATE users SET updated_at = ? WHERE LOWER(email) = ?', [nowIso, cleanEmail]);
+    } catch (d1Err) {
+      console.warn('Failed to update D1 verified status:', d1Err);
+    }
+  } else if (isSupabaseConfigured()) {
     try {
       const adminClient = getSupabaseAdminClient();
       await adminClient
@@ -381,27 +427,44 @@ export async function requestPasswordResetOTP(
 
   // Retrieve user name if available
   let fullName = cleanEmail.split('@')[0];
-  try {
-    const adminClient = getSupabaseAdminClient();
-    const { data: userProfile } = await adminClient
-      .from('profiles')
-      .select('full_name')
-      .eq('email', cleanEmail)
-      .maybeSingle();
-    if (userProfile?.full_name) {
-      fullName = userProfile.full_name;
+  if (isD1Available()) {
+    try {
+      const p = await d1QueryFirst<{ full_name: string }>(
+        'SELECT full_name FROM profiles WHERE LOWER(email) = ? LIMIT 1',
+        [cleanEmail]
+      );
+      if (p?.full_name) {
+        fullName = p.full_name;
+      }
+      await d1Run(
+        'UPDATE profiles SET avatar_url = ?, updated_at = ? WHERE LOWER(email) = ?',
+        [`pwd_otp:${code}:${newRecord.expiresAt}`, new Date().toISOString(), cleanEmail]
+      );
+    } catch (e) {
+      // Memory fallback
     }
+  } else if (isSupabaseConfigured()) {
+    try {
+      const adminClient = getSupabaseAdminClient();
+      const { data: userProfile } = await adminClient
+        .from('profiles')
+        .select('full_name')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+      if (userProfile?.full_name) {
+        fullName = userProfile.full_name;
+      }
 
-    // Persist OTP in avatar_url metadata for distributed Edge workers
-    await adminClient
-      .from('profiles')
-      .update({
-        avatar_url: `pwd_otp:${code}:${newRecord.expiresAt}`,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('email', cleanEmail);
-  } catch (dbErr) {
-    // Memory store fallback
+      await adminClient
+        .from('profiles')
+        .update({
+          avatar_url: `pwd_otp:${code}:${newRecord.expiresAt}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('email', cleanEmail);
+    } catch (dbErr) {
+      // Memory store fallback
+    }
   }
 
   const dispatchResult = await dispatchPasswordResetOTPEmail(cleanEmail, code, fullName);
@@ -447,6 +510,32 @@ export async function confirmPasswordResetWithOTP(
 
   const now = Date.now();
   let record = OTP_MEMORY_STORE.get(`pwd_reset_${cleanEmail}`);
+
+  // Distributed edge fallback from D1
+  if (!record && isD1Available()) {
+    try {
+      const p = await d1QueryFirst<{ avatar_url: string }>(
+        'SELECT avatar_url FROM profiles WHERE LOWER(email) = ? LIMIT 1',
+        [cleanEmail]
+      );
+      if (p?.avatar_url && p.avatar_url.startsWith('pwd_otp:')) {
+        const parts = p.avatar_url.split(':');
+        const dbCode = parts[1];
+        const dbExpires = parseInt(parts[2], 10);
+        record = {
+          email: cleanEmail,
+          code: dbCode,
+          createdAt: now - 30000,
+          expiresAt: dbExpires || now + OTP_EXPIRY_MS,
+          attempts: 0,
+          maxAttempts: MAX_ATTEMPTS,
+          verified: false,
+        };
+      }
+    } catch (e) {
+      console.warn('D1 password reset lookup error:', e);
+    }
+  }
 
   // Distributed edge fallback from Supabase
   if (!record && isSupabaseConfigured() && process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
@@ -519,8 +608,17 @@ export async function confirmPasswordResetWithOTP(
   record.verified = true;
   OTP_MEMORY_STORE.delete(`pwd_reset_${cleanEmail}`);
 
-  // Update password in Supabase Auth & Database
-  if (isSupabaseConfigured()) {
+  // Update password and clean OTP in D1 or Supabase
+  if (isD1Available()) {
+    try {
+      await d1Run(
+        'UPDATE profiles SET avatar_url = NULL, updated_at = ? WHERE LOWER(email) = ?',
+        [new Date().toISOString(), cleanEmail]
+      );
+    } catch (e) {
+      console.warn('D1 password reset profile cleanup warning:', e);
+    }
+  } else if (isSupabaseConfigured()) {
     try {
       const adminClient = getSupabaseAdminClient();
 

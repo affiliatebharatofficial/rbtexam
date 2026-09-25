@@ -43,12 +43,13 @@ export function getSupabaseClient(): SupabaseClient {
 export const supabase = getSupabaseClient();
 
 export function isSupabaseConfigured(): boolean {
-  const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || SUPABASE_URL;
-  const anonKey = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || SUPABASE_ANON_KEY;
+  const url = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_URL') || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = getRuntimeEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY') || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   return Boolean(
     url &&
     anonKey &&
     !url.includes('mock-') &&
+    !url.includes('ntwomhtfkuazqgtnkffk') &&
     anonKey !== 'mock-anon-key'
   );
 }

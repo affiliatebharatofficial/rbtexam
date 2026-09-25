@@ -8,6 +8,7 @@ import {
 import { createInitialCardState, calculateNextSpacedRepetition } from './spaced-repetition-engine';
 import { MASTER_QUESTION_BANK } from './master-question-bank';
 import { getSupabaseAdminClient, isSupabaseConfigured } from '@/lib/supabase';
+import { d1Query, d1Run, isD1Available } from '@/lib/d1';
 
 // Master Flashcard Seed Bank with RBT, BCaBA, and BCBA items
 export const MASTER_FLASHCARDS: Flashcard[] = [
@@ -1073,9 +1074,49 @@ export function generateFlashcardsFromQuestions(): Flashcard[] {
  * Query and filter flashcards with Spaced Repetition queue management
  */
 /**
- * Fetch flashcards directly from Supabase master_flashcards table with pagination and explicit columns
+ * Fetch flashcards from Cloudflare D1 database (or Supabase fallback if configured)
  */
 export async function fetchDatabaseFlashcards(limit: number = 100, offset: number = 0): Promise<Flashcard[]> {
+  // 1. Cloudflare D1 Native Query
+  if (isD1Available()) {
+    try {
+      const rows = await d1Query(
+        'SELECT * FROM flashcards WHERE status != "archived" ORDER BY created_at DESC LIMIT ? OFFSET ?',
+        [limit, offset]
+      );
+      if (rows && rows.length > 0) {
+        return rows.map((row: any) => ({
+          id: row.id,
+          title: row.front || 'BACB Flashcard',
+          front: row.front || 'Prompt',
+          back: row.back || 'Answer',
+          cardType: 'basic',
+          explanation: row.explanation || '',
+          clinicalExplanation: row.explanation || '',
+          memoryTip: 'Mnemonic memory tip',
+          realLifeExample: 'Clinical scenario',
+          commonMistakes: 'Common mistakes',
+          reference: row.subcategory || 'BACB Task List Standard',
+          certification: 'RBT' as any,
+          category: (row.category as any) || 'Measurement',
+          subcategory: row.subcategory || 'Task List Item',
+          difficulty: (row.difficulty as any) || 'medium',
+          keywords: typeof row.tags === 'string' ? JSON.parse(row.tags || '[]') : (row.tags || ['BACB', 'Flashcard']),
+          tags: typeof row.tags === 'string' ? JSON.parse(row.tags || '[]') : (row.tags || ['Published']),
+          status: (row.status as any) || 'published',
+          isPremium: false,
+          isFeatured: true,
+          createdBy: 'd1_db',
+          updatedBy: 'd1_db',
+          createdAt: row.created_at || new Date().toISOString(),
+          updatedAt: row.updated_at || new Date().toISOString(),
+        }));
+      }
+    } catch (err: any) {
+      console.warn('[Flashcard Bank] D1 fetch notice:', err.message);
+    }
+  }
+
   if (!isSupabaseConfigured()) return [];
   try {
     const adminDb = getSupabaseAdminClient();
@@ -1124,56 +1165,81 @@ export async function fetchDatabaseFlashcards(limit: number = 100, offset: numbe
 }
 
 /**
- * Insert a single flashcard into Supabase database
+ * Insert a single flashcard into D1 database (or Supabase fallback)
  */
 export async function createDatabaseFlashcard(card: Partial<Flashcard>): Promise<Flashcard> {
-  const adminDb = getSupabaseAdminClient();
-  const dbRow = {
-    certification: card.certification || 'RBT',
-    term: card.front || card.title || 'Untitled Flashcard',
-    definition: card.back || card.explanation || 'No definition',
-    clinical_example: card.explanation || card.clinicalExplanation || null,
-    category: card.category || 'Measurement',
-    task_list_code: card.subcategory || card.reference || 'BACB Task List',
-    tags: card.tags || ['Custom'],
-    difficulty: card.difficulty || 'medium',
-    is_premium: card.isPremium || false,
-    status: 'published',
-  };
-
-  const { data, error } = await adminDb.from('master_flashcards').insert([dbRow]).select();
-  if (error || !data || data.length === 0) {
-    console.error('[Flashcard Bank] Create error:', error?.message);
-    throw new Error(error?.message || 'Failed to insert flashcard row into database');
-  }
-
-  const row = data[0];
+  const cardId = card.id || `fc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   const newCard: Flashcard = {
-    id: row.id,
-    title: row.term,
-    front: row.term,
-    back: row.definition,
+    id: cardId,
+    title: card.title || card.front || 'Untitled Flashcard',
+    front: card.front || card.title || 'Untitled Flashcard',
+    back: card.back || card.explanation || 'No definition',
     cardType: 'basic',
-    explanation: row.clinical_example || row.definition,
-    clinicalExplanation: row.clinical_example || row.definition,
-    memoryTip: 'Mnemonic memory tip',
-    realLifeExample: 'Clinical scenario',
-    commonMistakes: 'Common mistakes',
-    reference: row.task_list_code || 'BACB Task List Standard',
-    certification: row.certification || 'RBT',
-    category: row.category || 'Measurement',
-    subcategory: row.task_list_code,
-    difficulty: row.difficulty || 'medium',
-    keywords: row.tags || ['BACB'],
-    tags: row.tags || ['Custom'],
-    status: row.status || 'published',
-    isPremium: row.is_premium || false,
+    explanation: card.explanation || card.clinicalExplanation || '',
+    clinicalExplanation: card.clinicalExplanation || card.explanation || '',
+    memoryTip: card.memoryTip || 'Mnemonic memory tip',
+    realLifeExample: card.realLifeExample || 'Clinical scenario',
+    commonMistakes: card.commonMistakes || 'Common mistakes',
+    reference: card.reference || card.subcategory || 'BACB Task List Standard',
+    certification: card.certification || 'RBT',
+    category: card.category || 'Measurement',
+    subcategory: card.subcategory || 'Task List Item',
+    difficulty: card.difficulty || 'medium',
+    keywords: card.keywords || ['BACB'],
+    tags: card.tags || ['Custom'],
+    status: card.status || 'published',
+    isPremium: card.isPremium || false,
     isFeatured: true,
     createdBy: 'user',
     updatedBy: 'user',
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
+
+  if (isD1Available()) {
+    try {
+      await d1Run(
+        `INSERT INTO flashcards (id, front, back, category, subcategory, difficulty, explanation, tags, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          newCard.id,
+          newCard.front,
+          newCard.back,
+          newCard.category,
+          newCard.subcategory,
+          newCard.difficulty,
+          newCard.explanation,
+          JSON.stringify(newCard.tags),
+          newCard.status,
+        ]
+      );
+      addCustomFlashcard(newCard);
+      return newCard;
+    } catch (e) {
+      console.warn('D1 flashcard insert warning:', e);
+    }
+  }
+
+  if (isSupabaseConfigured()) {
+    try {
+      const adminDb = getSupabaseAdminClient();
+      const dbRow = {
+        certification: card.certification || 'RBT',
+        term: card.front || card.title || 'Untitled Flashcard',
+        definition: card.back || card.explanation || 'No definition',
+        clinical_example: card.explanation || card.clinicalExplanation || null,
+        category: card.category || 'Measurement',
+        task_list_code: card.subcategory || card.reference || 'BACB Task List',
+        tags: card.tags || ['Custom'],
+        difficulty: card.difficulty || 'medium',
+        is_premium: card.isPremium || false,
+        status: 'published',
+      };
+      await adminDb.from('master_flashcards').insert([dbRow]);
+    } catch (err: any) {
+      console.warn('[Flashcard Bank] Supabase insert warning:', err?.message);
+    }
+  }
 
   addCustomFlashcard(newCard);
   return newCard;

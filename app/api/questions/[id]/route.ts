@@ -1,38 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdminClient } from '@/lib/supabase';
-import { mapDbRowToMasterQuestion, updateServerQuestionAsync, deleteServerQuestionAsync } from '@/lib/master-question-bank-server';
+import { fetchQuestionByIdOrCodeAsync, updateServerQuestionAsync, deleteServerQuestionAsync } from '@/lib/master-question-bank-server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET(request: NextRequest, { params }: { params: any }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const resolvedParams = await params;
-    const id = resolvedParams.id;
-    const adminDb = getSupabaseAdminClient();
+    const { id } = await params;
+    const question = await fetchQuestionByIdOrCodeAsync(id);
 
-    const { data: dbRow, error } = await adminDb
-      .from('master_questions')
-      .select('*')
-      .or(`question_code.eq.${id},id.eq.${id}`)
-      .is('deleted_at', null)
-      .maybeSingle();
-
-    if (error || !dbRow) {
+    if (!question) {
       return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    const question = mapDbRowToMasterQuestion(dbRow);
     return NextResponse.json(question);
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to retrieve question' }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: any }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const { id } = await params;
     const body = (await request.json()) as any;
 
     const updated = await updateServerQuestionAsync(id, body);
@@ -46,10 +35,9 @@ export async function PUT(request: NextRequest, { params }: { params: any }) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: any }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const resolvedParams = await params;
-    const id = resolvedParams.id;
+    const { id } = await params;
     const deleted = await deleteServerQuestionAsync(id);
 
     if (!deleted) {

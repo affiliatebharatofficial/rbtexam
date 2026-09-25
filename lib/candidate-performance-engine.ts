@@ -1,4 +1,3 @@
-import { isSupabaseConfigured, supabase } from './supabase';
 
 export interface CandidateBadge {
   id: string;

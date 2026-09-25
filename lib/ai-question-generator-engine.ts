@@ -7,7 +7,8 @@ import {
   QuestionCategory,
 } from '@/types/master-question';
 import { supabase, isSupabaseConfigured, getRuntimeEnv } from '@/lib/supabase';
-import { createServerQuestion } from '@/lib/master-question-bank-server';
+import { createServerQuestion, createServerQuestionAsync } from '@/lib/master-question-bank-server';
+import { isD1Available } from '@/lib/d1';
 
 export interface GenerationInputParams {
   topicPrompt: string;
@@ -521,6 +522,18 @@ async function saveValidQuestionBatchToDatabaseAndMemory(validQuestions: any[]):
     const saved = createServerQuestion(vq as any);
     createdMasterQuestions.push(saved);
     insertedIds.push(saved.id);
+  }
+
+  // 1. Cloudflare D1 Native persistence
+  if (isD1Available()) {
+    try {
+      for (const q of createdMasterQuestions) {
+        await createServerQuestionAsync(q);
+      }
+      return { ids: insertedIds, questions: createdMasterQuestions };
+    } catch (e) {
+      console.warn('D1 question batch persistence notice:', e);
+    }
   }
 
   if (isSupabaseConfigured()) {

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import {
   getAllArticles,
   createArticle,
@@ -7,6 +6,7 @@ import {
   deleteArticle,
 } from '@/lib/article-cms-engine';
 import { requireAdminAuth } from '@/lib/server-auth';
+import { d1Query, d1Run, isD1Available } from '@/lib/d1';
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdminAuth(request);
@@ -15,44 +15,37 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-    const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false },
-    });
-
     let articlesList = getAllArticles();
 
-    // Query Supabase DB for articles table if available
-    try {
-      const { data: dbArticles } = await adminSupabase
-        .from('articles')
-        .select('*')
-        .order('created_at', { ascending: false });
+    // Query D1 database for articles table if available
+    if (isD1Available()) {
+      try {
+        const dbArticles = await d1Query(
+          'SELECT * FROM articles ORDER BY created_at DESC'
+        );
 
-      if (dbArticles && Array.isArray(dbArticles) && dbArticles.length > 0) {
-        const mapped = dbArticles.map((a: any) => ({
-          id: a.id,
-          slug: a.slug,
-          title: a.title,
-          summary: a.summary,
-          content: a.content,
-          category: a.category,
-          tags: a.tags || [],
-          coverImageUrl: a.cover_image_url || '/banner-rbt-hero.png',
-          authorName: a.author_name || 'Jobpe gyan',
-          readTimeMinutes: a.read_time_minutes || 5,
-          status: a.status || 'draft',
-          viewsCount: a.views_count || 0,
-          publishedAt: a.published_at,
-          createdAt: a.created_at,
-          updatedAt: a.updated_at,
-        }));
-        articlesList = mapped;
+        if (dbArticles && Array.isArray(dbArticles) && dbArticles.length > 0) {
+          articlesList = dbArticles.map((a: any) => ({
+            id: a.id,
+            slug: a.slug,
+            title: a.title,
+            summary: a.summary || '',
+            content: a.content || '',
+            category: a.category || 'Exam Prep',
+            tags: typeof a.tags === 'string' ? JSON.parse(a.tags || '[]') : (a.tags || []),
+            coverImageUrl: a.cover_image_url || '/banner-rbt-hero.png',
+            authorName: a.author_name || 'Jobpe gyan',
+            readTimeMinutes: Number(a.read_time_minutes) || 5,
+            status: a.status || 'published',
+            viewsCount: Number(a.views_count) || 0,
+            publishedAt: a.published_at || a.created_at,
+            createdAt: a.created_at,
+            updatedAt: a.updated_at,
+          }));
+        }
+      } catch (dbErr) {
+        console.warn('D1 articles query fallback to in-memory:', dbErr);
       }
-    } catch (dbErr) {
-      console.warn('Supabase DB articles query fallback to in-memory:', dbErr);
     }
 
     return NextResponse.json({
@@ -90,31 +83,42 @@ export async function POST(request: NextRequest) {
       status,
     });
 
-    // Optionally sync to Supabase DB
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ntwomhtfkuazqgtnkffk.supabase.co';
-      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-      const adminSupabase = createClient(supabaseUrl, serviceRoleKey, {
-        auth: { persistSession: false },
-      });
-
-      await adminSupabase.from('articles').upsert({
-        slug: created.slug,
-        title: created.title,
-        summary: created.summary,
-        content: created.content,
-        category: created.category,
-        tags: created.tags,
-        cover_image_url: created.coverImageUrl,
-        author_name: created.authorName,
-        read_time_minutes: created.readTimeMinutes,
-        status: created.status,
-        published_at: created.publishedAt,
-        updated_at: created.updatedAt,
-      });
-    } catch (e) {
-      console.warn('DB sync warning in POST /api/admin/articles:', e);
+    // Sync to D1 database if available
+    if (isD1Available()) {
+      try {
+        await d1Run(
+          `INSERT INTO articles (id, slug, title, summary, content, category, tags, cover_image_url, author_name, read_time_minutes, status, published_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(slug) DO UPDATE SET
+             title = excluded.title,
+             summary = excluded.summary,
+             content = excluded.content,
+             category = excluded.category,
+             tags = excluded.tags,
+             cover_image_url = excluded.cover_image_url,
+             author_name = excluded.author_name,
+             read_time_minutes = excluded.read_time_minutes,
+             status = excluded.status,
+             updated_at = excluded.updated_at`,
+          [
+            created.id || crypto.randomUUID(),
+            created.slug,
+            created.title,
+            created.summary,
+            created.content,
+            created.category,
+            JSON.stringify(created.tags || []),
+            created.coverImageUrl,
+            created.authorName,
+            created.readTimeMinutes,
+            created.status,
+            created.publishedAt,
+            created.updatedAt,
+          ]
+        );
+      } catch (e) {
+        console.warn('D1 sync warning in POST /api/admin/articles:', e);
+      }
     }
 
     return NextResponse.json({ success: true, article: created });
@@ -153,6 +157,39 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     }
 
+    // Sync to D1
+    if (isD1Available()) {
+      try {
+        await d1Run(
+          `UPDATE articles SET
+             title = COALESCE(?, title),
+             summary = COALESCE(?, summary),
+             content = COALESCE(?, content),
+             category = COALESCE(?, category),
+             tags = COALESCE(?, tags),
+             cover_image_url = COALESCE(?, cover_image_url),
+             author_name = COALESCE(?, author_name),
+             status = COALESCE(?, status),
+             updated_at = datetime('now')
+           WHERE id = ? OR slug = ?`,
+          [
+            title || null,
+            summary || null,
+            content || null,
+            category || null,
+            tags ? JSON.stringify(tags) : null,
+            coverImageUrl || null,
+            authorName || null,
+            status || null,
+            id,
+            id,
+          ]
+        );
+      } catch (e) {
+        console.warn('D1 sync warning in PUT /api/admin/articles:', e);
+      }
+    }
+
     return NextResponse.json({ success: true, article: updated });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to update article' }, { status: 500 });
@@ -174,6 +211,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     const deleted = deleteArticle(id);
+
+    if (isD1Available()) {
+      try {
+        await d1Run('DELETE FROM articles WHERE id = ? OR slug = ?', [id, id]);
+      } catch (e) {
+        console.warn('D1 delete warning in DELETE /api/admin/articles:', e);
+      }
+    }
+
     return NextResponse.json({ success: deleted });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to delete article' }, { status: 500 });

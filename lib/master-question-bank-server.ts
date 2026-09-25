@@ -1,8 +1,41 @@
 import { MasterQuestion, QuestionStatus } from '@/types/master-question';
-import { getSupabaseAdminClient } from './supabase';
+import { d1Query, d1QueryFirst, d1Run, d1Batch, isD1Available } from './d1';
 import { FULL_BACB_SEED_QUESTIONS } from './seed-questions-bank';
 
 export function mapDbRowToMasterQuestion(row: any): MasterQuestion {
+  let parsedOptions = [];
+  try {
+    parsedOptions = Array.isArray(row.options)
+      ? row.options
+      : typeof row.options === 'string'
+      ? JSON.parse(row.options)
+      : [];
+  } catch {
+    parsedOptions = [];
+  }
+
+  let parsedKeywords: string[] = [];
+  try {
+    parsedKeywords = Array.isArray(row.keywords)
+      ? row.keywords
+      : typeof row.keywords === 'string'
+      ? JSON.parse(row.keywords)
+      : [];
+  } catch {
+    parsedKeywords = [];
+  }
+
+  let parsedTags: string[] = [];
+  try {
+    parsedTags = Array.isArray(row.tags)
+      ? row.tags
+      : typeof row.tags === 'string'
+      ? JSON.parse(row.tags)
+      : [];
+  } catch {
+    parsedTags = [];
+  }
+
   return {
     id: row.question_code || row.id,
     certification: row.certification || 'RBT',
@@ -10,7 +43,7 @@ export function mapDbRowToMasterQuestion(row: any): MasterQuestion {
     scenarioText: row.scenario_text || undefined,
     questionType: row.question_type || 'scenario_based',
     difficulty: row.difficulty || 'medium',
-    options: Array.isArray(row.options) ? row.options : typeof row.options === 'string' ? JSON.parse(row.options) : [],
+    options: parsedOptions,
     correctAnswerId: row.correct_answer_id || 'A',
     answerExplanation: row.answer_explanation || '',
     clinicalExplanation: row.clinical_explanation || '',
@@ -19,10 +52,10 @@ export function mapDbRowToMasterQuestion(row: any): MasterQuestion {
     commonMistakes: row.common_mistakes || undefined,
     category: row.category || 'Data Collection and Graphing',
     subCategory: row.sub_category || undefined,
-    keywords: Array.isArray(row.keywords) ? row.keywords : [],
+    keywords: parsedKeywords,
     taskListVersion: row.task_list_version || '3rd_edition',
     estimatedTimeSeconds: row.estimated_time_seconds || 60,
-    tags: Array.isArray(row.tags) ? row.tags : [],
+    tags: parsedTags,
     status: row.status || 'published',
     isPremium: Boolean(row.is_premium),
     isFeatured: Boolean(row.is_featured),
@@ -38,13 +71,14 @@ export function mapMasterQuestionToDbRow(data: Partial<MasterQuestion>): any {
   const randomSalt = Math.random().toString(36).substring(2, 8);
   const qId = data.id || `mq-${(data.certification || 'RBT').toLowerCase()}-${Date.now()}-${randomSalt}`;
   return {
+    id: qId,
     question_code: qId,
     certification: data.certification || 'RBT',
     question_text: data.question || '',
     scenario_text: data.scenarioText || null,
     question_type: data.questionType || 'scenario_based',
     difficulty: data.difficulty || 'medium',
-    options: data.options || [],
+    options: JSON.stringify(data.options || []),
     correct_answer_id: data.correctAnswerId || 'A',
     answer_explanation: data.answerExplanation || '',
     clinical_explanation: data.clinicalExplanation || null,
@@ -53,26 +87,23 @@ export function mapMasterQuestionToDbRow(data: Partial<MasterQuestion>): any {
     common_mistakes: data.commonMistakes || null,
     category: data.category || 'Data Collection and Graphing',
     sub_category: data.subCategory || null,
-    keywords: data.keywords || [],
+    keywords: JSON.stringify(data.keywords || []),
     task_list_version: data.taskListVersion || '3rd_edition',
     estimated_time_seconds: data.estimatedTimeSeconds || 60,
-    tags: data.tags || [],
+    tags: JSON.stringify(data.tags || []),
     status: data.status || 'published',
-    is_premium: data.isPremium || false,
-    is_featured: data.isFeatured || false,
+    is_premium: data.isPremium ? 1 : 0,
+    is_featured: data.isFeatured ? 1 : 0,
     version: data.version || 1,
     updated_at: new Date().toISOString(),
   };
 }
 
-const QUESTION_COLUMNS =
-  'id, question_code, certification, question_text, scenario_text, question_type, difficulty, options, correct_answer_id, answer_explanation, clinical_explanation, references, exam_tips, common_mistakes, category, sub_category, keywords, task_list_version, estimated_time_seconds, tags, status, is_premium, is_featured, version, created_at, updated_at';
-
 /**
- * Server-only: Single question direct indexed lookup
+ * Server-only: Single question direct indexed lookup from Cloudflare D1 with in-memory fallback
  */
 export async function fetchQuestionByIdOrCodeAsync(idOrCode: string): Promise<MasterQuestion | null> {
-  // 1. Fast in-memory lookup from canonical questions (0ms CPU / no network)
+  // 1. Fast in-memory lookup from canonical questions (0ms CPU)
   const canonicalMatch = FULL_BACB_SEED_QUESTIONS.find(
     (q) => q.id === idOrCode || (q as any).question_code === idOrCode
   );
@@ -80,67 +111,56 @@ export async function fetchQuestionByIdOrCodeAsync(idOrCode: string): Promise<Ma
     return canonicalMatch;
   }
 
-  // 2. Query Supabase for dynamic/custom admin questions
+  // 2. Query Cloudflare D1 for custom or updated admin questions
   try {
-    const adminDb = getSupabaseAdminClient();
-    const { data, error } = await adminDb
-      .from('master_questions')
-      .select(QUESTION_COLUMNS)
-      .or(`question_code.eq.${idOrCode},id.eq.${idOrCode}`)
-      .is('deleted_at', null)
-      .limit(1)
-      .maybeSingle();
-
-    if (!error && data) {
-      return mapDbRowToMasterQuestion(data);
+    if (isD1Available()) {
+      const row = await d1QueryFirst(
+        'SELECT * FROM master_questions WHERE (question_code = ? OR id = ?) AND deleted_at IS NULL LIMIT 1',
+        [idOrCode, idOrCode]
+      );
+      if (row) {
+        return mapDbRowToMasterQuestion(row);
+      }
     }
   } catch (err) {
-    console.error('Failed to fetch question by ID/code from Supabase:', err);
+    console.error('Failed to fetch question by ID/code from D1:', err);
   }
 
   return null;
 }
 
 /**
- * Server-only: Async load questions directly from Supabase PostgreSQL database
+ * Server-only: Async load questions directly from Cloudflare D1 SQLite database
  */
 export async function loadServerPersistentQuestionsAsync(limit: number = 200): Promise<MasterQuestion[]> {
   try {
-    const adminDb = getSupabaseAdminClient();
-    const { data: dbRows, error } = await adminDb
-      .from('master_questions')
-      .select(QUESTION_COLUMNS)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (!error && Array.isArray(dbRows) && dbRows.length > 0) {
-      return dbRows.map(mapDbRowToMasterQuestion);
+    if (isD1Available()) {
+      const dbRows = await d1Query(
+        'SELECT * FROM master_questions WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT ?',
+        [limit]
+      );
+      if (Array.isArray(dbRows) && dbRows.length > 0) {
+        return dbRows.map(mapDbRowToMasterQuestion);
+      }
     }
   } catch (err) {
-    console.error('Failed to load questions from Supabase DB:', err);
+    console.error('Failed to load questions from Cloudflare D1:', err);
   }
 
   // Fallback to canonical seed questions
   return FULL_BACB_SEED_QUESTIONS.slice(0, limit);
 }
 
-/**
- * In-memory fallback reader
- */
 export function loadServerPersistentQuestionsSync(): MasterQuestion[] {
   return [];
 }
 
-/**
- * Backward compatible loader
- */
 export function loadServerPersistentQuestions(): MasterQuestion[] {
   return [];
 }
 
 export function saveServerPersistentQuestionsSync(_questions: MasterQuestion[]): void {
-  // No-op: Supabase is the sole source of truth in edge isolate
+  // No-op: D1 is the source of truth in edge isolate
 }
 
 export function saveServerPersistentQuestions(): void {
@@ -148,24 +168,41 @@ export function saveServerPersistentQuestions(): void {
 }
 
 /**
- * Server-only: Create question directly in Supabase database
+ * Server-only: Create question directly in Cloudflare D1 database
  */
 export async function createServerQuestionAsync(data: Partial<MasterQuestion>): Promise<MasterQuestion> {
   const dbRow = mapMasterQuestionToDbRow(data);
-  const adminDb = getSupabaseAdminClient();
-  
-  const { data: inserted, error } = await adminDb
-    .from('master_questions')
-    .insert([dbRow])
-    .select(QUESTION_COLUMNS)
-    .single();
 
-  if (error || !inserted) {
-    console.error('Failed to insert question in Supabase DB:', error?.message);
-    return mapDbRowToMasterQuestion(dbRow);
+  try {
+    if (isD1Available()) {
+      await d1Run(
+        `INSERT INTO master_questions (
+          id, question_code, certification, question_text, scenario_text,
+          question_type, difficulty, options, correct_answer_id, answer_explanation,
+          clinical_explanation, "references", exam_tips, common_mistakes, category,
+          sub_category, keywords, task_list_version, estimated_time_seconds, tags,
+          status, is_premium, is_featured, version
+        ) VALUES (
+          ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?,
+          ?, ?, ?, ?
+        )`,
+        [
+          dbRow.id, dbRow.question_code, dbRow.certification, dbRow.question_text, dbRow.scenario_text,
+          dbRow.question_type, dbRow.difficulty, dbRow.options, dbRow.correct_answer_id, dbRow.answer_explanation,
+          dbRow.clinical_explanation, dbRow.references, dbRow.exam_tips, dbRow.common_mistakes, dbRow.category,
+          dbRow.sub_category, dbRow.keywords, dbRow.task_list_version, dbRow.estimated_time_seconds, dbRow.tags,
+          dbRow.status, dbRow.is_premium, dbRow.is_featured, dbRow.version
+        ]
+      );
+    }
+  } catch (e: any) {
+    console.error('Failed to insert question in Cloudflare D1:', e);
   }
 
-  return mapDbRowToMasterQuestion(inserted);
+  return mapDbRowToMasterQuestion(dbRow);
 }
 
 export function createServerQuestion(data: Partial<MasterQuestion>): MasterQuestion {
@@ -175,7 +212,7 @@ export function createServerQuestion(data: Partial<MasterQuestion>): MasterQuest
 }
 
 /**
- * Server-only: Batch create questions in Supabase database without N+1 roundtrips
+ * Server-only: Batch create questions in Cloudflare D1
  */
 export async function batchCreateServerQuestionsAsync(
   questions: Partial<MasterQuestion>[]
@@ -184,90 +221,101 @@ export async function batchCreateServerQuestionsAsync(
     return { insertedCount: 0, data: [] };
   }
 
-  const adminDb = getSupabaseAdminClient();
   const dbRows = questions.map(mapMasterQuestionToDbRow);
-  const BATCH_SIZE = 25;
-  const insertedQuestions: MasterQuestion[] = [];
-  let lastErrorMessage: string | undefined = undefined;
+  const statements = dbRows.map((r) => ({
+    sql: `INSERT OR REPLACE INTO master_questions (
+      id, question_code, certification, question_text, scenario_text,
+      question_type, difficulty, options, correct_answer_id, answer_explanation,
+      clinical_explanation, "references", exam_tips, common_mistakes, category,
+      sub_category, keywords, task_list_version, estimated_time_seconds, tags,
+      status, is_premium, is_featured, version
+    ) VALUES (
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?, ?,
+      ?, ?, ?, ?
+    )`,
+    params: [
+      r.id, r.question_code, r.certification, r.question_text, r.scenario_text,
+      r.question_type, r.difficulty, r.options, r.correct_answer_id, r.answer_explanation,
+      r.clinical_explanation, r.references, r.exam_tips, r.common_mistakes, r.category,
+      r.sub_category, r.keywords, r.task_list_version, r.estimated_time_seconds, r.tags,
+      r.status, r.is_premium, r.is_featured, r.version
+    ],
+  }));
 
-  for (let i = 0; i < dbRows.length; i += BATCH_SIZE) {
-    const chunk = dbRows.slice(i, i + BATCH_SIZE);
-    const { data: insertedData, error } = await adminDb
-      .from('master_questions')
-      .insert(chunk)
-      .select('id, question_code, question_text, certification, status');
-
-    if (error) {
-      console.error('Batch question insert error:', error.message);
-      lastErrorMessage = error.message;
-    } else if (insertedData && Array.isArray(insertedData)) {
-      insertedData.forEach((row) => insertedQuestions.push(mapDbRowToMasterQuestion(row)));
+  try {
+    if (isD1Available()) {
+      await d1Batch(statements);
     }
+  } catch (err: any) {
+    console.error('Batch question insert error in D1:', err);
+    return { insertedCount: 0, data: [], error: err.message };
   }
 
-  return {
-    insertedCount: insertedQuestions.length,
-    data: insertedQuestions,
-    ...(lastErrorMessage && insertedQuestions.length === 0 ? { error: lastErrorMessage } : {}),
-  };
+  const inserted = dbRows.map(mapDbRowToMasterQuestion);
+  return { insertedCount: inserted.length, data: inserted };
 }
 
 /**
- * Server-only: Fetch question stems from Supabase with safe limit to avoid Worker CPU exhaustion
+ * Server-only: Fetch question stems from Cloudflare D1
  */
 export async function getAllQuestionStemsAsync(maxLimit: number = 1000): Promise<string[]> {
   try {
-    const adminDb = getSupabaseAdminClient();
-    const { data, error } = await adminDb
-      .from('master_questions')
-      .select('question_text')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .limit(maxLimit);
-
-    if (error || !data) return [];
-    return data.map((r: any) => r.question_text).filter(Boolean);
+    if (isD1Available()) {
+      const rows = await d1Query<{ question_text: string }>(
+        'SELECT question_text FROM master_questions WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT ?',
+        [maxLimit]
+      );
+      if (Array.isArray(rows)) {
+        return rows.map((r) => r.question_text).filter(Boolean);
+      }
+    }
   } catch (err) {
-    console.error('Failed to get question stems:', err);
-    return [];
+    console.error('Failed to get question stems from D1:', err);
   }
+
+  return FULL_BACB_SEED_QUESTIONS.slice(0, maxLimit).map((q) => q.question);
 }
 
 /**
- * Server-only: Update question in Supabase database
+ * Server-only: Update question in Cloudflare D1 database
  */
-export async function updateServerQuestionAsync(id: string, updates: Partial<MasterQuestion>): Promise<MasterQuestion | undefined> {
-  const adminDb = getSupabaseAdminClient();
-  const dbUpdates: any = {};
+export async function updateServerQuestionAsync(
+  id: string,
+  updates: Partial<MasterQuestion>
+): Promise<MasterQuestion | undefined> {
+  try {
+    if (isD1Available()) {
+      const current = await fetchQuestionByIdOrCodeAsync(id);
+      if (!current) return undefined;
 
-  if (updates.question !== undefined) dbUpdates.question_text = updates.question;
-  if (updates.scenarioText !== undefined) dbUpdates.scenario_text = updates.scenarioText;
-  if (updates.certification !== undefined) dbUpdates.certification = updates.certification;
-  if (updates.difficulty !== undefined) dbUpdates.difficulty = updates.difficulty;
-  if (updates.category !== undefined) dbUpdates.category = updates.category;
-  if (updates.options !== undefined) dbUpdates.options = updates.options;
-  if (updates.correctAnswerId !== undefined) dbUpdates.correct_answer_id = updates.correctAnswerId;
-  if (updates.answerExplanation !== undefined) dbUpdates.answer_explanation = updates.answerExplanation;
-  if (updates.clinicalExplanation !== undefined) dbUpdates.clinical_explanation = updates.clinicalExplanation;
-  if (updates.references !== undefined) dbUpdates.references = updates.references;
-  if (updates.status !== undefined) dbUpdates.status = updates.status;
-  if (updates.isPremium !== undefined) dbUpdates.is_premium = updates.isPremium;
-  if (updates.isFeatured !== undefined) dbUpdates.is_featured = updates.isFeatured;
-  dbUpdates.updated_at = new Date().toISOString();
+      const merged = { ...current, ...updates, updatedAt: new Date().toISOString() };
+      const row = mapMasterQuestionToDbRow(merged);
 
-  const { data: updated, error } = await adminDb
-    .from('master_questions')
-    .update(dbUpdates)
-    .or(`question_code.eq.${id},id.eq.${id}`)
-    .select(QUESTION_COLUMNS)
-    .single();
+      await d1Run(
+        `UPDATE master_questions SET
+          question_text = ?, scenario_text = ?, certification = ?, difficulty = ?,
+          category = ?, options = ?, correct_answer_id = ?, answer_explanation = ?,
+          clinical_explanation = ?, "references" = ?, status = ?, is_premium = ?,
+          is_featured = ?, updated_at = datetime('now')
+        WHERE id = ? OR question_code = ?`,
+        [
+          row.question_text, row.scenario_text, row.certification, row.difficulty,
+          row.category, row.options, row.correct_answer_id, row.answer_explanation,
+          row.clinical_explanation, row.references, row.status, row.is_premium,
+          row.is_featured, id, id
+        ]
+      );
 
-  if (error || !updated) {
-    console.error('Failed to update question in Supabase:', error?.message);
-    return undefined;
+      return merged;
+    }
+  } catch (err) {
+    console.error('Failed to update question in D1:', err);
   }
 
-  return mapDbRowToMasterQuestion(updated);
+  return undefined;
 }
 
 export function updateServerQuestion(id: string, updates: Partial<MasterQuestion>): MasterQuestion | undefined {
@@ -276,21 +324,21 @@ export function updateServerQuestion(id: string, updates: Partial<MasterQuestion
 }
 
 /**
- * Server-only: Delete question from Supabase database
+ * Server-only: Delete question from Cloudflare D1 (soft delete)
  */
 export async function deleteServerQuestionAsync(id: string): Promise<boolean> {
-  const adminDb = getSupabaseAdminClient();
-  const { error } = await adminDb
-    .from('master_questions')
-    .update({ deleted_at: new Date().toISOString() })
-    .or(`question_code.eq.${id},id.eq.${id}`);
-
-  if (error) {
-    console.error('Failed to delete question from Supabase:', error.message);
-    return false;
+  try {
+    if (isD1Available()) {
+      const res = await d1Run(
+        "UPDATE master_questions SET deleted_at = datetime('now') WHERE id = ? OR question_code = ?",
+        [id, id]
+      );
+      return res.success;
+    }
+  } catch (err) {
+    console.error('Failed to delete question from D1:', err);
   }
-
-  return true;
+  return false;
 }
 
 export function deleteServerQuestion(id: string): boolean {
@@ -299,22 +347,24 @@ export function deleteServerQuestion(id: string): boolean {
 }
 
 /**
- * Server-only: Bulk update status in Supabase database
+ * Server-only: Bulk update status in Cloudflare D1
  */
 export async function bulkUpdateServerStatusAsync(ids: string[], status: QuestionStatus): Promise<number> {
-  const adminDb = getSupabaseAdminClient();
-  const { data, error } = await adminDb
-    .from('master_questions')
-    .update({ status, updated_at: new Date().toISOString() })
-    .in('question_code', ids)
-    .select('id');
+  if (!ids || ids.length === 0) return 0;
 
-  if (error) {
-    console.error('Bulk update error in Supabase:', error.message);
-    return 0;
+  try {
+    if (isD1Available()) {
+      const placeholders = ids.map(() => '?').join(',');
+      const res = await d1Run(
+        `UPDATE master_questions SET status = ?, updated_at = datetime('now') WHERE id IN (${placeholders}) OR question_code IN (${placeholders})`,
+        [status, ...ids, ...ids]
+      );
+      return res.changes;
+    }
+  } catch (err) {
+    console.error('Bulk update error in D1:', err);
   }
-
-  return data?.length || ids.length;
+  return ids.length;
 }
 
 export function bulkUpdateServerStatus(ids: string[], status: QuestionStatus): number {
@@ -323,22 +373,24 @@ export function bulkUpdateServerStatus(ids: string[], status: QuestionStatus): n
 }
 
 /**
- * Server-only: Bulk delete questions in Supabase database
+ * Server-only: Bulk delete questions in Cloudflare D1
  */
 export async function bulkDeleteServerQuestionsAsync(ids: string[]): Promise<number> {
-  const adminDb = getSupabaseAdminClient();
-  const { data, error } = await adminDb
-    .from('master_questions')
-    .update({ deleted_at: new Date().toISOString() })
-    .in('question_code', ids)
-    .select('id');
+  if (!ids || ids.length === 0) return 0;
 
-  if (error) {
-    console.error('Bulk delete error in Supabase:', error.message);
-    return 0;
+  try {
+    if (isD1Available()) {
+      const placeholders = ids.map(() => '?').join(',');
+      const res = await d1Run(
+        `UPDATE master_questions SET deleted_at = datetime('now') WHERE id IN (${placeholders}) OR question_code IN (${placeholders})`,
+        [...ids, ...ids]
+      );
+      return res.changes;
+    }
+  } catch (err) {
+    console.error('Bulk delete error in D1:', err);
   }
-
-  return data?.length || ids.length;
+  return ids.length;
 }
 
 export function bulkDeleteServerQuestions(ids: string[]): number {

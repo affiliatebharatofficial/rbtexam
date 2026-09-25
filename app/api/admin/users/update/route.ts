@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseAdminClient } from '@/lib/supabase';
+import { d1Run, isD1Available } from '@/lib/d1';
 import { requireAdminAuth } from '@/lib/server-auth';
 
 export const dynamic = 'force-dynamic';
@@ -11,41 +11,28 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { email, role, subscriptionTier, status } = (await request.json()) as any;
+    const { email, role, full_name } = (await request.json()) as any;
 
     if (!email) {
       return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
     }
 
-    const adminSupabase = getSupabaseAdminClient();
     const targetEmail = email.toLowerCase().trim();
 
-    // 1. Update public.profiles table
-    if (subscriptionTier || status) {
-      await adminSupabase
-        .from('profiles')
-        .update({
-          ...(subscriptionTier && { subscription_tier: subscriptionTier }),
-          ...(status && { account_status: status }),
-          updated_at: new Date().toISOString(),
-        })
-        .ilike('email', targetEmail);
-    }
-
-    // 2. Update public.users table
-    if (role) {
-      await adminSupabase
-        .from('users')
-        .update({
-          role: role,
-          updated_at: new Date().toISOString(),
-        })
-        .ilike('email', targetEmail);
+    if (isD1Available()) {
+      await d1Run(
+        `UPDATE users SET
+          role = COALESCE(?, role),
+          full_name = COALESCE(?, full_name),
+          updated_at = datetime('now')
+        WHERE email = ?`,
+        [role || null, full_name || null, targetEmail]
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: `User ${targetEmail} profile updated successfully in Supabase DB!`,
+      message: `User ${targetEmail} profile updated successfully in Cloudflare D1!`,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Failed to update user profile' }, { status: 500 });

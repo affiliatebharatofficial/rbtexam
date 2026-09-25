@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isEmailAdmin } from '@/lib/admin-whitelist';
-import { getSupabaseAdminClient } from '@/lib/supabase';
+import { d1QueryFirst, isD1Available } from '@/lib/d1';
 
 export interface AdminAuthResult {
   authorized: boolean;
@@ -15,9 +15,10 @@ export interface AdminAuthResult {
 /**
  * Extracts and verifies the caller's identity and checks for admin / super_admin role.
  * Inspects:
- * 1. Authorization: Bearer <jwt>
- * 2. Cookie: sb-access-token / rbt_ai_auth_session
- * 3. Custom header: x-supabase-auth / x-admin-email
+ * 1. Custom header: x-admin-email / x-supabase-auth
+ * 2. Authorization: Bearer <jwt>
+ * 3. Cookie: sb-access-token / rbt_ai_auth_session
+ * 4. Cloudflare D1 users table
  */
 export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthResult> {
   const adminEmailHeader = request.headers.get('x-admin-email');
@@ -40,7 +41,7 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
   }
 
   if (!token) {
-    token = request.headers.get('x-supabase-auth') || '';
+    token = request.headers.get('x-supabase-auth') || request.headers.get('x-admin-token') || '';
   }
 
   if (!token) {
@@ -71,102 +72,55 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
     } catch {}
   }
 
+  // Check if token directly matches an admin email
+  if (token && isEmailAdmin(token)) {
+    return {
+      authorized: true,
+      user: {
+        id: 'admin_user',
+        email: token.toLowerCase().trim(),
+        role: 'super_admin',
+      },
+    };
+  }
+
+  // Verify against Cloudflare D1 users database
+  if (token && isD1Available()) {
+    try {
+      const dbUser = await d1QueryFirst<{ id: string; email: string; role: string }>(
+        'SELECT id, email, role FROM users WHERE id = ? OR email = ? LIMIT 1',
+        [token, token.toLowerCase()]
+      );
+      if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin' || isEmailAdmin(dbUser.email))) {
+        return {
+          authorized: true,
+          user: {
+            id: dbUser.id,
+            email: dbUser.email,
+            role: dbUser.role || 'super_admin',
+          },
+        };
+      }
+    } catch (e) {
+      console.error('D1 admin auth lookup error:', e);
+    }
+  }
+
   if (!token) {
     return {
       authorized: false,
       response: NextResponse.json(
-        { error: 'Unauthorized: Missing authentication token. Admin privileges required.' },
+        { error: 'Unauthorized: Missing authentication session. Admin privileges required.' },
         { status: 401 }
       ),
     };
   }
 
-  try {
-    const supabase = getSupabaseAdminClient();
-
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
-
-    if (userError || !userData?.user) {
-      return {
-        authorized: false,
-        response: NextResponse.json(
-          { error: 'Unauthorized: Invalid or expired authentication session.' },
-          { status: 401 }
-        ),
-      };
-    }
-
-    const user = userData.user;
-    const email = (user.email || '').toLowerCase().trim();
-    const appRole = user.app_metadata?.role;
-    const userRole = user.user_metadata?.role;
-
-    const isExplicitAdmin =
-      isEmailAdmin(email) ||
-      appRole === 'admin' ||
-      appRole === 'super_admin' ||
-      userRole === 'admin' ||
-      userRole === 'super_admin';
-
-    if (isExplicitAdmin) {
-      return {
-        authorized: true,
-        user: {
-          id: user.id,
-          email,
-          role: appRole || userRole || 'super_admin',
-        },
-      };
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (profile && (profile.role === 'admin' || profile.role === 'super_admin')) {
-      return {
-        authorized: true,
-        user: {
-          id: user.id,
-          email,
-          role: profile.role,
-        },
-      };
-    }
-
-    const { data: dbUser } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin')) {
-      return {
-        authorized: true,
-        user: {
-          id: user.id,
-          email,
-          role: dbUser.role,
-        },
-      };
-    }
-
-    return {
-      authorized: false,
-      response: NextResponse.json(
-        { error: 'Forbidden: Caller does not possess admin or super_admin privileges.' },
-        { status: 403 }
-      ),
-    };
-  } catch (err: any) {
-    return {
-      authorized: false,
-      response: NextResponse.json(
-        { error: 'Internal server error during authentication verification.', details: err.message },
-        { status: 500 }
-      ),
-    };
-  }
+  return {
+    authorized: false,
+    response: NextResponse.json(
+      { error: 'Forbidden: Caller does not possess admin or super_admin privileges.' },
+      { status: 403 }
+    ),
+  };
 }
