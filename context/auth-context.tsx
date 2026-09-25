@@ -462,9 +462,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       // 1. Direct Official Google Cloud OAuth (Primary Edge Provider)
-      const googleClientId =
+      let googleClientId =
         process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
         '';
+
+      if (!googleClientId || googleClientId.includes('mock-')) {
+        try {
+          const res = await fetch('/api/auth/google/client-id');
+          if (res.ok) {
+            const data = (await res.json()) as any;
+            if (data?.clientId) {
+              googleClientId = data.clientId;
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('Failed to fetch client ID from server:', fetchErr);
+        }
+      }
 
       if (googleClientId && !googleClientId.includes('mock-')) {
         const origin =
