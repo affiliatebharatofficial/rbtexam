@@ -247,7 +247,11 @@ export async function batchCreateServerQuestionsAsync(
 
   try {
     if (isD1Available()) {
-      await d1Batch(statements);
+      const CHUNK_SIZE = 15;
+      for (let i = 0; i < statements.length; i += CHUNK_SIZE) {
+        const slice = statements.slice(i, i + CHUNK_SIZE);
+        await d1Batch(slice);
+      }
     }
   } catch (err: any) {
     console.error('Batch question insert error in D1:', err);

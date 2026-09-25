@@ -50,22 +50,8 @@ export async function POST(request: NextRequest) {
         batchUniqueQuestions.push(q);
       }
 
-      // 2. Fetch existing stems safely with max limit to verify duplicates
-      const existingStems = await getAllQuestionStemsAsync(500);
-      const existingSet = new Set<string>(
-        existingStems.map((s) => normalizeQuestionForComparison(s)).filter(Boolean)
-      );
-
-      const questionsToInsert = batchUniqueQuestions.filter((q) => {
-        const norm = normalizeQuestionForComparison(q.question || q.question_text || '');
-        if (norm && existingSet.has(norm)) {
-          skippedDuplicatesCount++;
-          return false;
-        }
-        return true;
-      });
-
-      const result = await batchCreateServerQuestionsAsync(questionsToInsert);
+      // 2. Insert batch questions directly with SQLite ON CONFLICT replacement
+      const result = await batchCreateServerQuestionsAsync(batchUniqueQuestions);
 
       if (result.error && result.insertedCount === 0) {
         return NextResponse.json(
@@ -80,7 +66,7 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json({
-        success: result.insertedCount > 0 || questionsToInsert.length === 0,
+        success: result.insertedCount > 0 || batchUniqueQuestions.length === 0,
         importedCount: result.insertedCount,
         skippedDuplicatesCount,
         ...(result.error ? { warning: result.error } : {}),

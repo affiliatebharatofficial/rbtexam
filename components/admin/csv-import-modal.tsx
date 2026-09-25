@@ -20,6 +20,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
   const [targetCert, setTargetCert] = useState<CertificationLevel>('BCBA');
   const [validationResult, setValidationResult] = useState<ImportValidationResult | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState<{ current: number; total: number } | null>(null);
   const [importSuccessCount, setImportSuccessCount] = useState<number | null>(null);
   const [dbStems, setDbStems] = useState<MasterQuestion[]>([]);
 
@@ -90,33 +91,54 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
     if (!validationResult || validationResult.validRows.length === 0) return;
 
     setIsImporting(true);
+    setImportProgress({ current: 0, total: validationResult.validRows.length });
+
+    const CHUNK_SIZE = 15;
+    const allRows = validationResult.validRows;
+    let totalImported = 0;
+    let totalSkipped = 0;
+    let anyError: string | null = null;
 
     try {
-      const res = await fetch('/api/questions/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'import',
-          questions: validationResult.validRows,
-        }),
-      });
+      for (let i = 0; i < allRows.length; i += CHUNK_SIZE) {
+        const chunk = allRows.slice(i, i + CHUNK_SIZE);
+        const res = await fetch('/api/questions/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'import',
+            questions: chunk,
+          }),
+        });
 
-      const data = (await res.json()) as any;
-      if (!res.ok || !data || data.success === false) {
-        setIsImporting(false);
-        alert(data?.error || 'Failed to import CSV questions into database.');
-        return;
+        const data = (await res.json()) as any;
+        if (!res.ok || !data || data.success === false) {
+          anyError = data?.error || 'Failed to import CSV questions into database.';
+          break;
+        }
+
+        totalImported += data.importedCount || 0;
+        totalSkipped += data.skippedDuplicatesCount || 0;
+        setImportProgress({
+          current: Math.min(i + chunk.length, allRows.length),
+          total: allRows.length,
+        });
       }
 
-      if (data.importedCount === 0 && (data.skippedDuplicatesCount > 0 || validationResult.validRows.length > 0)) {
-        setIsImporting(false);
-        alert(`All ${data.skippedDuplicatesCount || validationResult.validRows.length} question(s) already exist in the database as duplicates and were skipped.`);
-        return;
-      }
-
-      const count = data.importedCount;
       setIsImporting(false);
-      setImportSuccessCount(count);
+      setImportProgress(null);
+
+      if (anyError && totalImported === 0) {
+        alert(anyError);
+        return;
+      }
+
+      if (totalImported === 0 && (totalSkipped > 0 || allRows.length > 0)) {
+        alert(`All ${totalSkipped || allRows.length} question(s) already exist in the database as duplicates and were skipped.`);
+        return;
+      }
+
+      setImportSuccessCount(totalImported);
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -124,6 +146,7 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
     } catch (err: any) {
       console.error('CSV import API error:', err);
       setIsImporting(false);
+      setImportProgress(null);
       alert(err.message || 'Failed to import CSV questions into database.');
     }
   };
@@ -260,7 +283,11 @@ export function CSVImportModal({ isOpen, onClose, onSuccess, existingQuestions =
                   {isImporting ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                      <span>Importing...</span>
+                      <span>
+                        {importProgress
+                          ? `Importing (${importProgress.current}/${importProgress.total})...`
+                          : 'Importing...'}
+                      </span>
                     </>
                   ) : (
                     <>
