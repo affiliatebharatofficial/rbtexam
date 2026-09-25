@@ -145,15 +145,22 @@ export async function sendOTPToEmail(
 
   OTP_MEMORY_STORE.set(cleanEmail, newRecord);
 
-  // Store in D1 profiles table for persistence across worker instances
+  // Store in D1 email_verifications table for persistence across worker instances
   if (isD1Available()) {
     try {
+      const expiresAtIso = new Date(newRecord.expiresAt).toISOString();
       await d1Run(
-        'UPDATE profiles SET avatar_url = ?, updated_at = ? WHERE LOWER(email) = ?',
-        [`otp:${code}:${newRecord.expiresAt}`, new Date().toISOString(), cleanEmail]
+        `INSERT INTO email_verifications (id, email, code, verified, expires_at, created_at)
+         VALUES (?, ?, ?, 0, ?, datetime('now'))
+         ON CONFLICT(email) DO UPDATE SET
+           code = excluded.code,
+           verified = 0,
+           expires_at = excluded.expires_at,
+           created_at = datetime('now')`,
+        [`v_${cleanEmail}`, cleanEmail, code, expiresAtIso]
       );
     } catch (e) {
-      // Memory fallback
+      console.warn('Failed to persist OTP to D1 email_verifications:', e);
     }
   } else if (isSupabaseConfigured()) {
     try {
@@ -207,25 +214,23 @@ export async function verifyOTPCode(
   const now = Date.now();
   let record = OTP_MEMORY_STORE.get(cleanEmail);
 
-  // If not in memory, check D1 edge SQLite
+  // If not in memory, check D1 edge SQLite email_verifications
   if (!record && isD1Available()) {
     try {
-      const p = await d1QueryFirst<{ avatar_url: string }>(
-        'SELECT avatar_url FROM profiles WHERE LOWER(email) = ? LIMIT 1',
+      const ev = await d1QueryFirst<{ code: string; expires_at: string; verified: number }>(
+        'SELECT code, expires_at, verified FROM email_verifications WHERE LOWER(email) = ? AND verified = 0 LIMIT 1',
         [cleanEmail]
       );
-      if (p?.avatar_url && p.avatar_url.startsWith('otp:')) {
-        const parts = p.avatar_url.split(':');
-        const dbCode = parts[1];
-        const dbExpires = parseInt(parts[2], 10);
+      if (ev?.code) {
+        const dbExpires = new Date(ev.expires_at).getTime() || (now + OTP_EXPIRY_MS);
         record = {
           email: cleanEmail,
-          code: dbCode,
+          code: ev.code,
           createdAt: now - 30000,
-          expiresAt: dbExpires || now + OTP_EXPIRY_MS,
+          expiresAt: dbExpires,
           attempts: 0,
           maxAttempts: MAX_ATTEMPTS,
-          verified: false,
+          verified: ev.verified === 1,
         };
       }
     } catch (e) {
@@ -308,8 +313,9 @@ export async function verifyOTPCode(
   if (isD1Available()) {
     try {
       const nowIso = new Date().toISOString();
+      await d1Run('UPDATE email_verifications SET verified = 1 WHERE LOWER(email) = ?', [cleanEmail]);
+      await d1Run('UPDATE users SET email_verified = 1, updated_at = ? WHERE LOWER(email) = ?', [nowIso, cleanEmail]);
       await d1Run('UPDATE profiles SET account_status = "active", updated_at = ? WHERE LOWER(email) = ?', [nowIso, cleanEmail]);
-      await d1Run('UPDATE users SET updated_at = ? WHERE LOWER(email) = ?', [nowIso, cleanEmail]);
     } catch (d1Err) {
       console.warn('Failed to update D1 verified status:', d1Err);
     }
@@ -429,19 +435,27 @@ export async function requestPasswordResetOTP(
   let fullName = cleanEmail.split('@')[0];
   if (isD1Available()) {
     try {
-      const p = await d1QueryFirst<{ full_name: string }>(
-        'SELECT full_name FROM profiles WHERE LOWER(email) = ? LIMIT 1',
+      const u = await d1QueryFirst<{ full_name: string }>(
+        'SELECT full_name FROM users WHERE LOWER(email) = ? LIMIT 1',
         [cleanEmail]
       );
-      if (p?.full_name) {
-        fullName = p.full_name;
+      if (u?.full_name) {
+        fullName = u.full_name;
       }
+      const expiresAtIso = new Date(newRecord.expiresAt).toISOString();
+      const pwdKey = `pwd_${cleanEmail}`;
       await d1Run(
-        'UPDATE profiles SET avatar_url = ?, updated_at = ? WHERE LOWER(email) = ?',
-        [`pwd_otp:${code}:${newRecord.expiresAt}`, new Date().toISOString(), cleanEmail]
+        `INSERT INTO email_verifications (id, email, code, verified, expires_at, created_at)
+         VALUES (?, ?, ?, 0, ?, datetime('now'))
+         ON CONFLICT(email) DO UPDATE SET
+           code = excluded.code,
+           verified = 0,
+           expires_at = excluded.expires_at,
+           created_at = datetime('now')`,
+        [`v_${pwdKey}`, pwdKey, code, expiresAtIso]
       );
     } catch (e) {
-      // Memory fallback
+      console.warn('D1 password reset OTP save error:', e);
     }
   } else if (isSupabaseConfigured()) {
     try {
@@ -514,22 +528,21 @@ export async function confirmPasswordResetWithOTP(
   // Distributed edge fallback from D1
   if (!record && isD1Available()) {
     try {
-      const p = await d1QueryFirst<{ avatar_url: string }>(
-        'SELECT avatar_url FROM profiles WHERE LOWER(email) = ? LIMIT 1',
-        [cleanEmail]
+      const pwdKey = `pwd_${cleanEmail}`;
+      const ev = await d1QueryFirst<{ code: string; expires_at: string; verified: number }>(
+        'SELECT code, expires_at, verified FROM email_verifications WHERE LOWER(email) = ? AND verified = 0 LIMIT 1',
+        [pwdKey]
       );
-      if (p?.avatar_url && p.avatar_url.startsWith('pwd_otp:')) {
-        const parts = p.avatar_url.split(':');
-        const dbCode = parts[1];
-        const dbExpires = parseInt(parts[2], 10);
+      if (ev?.code) {
+        const dbExpires = new Date(ev.expires_at).getTime() || (now + OTP_EXPIRY_MS);
         record = {
           email: cleanEmail,
-          code: dbCode,
+          code: ev.code,
           createdAt: now - 30000,
-          expiresAt: dbExpires || now + OTP_EXPIRY_MS,
+          expiresAt: dbExpires,
           attempts: 0,
           maxAttempts: MAX_ATTEMPTS,
-          verified: false,
+          verified: ev.verified === 1,
         };
       }
     } catch (e) {
@@ -611,12 +624,14 @@ export async function confirmPasswordResetWithOTP(
   // Update password and clean OTP in D1 or Supabase
   if (isD1Available()) {
     try {
-      await d1Run(
-        'UPDATE profiles SET avatar_url = NULL, updated_at = ? WHERE LOWER(email) = ?',
-        [new Date().toISOString(), cleanEmail]
-      );
+      const { hashPassword } = await import('./crypto-auth');
+      const hashed = await hashPassword(newPassword);
+      const nowIso = new Date().toISOString();
+      const pwdKey = `pwd_${cleanEmail}`;
+      await d1Run('UPDATE email_verifications SET verified = 1 WHERE LOWER(email) = ?', [pwdKey]);
+      await d1Run('UPDATE users SET password_hash = ?, updated_at = ? WHERE LOWER(email) = ?', [hashed, nowIso, cleanEmail]);
     } catch (e) {
-      console.warn('D1 password reset profile cleanup warning:', e);
+      console.warn('D1 password reset update warning:', e);
     }
   } else if (isSupabaseConfigured()) {
     try {

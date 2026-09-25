@@ -13,7 +13,7 @@ function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email') || 'candidate@rbtpracticeai.com';
 
-  const { verifyEmail, user } = useAuth();
+  const { verifyEmail, updateProfile, user } = useAuth();
 
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -71,6 +71,31 @@ function VerifyEmailForm() {
       }
     } catch (e: any) {
       setErrorMessage('Failed to send verification code. Please check your network connection.');
+    }
+  };
+
+  const handleInstantVerify = async () => {
+    setIsVerifying(true);
+    setErrorMessage('');
+    try {
+      const res = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailParam, instant: true }),
+      });
+      const data = (await res.json()) as any;
+      setIsVerifying(false);
+      if (res.ok && data.success) {
+        if (user) {
+          updateProfile({ emailVerified: true, accountStatus: 'active' });
+        }
+        setIsVerified(true);
+      } else {
+        setErrorMessage(data.error || 'Failed to verify email.');
+      }
+    } catch {
+      setIsVerifying(false);
+      setIsVerified(true);
     }
   };
 
@@ -145,8 +170,9 @@ function VerifyEmailForm() {
           <div className="pt-4 border-t border-slate-100">
             <button
               type="button"
-              onClick={() => setIsVerified(true)}
-              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+              onClick={handleInstantVerify}
+              disabled={isVerifying}
+              className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 disabled:opacity-60"
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
               <span>Instant Verify & Access (Free Access Active)</span>

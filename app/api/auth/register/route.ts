@@ -5,7 +5,7 @@ import { d1QueryFirst, d1Run, isD1Available } from '@/lib/d1';
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as any;
-    const { id, email, fullName, role, targetExamDate, subscriptionTier, accountStatus, avatarUrl } = body;
+    const { id, email, fullName, role, targetExamDate, subscriptionTier, accountStatus, avatarUrl, password } = body;
 
     if (!email) {
       return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
@@ -38,22 +38,29 @@ export async function POST(request: NextRequest) {
         userId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `usr_${Math.random().toString(36).substring(2, 11)}`;
       }
 
-      // 2. Upsert into users table
+      let passwordHash: string | null = null;
+      if (password) {
+        const { hashPassword } = await import('@/lib/crypto-auth');
+        passwordHash = await hashPassword(password);
+      }
+
+      // 2. Upsert into users table (supports upsert)
       await d1Run(
-        `INSERT INTO users (id, email, full_name, role, target_exam_date, target_score, updated_at)
-         VALUES (?, ?, ?, ?, ?, 90, ?)
+        `INSERT INTO users (id, email, full_name, role, password_hash, target_exam_date, target_score, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, 90, ?)
          ON CONFLICT(email) DO UPDATE SET
            full_name = excluded.full_name,
            role = CASE WHEN users.role = 'super_admin' OR excluded.role = 'super_admin' THEN 'super_admin' ELSE excluded.role END,
+           password_hash = COALESCE(excluded.password_hash, users.password_hash),
            target_exam_date = COALESCE(excluded.target_exam_date, users.target_exam_date),
            updated_at = excluded.updated_at`,
-        [userId, cleanEmail, cleanName, assignedRole, targetExamDate || null, now]
+        [userId, cleanEmail, cleanName, assignedRole, passwordHash, targetExamDate || null, now]
       );
 
-      // 3. Upsert into profiles table
+      // 3. Upsert into profiles table (supports upsert)
       await d1Run(
-        `INSERT INTO profiles (id, email, full_name, avatar_url, certification_target, subscription_tier, account_status, trial_ends_at, updated_at)
-         VALUES (?, ?, ?, ?, 'RBT', ?, ?, ?, ?)
+        `INSERT INTO profiles (id, user_id, email, full_name, avatar_url, certification_target, subscription_tier, account_status, trial_ends_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, 'RBT', ?, ?, ?, ?)
          ON CONFLICT(email) DO UPDATE SET
            full_name = excluded.full_name,
            avatar_url = COALESCE(excluded.avatar_url, profiles.avatar_url),
@@ -61,7 +68,7 @@ export async function POST(request: NextRequest) {
            account_status = excluded.account_status,
            trial_ends_at = excluded.trial_ends_at,
            updated_at = excluded.updated_at`,
-        [userId, cleanEmail, cleanName, avatarUrl || '', assignedTier, status, trialEndsAt, now]
+        [userId, userId, cleanEmail, cleanName, avatarUrl || '', assignedTier, status, trialEndsAt, now]
       );
     } else {
       if (!userId) {

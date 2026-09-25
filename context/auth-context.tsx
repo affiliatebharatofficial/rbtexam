@@ -345,10 +345,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const userEmail = credentials.email.toLowerCase().trim();
+
+      // 1. Authenticate against central server database
+      let existingUser: UserProfile | null = null;
+      try {
+        const loginRes = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: userEmail, password: credentials.password }),
+        });
+
+        const loginData = (await loginRes.json()) as any;
+        if (loginRes.ok && loginData.success && loginData.user) {
+          existingUser = loginData.user;
+        } else if (loginRes.status === 401 || loginRes.status === 404) {
+          setIsLoading(false);
+          return { success: false, error: loginData.error || 'Authentication failed. Please check your credentials.' };
+        }
+      } catch (srvErr) {
+        console.warn('Server login fetch warning (falling back to local cache):', srvErr);
+      }
+
+      // 2. Fallback to local cache if server is offline or returned no error
       const registeredUsersStr = localStorage.getItem('rbt_registered_users');
       let registeredUsers: UserProfile[] = registeredUsersStr ? JSON.parse(registeredUsersStr) : [];
       
-      let existingUser = registeredUsers.find((u) => u.email.toLowerCase() === userEmail);
+      if (!existingUser) {
+        existingUser = registeredUsers.find((u) => u.email.toLowerCase() === userEmail) || null;
+      }
 
       if (!existingUser) {
         const config = getPlatformConfig();
