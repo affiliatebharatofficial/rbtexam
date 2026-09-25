@@ -4,6 +4,7 @@ import { mapDbRowToMasterQuestion, createServerQuestionAsync } from '@/lib/maste
 import { normalizeQuestionForComparison } from '@/lib/question-import-engine';
 import { QuestionFilterParams, MasterQuestion } from '@/types/master-question';
 import { isValidCertification } from '@/lib/certifications-config';
+import { MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -75,13 +76,43 @@ export async function GET(request: NextRequest) {
 
     const { data: dbRows, count, error } = await query;
 
-    if (error) {
-      console.error('Supabase GET /api/questions query error:', error.message);
-      return NextResponse.json({ error: 'Failed to fetch questions from database', message: error.message }, { status: 500 });
+    let questions: MasterQuestion[] = [];
+    let total = 0;
+
+    if (!error && Array.isArray(dbRows) && dbRows.length > 0) {
+      questions = (dbRows || []).map(mapDbRowToMasterQuestion);
+      total = count ?? questions.length;
+    } else {
+      // Graceful fallback to canonical master question bank (e.g. Supabase cold start, paused, or unseeded)
+      let fallbackPool = [...MASTER_QUESTION_BANK];
+
+      if (certification !== 'ALL') {
+        fallbackPool = fallbackPool.filter((q) => q.certification === certification);
+      }
+      if (category !== 'ALL') {
+        const cleanCat = category.trim().toLowerCase();
+        fallbackPool = fallbackPool.filter((q) => (q.category || '').toLowerCase().includes(cleanCat));
+      }
+      if (difficulty !== 'ALL') {
+        fallbackPool = fallbackPool.filter((q) => q.difficulty === difficulty);
+      }
+      if (status !== 'ALL') {
+        fallbackPool = fallbackPool.filter((q) => (q.status || 'published') === status);
+      }
+      if (search && search.trim() !== '') {
+        const term = search.trim().toLowerCase();
+        fallbackPool = fallbackPool.filter((q) =>
+          (q.question || '').toLowerCase().includes(term) ||
+          (q.scenarioText || '').toLowerCase().includes(term) ||
+          (q.id || '').toLowerCase().includes(term) ||
+          (q.category || '').toLowerCase().includes(term)
+        );
+      }
+
+      total = fallbackPool.length;
+      questions = fallbackPool.slice(startIndex, startIndex + limit);
     }
 
-    const questions: MasterQuestion[] = (dbRows || []).map(mapDbRowToMasterQuestion);
-    const total = count ?? questions.length;
     const totalPages = Math.ceil(total / limit) || 1;
 
     return NextResponse.json({

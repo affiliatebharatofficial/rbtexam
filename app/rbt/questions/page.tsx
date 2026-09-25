@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { MasterQuestion } from '@/types/master-question';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
+import { FULL_BACB_SEED_QUESTIONS } from '@/lib/seed-questions-bank';
 import {
   Sparkles,
   BookOpen,
@@ -44,8 +45,9 @@ function QuestionsListContent() {
         const res = await fetch('/api/questions?certification=RBT&limit=100&status=ALL');
         if (res.ok) {
           const json = (await res.json()) as any;
-          if (json && Array.isArray(json.data)) {
+          if (json && Array.isArray(json.data) && json.data.length > 0) {
             setQuestions(json.data);
+            return;
           }
         }
       } catch (err) {
@@ -53,6 +55,9 @@ function QuestionsListContent() {
       } finally {
         setIsLoading(false);
       }
+      // Offline / fallback to canonical seed questions
+      setQuestions(FULL_BACB_SEED_QUESTIONS);
+      setIsLoading(false);
     };
     fetchQuestions();
   }, []);

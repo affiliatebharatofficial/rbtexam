@@ -44,16 +44,28 @@ export async function GET() {
       });
     }
 
-    if (totalErr || totalCount === null) {
+    if (totalErr || totalCount === null || totalCount === 0) {
       const allQ: MasterQuestion[] = MASTER_QUESTION_BANK;
+      const fallbackDomainCounts: Record<string, number> = { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 };
+      allQ.forEach((q) => {
+        const cat = (q.category || '').toLowerCase();
+        if (cat.includes('measurement') || cat.includes('data collection') || cat.includes('graphing')) fallbackDomainCounts.A++;
+        else if (cat.includes('assessment') || cat.includes('preference')) fallbackDomainCounts.B++;
+        else if (cat.includes('acquisition') || cat.includes('skill') || cat.includes('dtt') || cat.includes('prompt')) fallbackDomainCounts.C++;
+        else if (cat.includes('reduction') || cat.includes('behavior reduction') || cat.includes('bip') || cat.includes('extinction') || cat.includes('reinforcement')) fallbackDomainCounts.D++;
+        else if (cat.includes('documentation') || cat.includes('reporting') || cat.includes('session notes')) fallbackDomainCounts.E++;
+        else if (cat.includes('ethics') || cat.includes('professional') || cat.includes('code')) fallbackDomainCounts.F++;
+        else fallbackDomainCounts.A++;
+      });
+
       return NextResponse.json({
         total: allQ.length,
-        published: allQ.filter((q: MasterQuestion) => q.status === 'published').length,
+        published: allQ.filter((q: MasterQuestion) => (q.status || 'published') === 'published').length,
         rbt: allQ.filter((q: MasterQuestion) => q.certification === 'RBT').length,
         bcaba: allQ.filter((q: MasterQuestion) => q.certification === 'BCaBA').length,
         bcba: allQ.filter((q: MasterQuestion) => q.certification === 'BCBA').length,
         featured: allQ.filter((q: MasterQuestion) => q.isPremium || q.isFeatured).length,
-        domainCounts: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 },
+        domainCounts: fallbackDomainCounts,
       });
     }
 

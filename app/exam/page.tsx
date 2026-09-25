@@ -11,7 +11,7 @@ import { useLanguage } from '@/context/language-context';
 import { Question, ExamDomainId } from '@/types/exam';
 import { CertificationLevel } from '@/types/certification';
 import { getCertificationConfig, CERTIFICATION_CONFIGS } from '@/lib/certifications-config';
-import { generateExamQuestions, convertMasterQuestionsToExamQuestions } from '@/lib/sample-questions';
+import { generateExamQuestions, convertMasterQuestionsToExamQuestions, getMasterBankExamQuestions } from '@/lib/sample-questions';
 import { awardCandidateXP } from '@/lib/candidate-performance-engine';
 import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
 import confetti from 'canvas-confetti';
@@ -125,6 +125,11 @@ export default function ExamPage() {
       console.error('Failed to fetch live DB questions for exam:', e);
     }
 
+    // Always fallback to master bank if API returned empty
+    if (!convertedQuestions || convertedQuestions.length === 0) {
+      convertedQuestions = getMasterBankExamQuestions(certification);
+    }
+
     const generated = generateExamQuestions(questionCount, domainFocus, convertedQuestions, certification);
     setQuestions(generated);
     setCurrentIndex(0);
@@ -149,30 +154,22 @@ export default function ExamPage() {
         const savedCert: CertificationLevel = parsed.certification || 'RBT';
         setCertification(savedCert);
 
-        // Verify questions still exist in live database
-        const res = await fetch(`/api/questions?limit=150&certification=${savedCert}&status=published`);
-        if (res.ok) {
-          const json = (await res.json()) as any;
-          const dbQuestionIds = new Set((json?.data || []).map((q: any) => q.id));
-          const validQuestions = (parsed.questions || []).filter((q: Question) => dbQuestionIds.has(q.id));
-
-          if (validQuestions.length > 0) {
-            setQuestions(validQuestions);
-            setCurrentIndex(Math.min(parsed.currentIndex || 0, validQuestions.length - 1));
-            setUserAnswers(parsed.userAnswers || {});
-            setBookmarkedIds(parsed.bookmarkedIds || []);
-            setTimeRemaining(parsed.timeRemaining || 7200);
-            setMode(parsed.mode || 'timed');
-            setQuestionCount(parsed.questionCount || 85);
-            setPhase('active');
-            return;
-          }
+        if (Array.isArray(parsed.questions) && parsed.questions.length > 0) {
+          setQuestions(parsed.questions);
+          setCurrentIndex(Math.min(parsed.currentIndex || 0, parsed.questions.length - 1));
+          setUserAnswers(parsed.userAnswers || {});
+          setBookmarkedIds(parsed.bookmarkedIds || []);
+          setTimeRemaining(parsed.timeRemaining || 7200);
+          setMode(parsed.mode || 'timed');
+          setQuestionCount(parsed.questionCount || 85);
+          setPhase('active');
+          return;
         }
       }
     } catch (e) {
       console.error('Failed to validate saved session:', e);
     }
-    // If DB is empty or questions were deleted, clear saved session state
+    // If saved session is invalid, clear saved session state and start fresh
     localStorage.removeItem(EXAM_STORAGE_KEY);
     setHasSavedSession(false);
     handleStartExam();

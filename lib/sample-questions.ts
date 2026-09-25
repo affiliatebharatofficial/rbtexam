@@ -176,7 +176,9 @@ export function generateExamQuestions(
   customQuestions?: Question[],
   certification: CertificationLevel = 'RBT'
 ): Question[] {
-  const sourceBank = customQuestions || getMasterBankExamQuestions(certification);
+  const sourceBank = (customQuestions && customQuestions.length > 0)
+    ? customQuestions
+    : getMasterBankExamQuestions(certification);
   const pool = targetDomain && targetDomain !== 'ALL'
     ? sourceBank.filter((q) => q.domainId === targetDomain)
     : sourceBank;
