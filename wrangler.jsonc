@@ -24,10 +24,20 @@
       "service": "rbtexam"
     }
   ],
+  "routes": [
+    {
+      "pattern": "www.rbtpracticeai.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "rbtpracticeai.com",
+      "custom_domain": true
+    }
+  ],
   "vars": {
     "DATABASE_ENGINE": "cloudflare_d1",
     "D1_DATABASE_NAME": "rbtexam-db",
-    "NEXT_PUBLIC_GOOGLE_CALLBACK_URL": "https://www.rbtpracticeai.com/api/auth/callback/google",
+    "NEXT_PUBLIC_GOOGLE_CALLBACK_URL": "https://www.rbtpracticeai.com/auth/callback",
     "NEXT_PUBLIC_SITE_URL": "https://www.rbtpracticeai.com"
   }
 }

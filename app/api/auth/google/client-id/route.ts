@@ -10,14 +10,7 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
     '';
 
-  let callbackUrl =
-    getRuntimeEnv('NEXT_PUBLIC_GOOGLE_CALLBACK_URL') ||
-    process.env.NEXT_PUBLIC_GOOGLE_CALLBACK_URL ||
-    '';
-
-  if (!callbackUrl || callbackUrl.includes('auth/v1/callback')) {
-    callbackUrl = `${url.origin}/auth/callback`;
-  }
+  const callbackUrl = `${url.origin}/auth/callback`;
 
   return NextResponse.json({
     clientId,
