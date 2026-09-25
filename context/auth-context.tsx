@@ -490,7 +490,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ? window.location.origin
             : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
 
-        const finalRedirectUrl = `${origin}/auth/callback`;
+        const finalRedirectUrl = `${origin}/api/auth/callback/google`;
         const redirectUri = encodeURIComponent(finalRedirectUrl);
         if (typeof window !== 'undefined') {
           window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account&access_type=offline`;
