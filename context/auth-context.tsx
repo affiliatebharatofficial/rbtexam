@@ -465,6 +465,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       let googleClientId =
         process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
         '';
+      let serverCallbackUrl = '';
 
       if (!googleClientId || googleClientId.includes('mock-')) {
         try {
@@ -473,6 +474,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const data = (await res.json()) as any;
             if (data?.clientId) {
               googleClientId = data.clientId;
+            }
+            if (data?.callbackUrl) {
+              serverCallbackUrl = data.callbackUrl;
             }
           }
         } catch (fetchErr) {
@@ -485,7 +489,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           typeof window !== 'undefined' && window.location.origin
             ? window.location.origin
             : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
-        const redirectUri = encodeURIComponent(`${origin}/auth/callback`);
+
+        let finalRedirectUrl = `${origin}/auth/callback`;
+        if (serverCallbackUrl) {
+          try {
+            const parsed = new URL(serverCallbackUrl);
+            if (typeof window !== 'undefined' && parsed.host === window.location.host) {
+              finalRedirectUrl = serverCallbackUrl;
+            }
+          } catch {}
+        }
+
+        const redirectUri = encodeURIComponent(finalRedirectUrl);
         if (typeof window !== 'undefined') {
           window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid%20email%20profile&prompt=select_account&access_type=offline`;
         }
