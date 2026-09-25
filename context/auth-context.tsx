@@ -491,7 +491,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.rbtpracticeai.com');
 
         let finalRedirectUrl = `${origin}/auth/callback`;
-        if (serverCallbackUrl) {
+        if (serverCallbackUrl && !serverCallbackUrl.includes('auth/v1/callback')) {
           try {
             const parsed = new URL(serverCallbackUrl);
             if (typeof window !== 'undefined' && parsed.host === window.location.host) {
