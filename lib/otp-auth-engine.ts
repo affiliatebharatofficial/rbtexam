@@ -1,6 +1,7 @@
 import { getSupabaseAdminClient, getRuntimeEnv, isSupabaseConfigured } from './supabase';
 import { logAuditEvent } from './platform-config';
 import { isD1Available, d1Run, d1QueryFirst } from './d1';
+import { generateOtpCode } from './secure-random';
 
 export interface OTPRecord {
   email: string;
@@ -23,10 +24,8 @@ const RESEND_COOLDOWN_MS = 60 * 1000; // 60 seconds resend cooldown
  * Generate a cryptographically secure 6-digit verification OTP
  */
 export function generateSecureOTP(): string {
-  // Generate 6 digit number between 100000 and 999999
-  const min = 100000;
-  const max = 999999;
-  return Math.floor(min + Math.random() * (max - min + 1)).toString();
+  // Cryptographically secure 6-digit code (leading zeros allowed)
+  return generateOtpCode(6);
 }
 
 import { sendTransactionalEmail } from './smtp-engine';
@@ -518,8 +517,8 @@ export async function confirmPasswordResetWithOTP(
     return { success: false, error: 'Reset code must be exactly 6 digits.' };
   }
 
-  if (!newPassword || newPassword.length < 6) {
-    return { success: false, error: 'New password must be at least 6 characters long.' };
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: 'New password must be at least 8 characters long.' };
   }
 
   const now = Date.now();

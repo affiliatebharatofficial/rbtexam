@@ -38,6 +38,8 @@
     "DATABASE_ENGINE": "cloudflare_d1",
     "D1_DATABASE_NAME": "rbtexam-db",
     "NEXT_PUBLIC_GOOGLE_CALLBACK_URL": "https://www.rbtpracticeai.com/api/auth/callback/google",
-    "NEXT_PUBLIC_SITE_URL": "https://www.rbtpracticeai.com"
+    "NEXT_PUBLIC_SITE_URL": "https://www.rbtpracticeai.com",
+    "NEXT_PUBLIC_APP_ENV": "production",
+    "NEXT_PUBLIC_APP_URL": "https://www.rbtpracticeai.com"
   }
 }

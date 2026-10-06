@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { MasterQuestion } from '@/types/master-question';
 import { BACB_TASK_LIST_3RD_EDITION } from '@/lib/bacb-task-list';
 import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
-import { FULL_BACB_SEED_QUESTIONS } from '@/lib/seed-questions-bank';
 import {
   Sparkles,
   BookOpen,
@@ -37,6 +36,9 @@ function QuestionsListContent() {
   const [questions, setQuestions] = useState<MasterQuestion[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [revealedIds, setRevealedIds] = useState<string[]>([]);
+  const [revealedAnswers, setRevealedAnswers] = useState<
+    Record<string, { correctOptionId: string; answerExplanation: string; clinicalExplanation: string }>
+  >({});
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -55,17 +57,46 @@ function QuestionsListContent() {
       } finally {
         setIsLoading(false);
       }
-      // Offline / fallback to canonical seed questions
-      setQuestions(FULL_BACB_SEED_QUESTIONS);
+      // No client-side seed fallback (it would bundle correct answers
+      // into the browser). The empty state is shown instead.
+      setQuestions([]);
       setIsLoading(false);
     };
     fetchQuestions();
   }, []);
 
-  const toggleRevealAnswer = (id: string) => {
+  const toggleRevealAnswer = async (id: string) => {
+    const isCurrentlyRevealed = revealedIds.includes(id);
     setRevealedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
+
+    // Correct answers are no longer shipped with the question list;
+    // fetch this one from the server-side grading endpoint on reveal.
+    if (!isCurrentlyRevealed && !revealedAnswers[id]) {
+      const question = questions.find((q) => q.id === id);
+      const alreadyHasAnswer = Boolean(
+        question?.correctAnswerId || question?.options?.some((o) => o.isCorrect)
+      );
+      if (!alreadyHasAnswer) {
+        try {
+          const res = await fetch('/api/questions/grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answers: [{ questionId: id, selectedOptionId: '' }] }),
+          });
+          if (res.ok) {
+            const json = (await res.json()) as any;
+            const result = json?.results?.[id];
+            if (result) {
+              setRevealedAnswers((prev) => ({ ...prev, [id]: result }));
+            }
+          }
+        } catch (err) {
+          console.error('Failed to reveal answer:', err);
+        }
+      }
+    }
   };
 
   // Filter logic
@@ -204,7 +235,9 @@ function QuestionsListContent() {
           <div className="grid grid-cols-1 gap-6">
             {filteredQuestions.map((q, idx) => {
               const isRevealed = revealedIds.includes(q.id);
-              const correctOption = q.options?.find((o) => o.isCorrect || o.id === q.correctAnswerId);
+              const correctOption = q.options?.find(
+                (o) => o.isCorrect || o.id === q.correctAnswerId || o.id === revealedAnswers[q.id]?.correctOptionId
+              );
 
               return (
                 <Card key={q.id || idx} glass className="p-6 space-y-4 shadow-lg border-white/90 hover:border-blue-200 transition-all">
@@ -244,7 +277,8 @@ function QuestionsListContent() {
                   {/* Options List */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                     {(q.options || []).map((opt) => {
-                      const isCorrectChoice = opt.isCorrect || opt.id === q.correctAnswerId;
+                      const isCorrectChoice =
+                        opt.isCorrect || opt.id === q.correctAnswerId || opt.id === revealedAnswers[q.id]?.correctOptionId;
                       return (
                         <div
                           key={opt.id}
@@ -287,10 +321,14 @@ function QuestionsListContent() {
                     <div className="p-4 rounded-xl bg-slate-900 text-slate-100 text-xs space-y-2 animate-fadeIn shadow-inner">
                       <div className="font-extrabold text-emerald-400 flex items-center space-x-1.5">
                         <CheckCircle2 className="w-4 h-4" />
-                        <span>Correct Answer: Choice {q.correctAnswerId || correctOption?.id || 'A'}</span>
+                        <span>Correct Answer: Choice {q.correctAnswerId || revealedAnswers[q.id]?.correctOptionId || correctOption?.id || 'A'}</span>
                       </div>
                       <p className="text-slate-300 leading-relaxed">
-                        {q.answerExplanation || q.clinicalExplanation || 'Operational ABA criteria require continuous data collection and adherence to BACB task list specifications.'}
+                        {q.answerExplanation ||
+                          q.clinicalExplanation ||
+                          revealedAnswers[q.id]?.answerExplanation ||
+                          revealedAnswers[q.id]?.clinicalExplanation ||
+                          'Operational ABA criteria require continuous data collection and adherence to BACB task list specifications.'}
                       </p>
                     </div>
                   )}

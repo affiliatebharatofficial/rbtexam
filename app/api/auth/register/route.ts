@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isEmailAdmin } from '@/lib/admin-whitelist';
 import { d1QueryFirst, d1Run, isD1Available } from '@/lib/d1';
+import { signSessionToken, SESSION_COOKIE_NAME, sessionCookieOptions } from '@/lib/session-token';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,11 +12,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email address is required' }, { status: 400 });
     }
 
+    if (password && typeof password === 'string' && password.length < 8) {
+      return NextResponse.json(
+        { error: 'Password must be at least 8 characters long.' },
+        { status: 400 }
+      );
+    }
+
     const cleanEmail = email.toLowerCase().trim();
     const cleanName = fullName || cleanEmail.split('@')[0];
     const isAdmin = isEmailAdmin(cleanEmail);
-    const assignedRole = isAdmin ? 'super_admin' : (role || 'student');
-    const assignedTier = isAdmin ? 'enterprise' : (subscriptionTier || 'pro');
+    // Never trust a client-supplied role/tier: anyone could otherwise
+    // register themselves as super_admin / enterprise.
+    const assignedRole = isAdmin ? 'super_admin' : 'student';
+    const assignedTier = isAdmin
+      ? 'enterprise'
+      : subscriptionTier === 'enterprise'
+        ? 'pro'
+        : subscriptionTier || 'pro';
     const status = accountStatus || 'active';
     const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const now = new Date().toISOString();
@@ -76,8 +90,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const accessToken = await signSessionToken({
+      id: userId,
+      email: cleanEmail,
+      role: assignedRole,
+    });
+
+    const response = NextResponse.json({
       success: true,
+      accessToken,
       user: {
         id: userId,
         email: cleanEmail,
@@ -89,6 +110,10 @@ export async function POST(request: NextRequest) {
         createdAt: now,
       },
     });
+    if (accessToken) {
+      response.cookies.set(SESSION_COOKIE_NAME, accessToken, sessionCookieOptions());
+    }
+    return response;
   } catch (error: any) {
     console.error('API /api/auth/register error:', error);
     return NextResponse.json({ error: error.message || 'Failed to register user centrally' }, { status: 500 });

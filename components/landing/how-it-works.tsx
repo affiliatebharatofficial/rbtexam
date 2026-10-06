@@ -69,11 +69,11 @@ export function HowItWorks() {
       stepNumber: '04',
       title: t('howItWorks.step4.title', 'Pass Your RBT Exam with Guaranteed Confidence'),
       subtitle: t('howItWorks.step4.subtitle', '85-Question Mocks • Pass-or-Refund Guarantee'),
-      description: t('howItWorks.step4.desc', 'Take simulated 85-question 120-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.'),
+      description: t('howItWorks.step4.desc', 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.'),
       icon: ShieldCheck,
       color: 'from-emerald-500 to-teal-600',
       badgeText: 'Pass-or-Refund Guarantee',
-      highlightStats: '85 Q / 120 Min Full Simulation • Money-Back Guarantee',
+      highlightStats: '85 Q / 90 Min Full Simulation • Money-Back Guarantee',
       interactiveContent: {
         readinessScore: 97.2,
         status: 'Target Benchmark Achieved!',

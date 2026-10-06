@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isEmailAdmin } from '@/lib/admin-whitelist';
 import { d1QueryFirst, d1Run, isD1Available } from '@/lib/d1';
-import { hashPassword, verifyPassword } from '@/lib/crypto-auth';
+import { hashPassword, verifyPassword, needsPasswordRehash } from '@/lib/crypto-auth';
+import { signSessionToken, SESSION_COOKIE_NAME, sessionCookieOptions } from '@/lib/session-token';
+import { secureRandomString } from '@/lib/secure-random';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,17 +19,12 @@ export async function POST(request: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
 
     if (!isD1Available()) {
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: `usr_${Math.random().toString(36).substring(2, 9)}`,
-          email: cleanEmail,
-          fullName: cleanEmail.split('@')[0],
-          role: isEmailAdmin(cleanEmail) ? 'super_admin' : 'student',
-          emailVerified: true,
-          accountStatus: 'active',
-        },
-      });
+      // Never authenticate without the database: previously any email +
+      // password was accepted here when D1 was unavailable.
+      return NextResponse.json(
+        { error: 'Authentication service is temporarily unavailable. Please try again shortly.' },
+        { status: 503 }
+      );
     }
 
     // 1. Fetch user from users table
@@ -52,21 +49,36 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Verify password
-    if (dbUser.password_hash) {
-      const isValid = await verifyPassword(password, dbUser.password_hash);
-      if (!isValid) {
-        return NextResponse.json(
-          { error: 'Incorrect password. Please verify your credentials or reset your password.' },
-          { status: 401 }
-        );
-      }
-    } else {
-      // First login with password after registration or password not yet stored: save hash
-      const newHash = await hashPassword(password);
-      await d1Run(
-        'UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?',
-        [newHash, new Date().toISOString(), dbUser.id]
+    if (!dbUser.password_hash) {
+      // Accounts created via Google OAuth (or without a password) must use
+      // Google sign-in or the password-reset flow. Accepting whatever
+      // password was typed here would let anyone take over such accounts.
+      return NextResponse.json(
+        { error: 'No password is set for this account. Please sign in with Google or use "Forgot password" to set one.' },
+        { status: 401 }
       );
+    }
+
+    const isValid = await verifyPassword(password, dbUser.password_hash);
+    if (!isValid) {
+      return NextResponse.json(
+        { error: 'Incorrect password. Please verify your credentials or reset your password.' },
+        { status: 401 }
+      );
+    }
+
+    // Transparently upgrade legacy (single SHA-256) hashes to PBKDF2.
+    if (needsPasswordRehash(dbUser.password_hash)) {
+      try {
+        const upgradedHash = await hashPassword(password);
+        await d1Run('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?', [
+          upgradedHash,
+          new Date().toISOString(),
+          dbUser.id,
+        ]);
+      } catch (rehashErr) {
+        console.warn('Password hash upgrade warning:', rehashErr);
+      }
     }
 
     // 3. Fetch profile
@@ -99,10 +111,23 @@ export async function POST(request: NextRequest) {
       lastLoginAt: new Date().toISOString(),
     };
 
-    return NextResponse.json({
+    // Issue a server-signed session token (also set as an httpOnly cookie)
+    const accessToken = await signSessionToken({
+      id: userProfile.id,
+      email: userProfile.email,
+      role: userProfile.role,
+    });
+
+    const response = NextResponse.json({
       success: true,
       user: userProfile,
+      accessToken,
+      sessionId: `sess_${secureRandomString(16)}`,
     });
+    if (accessToken) {
+      response.cookies.set(SESSION_COOKIE_NAME, accessToken, sessionCookieOptions());
+    }
+    return response;
   } catch (error: any) {
     console.error('API /api/auth/login error:', error);
     return NextResponse.json({ error: error.message || 'Authentication failed' }, { status: 500 });

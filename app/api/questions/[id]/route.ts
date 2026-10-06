@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchQuestionByIdOrCodeAsync, updateServerQuestionAsync, deleteServerQuestionAsync } from '@/lib/master-question-bank-server';
+import { getAdminUser, requireAdminAuth } from '@/lib/server-auth';
+import { stripAnswerFields } from '@/lib/question-sanitize';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,13 +15,16 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Question not found' }, { status: 404 });
     }
 
-    return NextResponse.json(question);
+    const adminUser = await getAdminUser(request);
+    return NextResponse.json(adminUser ? question : stripAnswerFields(question));
   } catch (error: any) {
     return NextResponse.json({ error: 'Failed to retrieve question' }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) return auth.response!;
   try {
     const { id } = await params;
     const body = (await request.json()) as any;
@@ -36,6 +41,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) return auth.response!;
   try {
     const { id } = await params;
     const deleted = await deleteServerQuestionAsync(id);

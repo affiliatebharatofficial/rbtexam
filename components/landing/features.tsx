@@ -54,7 +54,7 @@ export function Features() {
             Practice for the RBT Exam Online with Intelligent Study Tools
           </h2>
           <p className="text-base text-slate-600">
-            Start your 7-day free trial and experience active recall, adaptive exam simulations, and conversational AI tutoring.
+            Start practicing free and experience active recall, adaptive exam simulations, and conversational AI tutoring.
           </p>
         </div>
 

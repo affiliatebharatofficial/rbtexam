@@ -68,7 +68,7 @@ export function generateCourseJSONLD(certification: string = 'RBT') {
     '@context': 'https://schema.org',
     '@type': 'Course',
     name: `${certification} Exam Preparation & Practice Simulator`,
-    description: `Complete ${certification} certification preparation platform with 85-question 120-minute mock exams, Leitner flashcards, and Socrates AI Tutor mentorship.`,
+    description: `Complete ${certification} certification preparation platform with 85-question 90-minute mock exams, Leitner flashcards, and Socrates AI Tutor mentorship.`,
     provider: {
       '@type': 'EducationalOrganization',
       name: 'RBT Practice AI',
@@ -78,7 +78,7 @@ export function generateCourseJSONLD(certification: string = 'RBT') {
     hasPart: [
       {
         '@type': 'LearningResource',
-        name: '85-Question 120-Minute RBT Mock Exam Simulator',
+        name: '85-Question 90-Minute RBT Mock Exam Simulator',
         learningResourceType: 'Assessment',
       },
       {

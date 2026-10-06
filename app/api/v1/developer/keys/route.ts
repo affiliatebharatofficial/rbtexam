@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     const defaultScopes: APIScope[] = scopes || ['questions:read', 'flashcards:read', 'tutor:interact'];
-    const result = generateAPIKey(name, defaultScopes);
+    const result = await generateAPIKey(name, defaultScopes);
 
     return NextResponse.json({
       success: true,

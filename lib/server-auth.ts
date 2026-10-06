@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isEmailAdmin } from '@/lib/admin-whitelist';
 import { d1QueryFirst, isD1Available } from '@/lib/d1';
+import { verifySessionToken, SESSION_COOKIE_NAME } from '@/lib/session-token';
 
 export interface AdminAuthResult {
   authorized: boolean;
@@ -12,101 +13,91 @@ export interface AdminAuthResult {
   response?: NextResponse;
 }
 
-/**
- * Extracts and verifies the caller's identity and checks for admin / super_admin role.
- * Inspects:
- * 1. Custom header: x-admin-email / x-supabase-auth
- * 2. Authorization: Bearer <jwt>
- * 3. Cookie: sb-access-token / rbt_ai_auth_session
- * 4. Cloudflare D1 users table
- */
-export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthResult> {
-  const adminEmailHeader = request.headers.get('x-admin-email');
-  if (adminEmailHeader && isEmailAdmin(adminEmailHeader)) {
-    return {
-      authorized: true,
-      user: {
-        id: 'admin_header_user',
-        email: adminEmailHeader.toLowerCase().trim(),
-        role: 'super_admin',
-      },
-    };
-  }
-
-  let token = '';
+function collectCandidateTokens(request: NextRequest): string[] {
+  const tokens: string[] = [];
 
   const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.substring(7).trim();
+    tokens.push(authHeader.slice('Bearer '.length).trim());
   }
 
-  if (!token) {
-    token = request.headers.get('x-supabase-auth') || request.headers.get('x-admin-token') || '';
-  }
+  const cookieToken =
+    request.cookies.get(SESSION_COOKIE_NAME)?.value ||
+    request.cookies.get('rbt_ai_auth_session_token')?.value;
+  if (cookieToken) tokens.push(cookieToken);
 
-  if (!token) {
-    const cookieToken =
-      request.cookies.get('sb-access-token')?.value ||
-      request.cookies.get('rbt_ai_auth_token')?.value ||
-      request.cookies.get('rbt_ai_auth_session')?.value;
-    if (cookieToken) {
-      token = cookieToken;
-    }
-  }
+  return tokens.filter(Boolean);
+}
 
-  // Handle JSON session stored in token/cookie
-  if (token && token.startsWith('{') && token.includes('email')) {
-    try {
-      const parsed = JSON.parse(token);
-      const email = (parsed?.user?.email || parsed?.email || '').toLowerCase().trim();
-      if (isEmailAdmin(email) || parsed?.user?.role === 'super_admin' || parsed?.user?.role === 'admin') {
-        return {
-          authorized: true,
-          user: {
-            id: parsed?.user?.id || parsed?.id || 'admin_user',
-            email,
-            role: 'super_admin',
-          },
-        };
+/**
+ * Verifies the caller's identity for admin / super_admin routes.
+ *
+ * Only server-signed session tokens (see lib/session-token.ts, issued by
+ * /api/auth/login, /api/auth/register and the Google OAuth routes after
+ * real credential verification) are accepted. Client-supplied identity
+ * claims — an x-admin-email header, a raw email as the token, or unsigned
+ * session JSON from localStorage — are NOT trusted and are rejected.
+ *
+ * When Cloudflare D1 is available the signed identity is also re-checked
+ * against the users table, so revoking a user's admin role takes effect
+ * immediately instead of waiting for the token to expire.
+ */
+/**
+ * Returns the signed admin user for a request, or null. Unlike
+ * requireAdminAuth this never produces an error response, which makes it
+ * suitable for endpoints that are public for students but return extra
+ * data (e.g. correct answers) to admins.
+ */
+export async function getAdminUser(
+  request: NextRequest
+): Promise<{ id: string; email: string; role: string } | null> {
+  const result = await resolveAdminUser(request);
+  return result;
+}
+
+async function resolveAdminUser(
+  request: NextRequest
+): Promise<{ id: string; email: string; role: string } | null> {
+  const tokens = collectCandidateTokens(request);
+
+  for (const token of tokens) {
+    const payload = await verifySessionToken(token);
+    if (!payload) continue;
+
+    const email = payload.email.toLowerCase().trim();
+    const tokenClaimsAdmin =
+      isEmailAdmin(email) || payload.role === 'admin' || payload.role === 'super_admin';
+    if (!tokenClaimsAdmin) continue;
+
+    if (isD1Available()) {
+      try {
+        const dbUser = await d1QueryFirst<{ id: string; email: string; role: string }>(
+          'SELECT id, email, role FROM users WHERE id = ? OR LOWER(email) = ? LIMIT 1',
+          [payload.sub, email]
+        );
+        if (dbUser) {
+          const dbIsAdmin =
+            dbUser.role === 'admin' || dbUser.role === 'super_admin' || isEmailAdmin(dbUser.email);
+          if (!dbIsAdmin) continue;
+          return { id: dbUser.id, email: dbUser.email, role: dbUser.role || payload.role };
+        }
+      } catch (e) {
+        console.error('D1 admin auth lookup error:', e);
       }
-    } catch {}
-  }
-
-  // Check if token directly matches an admin email
-  if (token && isEmailAdmin(token)) {
-    return {
-      authorized: true,
-      user: {
-        id: 'admin_user',
-        email: token.toLowerCase().trim(),
-        role: 'super_admin',
-      },
-    };
-  }
-
-  // Verify against Cloudflare D1 users database
-  if (token && isD1Available()) {
-    try {
-      const dbUser = await d1QueryFirst<{ id: string; email: string; role: string }>(
-        'SELECT id, email, role FROM users WHERE id = ? OR email = ? LIMIT 1',
-        [token, token.toLowerCase()]
-      );
-      if (dbUser && (dbUser.role === 'admin' || dbUser.role === 'super_admin' || isEmailAdmin(dbUser.email))) {
-        return {
-          authorized: true,
-          user: {
-            id: dbUser.id,
-            email: dbUser.email,
-            role: dbUser.role || 'super_admin',
-          },
-        };
-      }
-    } catch (e) {
-      console.error('D1 admin auth lookup error:', e);
+      // D1 is available but the signed user no longer exists: do not authorize.
+      continue;
     }
+
+    return { id: payload.sub, email, role: payload.role };
   }
 
-  if (!token) {
+  return null;
+}
+
+export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthResult> {
+  const tokens = collectCandidateTokens(request);
+
+  if (tokens.length === 0) {
     return {
       authorized: false,
       response: NextResponse.json(
@@ -116,11 +107,16 @@ export async function requireAdminAuth(request: NextRequest): Promise<AdminAuthR
     };
   }
 
-  return {
-    authorized: false,
-    response: NextResponse.json(
-      { error: 'Forbidden: Caller does not possess admin or super_admin privileges.' },
-      { status: 403 }
-    ),
-  };
+  const user = await resolveAdminUser(request);
+  if (!user) {
+    return {
+      authorized: false,
+      response: NextResponse.json(
+        { error: 'Forbidden: Caller does not possess admin or super_admin privileges.' },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { authorized: true, user };
 }

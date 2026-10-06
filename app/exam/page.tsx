@@ -11,7 +11,7 @@ import { useLanguage } from '@/context/language-context';
 import { Question, ExamDomainId } from '@/types/exam';
 import { CertificationLevel } from '@/types/certification';
 import { getCertificationConfig, CERTIFICATION_CONFIGS } from '@/lib/certifications-config';
-import { generateExamQuestions, convertMasterQuestionsToExamQuestions, getMasterBankExamQuestions } from '@/lib/sample-questions';
+import { generateExamQuestions, convertMasterQuestionsToExamQuestions } from '@/lib/exam-questions';
 import { awardCandidateXP } from '@/lib/candidate-performance-engine';
 import { QuestionSourceDisclosure } from '@/components/eeat/question-source-disclosure';
 import confetti from 'canvas-confetti';
@@ -59,7 +59,7 @@ export default function ExamPage() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({});
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
-  const [timeRemaining, setTimeRemaining] = useState<number>(7200); // 120 minutes (2 hours) in seconds
+  const [timeRemaining, setTimeRemaining] = useState<number>(5400); // 90 minutes in seconds (official RBT duration)
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [hasSavedSession, setHasSavedSession] = useState<boolean>(false);
 
@@ -125,10 +125,9 @@ export default function ExamPage() {
       console.error('Failed to fetch live DB questions for exam:', e);
     }
 
-    // Always fallback to master bank if API returned empty
-    if (!convertedQuestions || convertedQuestions.length === 0) {
-      convertedQuestions = getMasterBankExamQuestions(certification);
-    }
+    // No client-side fallback bank: bundling the seed bank would ship
+    // every correct answer to the browser. An empty API result shows
+    // the "no published questions" state instead.
 
     const generated = generateExamQuestions(questionCount, domainFocus, convertedQuestions, certification);
     setQuestions(generated);
@@ -159,7 +158,7 @@ export default function ExamPage() {
           setCurrentIndex(Math.min(parsed.currentIndex || 0, parsed.questions.length - 1));
           setUserAnswers(parsed.userAnswers || {});
           setBookmarkedIds(parsed.bookmarkedIds || []);
-          setTimeRemaining(parsed.timeRemaining || 7200);
+          setTimeRemaining(parsed.timeRemaining || 5400);
           setMode(parsed.mode || 'timed');
           setQuestionCount(parsed.questionCount || 85);
           setPhase('active');
@@ -197,10 +196,58 @@ export default function ExamPage() {
   };
 
   // Select Option
+  // Ask the server to grade submitted answers and merge the revealed
+  // correct answers / rationales back into the local question objects.
+  // Correct answers are never shipped with the question list itself.
+  const gradeAndEnrich = async (
+    answersMap: Record<string, string>,
+    sourceQuestions: typeof questions
+  ) => {
+    try {
+      const answers = Object.entries(answersMap).map(([questionId, selectedOptionId]) => ({
+        questionId,
+        selectedOptionId,
+      }));
+      if (answers.length === 0) return sourceQuestions;
+      const res = await fetch('/api/questions/grade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers }),
+      });
+      if (!res.ok) return sourceQuestions;
+      const json = (await res.json()) as any;
+      const results = json?.results || {};
+      return sourceQuestions.map((q) => {
+        const r = results[q.id];
+        if (!r) return q;
+        return {
+          ...q,
+          correctOptionId: r.correctOptionId || q.correctOptionId,
+          aiExplanationDetail:
+            r.clinicalExplanation || r.answerExplanation || q.aiExplanationDetail,
+        };
+      });
+    } catch (e) {
+      console.error('Server grading warning:', e);
+      return sourceQuestions;
+    }
+  };
+
   const handleSelectOption = (questionId: string, optionId: string) => {
     const updated = { ...userAnswers, [questionId]: optionId };
     setUserAnswers(updated);
     saveProgress();
+
+    // In untimed study mode, reveal correctness only after answering,
+    // graded by the server for this single question.
+    if (mode === 'untimed') {
+      const target = questions.find((q) => q.id === questionId);
+      if (target && !target.correctOptionId) {
+        gradeAndEnrich({ [questionId]: optionId }, questions).then((enriched) => {
+          setQuestions(enriched);
+        });
+      }
+    }
   };
 
   // Toggle Bookmark
@@ -215,7 +262,11 @@ export default function ExamPage() {
   };
 
   // Final Submit
-  const handleFinalSubmit = () => {
+  const handleFinalSubmit = async () => {
+    // Grade on the server first so scores are calculated from verified
+    // correct answers, then reveal rationales in the results view.
+    const enrichedQuestions = await gradeAndEnrich(userAnswers, questions);
+    setQuestions(enrichedQuestions);
     setPhase('results');
     localStorage.removeItem(EXAM_STORAGE_KEY);
 
@@ -226,7 +277,7 @@ export default function ExamPage() {
       domainScores[d.id] = { total: 0, correct: 0 };
     });
 
-    questions.forEach((q) => {
+    enrichedQuestions.forEach((q) => {
       const dom = q.domainId || 'A';
       if (!domainScores[dom]) domainScores[dom] = { total: 0, correct: 0 };
       domainScores[dom].total += 1;
@@ -237,7 +288,7 @@ export default function ExamPage() {
       }
     });
 
-    const percentage = Math.round((correct / (questions.length || 1)) * 100);
+    const percentage = Math.round((correct / (enrichedQuestions.length || 1)) * 100);
     const isPassed = percentage >= certConfig.passingScorePercentage;
 
     // Save Completed Exam Session to Persistent Storage
@@ -246,7 +297,7 @@ export default function ExamPage() {
       date: new Date().toISOString().split('T')[0],
       timestamp: Date.now(),
       score: percentage,
-      totalQuestions: questions.length,
+      totalQuestions: enrichedQuestions.length,
       correctCount: correct,
       timeSpentSeconds: Math.max(0, (certConfig.officialExamDurationMinutes * 60) - timeRemaining),
       mode,
@@ -270,7 +321,7 @@ export default function ExamPage() {
       // Append to Activity Feed Stream
       const newActivity = {
         id: `act_${Date.now()}`,
-        title: `Completed ${certification} ${questions.length}-Question Practice Exam (${percentage}%)`,
+        title: `Completed ${certification} ${enrichedQuestions.length}-Question Practice Exam (${percentage}%)`,
         timestamp: new Date().toISOString(),
         type: 'exam',
         score: percentage,
@@ -290,17 +341,17 @@ export default function ExamPage() {
 
     // Calculate & Award XP
     let xpEarned = 200; // Base completion
-    let xpReason = `Completed ${certification} ${questions.length}-Question Practice Exam (${percentage}%)`;
+    let xpReason = `Completed ${certification} ${enrichedQuestions.length}-Question Practice Exam (${percentage}%)`;
 
     if (isPassed) {
       xpEarned += 500;
-      xpReason = `🎉 PASSED ${certification} ${questions.length}-Q Exam (${percentage}%) - Pass Threshold Bonus!`;
+      xpReason = `🎉 PASSED ${certification} ${enrichedQuestions.length}-Q Exam (${percentage}%) - Pass Threshold Bonus!`;
       confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
     }
 
     if (percentage >= 95) {
       xpEarned += 300;
-      xpReason = `🏆 OUTSTANDING ${certification} ${questions.length}-Q Exam (${percentage}%) - High Mastery Bonus!`;
+      xpReason = `🏆 OUTSTANDING ${certification} ${enrichedQuestions.length}-Q Exam (${percentage}%) - High Mastery Bonus!`;
     }
 
     awardCandidateXP(xpEarned, xpReason, 'exam');

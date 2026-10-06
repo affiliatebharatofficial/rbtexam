@@ -69,7 +69,6 @@ export default function AdminNotificationPage() {
         try {
           const parsed = JSON.parse(sessStr);
           if (parsed?.accessToken) headers['Authorization'] = `Bearer ${parsed.accessToken}`;
-          if (parsed?.user?.email) headers['x-admin-email'] = parsed.user.email;
         } catch {}
       }
     }

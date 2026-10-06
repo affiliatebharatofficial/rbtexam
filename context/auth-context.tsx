@@ -12,7 +12,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: () => Promise<{ success: boolean; error?: string }>;
-  completeGoogleAuthSession: (email: string, name?: string, userId?: string, avatarUrl?: string) => Promise<{ success: boolean; error?: string }>;
+  completeGoogleAuthSession: (email: string, name?: string, userId?: string, avatarUrl?: string, serverAccessToken?: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (data: SignUpData) => Promise<{ success: boolean; error?: string; requiresVerification?: boolean }>;
   requestPasswordReset: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   confirmPasswordReset: (email: string, code: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
@@ -348,6 +348,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // 1. Authenticate against central server database
       let existingUser: UserProfile | null = null;
+      let serverAccessToken: string | null = null;
       try {
         const loginRes = await fetch('/api/auth/login', {
           method: 'POST',
@@ -358,6 +359,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const loginData = (await loginRes.json()) as any;
         if (loginRes.ok && loginData.success && loginData.user) {
           existingUser = loginData.user;
+          serverAccessToken = loginData.accessToken || null;
         } else if (loginRes.status === 401 || loginRes.status === 404) {
           setIsLoading(false);
           return { success: false, error: loginData.error || 'Authentication failed. Please check your credentials.' };
@@ -407,7 +409,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const newSession: AuthSession = {
-        accessToken: `jwt_token_${Math.random().toString(36).substring(2)}`,
+        // Prefer the server-signed token issued by /api/auth/login. The
+        // local placeholder is only used for the offline local-cache
+        // fallback and is never accepted by admin API routes.
+        accessToken: serverAccessToken || `local_session_${Math.random().toString(36).substring(2)}`,
         refreshToken: `refresh_token_${Math.random().toString(36).substring(2)}`,
         expiresAt: Date.now() + 86400 * 7 * 1000,
         user: existingUser,
@@ -430,7 +435,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     name?: string,
     userId?: string,
-    avatarUrl?: string
+    avatarUrl?: string,
+    serverAccessToken?: string
   ) => {
     setIsLoading(true);
     try {
@@ -463,7 +469,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       const newSession: AuthSession = {
-        accessToken: `google_oauth_session_${Math.random().toString(36).substring(2)}`,
+        accessToken: serverAccessToken || `local_session_${Math.random().toString(36).substring(2)}`,
         refreshToken: `google_refresh_token_${Math.random().toString(36).substring(2)}`,
         expiresAt: Date.now() + 86400 * 7 * 1000,
         user: activeProfile,
@@ -634,6 +640,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         lastLoginAt: new Date().toISOString(),
       };
 
+      let serverAccessToken: string | null = null;
+
       // Call central register API route to save candidate to Supabase PostgreSQL database & Auth
       try {
         const regRes = await fetch('/api/auth/register', {
@@ -655,6 +663,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const regData = (await regRes.json()) as any;
           if (regData?.user?.id) {
             newUser.id = regData.user.id;
+          }
+          if (regData?.accessToken) {
+            serverAccessToken = regData.accessToken;
+          }
+          if (regData?.user?.role) {
+            newUser.role = regData.user.role;
           }
         }
       } catch (regErr) {
@@ -686,7 +700,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const newSession: AuthSession = {
-        accessToken: `signup_token_${Math.random().toString(36).substring(2)}`,
+        accessToken: serverAccessToken || `local_session_${Math.random().toString(36).substring(2)}`,
         refreshToken: `signup_refresh_${Math.random().toString(36).substring(2)}`,
         expiresAt: Date.now() + 86400 * 7 * 1000,
         user: newUser,

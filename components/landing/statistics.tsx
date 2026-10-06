@@ -32,8 +32,8 @@ export function Statistics() {
     },
     {
       label: t('stats.examDuration', 'Exam Simulation Duration'),
-      value: '120 Min',
-      subtext: t('stats.examDurationSub', 'Authentic Test Center Pacing (2 Hours)'),
+      value: '90 Min',
+      subtext: t('stats.examDurationSub', 'Authentic Test Center Pacing (90 Minutes)'),
       icon: Clock,
       color: 'text-amber-400',
     },

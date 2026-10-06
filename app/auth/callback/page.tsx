@@ -58,7 +58,8 @@ function AuthCallbackContent() {
                   data.user.email,
                   data.user.fullName,
                   data.user.id,
-                  data.user.avatarUrl
+                  data.user.avatarUrl,
+                  data.session?.accessToken || undefined
                 );
                 const target = isEmailAdmin(data.user.email) || data.user.role === 'admin' || data.user.role === 'super_admin'
                   ? '/admin'
