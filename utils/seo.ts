@@ -5,7 +5,7 @@ export const PRIMARY_DOMAIN = 'https://www.rbtpracticeai.com';
 export const SITE_CONFIG = {
   name: 'RBT Practice AI',
   title: 'RBT Practice & Exam Prep 2026 | RBT Practice AI',
-  description: 'Start your 7-day free trial for RBT practice. Master the RBT exam with realistic practice questions, 85-question mock tests, and 3rd Edition study tools.',
+  description: 'Start practicing RBT for free. Master the RBT exam with realistic practice questions, 85-question mock tests, and 3rd Edition study tools.',
   url: PRIMARY_DOMAIN,
   ogImage: `${PRIMARY_DOMAIN}/icon-512.png`,
   keywords: [

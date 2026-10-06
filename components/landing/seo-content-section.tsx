@@ -40,7 +40,7 @@ export function SeoContentSection() {
           <p className="text-base text-slate-600 max-w-3xl mx-auto">
             {isEs
               ? 'Todo lo que necesitas saber para prepararte para el examen de certificación Registered Behavior Technician®, recuerdo activo, simulacros y acceso 100% gratuito.'
-              : 'Everything you need to know about preparing for the Registered Behavior Technician® certification exam, active recall, mock test strategies, and our 7-day free trial.'}
+              : 'Everything you need to know about preparing for the Registered Behavior Technician® certification exam, active recall, mock test strategies, and free full access.'}
           </p>
         </div>
 
@@ -210,14 +210,14 @@ export function SeoContentSection() {
             </div>
           </Card>
 
-          {/* Section 9: What You Receive During the 7-Day Free Trial */}
+          {/* Section 9: What You Receive With Free Access */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-blue-200">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
               <span className="w-8 h-8 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-sm font-black">9</span>
               What You Receive With Free Access
             </h3>
             <p className="text-sm sm:text-base text-slate-700">
-              When you create an account, you receive immediate, unrestricted Pro access for 7 full days to experience everything our platform offers:
+              When you create an account, you receive immediate, unrestricted access to experience everything our platform offers:
             </p>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm text-slate-800 font-medium">
               <li className="flex items-center gap-2">
