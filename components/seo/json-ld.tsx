@@ -37,7 +37,7 @@ export function JsonLdSchema() {
     '@type': 'WebPage',
     name: 'RBT Practice & Exam Prep 2026 | RBT Practice AI',
     url: 'https://www.rbtpracticeai.com',
-    description: 'Start your 7-day free trial for RBT practice. Master the RBT exam with realistic practice questions, 85-question mock tests, and 3rd Edition study tools.',
+    description: 'Start practicing RBT for free. Master the RBT exam with realistic practice questions, 85-question mock tests, and 3rd Edition study tools.',
     inLanguage: 'en-US',
     isPartOf: {
       '@type': 'WebSite',
@@ -52,7 +52,7 @@ export function JsonLdSchema() {
     name: 'RBT Practice AI Study & Exam Simulator',
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'Any (Web browser)',
-    description: 'Online RBT certification exam study platform featuring 85-question 120-minute timed mock exams, spaced repetition flashcards, and AI-assisted tutoring aligned with the BACB RBT 3rd Edition Test Content Outline.',
+    description: 'Online RBT certification exam study platform featuring 85-question 90-minute timed mock exams, spaced repetition flashcards, and AI-assisted tutoring aligned with the BACB RBT 3rd Edition Test Content Outline.',
     provider: {
       '@type': 'Organization',
       name: 'RBT Practice AI',
@@ -80,10 +80,10 @@ export function JsonLdSchema() {
       },
       {
         '@type': 'Question',
-        name: 'What does the 7-day free trial include?',
+        name: 'What does free access include?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The 7-day free trial gives you complete Pro access to the platform, including realistic practice questions, full 85-question 120-minute timed mock exams, Socrates AI tutor explanations, spaced repetition flashcards, and personalized domain diagnostic heatmaps.',
+          text: 'Free access gives you complete access to the platform, including realistic practice questions, full 85-question 90-minute timed mock exams, Socrates AI tutor explanations, spaced repetition flashcards, and personalized domain diagnostic heatmaps.',
         },
       },
       {
@@ -107,7 +107,7 @@ export function JsonLdSchema() {
         name: 'Can I take a full 85-question RBT practice exam online?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'Yes! RBT Practice AI includes full 85-question, 120-minute timed mock exams with question weighting that mirrors the official exam distribution across all 6 BACB 3rd Edition domains.',
+          text: 'Yes! RBT Practice AI includes full 85-question, 90-minute timed mock exams with question weighting that mirrors the official exam distribution across all 6 BACB 3rd Edition domains.',
         },
       },
       {
@@ -123,7 +123,7 @@ export function JsonLdSchema() {
         name: 'How does the practice exam match Pearson VUE testing conditions?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The actual BACB RBT exam is administered via computer at Pearson VUE test centers. Our mock exam simulator replicates these conditions with an 85-question 120-minute timer, question flagging, navigation review grid, and instant post-exam domain score breakdowns.',
+          text: 'The actual BACB RBT exam is administered via computer at Pearson VUE test centers. Our mock exam simulator replicates these conditions with an 85-question 90-minute timer, question flagging, navigation review grid, and instant post-exam domain score breakdowns.',
         },
       },
       {

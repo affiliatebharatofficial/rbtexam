@@ -4,6 +4,8 @@ import { mapDbRowToMasterQuestion, createServerQuestionAsync } from '@/lib/maste
 import { QuestionFilterParams, MasterQuestion } from '@/types/master-question';
 import { isValidCertification } from '@/lib/certifications-config';
 import { MASTER_QUESTION_BANK } from '@/lib/master-question-bank';
+import { getAdminUser, requireAdminAuth } from '@/lib/server-auth';
+import { stripAnswerFieldsList } from '@/lib/question-sanitize';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -124,8 +126,14 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(total / limit) || 1;
 
+    // Students never receive correct answers / rationales from this
+    // endpoint (grading happens server-side via /api/questions/grade).
+    // Signed-in admins managing the bank get the full records.
+    const adminUser = await getAdminUser(request);
+    const safeQuestions = adminUser ? questions : stripAnswerFieldsList(questions);
+
     return NextResponse.json({
-      data: questions,
+      data: safeQuestions,
       total,
       page,
       limit,
@@ -138,6 +146,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) return auth.response!;
   try {
     const body = (await request.json()) as any;
 

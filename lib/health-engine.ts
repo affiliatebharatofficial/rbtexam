@@ -25,6 +25,10 @@ export interface PlatformHealthReport {
 
 import { isD1Available, d1QueryFirst } from '@/lib/d1';
 
+// Isolate start time: on Cloudflare Workers process.uptime() is unavailable,
+// so uptime is measured from when this worker isolate started serving.
+const ISOLATE_STARTED_AT = Date.now();
+
 // Service health checks for Cloudflare D1 edge database and external APIs
 async function checkD1Database(): Promise<ServiceHealth> {
   const start = Date.now();
@@ -123,8 +127,9 @@ export async function getPlatformHealthReport(): Promise<PlatformHealthReport> {
   return {
     overall,
     version: process.env.npm_package_version ?? '2.7.0',
-    environment: process.env.NEXT_PUBLIC_APP_ENV ?? 'development',
-    uptime: process.uptime ? Math.floor(process.uptime()) : 0,
+    environment:
+      process.env.NEXT_PUBLIC_APP_ENV ?? process.env.NODE_ENV ?? 'development',
+    uptime: Math.max(0, Math.floor((Date.now() - ISOLATE_STARTED_AT) / 1000)),
     timestamp: new Date().toISOString(),
     services,
   };

@@ -19,15 +19,15 @@ export function getRuntimeEnv(key: string): string {
 
 export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  'https://ntwomhtfkuazqgtnkffk.supabase.co';
+  'https://mock-supabase.local';
 
 export const SUPABASE_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwNTYxMzMsImV4cCI6MjEwMTYzMjEzM30.GnMw1y4htxgLJd1Kr20fWCPN7elME_uKU2EbxwudHcw';
+  'mock-anon-key';
 
 export const SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50d29taHRma3VhenFndG5rZmZrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NjA1NjEzMywiZXhwIjoyMTAxNjMyMTMzfQ.OEKK73cH84lpMAr9ma2MMdzUeq5nI8IsLZVtBT2qHxQ';
+  '';
 
 let supabaseInstance: SupabaseClient | null = null;
 
@@ -49,7 +49,7 @@ export function isSupabaseConfigured(): boolean {
     url &&
     anonKey &&
     !url.includes('mock-') &&
-    !url.includes('ntwomhtfkuazqgtnkffk') &&
+    !url.includes('mock-supabase') &&
     anonKey !== 'mock-anon-key'
   );
 }
@@ -65,7 +65,7 @@ export function getSupabaseAdminClient(): SupabaseClient {
     getRuntimeEnv('SUPABASE_SERVICE_ROLE_KEY') ||
     SUPABASE_SERVICE_ROLE_KEY;
 
-  supabaseAdminInstance = createClient(url, serviceRoleKey, {
+  supabaseAdminInstance = createClient(url, serviceRoleKey || 'mock-anon-key', {
     auth: { persistSession: false },
   });
   return supabaseAdminInstance;

@@ -13,9 +13,9 @@ import {
 import type { APIScope } from '@/types/api-platform';
 
 describe('generateAPIKey()', () => {
-  it('creates a key with the given name and scopes', () => {
+  it('creates a key with the given name and scopes', async () => {
     const scopes: APIScope[] = ['questions:read', 'flashcards:read'];
-    const { apiKey, rawSecretKey } = generateAPIKey('Test App Key', scopes, 'user-gen-001');
+    const { apiKey, rawSecretKey } = await generateAPIKey('Test App Key', scopes, 'user-gen-001');
     expect(apiKey.name).toBe('Test App Key');
     expect(apiKey.scopes).toEqual(scopes);
     expect(apiKey.userId).toBe('user-gen-001');
@@ -24,41 +24,41 @@ describe('generateAPIKey()', () => {
     expect(rawSecretKey.length).toBeGreaterThan(10);
   });
 
-  it('key prefix starts with "rbt_live_"', () => {
-    const { apiKey } = generateAPIKey('Prefix Test', ['questions:read']);
+  it('key prefix starts with "rbt_live_"', async () => {
+    const { apiKey } = await generateAPIKey('Prefix Test', ['questions:read']);
     expect(apiKey.keyPrefix).toMatch(/^rbt_live_/);
   });
 
-  it('generated key id has key- prefix format', () => {
-    const { apiKey } = generateAPIKey('Format Test Key', ['questions:read']);
+  it('generated key id has key- prefix format', async () => {
+    const { apiKey } = await generateAPIKey('Format Test Key', ['questions:read']);
     expect(typeof apiKey.id).toBe('string');
     expect(apiKey.id).toMatch(/^key-/);
     expect(apiKey.id.length).toBeGreaterThan(0);
   });
 
-  it('adds generated key to developer keys list', () => {
+  it('adds generated key to developer keys list', async () => {
     const countBefore = getDeveloperAPIKeys('unique-user-999').length;
-    generateAPIKey('New Key', ['tutor:interact'], 'unique-user-999');
+    await generateAPIKey('New Key', ['tutor:interact'], 'unique-user-999');
     expect(getDeveloperAPIKeys('unique-user-999').length).toBe(countBefore + 1);
   });
 });
 
 describe('validateAPIKeyRequest()', () => {
-  it('validates a correct active key', () => {
-    const { apiKey, rawSecretKey } = generateAPIKey('Valid Key', ['questions:read'], 'user-val-01');
-    const { valid, message } = validateAPIKeyRequest(rawSecretKey, 'questions:read');
+  it('validates a correct active key', async () => {
+    const { apiKey, rawSecretKey } = await generateAPIKey('Valid Key', ['questions:read'], 'user-val-01');
+    const { valid, message } = await validateAPIKeyRequest(rawSecretKey, 'questions:read');
     expect(valid).toBe(true);
     expect(message).toContain('Authorized');
   });
 
-  it('rejects an invalid / unknown key', () => {
-    const { valid } = validateAPIKeyRequest('rbt_live_totally_fake_key_xyz', 'questions:read');
+  it('rejects an invalid / unknown key', async () => {
+    const { valid } = await validateAPIKeyRequest('rbt_live_totally_fake_key_xyz', 'questions:read');
     expect(valid).toBe(false);
   });
 
-  it('rejects when required scope is missing', () => {
-    const { rawSecretKey } = generateAPIKey('Scoped Key', ['questions:read'], 'user-scope-01');
-    const { valid } = validateAPIKeyRequest(rawSecretKey, 'billing:manage');
+  it('rejects when required scope is missing', async () => {
+    const { rawSecretKey } = await generateAPIKey('Scoped Key', ['questions:read'], 'user-scope-01');
+    const { valid } = await validateAPIKeyRequest(rawSecretKey, 'billing:manage');
     expect(valid).toBe(false);
   });
 });

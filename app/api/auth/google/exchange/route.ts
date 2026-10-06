@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isEmailAdmin } from '@/lib/admin-whitelist';
 import { d1QueryFirst, d1Run, isD1Available } from '@/lib/d1';
 import { getRuntimeEnv } from '@/lib/supabase';
+import { signSessionToken, SESSION_COOKIE_NAME, sessionCookieOptions } from '@/lib/session-token';
 
 export async function POST(request: NextRequest) {
   try {
@@ -148,9 +149,17 @@ export async function POST(request: NextRequest) {
       userId = `usr_g_${googleUser.sub || Math.random().toString(36).substring(2, 11)}`;
     }
 
+    // Issue our own server-signed session token. Google's access token is
+    // for Google APIs only and must not double as the app session token.
+    const appAccessToken = await signSessionToken({
+      id: userId,
+      email: cleanEmail,
+      role: assignedRole,
+    });
+
     const sessionPayload = {
-      accessToken: tokenData.access_token || `google_token_${Math.random().toString(36).substring(2)}`,
-      refreshToken: tokenData.refresh_token || `refresh_${Math.random().toString(36).substring(2)}`,
+      accessToken: appAccessToken || '',
+      refreshToken: tokenData.refresh_token || '',
       expiresAt: Date.now() + 86400 * 7 * 1000,
       user: {
         id: userId,
@@ -166,11 +175,15 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: sessionPayload.user,
       session: sessionPayload,
     });
+    if (appAccessToken) {
+      response.cookies.set(SESSION_COOKIE_NAME, appAccessToken, sessionCookieOptions());
+    }
+    return response;
   } catch (error: any) {
     console.error('Error in /api/auth/google/exchange:', error);
     return NextResponse.json({ error: error.message || 'Internal server error during Google login' }, { status: 500 });

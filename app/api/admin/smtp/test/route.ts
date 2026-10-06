@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { testSMTPConnection, sendTransactionalEmail } from '@/lib/smtp-engine';
 import { renderEmailTemplate } from '@/lib/notification-engine';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) return auth.response!;
   try {
     const body = (await request.json()) as any;
     const { recipientEmail, config, templateId, variables } = body;

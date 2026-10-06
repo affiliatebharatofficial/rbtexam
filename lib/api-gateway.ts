@@ -1,78 +1,40 @@
 import { APIKey, APIScope, WebhookEndpoint, WebhookLog, APIMetrics } from '@/types/api-platform';
+import { secureRandomString, secureRandomInt } from './secure-random';
 
-// In-Memory API Keys Store (Supabase ready)
-const DEVELOPER_KEYS_STORE: APIKey[] = [
-  {
-    id: 'key-101',
-    name: 'Production Mobile App Key',
-    keyPrefix: 'rbt_live_9a8f',
-    maskedKey: 'rbt_live_9a8f...42a1',
-    secretHash: 'hash_secret_101',
-    userId: 'default_user',
-    scopes: ['questions:read', 'flashcards:read', 'tutor:interact', 'adaptive:read'],
-    rateLimitPerMinute: 600,
-    lastUsedAt: new Date(Date.now() - 60000).toISOString(),
-    isActive: true,
-    createdAt: new Date(Date.now() - 864000000).toISOString(),
-  },
-  {
-    id: 'key-102',
-    name: 'Clinic Integration Partner Key',
-    keyPrefix: 'rbt_live_10bf',
-    maskedKey: 'rbt_live_10bf...881c',
-    secretHash: 'hash_secret_102',
-    userId: 'default_user',
-    scopes: ['questions:read', 'analytics:read', 'billing:manage'],
-    rateLimitPerMinute: 1200,
-    lastUsedAt: new Date(Date.now() - 300000).toISOString(),
-    isActive: true,
-    createdAt: new Date(Date.now() - 1728000000).toISOString(),
-  },
-];
+// In-Memory API Keys Store (Supabase ready).
+// Intentionally starts empty: seeded demo keys/secrets must never ship in
+// production code (they look like real production credentials).
+const DEVELOPER_KEYS_STORE: APIKey[] = [];
 
-const WEBHOOK_ENDPOINTS_STORE: WebhookEndpoint[] = [
-  {
-    id: 'wh-201',
-    userId: 'default_user',
-    url: 'https://clinic-analytics.example.com/api/webhooks/rbt',
-    secret: 'whsec_991284a7bc01',
-    events: ['practice_test.completed', 'weak_topic.alert', 'payment.success'],
-    status: 'active',
-    createdAt: new Date().toISOString(),
-  },
-];
+const WEBHOOK_ENDPOINTS_STORE: WebhookEndpoint[] = [];
 
-const WEBHOOK_LOGS_STORE: WebhookLog[] = [
-  {
-    id: 'wlog-01',
-    webhookId: 'wh-201',
-    event: 'practice_test.completed',
-    payload: { candidateId: 'usr-901', score: 88, passStatus: true },
-    responseStatusCode: 200,
-    latencyMs: 142,
-    status: 'success',
-    timestamp: new Date(Date.now() - 1200000).toISOString(),
-  },
-];
+const WEBHOOK_LOGS_STORE: WebhookLog[] = [];
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 /**
  * Creates a new API Key for developer client applications
  */
-export function generateAPIKey(
+export async function generateAPIKey(
   name: string,
   scopes: APIScope[],
   userId: string = 'default_user'
-): { apiKey: APIKey; rawSecretKey: string } {
-  const randomSuffix = Math.random().toString(36).substring(2, 10);
-  const rawSecretKey = `rbt_live_${randomSuffix}_${Math.random().toString(36).substring(2, 10)}`;
-  const keyPrefix = `rbt_live_${randomSuffix}`;
+): Promise<{ apiKey: APIKey; rawSecretKey: string }> {
+  const keyPrefix = `rbt_live_${secureRandomString(8)}`;
+  const rawSecretKey = `${keyPrefix}_${secureRandomString(24)}`;
 
   const newKey: APIKey = {
     id: `key-${Date.now()}`,
     name,
     keyPrefix,
     maskedKey: `${keyPrefix}...${rawSecretKey.substring(rawSecretKey.length - 4)}`,
-    secretHash: `hash_${randomSuffix}`,
+    // Only a SHA-256 hash of the full secret is retained, never the secret
+    secretHash: await sha256Hex(rawSecretKey),
     userId,
     scopes,
     rateLimitPerMinute: 600,
@@ -87,13 +49,14 @@ export function generateAPIKey(
 /**
  * Validates incoming API key and enforces scope permissions
  */
-export function validateAPIKeyRequest(
+export async function validateAPIKeyRequest(
   providedKey: string,
   requiredScope?: APIScope
-): { valid: boolean; apiKey?: APIKey; message: string } {
-  const key = DEVELOPER_KEYS_STORE.find(
-    (k) => providedKey.startsWith(k.keyPrefix) && k.isActive
-  );
+): Promise<{ valid: boolean; apiKey?: APIKey; message: string }> {
+  // The full secret must match its stored hash — a key prefix alone
+  // (which is visible in masked keys) is never sufficient.
+  const providedHash = providedKey ? await sha256Hex(providedKey) : '';
+  const key = DEVELOPER_KEYS_STORE.find((k) => k.secretHash === providedHash && k.isActive);
 
   if (!key) {
     return { valid: false, message: 'Invalid or revoked API key provided.' };
@@ -112,7 +75,7 @@ export function validateAPIKeyRequest(
  */
 export function dispatchWebhookEvent(
   event: string,
-  payload: Record<string, any>
+  payload: Record<string, unknown>
 ): { dispatchedCount: number } {
   const targets = WEBHOOK_ENDPOINTS_STORE.filter(
     (wh) => wh.status === 'active' && wh.events.includes(event)
@@ -125,7 +88,7 @@ export function dispatchWebhookEvent(
       event,
       payload,
       responseStatusCode: 200,
-      latencyMs: Math.floor(Math.random() * 100) + 50,
+      latencyMs: 50 + secureRandomInt(100),
       status: 'success',
       timestamp: new Date().toISOString(),
     });

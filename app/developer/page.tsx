@@ -37,9 +37,9 @@ export default function DeveloperPortalPage() {
 
   const metrics = getAPIMetricsSummary();
 
-  const handleCreateKey = () => {
+  const handleCreateKey = async () => {
     if (!newKeyName) return;
-    const res = generateAPIKey(newKeyName, ['questions:read', 'flashcards:read', 'tutor:interact']);
+    const res = await generateAPIKey(newKeyName, ['questions:read', 'flashcards:read', 'tutor:interact']);
     setKeys([res.apiKey, ...keys]);
     setCreatedSecret(res.rawSecretKey);
     setNewKeyName('');

@@ -167,7 +167,7 @@ export function SeoContentSection() {
               <li><strong>Isolate Weak Domains:</strong> Review your visual diagnostic heatmap to focus study hours on low-scoring sub-tasks (such as C-04 Discrete Trial Teaching or D-02 Differential Reinforcement).</li>
               <li><strong>Drill Terminology with Spaced Flashcards:</strong> Review our <Link href="/rbt/glossary" className="text-[#2563EB] font-semibold underline hover:text-blue-700">RBT glossary definitions</Link> and Leitner flashcards for 15 minutes daily.</li>
               <li><strong>Engage with Socrates AI:</strong> Ask questions on ethical dilemmas and request clinical scenario roleplays to solidify your reasoning.</li>
-              <li><strong>Complete Timed 85-Question Mock Exams:</strong> Take full-length 120-minute simulations (2 hours) to confirm your benchmark readiness before test day.</li>
+              <li><strong>Complete Timed 85-Question Mock Exams:</strong> Take full-length 90-minute simulations to confirm your benchmark readiness before test day.</li>
             </ol>
           </Card>
 
@@ -214,7 +214,7 @@ export function SeoContentSection() {
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-blue-200">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
               <span className="w-8 h-8 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-sm font-black">9</span>
-              What You Receive During Your 7-Day Free Trial
+              What You Receive With Free Access
             </h3>
             <p className="text-sm sm:text-base text-slate-700">
               When you create an account, you receive immediate, unrestricted Pro access for 7 full days to experience everything our platform offers:
@@ -253,12 +253,12 @@ export function SeoContentSection() {
               How to Get Started with RBT Practice Today
             </h3>
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Start your 7-day free trial in under 60 seconds. Take your initial diagnostic exam, discover your domain readiness scores, and start practicing with realistic RBT exam questions right now.
+              Start practicing free in under 60 seconds. Take your initial diagnostic exam, discover your domain readiness scores, and start practicing with realistic RBT exam questions right now.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <Link href="/signup" className="w-full sm:w-auto">
                 <Button size="lg" variant="primary" className="w-full sm:w-auto gap-2 px-8 py-4 font-bold shadow-lg shadow-blue-500/30 text-base">
-                  <span>Start Your 7-Day Free Trial</span>
+                  <span>Start Free Practice</span>
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>

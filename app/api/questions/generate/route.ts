@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeAIQuestionGeneration } from '@/lib/ai-question-generator-engine';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) return auth.response!;
   try {
     const body = (await request.json()) as any;
     const {

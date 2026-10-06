@@ -8,11 +8,14 @@ import {
   batchCreateServerQuestionsAsync,
   getAllQuestionStemsAsync,
 } from '@/lib/master-question-bank-server';
+import { requireAdminAuth } from '@/lib/server-auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdminAuth(request);
+  if (!auth.authorized) return auth.response!;
   try {
     const body = (await request.json()) as any;
     const { action, ids, status, questions, limit = 200 } = body;

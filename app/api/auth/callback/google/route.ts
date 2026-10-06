@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isEmailAdmin } from '@/lib/admin-whitelist';
 import { d1QueryFirst, d1Run, isD1Available } from '@/lib/d1';
 import { getRuntimeEnv } from '@/lib/supabase';
+import { signSessionToken, SESSION_COOKIE_NAME, sessionCookieOptions } from '@/lib/session-token';
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -125,7 +126,18 @@ export async function GET(request: NextRequest) {
     if (avatarUrl) callbackTarget.searchParams.set('avatarUrl', avatarUrl);
     callbackTarget.searchParams.set('role', assignedRole);
 
-    return NextResponse.redirect(callbackTarget.toString());
+    const response = NextResponse.redirect(callbackTarget.toString());
+    // Establish the app session via an httpOnly cookie; the signed token
+    // itself is never placed in the redirect URL.
+    const appAccessToken = await signSessionToken({
+      id: userId,
+      email: cleanEmail,
+      role: assignedRole,
+    });
+    if (appAccessToken) {
+      response.cookies.set(SESSION_COOKIE_NAME, appAccessToken, sessionCookieOptions());
+    }
+    return response;
   } catch (err: any) {
     console.error('Callback error:', err);
     return NextResponse.redirect(`${origin}/login?error=oauth_internal_error`);
