@@ -103,6 +103,12 @@ export function TaskListPreview() {
             </div>
           </div>
 
+          <p className="text-xs text-slate-500 text-center pb-4">
+            {isEs
+              ? 'Estos porcentajes se basan en 75 preguntas puntuadas. 10 preguntas piloto no se puntúan.'
+              : 'These percentages are based on 75 scored questions. 10 pilot questions are not scored.'}
+          </p>
+
           <div className="pt-4 border-t border-slate-100 text-center">
             <Link href="/task-list">
               <Button variant="primary" size="md" className="gap-2 shadow-md">

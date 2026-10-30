@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/context/language-context';
-import { Sparkles, ArrowRight, ShieldCheck, CheckCircle2, Star, Award, Zap, Brain, Unlock } from 'lucide-react';
+import { Sparkles, ArrowRight, CheckCircle2, Award, Zap, Brain, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +43,7 @@ export function Hero() {
               <Sparkles className="w-4 h-4 text-emerald-600" />
               <span>{t('hero.badge', 'BACB RBT 3rd Edition Test Outline')}</span>
               <span className="bg-emerald-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
-                {freeAccessMode ? t('hero.bullet1', '100% Free For Everyone') : '7-Day Free Trial'}
+                {t('hero.bullet1', '100% Free For Everyone')}
               </span>
             </div>
 
@@ -59,6 +59,9 @@ export function Hero() {
             {/* Sub-headline with clear 100% Free / Sabke Liye Free value proposition */}
             <p className="text-lg sm:text-xl text-slate-600 max-w-2xl font-normal leading-relaxed mx-auto lg:mx-0">
               {t('hero.subtitle', 'Practice freely with realistic RBT exam questions, full 85-question timed mock exams, Socrates AI clinical explanations, and Leitner flashcards designed around the current BACB 3rd Edition outline.')}
+            </p>
+            <p className="text-sm sm:text-base font-bold text-emerald-700 max-w-2xl mx-auto lg:mx-0">
+              100% Free Complete Access. No payment required. No credit card required.
             </p>
 
             {/* Feature Bullets */}
@@ -99,17 +102,6 @@ export function Hero() {
               </Link>
             </div>
 
-            {/* Platform Highlights */}
-            <div className="pt-6 border-t border-slate-200/60 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-slate-600">
-              <div className="flex items-center space-x-1.5 font-semibold text-slate-800">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>85-Question Realistic Mock Exams</span>
-              </div>
-              <div className="flex items-center space-x-1.5 font-semibold text-slate-800">
-                <ShieldCheck className="w-4 h-4 text-blue-600" />
-                <span>43 Tasks Mapped to BACB 3rd Edition TCO</span>
-              </div>
-            </div>
           </div>
 
           {/* Right Column: Interactive Apple-Level Product Card */}
@@ -150,6 +142,9 @@ export function Hero() {
                   <div className="p-3 rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center justify-between">
                     <span>{t('common.spanish') === 'Español' && t('nav.home') === 'Inicio' ? 'C. Respuesta de Explosión de Extinción' : 'C. Extinction Burst Response'}</span>
                   </div>
+                  <div className="p-3 rounded-xl border border-slate-200 bg-white text-slate-700 flex items-center justify-between">
+                    <span>{t('common.spanish') === 'Español' && t('nav.home') === 'Inicio' ? 'D. Reforzamiento Diferencial de Conducta Alternativa (DRA)' : 'D. Differential Reinforcement of Alternative Behavior (DRA)'}</span>
+                  </div>
                 </div>
 
                 {/* AI Rationale Snippet */}
@@ -169,6 +164,7 @@ export function Hero() {
               {/* Simulated Readiness Gauge */}
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/80 p-3 rounded-xl">
                 <div>
+                  <div className="text-[10px] font-bold text-slate-500">Demo preview</div>
                   <div className="text-[10px] uppercase font-bold text-slate-400">{t('dashboard.readinessTitle', 'Exam Pass Likelihood')}</div>
                   <div className="text-lg font-extrabold text-[#22C55E]">96.4% {t('common.spanish') === 'Español' && t('nav.home') === 'Inicio' ? 'Preparado' : 'Ready'}</div>
                 </div>

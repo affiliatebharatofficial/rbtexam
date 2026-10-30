@@ -83,9 +83,9 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'howItWorks.step3.title': 'Drill with Socrates AI & Spaced Flashcards',
     'howItWorks.step3.subtitle': 'Active Recall & Conversational Scenario Roleplay',
     'howItWorks.step3.desc': 'Engage with our Socratic AI tutor for instant rationale on ethical dilemmas and clinical scenarios. Review Leitner 5-box flashcards designed to lock ABA terminology into long-term memory.',
-    'howItWorks.step4.title': 'Pass Your RBT Exam with Guaranteed Confidence',
-    'howItWorks.step4.subtitle': '85-Question Mocks • Pass-or-Refund Guarantee',
-    'howItWorks.step4.desc': 'Take simulated 85-question 120-minute (2 hours) timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.',
+    'howItWorks.step4.title': 'Take Your RBT Exam with Confidence',
+    'howItWorks.step4.subtitle': '85-Question Mocks • Free Complete Access',
+    'howItWorks.step4.desc': 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. 100% Free Complete Access. No payment required. No credit card required.',
 
     // Why Choose Us
     'whyUs.badge': 'The Smart Choice for RBT Candidates',
@@ -127,20 +127,20 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'faq.subheading': 'Everything you need to know about preparing for the RBT certification exam with RBT Practice AI.',
 
     // CTA Section
-    'cta.badge': '🎉 100% Free Complete Access Active • No Payment Required',
+    'cta.badge': '100% Free Complete Access. No payment required. No credit card required.',
     'cta.heading': 'Start Free Practice Today and Pass Your RBT Exam',
     'cta.subheading': 'Get full unrestricted access to realistic RBT exam questions, full 85-question timed mock exams, Socrates AI clinical explanations, and complete 3rd Edition flashcards.',
     'cta.startBtn': 'Start 100% Free Practice',
     'cta.mockBtn': 'Take a Free Mock Exam',
     'cta.standards': 'Aligned with BACB RBT 3rd Edition Test Content Outline (Domains A-F)',
 
-    // Pricing Section
-    'pricing.badge': 'RBT Practice AI Pass-or-Refund Guarantee',
-    'pricing.heading': 'Invest in Your RBT Certification Success',
-    'pricing.subheading': 'Choose the plan tailored for your exam target date or clinic cohort needs.',
-    'pricing.monthly': 'Monthly Plan',
-    'pricing.annual': 'Annual Pass',
-    'pricing.save': 'Save 40%',
+    // Free-access section
+    'pricing.badge': '100% Free Complete Access',
+    'pricing.heading': 'Practice Free Today — Master Your BACB RBT Exam',
+    'pricing.subheading': '100% Free Complete Access. No payment required. No credit card required.',
+    'pricing.monthly': 'Free Access',
+    'pricing.annual': 'Free Access',
+    'pricing.save': 'Free Access',
 
     // Exam Engine
     'exam.title': 'RBT Exam Simulator',
@@ -278,8 +278,8 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'howItWorks.step3.subtitle': 'Recuerdo activo y simulaciones clínicas conversacionales',
     'howItWorks.step3.desc': 'Interactúa con nuestro tutor de IA para justificaciones inmediatas en dilemas éticos. Repasa tarjetas Leitner de 5 cajas para fijar los términos de ABA en tu memoria a largo plazo.',
     'howItWorks.step4.title': 'Aprueba tu Examen RBT con Total Confianza',
-    'howItWorks.step4.subtitle': 'Simulacros de 85 preguntas • Garantía de Aprobación o Reembolso',
-    'howItWorks.step4.desc': 'Realiza exámenes simulados cronometrados de 85 preguntas y 90 minutos en condiciones reales de computadora. Al superar el 85% de preparación, estás respaldado por nuestra garantía.',
+    'howItWorks.step4.subtitle': 'Simulacros de 85 preguntas • Acceso Completo Gratis',
+    'howItWorks.step4.desc': 'Realiza exámenes simulados cronometrados de 85 preguntas y 90 minutos en condiciones reales de computadora. Acceso completo 100% gratis. No se requiere pago. No se requiere tarjeta de crédito.',
 
     // Why Choose Us
     'whyUs.badge': 'La Elección Inteligente para Candidatos RBT',
@@ -321,20 +321,20 @@ const translations: Record<SupportedLanguage, Record<string, string>> = {
     'faq.subheading': 'Todo lo que necesitas saber sobre la preparación para el examen de certificación RBT con RBT Practice AI.',
 
     // CTA Section
-    'cta.badge': '🎉 Acceso Completo 100% Gratis Activo • Sin Tarjeta Requerida',
+    'cta.badge': 'Acceso completo 100% gratis. No se requiere pago. No se requiere tarjeta de crédito.',
     'cta.heading': 'Comienza tu Práctica Gratuita Hoy y Aprueba tu Examen RBT',
     'cta.subheading': 'Obtén acceso total e ilimitado a preguntas realistas de RBT, exámenes simulados cronometrados de 85 preguntas, explicaciones clínicas con Sócrates IA y tarjetas de la 3ª edición.',
     'cta.startBtn': 'Comenzar Práctica 100% Gratis',
     'cta.mockBtn': 'Tomar Examen Simulado Gratis',
     'cta.standards': 'Alineado con el Temario BACB RBT 3ª Edición (Dominios A-F)',
 
-    // Pricing Section
-    'pricing.badge': 'Garantía RBT Practice AI Aprueba-o-Reembolso',
-    'pricing.heading': 'Invierte en tu Éxito de Certificación RBT',
-    'pricing.subheading': 'Elige el plan adaptado a tu fecha objetivo de examen o necesidades de cohorte clínica.',
-    'pricing.monthly': 'Plan Mensual',
-    'pricing.annual': 'Pase Anual',
-    'pricing.save': 'Ahorra 40%',
+    // Free-access section
+    'pricing.badge': 'Acceso Completo 100% Gratis',
+    'pricing.heading': 'Practica Gratis Hoy — Domina tu Examen BACB RBT',
+    'pricing.subheading': 'Acceso completo 100% gratis. No se requiere pago. No se requiere tarjeta de crédito.',
+    'pricing.monthly': 'Acceso Gratis',
+    'pricing.annual': 'Acceso Gratis',
+    'pricing.save': 'Acceso Gratis',
 
     // Exam Engine
     'exam.title': 'Simulador de Examen RBT',

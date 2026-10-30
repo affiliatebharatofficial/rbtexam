@@ -30,7 +30,7 @@ export function AiTutorPreview() {
         : 'Can you explain an extinction burst with a real-life clinical example?',
       response: isEs
         ? 'Una explosión de extinción es un aumento inmediato y temporal en la frecuencia, duración o intensidad de una conducta objetivo cuando se suspende por primera vez el reforzador. Ejemplo: Un niño que grita para obtener dulces en la caja grita más fuerte y por más tiempo cuando el padre deja de comprárselos.'
-        : 'An extinction burst is an immediate, temporary increase in the frequency or intensity of a target behavior when reinforcement is first withheld. Example: A child who screams to get candy at the checkout line screams louder and longer when the parent first stops buying the candy. If the parent holds firm, the screaming will eventually drop to zero.',
+        : 'An extinction burst is an immediate, temporary increase in the frequency or intensity of a target behavior when reinforcement is first withheld. Example: A child who screams to get candy at the store line screams louder and longer when the parent first stops buying the candy. If the parent holds firm, the screaming will eventually drop to zero.',
       taskDomain: isEs ? 'Dominio D: Reducción de Conducta' : 'Domain D: Behavior Reduction',
     },
     {

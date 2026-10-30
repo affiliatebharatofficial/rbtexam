@@ -67,13 +67,13 @@ export function HowItWorks() {
     },
     {
       stepNumber: '04',
-      title: t('howItWorks.step4.title', 'Pass Your RBT Exam with Guaranteed Confidence'),
-      subtitle: t('howItWorks.step4.subtitle', '85-Question Mocks • Pass-or-Refund Guarantee'),
-      description: t('howItWorks.step4.desc', 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. When your score crosses 85% readiness across all 6 domains, you are covered by our Pass-or-Refund Guarantee.'),
+      title: t('howItWorks.step4.title', 'Take Your RBT Exam with Confidence'),
+      subtitle: t('howItWorks.step4.subtitle', '85-Question Mocks • Free Complete Access'),
+      description: t('howItWorks.step4.desc', 'Take simulated 85-question 90-minute timed exams under realistic computer-based conditions. 100% Free Complete Access. No payment required. No credit card required.'),
       icon: ShieldCheck,
       color: 'from-emerald-500 to-teal-600',
-      badgeText: 'Pass-or-Refund Guarantee',
-      highlightStats: '85 Q / 90 Min Full Simulation • Money-Back Guarantee',
+      badgeText: 'Free Complete Access',
+      highlightStats: '85 Q / 90 Min Full Simulation • 100% Free',
       interactiveContent: {
         readinessScore: 97.2,
         status: 'Target Benchmark Achieved!',
@@ -196,6 +196,7 @@ export function HowItWorks() {
 
                 {activeStep === 0 && (
                   <div className="space-y-3">
+                    <div className="text-[10px] font-bold text-slate-500">Demo preview</div>
                     <div className="text-xs text-slate-400 font-medium">Diagnostic Domain Scores Breakdown:</div>
                     {currentStep.interactiveContent.domainScores?.map((ds, idx) => (
                       <div key={idx} className="space-y-1">
@@ -247,6 +248,7 @@ export function HowItWorks() {
 
                 {activeStep === 3 && (
                   <div className="space-y-4 text-center py-3">
+                    <div className="text-[10px] font-bold text-slate-500">Demo preview</div>
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                       <ShieldCheck className="w-10 h-10" />
                     </div>
@@ -257,7 +259,7 @@ export function HowItWorks() {
                       </div>
                     </div>
                     <div className="text-[10px] text-slate-400 font-mono">
-                      Pass Guarantee Verification ID: {currentStep.interactiveContent.certificateId}
+                      Sample ID: {currentStep.interactiveContent.certificateId}
                     </div>
                   </div>
                 )}

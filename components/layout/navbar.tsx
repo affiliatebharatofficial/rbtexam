@@ -6,7 +6,7 @@ import { useAuth } from '@/context/auth-context';
 import { useLanguage } from '@/context/language-context';
 import { LanguageSelector } from '@/components/layout/language-selector';
 import { UserProfileModal } from '@/components/auth/user-profile-modal';
-import { Sparkles, Brain, BookOpen, Layers, BarChart2, Users, Menu, X, ArrowRight, User, LogOut, Settings, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Sparkles, Brain, BookOpen, Layers, Users, Menu, X, ArrowRight, User, LogOut, Settings, ShieldCheck, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function Navbar() {
@@ -27,7 +27,6 @@ export function Navbar() {
     { href: '/flashcards', label: t('nav.flashcards', 'Flashcards'), icon: Layers },
     { href: '/task-list', label: t('nav.studyGuides', 'Study Guides'), icon: BookOpen },
     { href: '/tutor', label: t('nav.aiTutor', 'AI Tutor'), icon: BookOpen },
-    { href: '/pricing', label: t('nav.pricing', 'Pricing'), icon: BarChart2 },
   ];
 
   return (

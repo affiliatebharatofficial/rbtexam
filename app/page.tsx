@@ -60,7 +60,7 @@ export default function HomePage() {
       {/* 10. Platform Key Metrics & Statistics */}
       <Statistics />
 
-      {/* 11. Transparent Pricing Tiers */}
+      {/* 11. Free Access Summary */}
       <PricingSection />
 
       {/* 12. Comprehensive 800-1200 Word SEO Educational Guide */}

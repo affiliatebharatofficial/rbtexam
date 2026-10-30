@@ -65,8 +65,6 @@ export function Footer() {
             <ul className="space-y-2.5 text-xs">
               <li><Link href="/privacy" className="hover:text-white transition-colors">{t('footer.privacy', 'Privacy Policy')}</Link></li>
               <li><Link href="/terms" className="hover:text-white transition-colors">{t('footer.terms', 'Terms of Service')}</Link></li>
-              <li><Link href="/refund-policy" className="hover:text-white transition-colors">{t('footer.refundPolicy', 'Refund & Cancellation Policy')}</Link></li>
-              <li><Link href="/guarantee-terms" className="hover:text-white transition-colors">{t('footer.guarantee', 'Pass Guarantee Terms')}</Link></li>
               <li><Link href="/disclaimer" className="hover:text-white transition-colors">{t('footer.disclaimer', 'Educational Disclaimer')}</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">{t('footer.contactSupport', 'Contact & Support')}</Link></li>
             </ul>
@@ -74,9 +72,12 @@ export function Footer() {
         </div>
 
         {/* Disclaimer & Copyright */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-[11px] text-slate-500 space-y-4 md:space-y-0">
+        <div className="pt-8 space-y-3 text-[11px] text-slate-500">
           <p className="max-w-3xl leading-relaxed">
             <strong>Trademark & Non-Affiliation Disclaimer:</strong> RBT®, Registered Behavior Technician®, and BACB® are registered trademarks of the Behavior Analyst Certification Board® (BACB®). Pearson VUE is a registered trademark of Pearson Education, Inc. RBT Practice AI is an independent exam-preparation platform and is not affiliated with, sponsored by, or endorsed by the BACB® or Pearson VUE.
+          </p>
+          <p className="max-w-3xl leading-relaxed text-slate-300">
+            RBT Practice AI is not affiliated with BACB or Pearson VUE. All questions are original practice questions, not official exam questions.
           </p>
           <div className="flex items-center space-x-1">
             <span>{t('footer.builtWithPrecision', 'Built with precision for RBT Candidates')}</span>

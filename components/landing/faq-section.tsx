@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useLanguage } from '@/context/language-context';
-import { ChevronDown, HelpCircle } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 
+// This is the homepage's only FAQ section. Every answer is rendered
+// unconditionally so it is present in the page source, not only after
+// a click expands an accordion item.
 export function FAQSection() {
   const { t, language } = useLanguage();
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
   const isEs = language === 'es';
 
   const faqs = isEs
@@ -45,10 +47,6 @@ export function FAQSection() {
           a: 'Nuestro motor organiza los términos de ABA en 5 cajas Leitner según tu precisión de recuerdo. Los conceptos difíciles aparecen con mayor frecuencia para refuerzo activo.',
         },
         {
-          q: '¿Qué es la Garantía de Aprobación o Reembolso de RBT Practice AI?',
-          a: 'Los candidatos que alcanzan un puntaje de preparación del 85%+ en tres exámenes simulados clasificatorios están protegidos por nuestra garantía de satisfacción y reembolso.',
-        },
-        {
           q: '¿Pueden las clínicas de ABA y supervisores BCBA monitorear el progreso de los estudiantes?',
           a: 'Sí. Nuestro portal Enterprise permite a los directores clínicos y BCBA gestionar cohortes de aprendices, asignar exámenes y verificar la preparación del equipo.',
         },
@@ -60,7 +58,7 @@ export function FAQSection() {
         },
         {
           q: 'What does the 100% free complete access include?',
-          a: 'Free access gives you complete Pro access to the platform, including realistic practice questions, full 85-question 90-minute timed mock exams, Socrates AI tutor explanations, spaced repetition flashcards, and personalized domain diagnostic heatmaps.',
+          a: 'Free access gives you complete access to the platform, including realistic practice questions, full 85-question 90-minute timed mock exams, Socrates AI tutor explanations, spaced repetition flashcards, and personalized domain diagnostic heatmaps.',
         },
         {
           q: 'Is the platform aligned with the BACB RBT 3rd Edition Test Content Outline?',
@@ -87,10 +85,6 @@ export function FAQSection() {
           a: 'Our flashcard engine sorts ABA terms into 5 Leitner boxes based on your recall accuracy. Challenging concepts appear frequently for active reinforcement, while mastered terms appear at expanding intervals to guarantee long-term memory retention.',
         },
         {
-          q: 'What is the RBT Practice AI Pass-or-Refund Guarantee?',
-          a: 'Candidates who achieve an 85%+ readiness score on three qualifying mock exams and meet all eligibility requirements are covered by our Pass-or-Refund Guarantee. If you take your official BACB exam and do not pass, you may qualify for a full refund subject to our Guarantee Terms.',
-        },
-        {
           q: 'Can ABA Clinics and BCBA supervisors monitor student progress?',
           a: 'Yes. Our Clinic Enterprise portal allows clinical directors and BCBA supervisors to manage trainee cohorts, assign mock exams, track domain readiness heatmaps, and verify exam preparedness across their organization.',
         },
@@ -113,26 +107,19 @@ export function FAQSection() {
         </div>
 
         <div className="space-y-4">
-          {faqs.map((faq, idx) => {
-            const isOpen = openIndex === idx;
-            return (
-              <Card
-                key={idx}
-                className="p-6 cursor-pointer border-slate-200 transition-all hover:border-slate-300"
-                onClick={() => setOpenIndex(isOpen ? null : idx)}
-              >
-                <div className="flex items-center justify-between text-left">
-                  <h3 className="text-base font-bold text-[#0F172A] pr-4">{faq.q}</h3>
-                  <ChevronDown className={`w-5 h-5 text-slate-400 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#2563EB]' : ''}`} />
-                </div>
-                {isOpen && (
-                  <p className="mt-4 text-sm text-slate-600 leading-relaxed pt-3 border-t border-slate-100">
-                    {faq.a}
-                  </p>
-                )}
-              </Card>
-            );
-          })}
+          {faqs.map((faq, idx) => (
+            <Card
+              key={idx}
+              className="p-6 border-slate-200 transition-all hover:border-slate-300"
+            >
+              <div className="flex items-center justify-between text-left">
+                <h3 className="text-base font-bold text-[#0F172A] pr-4">{faq.q}</h3>
+              </div>
+              <p className="mt-4 text-sm text-slate-600 leading-relaxed pt-3 border-t border-slate-100">
+                {faq.a}
+              </p>
+            </Card>
+          ))}
         </div>
       </div>
     </section>

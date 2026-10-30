@@ -49,8 +49,8 @@ export function SeoContentSection() {
           {/* Section 1: What is RBT Practice */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">1</span>
-              {isEs ? '¿Qué es la Práctica de RBT y por qué es Esencial una Preparación Estructurada?' : 'What Is RBT Practice and Why Is Structured Exam Prep Essential?'}
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">1.</span>{" "}
+              {isEs ? '¿Qué es la Práctica de RBT y por qué es Esencial una Preparación Estructurada?' : 'What is RBT Practice and Why Is Structured Exam Prep Essential?'}
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
               Structured <strong>RBT practice</strong> is the systematic process of applying Applied Behavior Analysis (ABA) principles to realistic clinical scenarios before taking the official certification test. Becoming a Registered Behavior Technician® requires demonstrating competency across measurement, assessment, skill acquisition, behavior reduction, documentation, and professional ethics.
@@ -63,7 +63,7 @@ export function SeoContentSection() {
           {/* Section 2: Why Practice Questions & Active Recall Work */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">2</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">2.</span>{" "}
               Why Practice Questions and Active Recall Accelerate Your Learning
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -77,7 +77,7 @@ export function SeoContentSection() {
           {/* Section 3: 85-Question Mock Exams */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">3</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">3.</span>{" "}
               How Realistic 85-Question Mock Exams Prepare You for Test Day
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -87,7 +87,7 @@ export function SeoContentSection() {
               <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100">
                 <Clock className="w-5 h-5 text-[#2563EB] mb-2" />
                 <h4 className="font-bold text-slate-900 text-sm">Pacing Mastery</h4>
-                <p className="text-xs text-slate-600 mt-1">Practice budgeting approximately 60 seconds per question with 15 minutes reserved for review.</p>
+                <p className="text-xs text-slate-600 mt-1">90 minutes / 85 questions = average ~63 seconds per question. If you want 15 minutes for review, keep your first pass at ~53 seconds per question.</p>
               </div>
               <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100">
                 <Layers className="w-5 h-5 text-emerald-600 mb-2" />
@@ -105,7 +105,7 @@ export function SeoContentSection() {
           {/* Section 4: BACB 3rd Edition TCO */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">4</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">4.</span>{" "}
               Mastering the BACB RBT 3rd Edition Test Content Outline (Domains A–F)
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -137,12 +137,15 @@ export function SeoContentSection() {
                 <span><strong>Domain F: Ethics (15% / 11 Questions)</strong> — RBT Ethics Code 2.0, dual relationships, 5% monthly supervision, and cultural humility.</span>
               </li>
             </ul>
+            <p className="text-xs text-slate-500">
+              These percentages are based on 75 scored questions. 10 pilot questions are not scored.
+            </p>
           </Card>
 
           {/* Section 5: Socrates AI Explanations */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">5</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">5.</span>{" "}
               How Socratic AI Explanations Eliminate Conceptual Confusion
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -156,7 +159,7 @@ export function SeoContentSection() {
           {/* Section 6: How to Study Step-by-Step */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">6</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">6.</span>{" "}
               Step-by-Step Study Strategy: How to Use an RBT Exam Practice Test
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -174,7 +177,7 @@ export function SeoContentSection() {
           {/* Section 7: Testing Environment & Ethical Search Intent */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">7</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">7.</span>{" "}
               Understanding the Real Exam vs Practice: Pearson VUE & Study Tools
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -188,7 +191,7 @@ export function SeoContentSection() {
           {/* Section 8: Who the Platform is Designed For */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">8</span>
+              <span className="w-8 h-8 rounded-xl bg-blue-100 text-[#2563EB] flex items-center justify-center text-sm font-black">8.</span>{" "}
               Who RBT Practice AI Is Designed For: Candidates, Therapists, & ABA Clinics
             </h3>
             <p className="text-sm sm:text-base text-slate-600">
@@ -197,7 +200,7 @@ export function SeoContentSection() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <h4 className="font-bold text-slate-900 text-sm text-[#2563EB]">First-Time Candidates</h4>
-                <p className="text-xs text-slate-600 mt-1">Individuals completing their 40-hour training who want guaranteed first-attempt exam readiness.</p>
+                <p className="text-xs text-slate-600 mt-1">Individuals completing their 40-hour training, with study tools designed to improve first-attempt readiness.</p>
               </div>
               <div className="p-4 rounded-xl bg-white border border-slate-200">
                 <h4 className="font-bold text-slate-900 text-sm text-emerald-600">Retake Candidates</h4>
@@ -213,7 +216,7 @@ export function SeoContentSection() {
           {/* Section 9: What You Receive With Free Access */}
           <Card glass className="p-8 sm:p-10 space-y-5 border-white/80 shadow-md bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-blue-200">
             <h3 className="text-2xl font-bold text-[#0F172A] flex items-center gap-3">
-              <span className="w-8 h-8 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-sm font-black">9</span>
+              <span className="w-8 h-8 rounded-xl bg-[#2563EB] text-white flex items-center justify-center text-sm font-black">9.</span>{" "}
               What You Receive With Free Access
             </h3>
             <p className="text-sm sm:text-base text-slate-700">
@@ -240,10 +243,6 @@ export function SeoContentSection() {
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Interactive BACB RBT 3rd Edition Task List guide</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Pass-or-Refund Guarantee eligibility protection</span>
-              </li>
             </ul>
           </Card>
 
@@ -262,14 +261,18 @@ export function SeoContentSection() {
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
-              <Link href="/pricing" className="w-full sm:w-auto">
+              <Link href="/rbt/mock-exam" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 px-6 py-4 text-white border-slate-700 hover:bg-slate-800 text-base">
-                  <span>View All Plans & Pricing</span>
+                  <span>Take a Free Mock Exam</span>
                 </Button>
               </Link>
             </div>
             <p className="text-xs text-slate-400">
-              No long-term contracts. Cancel anytime. Backed by our <Link href="/guarantee-terms" className="text-blue-400 underline">Pass-or-Refund Guarantee</Link>.
+              Questions? Contact support at{' '}
+              <a href="mailto:hello@rbtpracticeai.com" className="text-blue-400 underline">
+                hello@rbtpracticeai.com
+              </a>
+              .
             </p>
           </div>
         </article>

@@ -41,12 +41,7 @@ export function WhyChooseUs() {
     {
       feature: isEs ? 'Acceso 100% Gratuito y Completo' : '100% Free Complete Access',
       usText: isEs ? 'Acceso total a simulacros, tutor de IA y tarjetas' : 'Full access to mocks, AI tutor & flashcards',
-      themText: isEs ? 'Muros de pago iniciales o compras no reembolsables' : 'Upfront paywalls or non-refundable purchases',
-    },
-    {
-      feature: isEs ? 'Garantía de Aprobación o Reembolso' : 'Pass-or-Refund Guarantee Protection',
-      usText: isEs ? 'Reembolso si repruebas tras 85% de preparación' : 'Refund if you fail after 85% readiness (Terms apply)',
-      themText: isEs ? 'Sin garantía ni soporte de aprobación' : 'No guarantee or support',
+      themText: isEs ? 'Acceso limitado en PDFs estáticos' : 'Limited access in static PDFs',
     },
   ];
 
@@ -114,10 +109,12 @@ export function WhyChooseUs() {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-slate-900">
-                  {isEs ? 'Garantía de Aprobación Respaldada' : 'Pass Guarantee Backed'}
+                  {isEs ? 'Acceso Completo 100% Gratis' : '100% Free Complete Access'}
                 </h4>
                 <p className="text-xs text-slate-600">
-                  {isEs ? 'Si alcanzas el 85% en nuestros simulacros y no apruebas el examen BACB, obtén 100% de reembolso.' : 'If you pass our readiness exam and fail the BACB exam, get 100% refund.'}
+                  {isEs
+                    ? 'Diseñado para mejorar la preparación para el primer intento, con simulacros completos, tutor de IA Sócrates y mapas de calor por dominio. No se requiere pago.'
+                    : 'Designed to improve first-attempt readiness, with full mock exams, Socrates AI tutor, and domain diagnostic heatmaps. No payment required.'}
                 </p>
               </div>
             </div>
